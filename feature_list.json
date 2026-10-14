@@ -114,8 +114,8 @@
         "feat-006",
         "feat-010"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành toàn bộ giao diện Sản phẩm & Kho hàng (Products UI) tuân thủ 100% đặc tả SRS 3.15, 3.16, 3.17 và các Business Rules: 1. ProductListPage.jsx (/products): Bảng danh sách sản phẩm phân trang đúng 20 dòng theo BR-03 (SRS 3.15), ô tìm kiếm đa năng theo mã sản phẩm hoặc tên sản phẩm có debounce 300ms, dropdown lọc theo danh mục sản phẩm, sắp xếp linh hoạt theo ngày/giá/kho, cảnh báo tồn kho sắp hết khi stock_qty <= 5, nút 'Thêm Sản Phẩm' và 'Quản Lý Danh Mục'. 2. ProductModal.jsx: Form thêm mới và chỉnh sửa sản phẩm (SRS 3.15), chọn danh mục và chiến dịch quảng bá (SRS 3.18), kiểm tra đơn giá và số lượng kho không âm, bắt mã lỗi HTTP 409 Conflict hiển thị cảnh báo đỏ khi trùng mã sản phẩm product_code. 3. CategoryModal.jsx: Modal quản lý danh mục sản phẩm độc lập (SRS 3.15), hiển thị số lượng sản phẩm liên kết (products_count), thêm mới, sửa, xóa danh mục có kiểm tra ràng buộc. 4. ProductDetailPage.jsx (/products/:id): Màn hình xem chi tiết sản phẩm và chứa 2 TABS CON ĐẶC THÙ THEO SRS: Tab 1 View Opportunities (SRS 3.16) xem danh sách toàn bộ các Cơ hội bán hàng đang quan tâm đến sản phẩm này kèm thông tin khách hàng Lead; Tab 2 View Orders (SRS 3.17) xem danh sách toàn bộ các Đơn hàng thực tế đã xuất bán sản phẩm này, tự động tổng hợp số lượng đã bán và tổng doanh thu thu về ($). 5. productApi.js: Service client axios kết nối toàn bộ endpoints danh mục và sản phẩm. 6. Đã viết 10 bài unit tests tại frontend/tests/products-ui.test.js và chạy kiểm thử toàn hệ thống đạt 115/115 tests pass (70 backend + 45 frontend), build client production thành công trong 237ms."
     },
     {
       "id": "feat-012",

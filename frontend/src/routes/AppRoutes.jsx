@@ -14,6 +14,8 @@ import UserManagement from '../pages/Admin/UserManagement';
 import ProfilePage from '../pages/Profile/ProfilePage';
 import LeadListPage from '../pages/Leads/LeadListPage';
 import LeadDetailPage from '../pages/Leads/LeadDetailPage';
+import ProductListPage from '../pages/Products/ProductListPage';
+import ProductDetailPage from '../pages/Products/ProductDetailPage';
 import PlaceholderPage from '../pages/Common/PlaceholderPage';
 
 export default function AppRoutes() {
@@ -86,28 +88,9 @@ export default function AppRoutes() {
 
           {/* Manager & Admin Modules (RBAC Guard) */}
           <Route element={<RoleRoute allowedRoles={['SALE_MANAGER', 'ADMIN']} />}>
-            <Route
-              path="/products"
-              element={
-                <PlaceholderPage
-                  title="Danh mục & Sản phẩm Kho (Products)"
-                  srsRef="SRS 3.15 - 3.17"
-                  description="Quản lý sản phẩm, tồn kho kho hàng, xem cơ hội và đơn hàng theo từng sản phẩm."
-                  featureId="feat-011"
-                />
-              }
-            />
-            <Route
-              path="/products/:id"
-              element={
-                <PlaceholderPage
-                  title="Chi tiết Sản phẩm Kho"
-                  srsRef="SRS 3.16 - 3.17"
-                  description="Hai tabs con riêng biệt: View Opportunities và View Orders liên quan đến sản phẩm."
-                  featureId="feat-011"
-                />
-              }
-            />
+            {/* Products Module (Manager & Admin - SRS 3.15 - 3.17) */}
+            <Route path="/products" element={<ProductListPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route
               path="/campaigns"
               element={

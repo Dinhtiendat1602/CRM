@@ -51,8 +51,8 @@
       "dependencies": [
         "feat-003"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Built RESTful Admin APIs protected by auth & ADMIN role guard: GET /api/admin/roles returns system roles; GET /api/admin/users provides paginated user list with role_name, search and filters; POST /api/admin/users creates new user with initial password; PATCH /api/admin/users/:id/status toggles active state and blocks inactive logins (admin self-deactivation blocked); PATCH /api/admin/users/:id/role updates role; POST /api/admin/users/:id/reset-password resets staff password directly. Verified with 13 integration tests in backend/tests/user.test.js (37/37 total backend tests passing in 4.8s)."
     },
     {
       "id": "feat-006",

@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 09:54
-**Active Feature:** `feat-005` - Backend Quản trị Người dùng & Phân quyền (Admin Users Management)
-**Current Objective:** Xây dựng các RESTful API cho Quản trị viên: `GET /api/admin/users` (kèm role_name), `GET /api/admin/roles` (danh sách vai trò), `POST /api/admin/users` (tạo tài khoản nhân viên và gán role), `PATCH /api/admin/users/:id/status` (Toggle Active/Deactive), `POST /api/admin/users/:id/reset-password` (Admin reset mật khẩu nhân viên trực tiếp) theo SRS 2.1.
+**Last Updated:** 2026-10-14 09:58
+**Active Feature:** `feat-006` - Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m
+**Current Objective:** Xây dựng MainLayout (Sidebar điều hướng động theo 3 Role, Header, User Menu), axiosClient tự động đính kèm Bearer Token và bắt lỗi 401 tự động logout, bảo vệ PrivateRoute / RoleRoute (RBAC Guard) và hoàn thiện popup cảnh báo đếm ngược của hook useIdleTimeout (SRS 5.3).
 
 ---
 
@@ -36,46 +36,48 @@
   - Xây dựng `POST /api/auth/forgot-password`: kiểm tra email hợp lệ và tồn tại trong hệ thống, sinh mã token ngẫu nhiên bảo mật 64 hex characters (thời hạn 15 phút), lưu vào CSDL và gửi email chứa liên kết đặt lại mật khẩu bằng Nodemailer qua Gmail SMTP.
   - Xây dựng `GET /api/auth/verify-reset-token/:token`: kiểm tra trước tính hợp lệ và thời hạn còn lại của token trước khi người dùng đổi mật khẩu.
   - Xây dựng `POST /api/auth/reset-password`: xác thực token chưa hết hạn, băm mật khẩu mới bằng bcrypt 10 rounds, cập nhật CSDL, xóa token (single-use) và cho phép đăng nhập ngay với mật khẩu mới.
-  - Kiểm thử: 6 integration tests tại `backend/tests/forgot-password.test.js` (xác thực email, gửi mail thực tế, kiểm tra token trong CSDL, cập nhật mật khẩu, chặn tái sử dụng token). Toàn bộ 24/24 tests backend pass 100%.
+  - Kiểm thử: 6 integration tests tại `backend/tests/forgot-password.test.js` (24/24 tests backend pass 100%).
 
-- [x] **Xác thực kết nối bên ngoài**
-  - PostgreSQL Database: Kết nối thành công tới database `CRM` trên `localhost:5432`.
-  - Gmail SMTP: Gửi email đặt lại mật khẩu thực tế qua tài khoản `dinhtiendat1602@gmail.com`.
+- [x] **`feat-005` - Backend Quản trị Người dùng & Phân quyền (Admin Users Management)**
+  - Xây dựng trọn bộ RESTful API bảo vệ bởi `auth.middleware.js` & `authorizeRoles('ADMIN')`:
+    - `GET /api/admin/roles`: Lấy danh sách 3 vai trò phục vụ dropdown tạo/sửa.
+    - `GET /api/admin/users`: Lấy danh sách nhân viên phân trang (mặc định 20 dòng), tìm kiếm đa năng theo từ khóa (username, họ tên, email), lọc theo vai trò và trạng thái kích hoạt.
+    - `POST /api/admin/users`: Quản trị viên tạo tài khoản nhân viên mới, gán role ngay khi tạo, hỗ trợ mật khẩu mặc định `11111111`, kiểm tra trùng username/email.
+    - `PATCH /api/admin/users/:id/status`: Kích hoạt / Khóa tài khoản nhân viên (chặn Admin tự vô hiệu hóa tài khoản của chính mình).
+    - `PATCH /api/admin/users/:id/role`: Gán / Đổi vai trò nhân viên và cập nhật quyền hạn ngay lập tức.
+    - `POST /api/admin/users/:id/reset-password`: Quản trị viên đặt lại mật khẩu nhân viên trực tiếp khi gặp sự cố.
+  - Kiểm thử: 13 integration tests tại `backend/tests/user.test.js` (toàn bộ 37/37 tests backend pass 100% trong 4.8s).
 
 ---
 
 ### What's In Progress (Việc đang thực hiện)
 
-- [ ] **`feat-005` - Backend Quản trị Người dùng & Phân quyền (Admin Users Management)**
-  - Xây dựng `GET /api/admin/users`: Lấy danh sách nhân viên kèm tên vai trò (phân trang, lọc theo role, tìm kiếm tên/email).
-  - Xây dựng `GET /api/admin/roles`: Lấy danh sách các vai trò để hiển thị dropdown gán vai trò.
-  - Xây dựng `POST /api/admin/users`: Admin tạo tài khoản nhân viên mới, gán role ngay khi tạo (mật khẩu mặc định).
-  - Xây dựng `PATCH /api/admin/users/:id/status`: Admin Bật / Tắt trạng thái kích hoạt tài khoản (`is_active`).
-  - Xây dựng `PATCH /api/admin/users/:id/role`: Admin cập nhật thay đổi vai trò nhân viên.
-  - Xây dựng `POST /api/admin/users/:id/reset-password`: Admin đặt lại mật khẩu trực tiếp cho nhân viên.
-  - Bảo vệ toàn bộ endpoint bằng `auth.middleware.js` + `authorizeRoles('ADMIN')`.
-  - Viết bộ kiểm thử tích hợp `backend/tests/user.test.js`.
+- [ ] **`feat-006` - Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m**
+  - Xây dựng `MainLayout`: Sidebar điều hướng động hiển thị menu phù hợp từng vai trò (`SALESMAN`, `SALE_MANAGER`, `ADMIN`), Header hiển thị thông tin người dùng và nút đăng xuất.
+  - Xây dựng Route Guard: `PrivateRoute.jsx` (chuyển hướng `/login` nếu chưa đăng nhập), `RoleRoute.jsx` (chuyển hướng nếu không đủ quyền).
+  - Tích hợp popup cảnh báo sắp hết hạn phiên làm việc (đếm ngược 2 phút trước khi chạm mốc 30 phút).
+  - Viết bộ frontend tests.
 
 ---
 
 ### What's Next (Các bước tiếp theo)
 
-1. `feat-006`: Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m.
-2. `feat-007`: Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI).
-3. `feat-008`: Backend Quản lý Khách hàng tiềm năng (Leads Module - phân trang 20 dòng, chống trùng SĐT/Email).
+1. `feat-007`: Frontend Màn hình Xác thực & Quản lý Người dùng (LoginPage, ForgotPasswordPage, ResetPasswordPage, AdminUserPage).
+2. `feat-008`: Backend Quản lý Khách hàng tiềm năng (Leads Module - phân trang 20 dòng, chống trùng SĐT/Email).
+3. `feat-009`: Frontend Giao diện Quản lý Khách tiềm năng (Leads UI).
 
 ---
 
 ## Blockers / Risks (Rào Cản & Rủi Ro)
 
-- **Không có rào cản kỹ thuật**: Các phân hệ nền tảng Backend hoạt động trơn tru và có độ bao phủ kiểm thử cao.
+- **Không có rào cản kỹ thuật**: Toàn bộ các API Backend phục vụ Auth và Admin User Management đã hoàn chỉnh 100%, sẵn sàng cho việc ghép nối Frontend UI.
 
 ---
 
 ## Decisions Made (Các Quyết Định Đã Thống Nhất)
 
-- Mã đặt lại mật khẩu có thời hạn chính xác 15 phút (theo đặc tả SRS 3.14) và tự động vô hiệu hóa ngay sau lần sử dụng đầu tiên để ngăn chặn tấn công replay.
-- Cấu hình template HTML email gửi qua Nodemailer hiển thị nhận diện thương hiệu Zen CRM trực quan, có nút bấm đặt lại mật khẩu và cảnh báo bảo mật.
+- Toàn bộ các API trong phân hệ Admin (`/api/admin/*`) đều được bọc bởi cả 2 middleware `auth.middleware.js` và `authorizeRoles('ADMIN')`, chặn tuyệt đối truy cập trái phép với mã lỗi 403 Forbidden.
+- Bổ sung cơ chế an toàn: Quản trị viên không thể tự vô hiệu hóa tài khoản của chính mình để tránh tình huống hệ thống mất quyền quản trị tối cao.
 
 ---
 
@@ -83,7 +85,7 @@
 
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
-| `npm test` (trong `backend/`) | **PASS (24/24 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) |
+| `npm test` (trong `backend/`) | **PASS (37/37 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) |
 | `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 7 files sạch sẽ |
-| `npm run build` (trong `frontend/`) | **PASS** | Vite build bundle production thành công trong 306ms |
+| `npm run build` (trong `frontend/`) | **PASS** | Vite build bundle production thành công trong 261ms |
 | `npm test` (tại thư mục gốc) | **PASS** | Đồng bộ cả test backend và lint frontend |

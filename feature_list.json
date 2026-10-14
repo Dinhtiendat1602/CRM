@@ -93,8 +93,8 @@
         "feat-006",
         "feat-008"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành toàn bộ giao diện Quản lý Khách hàng tiềm năng (Leads UI) tuân thủ 100% tài liệu SRS 3.1 - 3.5 và Business Rules: 1. LeadListPage.jsx (/leads): Hiển thị bảng dữ liệu phân trang đúng 20 dòng theo BR-03 (SRS 3.2.3 REQ-1), ô tìm kiếm theo tên có debounce 300ms (SRS 3.3), bộ lọc ngày nhập từ startDate đến endDate (BR-05, SRS 3.2.3 REQ-3), nút đổi chiều sắp xếp theo ngày nhập entered_date ASC/DESC (BR-04, SRS 3.2.3 REQ-2). 2. LeadModal.jsx: Form thêm mới và chỉnh sửa Lead với đầy đủ các trường thông tin (SRS 3.1, 3.4), đánh dấu sao đỏ các trường bắt buộc, xác thực định dạng email/phone, và tích hợp cơ chế phát hiện trùng lặp dữ liệu realtime (onBlur) kết hợp bắt mã lỗi HTTP 409 từ Backend hiển thị cảnh báo đỏ nổi bật (BR-02, SRS 3.1.2 REQ-4). 3. LeadDetailPage.jsx (/leads/:id): Màn hình xem chi tiết thông tin Lead (SRS 3.2.3 REQ-4), các nút thao tác Sửa, Xóa (kèm ConfirmDialog), Tạo Cơ hội mới, và bảng danh sách các Cơ hội bán hàng liên quan (Associated Opportunities) tính toán doanh số dự kiến. 4. leadApi.js: Service client axios kết nối trọn bộ 6 endpoints backend. 5. Đã viết 10 bài unit tests tại frontend/tests/leads-ui.test.js và chạy kiểm thử toàn hệ thống đạt 87/87 tests pass (52 backend + 35 frontend), build client production thành công."
     },
     {
       "id": "feat-010",

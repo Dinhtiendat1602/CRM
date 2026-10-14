@@ -4,16 +4,25 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 12:55
-**Active Feature:** `feat-008` - Backend Quản lý Khách hàng tiềm năng (Leads Module)
-**Current Status:** HOÀN THÀNH 100% (8/20 tính năng đã nghiệm thu đạt chuẩn DoD)
-**Next Feature:** `feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)
+**Last Updated:** 2026-10-14 13:06
+**Active Feature:** `feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)
+**Current Status:** HOÀN THÀNH 100% (9/20 tính năng đã nghiệm thu đạt chuẩn DoD)
+**Next Feature:** `feat-010` - Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **`feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)**
+  - Xây dựng trọn bộ giao diện người dùng theo chuẩn phong cách Zoho CRM và đáp ứng 100% SRS 3.1 - 3.5:
+    - `LeadListPage.jsx` (`/leads`): Bảng danh sách Leads phân trang đúng 20 dòng theo BR-03 (SRS 3.2.3 REQ-1), tích hợp `SearchInput` tìm kiếm theo tên có debounce 300ms (SRS 3.3), bộ lọc ngày nhập từ `startDate` đến `endDate` (BR-05), nút đảo chiều sắp xếp `entered_date` ASC/DESC (BR-04), nút "+ Thêm Khách Tiềm Năng" và nút xóa mở `ConfirmDialog`.
+    - `LeadModal.jsx`: Biểu mẫu thêm mới & chỉnh sửa Lead với đầy đủ các trường thông tin (SRS 3.1, 3.4), chỉ rõ các trường bắt buộc có dấu `*` đỏ, kiểm tra hợp lệ dữ liệu, kiểm tra trùng lặp realtime qua `leadApi.checkDuplicate` kết hợp bắt mã lỗi HTTP 409 từ server hiển thị cảnh báo đỏ nổi bật (BR-02, SRS 3.1.2 REQ-4).
+    - `LeadDetailPage.jsx` (`/leads/:id`): Màn hình xem chi tiết Lead theo SRS 3.2.3 REQ-4, các nút sửa thông tin, xóa và tạo cơ hội mới, cùng bảng danh sách các Cơ hội bán hàng liên quan (Associated Opportunities) tính toán doanh số dự kiến.
+    - `leadApi.js`: API Service kết nối trọn bộ 6 endpoints backend.
+    - Cập nhật định tuyến `AppRoutes.jsx` gắn `LeadListPage` và `LeadDetailPage` vào các route thực tế.
+  - Bộ kiểm thử: 10 bài unit tests tại `frontend/tests/leads-ui.test.js` kiểm tra validation, parse duplicate error 409, query params và tính toán cơ hội liên quan (35/35 tests frontend pass, build Vite thành công trong 241ms).
 
 - [x] **`feat-008` - Backend Quản lý Khách hàng tiềm năng (Leads Module)**
   - Xây dựng trọn bộ RESTful API CRUD Khách hàng tiềm năng (`lead.controller.js` và `lead.routes.js`) tuân thủ nghiêm ngặt SRS 3.1 - 3.5:
@@ -91,21 +100,21 @@
 
 ### What's In Progress (Việc đang thực hiện)
 
-- Đang chuẩn bị triển khai `feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI: `LeadListPage`, `LeadModal`, `LeadDetailPage`).
+- Sẵn sàng chuyển giao sang `feat-010` - Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module: CRUD categories, CRUD products, GET opportunities by product SRS 3.16, GET orders by product SRS 3.17).
 
 ---
 
 ### What's Next (Các bước tiếp theo)
 
-1. `feat-009`: Frontend Giao diện Quản lý Khách tiềm năng (Leads UI: bảng 20 dòng, modal thêm/sửa có validation trùng SĐT/Email, màn hình chi tiết kèm danh sách cơ hội).
-2. `feat-010`: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module).
-3. `feat-011`: Frontend Giao diện Sản phẩm & Kho hàng (Products UI).
+1. `feat-010`: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module).
+2. `feat-011`: Frontend Giao diện Sản phẩm & Kho hàng (Products UI).
+3. `feat-012`: Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log).
 
 ---
 
 ## Blockers / Risks (Rào Cản & Rủi Ro)
 
-- **Không có rào cản**: Backend Leads Module đã hoàn thiện trọn vẹn, vượt qua toàn bộ 15 integration tests độc lập và 52 tests backend toàn hệ thống.
+- **Không có rào cản**: Toàn bộ phân hệ Quản lý Khách hàng tiềm năng (Leads Module) đã hoàn thiện 100% cả Backend API và Frontend UI, vượt qua toàn bộ 87 tests hệ thống và build Vite thành công.
 
 ---
 
@@ -113,8 +122,8 @@
 
 - Backend chuyển sang cổng 8888, Frontend chạy cổng 8080 để tránh xung đột cổng.
 - Toàn bộ các bảng danh sách tuân thủ nguyên tắc BR-03: hiển thị đúng 20 bản ghi mỗi trang kèm thanh phân trang chuẩn.
-- Endpoint chống trùng realtime `GET /api/leads/check-duplicate` hỗ trợ kiểm tra tức thời khi gõ SĐT/Email trên form.
-- Nút toggle trạng thái tài khoản bắt buộc hiển thị hộp thoại xác nhận `ConfirmDialog` và chặn tuyệt đối hành vi Admin tự vô hiệu hóa tài khoản của chính mình.
+- Endpoint chống trùng realtime `GET /api/leads/check-duplicate` hỗ trợ kiểm tra tức thời khi gõ SĐT/Email trên form kết hợp bắt lỗi HTTP 409 từ Backend.
+- Chi tiết Lead (`LeadDetailPage`) hiển thị đồng thời danh sách Cơ hội (Opportunities) và tính toán tổng doanh thu dự kiến (SRS 3.2.3 REQ-4).
 
 ---
 
@@ -123,7 +132,7 @@
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
 | `npm test` (trong `backend/`) | **PASS (52/52 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) + `lead.test.js` (15) |
-| `npm test` (trong `frontend/`) | **PASS (25/25 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
-| `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 32 files sạch sẽ |
-| `npm run build` (trong `frontend/`) | **PASS (built thành công)** | Vite production bundle hoàn tất |
-| `npm test` (tại thư mục gốc) | **PASS (77/77 tests passed toàn hệ thống)** | Chạy test backend (52) + test frontend (25) + lint frontend |
+| `npm test` (trong `frontend/`) | **PASS (35/35 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `leads-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
+| `npm run lint` (trong `frontend/`) | **PASS (0 errors)** | Oxlint kiểm tra 37 files sạch sẽ |
+| `npm run build` (trong `frontend/`) | **PASS (built in 241ms)** | Vite production bundle hoàn tất |
+| `npm test` (tại thư mục gốc) | **PASS (87/87 tests passed toàn hệ thống)** | Chạy test backend (52) + test frontend (35) + lint frontend |

@@ -4,66 +4,76 @@
 
 ## Current Objective
 
-- Goal: Triển khai tính năng `feat-008` (Backend Quản lý Khách hàng tiềm năng - Leads Module) và chuẩn bị chuyển giao sang `feat-009` (Frontend Leads UI).
-- Current status: `feat-008` HOÀN THÀNH (100% Definition of Done đạt chuẩn). 8/20 tính năng hoàn thành.
+- Goal: Triển khai tính năng `feat-009` (Frontend Giao diện Quản lý Khách tiềm năng - Leads UI) và chuẩn bị chuyển giao sang `feat-010` (Backend Quản lý Danh mục & Sản phẩm Kho).
+- Current status: `feat-009` HOÀN THÀNH (100% Definition of Done đạt chuẩn). 9/20 tính năng hoàn thành (45% dự án).
 - Branch / commit: `main`
 
 ## Completed This Session
 
-- [x] Đổi cấu hình cổng máy chủ Backend sang cổng `8888` (`http://localhost:8888`) và Frontend sang `http://localhost:8080` để triệt tiêu hoàn toàn xung đột cổng `5000`/`5001`. Đồng bộ CORS và biến môi trường.
-- [x] Sửa lỗi phân giải phản hồi `POST /api/auth/login` trên giao diện `Login.jsx` (`res.data?.token || res.token`) và kiểm tra luồng đăng nhập end-to-end thành công với bằng chứng tiếng Việt.
-- [x] Xây dựng Bộ điều khiển `backend/src/controllers/lead.controller.js` phục vụ phân hệ Quản lý Khách tiềm năng theo SRS 3.1 - 3.5:
-  - `getLeads`: Lấy danh sách Khách tiềm năng có phân trang 20 bản ghi/trang theo BR-03 (SRS 3.2.3 REQ-1), tìm kiếm theo tên Lead (SRS 3.3), lọc theo khoảng ngày nhập `startDate`/`endDate` (BR-05), sắp xếp theo ngày nhập `entered_date` (BR-04).
-  - `getLeadById`: Xem chi tiết Khách tiềm năng kèm danh sách Cơ hội (Opportunities) liên quan (SRS 3.2.3 REQ-4).
-  - `checkDuplicate`: API kiểm tra phát hiện trùng lặp Email hoặc Số điện thoại trong thời gian thực khi nhân viên nhập liệu trên form.
-  - `createLead`: Tạo mới Khách tiềm năng với cơ chế kiểm tra chống trùng SĐT/Email (BR-02, SRS 3.1.2 REQ-4), trả về mã lỗi HTTP 409 Conflict kèm thông báo chi tiết khi phát hiện trùng.
-  - `updateLead`: Cập nhật thông tin Khách tiềm năng, có ràng buộc chống đổi sang Email/SĐT đã thuộc về Lead khác (HTTP 409).
-  - `deleteLead`: Xóa Khách tiềm năng khỏi hệ thống (SRS 3.5).
-- [x] Xây dựng Tuyến đường `backend/src/routes/lead.routes.js` bọc bởi `authMiddleware` và `authorizeRoles('SALESMAN', 'SALE_MANAGER', 'ADMIN')` và mount vào `backend/src/app.js` tại prefix `/api/leads`.
-- [x] Xây dựng bộ kiểm thử tích hợp 15 bài test tại `backend/tests/lead.test.js` kiểm tra toàn bộ luồng RBAC, validation, phân trang 20 dòng, chống trùng SĐT/Email, tìm kiếm, lọc theo ngày, xem chi tiết kèm cơ hội, cập nhật và xóa.
-- [x] Khôi phục toàn bộ mật khẩu tài khoản mặc định `admin`, `manager`, `salesman` về `11111111` bằng `npm run db:seed`.
+- [x] Xây dựng Service API `frontend/src/api/leadApi.js` kết nối toàn diện 6 endpoints Backend:
+  - `getLeads`: Lấy danh sách Leads có phân trang, tìm kiếm, lọc theo ngày, sort theo ngày nhập.
+  - `getLeadById`: Lấy chi tiết Lead kèm danh sách Opportunities liên quan.
+  - `checkDuplicate`: Kiểm tra trùng email/phone trong thời gian thực.
+  - `createLead`: Tạo Lead mới.
+  - `updateLead`: Cập nhật thông tin Lead.
+  - `deleteLead`: Xóa Lead.
+- [x] Xây dựng `LeadModal.jsx`:
+  - Biểu mẫu popup hiện đại, hỗ trợ cả 2 chế độ Tạo mới (Create) và Chỉnh sửa (Edit).
+  - Đánh dấu sao đỏ các trường bắt buộc (Họ, Tên, Email, SĐT).
+  - Tích hợp kiểm tra trùng lặp thời gian thực `onBlur` (`checkDuplicate`) và bắt lỗi HTTP 409 Conflict từ Backend để hiển thị cảnh báo đỏ nổi bật.
+- [x] Xây dựng `LeadListPage.jsx` (`/leads`):
+  - Bảng dữ liệu phân trang đúng 20 dòng theo BR-03 (SRS 3.2.3 REQ-1).
+  - Ô tìm kiếm theo họ tên khách hàng có debounce 300ms (SRS 3.3).
+  - Bộ lọc theo khoảng ngày nhập `startDate` đến `endDate` (BR-05).
+  - Nút chuyển đổi chiều sắp xếp ngày nhập `entered_date` ASC/DESC (BR-04).
+  - Cột hành động: Xem chi tiết (View), Sửa (Edit), Xóa (Delete) tích hợp hộp thoại `ConfirmDialog`.
+- [x] Xây dựng `LeadDetailPage.jsx` (`/leads/:id`):
+  - Hiển thị đầy đủ hồ sơ chi tiết khách hàng tiềm năng theo SRS 3.2.3 REQ-4.
+  - Các nút hành động: Quay lại danh sách, Sửa thông tin, Xóa Lead, và Tạo cơ hội mới.
+  - Bảng danh sách Các Cơ hội liên quan (Associated Opportunities) kèm trạng thái, số lượng và tổng doanh số dự kiến.
+- [x] Cập nhật định tuyến `frontend/src/routes/AppRoutes.jsx` gắn `LeadListPage` và `LeadDetailPage` vào router hệ thống.
+- [x] Viết 10 bài unit tests tại `frontend/tests/leads-ui.test.js` kiểm tra validation, parse duplicate error 409, query params và tính toán cơ hội liên quan.
+- [x] Chạy kiểm thử toàn hệ thống đạt 87/87 tests pass (52 backend + 35 frontend), build client production thành công trong 241ms.
 
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
 |---|---|---|---|
 | Backend Test Suite | `npm test` (trong `backend/`) | PASS (52/52 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4), `forgot-password.test.js` (6), `user.test.js` (13), `lead.test.js` (15) |
-| Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (25/25 tests passed) | `admin-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
-| Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors, 0 warnings) | Oxlint kiểm tra 32 files sạch sẽ |
-| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built thành công) | Vite production bundle hoàn tất |
-| Full System Test | `npm test` (tại thư mục gốc) | PASS (77/77 tests passed) | Chạy đồng bộ toàn bộ backend tests, frontend tests và frontend lint |
+| Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (35/35 tests passed) | `admin-ui.test.js` (10 tests) + `leads-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
+| Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors) | Oxlint kiểm tra 37 files sạch sẽ |
+| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 241ms) | Vite production bundle hoàn tất |
+| Full System Test | `npm test` (tại thư mục gốc) | PASS (87/87 tests passed) | Chạy đồng bộ toàn bộ backend tests, frontend tests và frontend lint |
 
 ## Files Changed
 
-- `backend/.env`, `frontend/.env`: Cập nhật cổng Backend `8888` và Frontend `8080`.
-- `backend/src/server.js`, `backend/src/app.js`: Đồng bộ cổng `8888` và mount `/api/leads`.
-- `backend/src/config/db.js`, `backend/src/config/mailer.js`: Cấu hình đường dẫn load `.env` tường minh tránh lỗi khi chạy test từ thư mục gốc.
-- `backend/src/controllers/lead.controller.js`: Xử lý CRUD Leads, chống trùng SĐT/Email, phân trang, lọc/sort.
-- `backend/src/routes/lead.routes.js`: Định tuyến và phân quyền RBAC cho module Leads.
-- `backend/tests/lead.test.js`: 15 bài kiểm thử tích hợp cho module Leads.
-- `backend/tests/db.test.js`: Cải thiện tính resilient khi kiểm tra số lượng leads seeded.
-- `frontend/src/pages/Auth/Login.jsx`: Sửa bóc tách token & user từ response login.
-- `frontend/tests/login-flow.test.js`: Bổ sung kiểm thử luồng đăng nhập end-to-end.
-- `feature_list.json`: Cập nhật `feat-008` thành `completed` với bằng chứng tiếng Việt.
-- `progress.md`: Cập nhật tiến độ 8/20 tính năng hoàn thành.
-- `session-handoff.md`: Cập nhật biên bản chuyển giao.
+- `frontend/src/api/leadApi.js`: API Service cho module Leads.
+- `frontend/src/pages/Leads/LeadModal.jsx`: Modal form thêm/sửa Lead có validation và chống trùng.
+- `frontend/src/pages/Leads/LeadListPage.jsx`: Bảng quản lý Leads 20 dòng, search, sort, filter ngày.
+- `frontend/src/pages/Leads/LeadDetailPage.jsx`: Chi tiết Lead và danh sách Opportunities.
+- `frontend/src/routes/AppRoutes.jsx`: Định tuyến `/leads` và `/leads/:id`.
+- `frontend/tests/leads-ui.test.js`: 10 bài unit tests cho Leads UI.
+- `feature_list.json`: Cập nhật `feat-009` thành `completed`.
+- `progress.md`: Cập nhật tiến độ 9/20 tính năng hoàn thành.
+- `session-handoff.md`: Cập nhật biên bản bàn giao.
 
 ## Decisions Made
 
-- Backend hoạt động trên cổng `8888`, Frontend hoạt động trên cổng `8080`.
-- Cơ chế chống trùng lặp: Trả về HTTP 409 Conflict với thông báo rõ ràng "Số điện thoại này đã tồn tại trên hệ thống" hoặc "Địa chỉ email này đã tồn tại trên hệ thống" tuân thủ BR-02 và SRS 3.1.2 REQ-4.
-- Danh sách Leads mặc định sắp xếp giảm dần theo `entered_date` (ngày nhập mới nhất) và giới hạn 20 dòng mỗi trang theo BR-03 và BR-04.
+- Phân trang chuẩn BR-03: Mọi bảng dữ liệu hiển thị đúng 20 dòng mỗi trang.
+- Chống trùng lặp 2 lớp: Kiểm tra realtime qua `checkDuplicate` khi blur ô input và bắt lỗi HTTP 409 khi submit.
+- Cột sắp xếp mặc định theo `entered_date DESC` (ngày nhập mới nhất đưa lên đầu).
 
 ## Blockers / Risks
 
-- Không có rào cản kỹ thuật. Toàn bộ backend leads đã hoạt động trơn tru và toàn vẹn.
+- Không có rào cản kỹ thuật. Phân hệ Leads (Backend + Frontend) đã hoàn thiện 100%.
 
 ## Next Steps
 
-1. Bắt đầu triển khai **`feat-009: Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)`**:
-   - Xây dựng `frontend/src/api/leadApi.js` (kết nối đầy đủ các API leads backend vừa hoàn thiện).
-   - Xây dựng `LeadListPage.jsx` (`/leads`): Bảng dữ liệu 20 dòng/trang theo BR-03, cột hành động, thanh tìm kiếm theo tên, bộ lọc khoảng ngày nhập, sort ngày nhập.
-   - Xây dựng `LeadModal.jsx`: Form thêm mới & chỉnh sửa Lead, tích hợp validation và cảnh báo trùng SĐT/Email tức thời (hoặc khi submit nhận 409).
-   - Xây dựng `LeadDetailPage.jsx` (`/leads/:id`): Xem chi tiết khách hàng và tab Cơ hội (Opportunities) liên quan (SRS 3.2.3 REQ-4).
-   - Đăng ký route `/leads` và `/leads/:id` trong `AppRoutes.jsx`.
-   - Viết unit tests kiểm thử Leads UI và chạy kiểm thử toàn hệ thống.
+1. Bắt đầu triển khai **`feat-010: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)`**:
+   - Xây dựng Controller `category.controller.js` và Tuyến đường `category.routes.js`: CRUD Danh mục sản phẩm (`product_categories`).
+   - Xây dựng Controller `product.controller.js` và Tuyến đường `product.routes.js`: CRUD Sản phẩm (`products`), tìm kiếm theo mã/tên, lọc theo danh mục.
+   - Xây dựng 2 APIs đặc thù theo SRS:
+     - `GET /api/products/:id/opportunities`: Xem toàn bộ cơ hội quan tâm sản phẩm này (SRS 3.16).
+     - `GET /api/products/:id/orders`: Xem toàn bộ đơn hàng đã bán sản phẩm này (SRS 3.17).
+   - Phân quyền RBAC: Chỉ `SALE_MANAGER` và `ADMIN` được quyền tạo, sửa, xóa; `SALESMAN` được xem danh sách.
+   - Viết bài kiểm thử tự động cho module Products & Categories.

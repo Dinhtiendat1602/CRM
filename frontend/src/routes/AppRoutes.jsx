@@ -12,6 +12,8 @@ import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import UserManagement from '../pages/Admin/UserManagement';
 import ProfilePage from '../pages/Profile/ProfilePage';
+import LeadListPage from '../pages/Leads/LeadListPage';
+import LeadDetailPage from '../pages/Leads/LeadDetailPage';
 import PlaceholderPage from '../pages/Common/PlaceholderPage';
 
 export default function AppRoutes() {
@@ -30,29 +32,9 @@ export default function AppRoutes() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* Leads Module (All Roles) */}
-          <Route
-            path="/leads"
-            element={
-              <PlaceholderPage
-                title="Khách hàng Tiềm năng (Leads)"
-                srsRef="SRS 3.1 - 3.5"
-                description="Quản lý danh sách khách hàng tiềm năng, chống trùng SĐT/Email và phân trang 20 dòng."
-                featureId="feat-009"
-              />
-            }
-          />
-          <Route
-            path="/leads/:id"
-            element={
-              <PlaceholderPage
-                title="Chi tiết Khách hàng Tiềm năng"
-                srsRef="SRS 3.2.3 REQ-4"
-                description="Thông tin chi tiết Lead kèm danh sách các Cơ hội (Opportunities) liên quan."
-                featureId="feat-009"
-              />
-            }
-          />
+          {/* Leads Module (All Roles - SRS 3.1 - 3.5) */}
+          <Route path="/leads" element={<LeadListPage />} />
+          <Route path="/leads/:id" element={<LeadDetailPage />} />
 
           {/* Opportunities Module (All Roles) */}
           <Route

@@ -1,0 +1,128 @@
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Lock, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import axiosClient from '../../api/axiosClient';
+
+export default function ResetPassword() {
+  const { token } = useParams();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      setError('Mật khẩu mới phải có độ dài tối thiểu 8 ký tự');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await axiosClient.post('/auth/reset-password', {
+        token,
+        new_password: newPassword,
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError(err?.message || 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn (SRS 3.14).');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
+        <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-800/10 space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <h3 className="text-xl font-bold text-slate-900">Thiết lập mật khẩu mới</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Nhập mật khẩu mới an toàn cho tài khoản của bạn (SRS 3.14).
+            </p>
+          </div>
+
+          {success ? (
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-3 text-center">
+              <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto" />
+              <p className="font-bold text-sm text-emerald-900">
+                Đặt lại mật khẩu thành công!
+              </p>
+              <p>Mật khẩu của bạn đã được cập nhật an toàn trong cơ sở dữ liệu.</p>
+              <div className="pt-2">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  Đăng nhập ngay <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {error && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                  Mật khẩu mới (tối thiểu 8 ký tự)
+                </label>
+                <div className="relative rounded-xl shadow-2xs">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                  Xác nhận mật khẩu mới
+                </label>
+                <div className="relative rounded-xl shadow-2xs">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+              >
+                {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

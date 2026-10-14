@@ -4,9 +4,10 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 09:58
+**Last Updated:** 2026-10-14 10:25
 **Active Feature:** `feat-006` - Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m
-**Current Objective:** Xây dựng MainLayout (Sidebar điều hướng động theo 3 Role, Header, User Menu), axiosClient tự động đính kèm Bearer Token và bắt lỗi 401 tự động logout, bảo vệ PrivateRoute / RoleRoute (RBAC Guard) và hoàn thiện popup cảnh báo đếm ngược của hook useIdleTimeout (SRS 5.3).
+**Current Status:** HOÀN THÀNH 100% (6/20 tính năng đã nghiệm thu đạt chuẩn DoD)
+**Next Feature:** `feat-007` - Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI)
 
 ---
 
@@ -48,21 +49,32 @@
     - `POST /api/admin/users/:id/reset-password`: Quản trị viên đặt lại mật khẩu nhân viên trực tiếp khi gặp sự cố.
   - Kiểm thử: 13 integration tests tại `backend/tests/user.test.js` (toàn bộ 37/37 tests backend pass 100% trong 4.8s).
 
+- [x] **`feat-006` - Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m**
+  - Xây dựng `MainLayout`:
+    - `Sidebar.jsx`: Điều hướng động theo RBAC (ADMIN: 9 mục, SALE_MANAGER: 8 mục, SALESMAN: 4 mục), hỗ trợ thu gọn/mở rộng, overlay mobile, icon Lucide và indicator active link.
+    - `Header.jsx`: Breadcrumbs tự động theo route, User Profile Menu với Avatar, Role Badge (`ADMIN`, `SALE_MANAGER`, `SALESMAN`), Quick Link Hồ sơ cá nhân và nút Đăng xuất.
+  - Xây dựng Route Guards:
+    - `PrivateRoute.jsx`: Chặn truy cập unauthenticated, chuyển hướng về `/login` lưu vết `location.state`.
+    - `RoleRoute.jsx`: Kiểm tra vai trò người dùng, chuyển hướng về `/403` Forbidden nếu không đủ thẩm quyền.
+  - Hoàn thiện Quản lý Phiên làm việc & Cảnh báo Timeout (SRS 5.3):
+    - `useIdleTimeout.js`: Tự động đăng xuất sau 30 phút bất hoạt.
+    - `TimeoutWarning.jsx`: Modal popup cảnh báo đếm ngược 2 phút cuối (phút 28-30) với 2 lựa chọn: "Tiếp tục làm việc" và "Đăng xuất ngay".
+  - Định tuyến tổng `AppRoutes.jsx` & `App.jsx`:
+    - Đăng ký đầy đủ các route: `/login`, `/forgot-password`, `/reset-password/:token`, `/dashboard`, `/leads`, `/opportunities`, `/orders`, `/products`, `/campaigns`, `/forecast/setup`, `/reports`, `/admin/users`, `/403`, `/profile`, `*` (404).
+    - Các màn hình `Login.jsx`, `ForgotPassword.jsx`, `ResetPassword.jsx`, `Dashboard.jsx`, `Forbidden.jsx`, `NotFound.jsx` và `PlaceholderPage.jsx` kết nối đồng bộ 100%.
+  - Kiểm thử: Viết 10 unit tests tại `frontend/tests/admin-ui.test.js` kiểm tra RBAC menu, Route guard, format đếm ngược và Axios interceptors. Toàn bộ 10/10 tests frontend pass 100%.
+
 ---
 
 ### What's In Progress (Việc đang thực hiện)
 
-- [ ] **`feat-006` - Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m**
-  - Xây dựng `MainLayout`: Sidebar điều hướng động hiển thị menu phù hợp từng vai trò (`SALESMAN`, `SALE_MANAGER`, `ADMIN`), Header hiển thị thông tin người dùng và nút đăng xuất.
-  - Xây dựng Route Guard: `PrivateRoute.jsx` (chuyển hướng `/login` nếu chưa đăng nhập), `RoleRoute.jsx` (chuyển hướng nếu không đủ quyền).
-  - Tích hợp popup cảnh báo sắp hết hạn phiên làm việc (đếm ngược 2 phút trước khi chạm mốc 30 phút).
-  - Viết bộ frontend tests.
+- Sẵn sàng chuyển giao sang `feat-007` - Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI).
 
 ---
 
 ### What's Next (Các bước tiếp theo)
 
-1. `feat-007`: Frontend Màn hình Xác thực & Quản lý Người dùng (LoginPage, ForgotPasswordPage, ResetPasswordPage, AdminUserPage).
+1. `feat-007`: Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI: bảng dữ liệu 20 dòng, bộ lọc vai trò, toggle kích hoạt tài khoản, modal tạo mới/reset mật khẩu).
 2. `feat-008`: Backend Quản lý Khách hàng tiềm năng (Leads Module - phân trang 20 dòng, chống trùng SĐT/Email).
 3. `feat-009`: Frontend Giao diện Quản lý Khách tiềm năng (Leads UI).
 
@@ -70,14 +82,14 @@
 
 ## Blockers / Risks (Rào Cản & Rủi Ro)
 
-- **Không có rào cản kỹ thuật**: Toàn bộ các API Backend phục vụ Auth và Admin User Management đã hoàn chỉnh 100%, sẵn sàng cho việc ghép nối Frontend UI.
+- **Không có rào cản**: Khung giao diện Admin UI, Layout, Router, Route Guards, Axios Interceptors và Session Timeout đã chạy ổn định và đạt chuẩn 100%.
 
 ---
 
 ## Decisions Made (Các Quyết Định Đã Thống Nhất)
 
-- Toàn bộ các API trong phân hệ Admin (`/api/admin/*`) đều được bọc bởi cả 2 middleware `auth.middleware.js` và `authorizeRoles('ADMIN')`, chặn tuyệt đối truy cập trái phép với mã lỗi 403 Forbidden.
-- Bổ sung cơ chế an toàn: Quản trị viên không thể tự vô hiệu hóa tài khoản của chính mình để tránh tình huống hệ thống mất quyền quản trị tối cao.
+- Sử dụng cơ chế cảnh báo 2 bước cho Session Timeout (SRS 5.3): Khi người dùng bất hoạt đạt 28 phút, modal cảnh báo đếm ngược từng giây sẽ bật lên. Người dùng có thể nhấn "Tiếp tục làm việc" để reset timer hoặc để hệ thống tự động xóa phiên và đăng xuất sau đúng 30 phút.
+- Menu điều hướng được lọc trực tiếp theo vai trò `user.role_name`: `ADMIN` thấy toàn bộ 9 phân hệ; `SALE_MANAGER` thấy 8 phân hệ (loại trừ User Mgmt); `SALESMAN` chỉ thấy 4 phân hệ cốt lõi (Dashboard, Leads, Opps, Orders).
 
 ---
 
@@ -86,6 +98,7 @@
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
 | `npm test` (trong `backend/`) | **PASS (37/37 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) |
-| `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 7 files sạch sẽ |
-| `npm run build` (trong `frontend/`) | **PASS** | Vite build bundle production thành công trong 261ms |
-| `npm test` (tại thư mục gốc) | **PASS** | Đồng bộ cả test backend và lint frontend |
+| `npm test` (trong `frontend/`) | **PASS (10/10 passed, 0 failures)** | `admin-ui.test.js` (10 tests: RBAC menu, Role guards, Timeout format, Axios interceptor) |
+| `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 22 files sạch sẽ |
+| `npm run build` (trong `frontend/`) | **PASS (built in 378ms)** | Vite production bundle thành công không có lỗi |
+| `npm test` (tại thư mục gốc) | **PASS (47/47 passed toàn hệ thống)** | Kết hợp chạy test backend, test frontend và lint frontend |

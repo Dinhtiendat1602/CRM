@@ -61,8 +61,8 @@
       "dependencies": [
         "feat-001"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Built comprehensive Frontend Admin UI framework complying with SRS 2.1, 4.1, 5.3: MainLayout with collapsible Sidebar dynamically filtered by RBAC roles (ADMIN: 9 items, SALE_MANAGER: 8 items, SALESMAN: 4 items); Header with breadcrumbs, role badges, profile access and logout; PrivateRoute and RoleRoute route guards; axiosClient interceptors with automatic Bearer token injection and 401 handling; and useIdleTimeout session security hook with 30-minute auto-logout and 2-minute countdown warning modal (TimeoutWarning). Built Login, ForgotPassword, ResetPassword, Dashboard, Forbidden (403), NotFound (404), and module Placeholders. Verified with 10 unit tests in frontend/tests/admin-ui.test.js, 0 oxlint warnings/errors on 22 files, and successful Vite production build."
     },
     {
       "id": "feat-007",

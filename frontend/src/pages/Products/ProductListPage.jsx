@@ -15,7 +15,6 @@ import {
   Edit3, 
   Trash2, 
   Layers, 
-  DollarSign, 
   Flag, 
   AlertCircle,
   Tag

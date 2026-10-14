@@ -16,6 +16,8 @@ import LeadListPage from '../pages/Leads/LeadListPage';
 import LeadDetailPage from '../pages/Leads/LeadDetailPage';
 import ProductListPage from '../pages/Products/ProductListPage';
 import ProductDetailPage from '../pages/Products/ProductDetailPage';
+import OpportunityListPage from '../pages/Opportunities/OpportunityListPage';
+import OpportunityDetailPage from '../pages/Opportunities/OpportunityDetailPage';
 import PlaceholderPage from '../pages/Common/PlaceholderPage';
 
 export default function AppRoutes() {
@@ -38,29 +40,9 @@ export default function AppRoutes() {
           <Route path="/leads" element={<LeadListPage />} />
           <Route path="/leads/:id" element={<LeadDetailPage />} />
 
-          {/* Opportunities Module (All Roles) */}
-          <Route
-            path="/opportunities"
-            element={
-              <PlaceholderPage
-                title="Quản lý Cơ hội Bán hàng (Opportunities)"
-                srsRef="SRS 3.6 - 3.12"
-                description="Theo dõi Deal, ghi nhật ký chăm sóc (Follow-up log) và Chốt đơn hàng."
-                featureId="feat-013"
-              />
-            }
-          />
-          <Route
-            path="/opportunities/:id"
-            element={
-              <PlaceholderPage
-                title="Chi tiết Cơ hội & Timeline Chăm sóc"
-                srsRef="SRS 3.7.3 REQ-4"
-                description="Lịch sử tương tác qua điện thoại, email, gặp mặt và quy trình Make Order."
-                featureId="feat-013"
-              />
-            }
-          />
+          {/* Opportunities Module (All Roles - SRS 3.6 - 3.11) */}
+          <Route path="/opportunities" element={<OpportunityListPage />} />
+          <Route path="/opportunities/:id" element={<OpportunityDetailPage />} />
 
           {/* Orders Module (All Roles) */}
           <Route

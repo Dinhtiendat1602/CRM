@@ -4,16 +4,26 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 13:48
-**Active Feature:** `feat-012` - Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log)
-**Current Status:** HOÀN THÀNH 100% (12/20 tính năng đã nghiệm thu đạt chuẩn DoD - Đạt 60% toàn bộ hệ thống Zen CRM)
-**Next Feature:** `feat-013` - Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)
+**Last Updated:** 2026-10-14 14:21
+**Active Feature:** `feat-013` - Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)
+**Current Status:** HOÀN THÀNH 100% (13/20 tính năng đã nghiệm thu đạt chuẩn DoD - Đạt 65% toàn bộ hệ thống Zen CRM)
+**Next Feature:** `feat-014` - Backend Chốt đơn hàng bằng Database Transaction (Make an Order)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **`feat-013` - Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)**
+  - Xây dựng trọn bộ giao diện người dùng Quản lý Cơ hội bán hàng theo phong cách Zoho CRM đáp ứng 100% SRS 3.6 - 3.11:
+    - `OpportunityListPage.jsx` (`/opportunities`): Bảng danh sách cơ hội phân trang chuẩn 20 dòng theo BR-03 (SRS 3.7.3 REQ-1), ô tìm kiếm đa năng theo tên Lead hoặc tên/mã sản phẩm debounced 300ms (SRS 3.8), dropdown lọc theo 6 trạng thái cơ hội chuẩn, bộ lọc khoảng ngày tạo (BR-05), sắp xếp linh hoạt theo ngày tạo/ngày chốt/số lượng kèm nút đảo chiều ASC/DESC (BR-04), các thẻ thống kê tổng số cơ hội và tổng doanh thu dự kiến ước tính, nút 'Thêm Cơ Hội Mới'. Tự động mở modal khi có query param `createForLead` hoặc `createForProduct`.
+    - `OpportunityModal.jsx`: Biểu mẫu thêm mới & chỉnh sửa Cơ hội (SRS 3.6, 3.9), dropdown chọn khách hàng Lead và sản phẩm Product (hiển thị kèm đơn giá và tồn kho), ô nhập số lượng nhu cầu và ngày dự kiến chốt; tự động tính nhẩm giá trị ước tính (`estimated_value`) hiển thị trực quan dạng thẻ badge tiền VND; tích hợp cơ chế phát hiện trùng lặp realtime qua `oppApi.checkDuplicate` (BR-02, SRS 3.6.2 REQ-4), bắt lỗi HTTP 409 Conflict hiển thị cảnh báo đỏ và cung cấp tùy chọn xác nhận trùng.
+    - `FollowUpModal.jsx`: Modal ghi nhận nhật ký chăm sóc khách hàng (SRS 3.11), lưu thời gian liên hệ, phương thức liên hệ (Điện thoại, Email, Gặp trực tiếp, Zalo/Chat), nội dung trao đổi bắt buộc, phản hồi của khách hàng, kế hoạch tiếp theo và tùy chọn cập nhật trạng thái cơ hội mới.
+    - `OpportunityDetailPage.jsx` (`/opportunities/:id`): Màn hình chi tiết cơ hội (SRS 3.7.3 REQ-4) gồm 3 thẻ thông tin: Thông số cơ hội, Hồ sơ khách hàng Lead, Chi tiết Sản phẩm; thẻ Đơn hàng khi đã chốt; và dòng thời gian trực quan (Follow-up Activity Timeline) hiển thị toàn bộ lịch sử các lần tương tác chăm sóc của nhân viên bán hàng kèm phản hồi của khách và kế hoạch tiếp theo.
+    - `oppApi.js`: Service client axios kết nối đầy đủ các endpoints cơ hội và nhật ký chăm sóc.
+    - Gắn định tuyến vào `AppRoutes.jsx` cho `/opportunities` và `/opportunities/:id` cho cả 3 vai trò `SALESMAN`, `SALE_MANAGER`, `ADMIN`.
+  - Bộ kiểm thử: 10 bài unit tests tại `frontend/tests/opportunities-ui.test.js` (toàn bộ 55/55 tests frontend pass, build Vite thành công trong 228ms).
 
 - [x] **`feat-012` - Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log)**
   - Xây dựng trọn bộ RESTful API CRUD Cơ hội bán hàng và Nhật ký chăm sóc (`opportunity.controller.js` và `opportunity.routes.js`):

@@ -41,8 +41,8 @@
       "dependencies": [
         "feat-003"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "POST /api/auth/forgot-password validates email, creates secure 64-char hex token expiring in 15 mins, and dispatches reset link via Gmail Nodemailer SMTP. GET /api/auth/verify-reset-token/:token verifies token validity. POST /api/auth/reset-password updates password with bcrypt, clears token (single-use), and enables immediate login with new credentials. Verified with 6 integration tests in backend/tests/forgot-password.test.js (24/24 total backend tests passing)."
     },
     {
       "id": "feat-005",

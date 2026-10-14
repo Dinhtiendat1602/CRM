@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 09:48
-**Active Feature:** `feat-004` - Backend Quên mật khẩu & Gửi mail SMTP (Nodemailer)
-**Current Objective:** Xây dựng `POST /api/auth/forgot-password` kiểm tra email tồn tại, sinh reset token có thời hạn và gửi email chứa link đặt lại mật khẩu qua Nodemailer Gmail SMTP. Xây dựng `POST /api/auth/reset-password` xác thực token và cập nhật mật khẩu mới (SRS 3.14).
+**Last Updated:** 2026-10-14 09:54
+**Active Feature:** `feat-005` - Backend Quản trị Người dùng & Phân quyền (Admin Users Management)
+**Current Objective:** Xây dựng các RESTful API cho Quản trị viên: `GET /api/admin/users` (kèm role_name), `GET /api/admin/roles` (danh sách vai trò), `POST /api/admin/users` (tạo tài khoản nhân viên và gán role), `PATCH /api/admin/users/:id/status` (Toggle Active/Deactive), `POST /api/admin/users/:id/reset-password` (Admin reset mật khẩu nhân viên trực tiếp) theo SRS 2.1.
 
 ---
 
@@ -30,42 +30,52 @@
   - Hoàn thiện `auth.middleware.js`: xác thực Bearer token từ header `Authorization`, chặn 401 nếu token thiếu/hỏng/hết hạn.
   - Hoàn thiện `role.middleware.js`: hàm `authorizeRoles('ADMIN', 'SALE_MANAGER', 'SALESMAN')` chặn truy cập 403 Forbidden nếu không đủ quyền.
   - Xây dựng `GET /api/auth/me` và `PUT /api/auth/profile`: lấy và cập nhật thông tin cá nhân (họ tên, SĐT, đổi mật khẩu).
-  - Kiểm thử: 12 integration tests chuyên biệt tại `backend/tests/auth.test.js` (đăng nhập đúng/sai/thiếu trường, đổi mật khẩu, bảo vệ RBAC Admin/Salesman). Toàn bộ 18/18 tests backend pass 100% trong 1.2s.
+  - Kiểm thử: 12 integration tests tại `backend/tests/auth.test.js` (18/18 tests backend pass trong 1.2s).
+
+- [x] **`feat-004` - Backend Quên mật khẩu & Gửi mail SMTP (Nodemailer)**
+  - Xây dựng `POST /api/auth/forgot-password`: kiểm tra email hợp lệ và tồn tại trong hệ thống, sinh mã token ngẫu nhiên bảo mật 64 hex characters (thời hạn 15 phút), lưu vào CSDL và gửi email chứa liên kết đặt lại mật khẩu bằng Nodemailer qua Gmail SMTP.
+  - Xây dựng `GET /api/auth/verify-reset-token/:token`: kiểm tra trước tính hợp lệ và thời hạn còn lại của token trước khi người dùng đổi mật khẩu.
+  - Xây dựng `POST /api/auth/reset-password`: xác thực token chưa hết hạn, băm mật khẩu mới bằng bcrypt 10 rounds, cập nhật CSDL, xóa token (single-use) và cho phép đăng nhập ngay với mật khẩu mới.
+  - Kiểm thử: 6 integration tests tại `backend/tests/forgot-password.test.js` (xác thực email, gửi mail thực tế, kiểm tra token trong CSDL, cập nhật mật khẩu, chặn tái sử dụng token). Toàn bộ 24/24 tests backend pass 100%.
 
 - [x] **Xác thực kết nối bên ngoài**
   - PostgreSQL Database: Kết nối thành công tới database `CRM` trên `localhost:5432`.
-  - Gmail SMTP: Xác thực thành công tài khoản `dinhtiendat1602@gmail.com` qua App Password.
+  - Gmail SMTP: Gửi email đặt lại mật khẩu thực tế qua tài khoản `dinhtiendat1602@gmail.com`.
 
 ---
 
 ### What's In Progress (Việc đang thực hiện)
 
-- [ ] **`feat-004` - Backend Quên mật khẩu & Gửi mail SMTP (Nodemailer)**
-  - Xây dựng `POST /api/auth/forgot-password`: kiểm tra email, sinh token ngẫu nhiên + thời hạn hết hạn 15 phút, gửi email chứa reset link qua Nodemailer.
-  - Xây dựng `POST /api/auth/reset-password`: kiểm tra token hợp lệ và còn hạn, hash mật khẩu mới, cập nhật CSDL và thu hồi token đã sử dụng.
-  - Viết bộ test `backend/tests/forgot-password.test.js`.
+- [ ] **`feat-005` - Backend Quản trị Người dùng & Phân quyền (Admin Users Management)**
+  - Xây dựng `GET /api/admin/users`: Lấy danh sách nhân viên kèm tên vai trò (phân trang, lọc theo role, tìm kiếm tên/email).
+  - Xây dựng `GET /api/admin/roles`: Lấy danh sách các vai trò để hiển thị dropdown gán vai trò.
+  - Xây dựng `POST /api/admin/users`: Admin tạo tài khoản nhân viên mới, gán role ngay khi tạo (mật khẩu mặc định).
+  - Xây dựng `PATCH /api/admin/users/:id/status`: Admin Bật / Tắt trạng thái kích hoạt tài khoản (`is_active`).
+  - Xây dựng `PATCH /api/admin/users/:id/role`: Admin cập nhật thay đổi vai trò nhân viên.
+  - Xây dựng `POST /api/admin/users/:id/reset-password`: Admin đặt lại mật khẩu trực tiếp cho nhân viên.
+  - Bảo vệ toàn bộ endpoint bằng `auth.middleware.js` + `authorizeRoles('ADMIN')`.
+  - Viết bộ kiểm thử tích hợp `backend/tests/user.test.js`.
 
 ---
 
 ### What's Next (Các bước tiếp theo)
 
-1. `feat-005`: Backend Quản trị Người dùng & Phân quyền cho Admin (`/api/admin/users`, `/api/admin/roles`, toggle status, gán role).
-2. `feat-006`: Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m.
-3. `feat-007`: Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI).
+1. `feat-006`: Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m.
+2. `feat-007`: Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI).
+3. `feat-008`: Backend Quản lý Khách hàng tiềm năng (Leads Module - phân trang 20 dòng, chống trùng SĐT/Email).
 
 ---
 
 ## Blockers / Risks (Rào Cản & Rủi Ro)
 
-- **Không có rào cản kỹ thuật**: Hệ thống xác thực và RBAC hoạt động ổn định, CSDL và SMTP Gmail đã sẵn sàng.
+- **Không có rào cản kỹ thuật**: Các phân hệ nền tảng Backend hoạt động trơn tru và có độ bao phủ kiểm thử cao.
 
 ---
 
 ## Decisions Made (Các Quyết Định Đã Thống Nhất)
 
-- Cho phép người dùng đăng nhập bằng cả `username` hoặc `email` tại endpoint `POST /api/auth/login` để tối ưu trải nghiệm (vẫn đảm bảo đúng chuẩn SRS 3.13).
-- Tuyệt đối không trả `password_hash` trong bất kỳ response nào (kể cả GET/PUT profile cá nhân) nhằm tuân thủ quy chuẩn an ninh `docs/SECURITY.md`.
-- Token JWT chứa payload tối giản `{ id, username, email, role, full_name }` phục vụ phân quyền RBAC và hiển thị UI tức thì.
+- Mã đặt lại mật khẩu có thời hạn chính xác 15 phút (theo đặc tả SRS 3.14) và tự động vô hiệu hóa ngay sau lần sử dụng đầu tiên để ngăn chặn tấn công replay.
+- Cấu hình template HTML email gửi qua Nodemailer hiển thị nhận diện thương hiệu Zen CRM trực quan, có nút bấm đặt lại mật khẩu và cảnh báo bảo mật.
 
 ---
 
@@ -73,7 +83,7 @@
 
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
-| `npm test` (trong `backend/`) | **PASS (18/18 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) chạy trong 1.2s |
+| `npm test` (trong `backend/`) | **PASS (24/24 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) |
 | `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 7 files sạch sẽ |
-| `npm run build` (trong `frontend/`) | **PASS** | Vite build thành công bundle production trong 267ms |
+| `npm run build` (trong `frontend/`) | **PASS** | Vite build bundle production thành công trong 306ms |
 | `npm test` (tại thư mục gốc) | **PASS** | Đồng bộ cả test backend và lint frontend |

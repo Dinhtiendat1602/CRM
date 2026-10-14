@@ -422,6 +422,14 @@ exports.createOpportunity = async (req, res, next) => {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *;
     `;
+    let finalCreatedBy = null;
+    if (req.user?.id) {
+      const uCheck = await db.query('SELECT id FROM users WHERE id = $1', [req.user.id]);
+      if (uCheck.rows.length > 0) {
+        finalCreatedBy = uCheck.rows[0].id;
+      }
+    }
+
     const insertValues = [
       parseInt(lead_id, 10),
       parseInt(product_id, 10),
@@ -429,7 +437,7 @@ exports.createOpportunity = async (req, res, next) => {
       expected_close_date || null,
       upperStatus,
       notes ? notes.trim() : null,
-      req.user ? req.user.id : null,
+      finalCreatedBy,
     ];
 
     const result = await db.query(insertQuery, insertValues);
@@ -653,6 +661,14 @@ exports.addFollowUp = async (req, res, next) => {
       ) VALUES ($1, COALESCE($2::timestamp, CURRENT_TIMESTAMP), $3, $4, $5, $6, $7)
       RETURNING *;
     `;
+    let finalCreatedBy = null;
+    if (req.user?.id) {
+      const uCheck = await db.query('SELECT id FROM users WHERE id = $1', [req.user.id]);
+      if (uCheck.rows.length > 0) {
+        finalCreatedBy = uCheck.rows[0].id;
+      }
+    }
+
     const insertValues = [
       oppId,
       follow_date || null,
@@ -660,7 +676,7 @@ exports.addFollowUp = async (req, res, next) => {
       content.trim(),
       customer_response ? customer_response.trim() : null,
       next_plan ? next_plan.trim() : null,
-      req.user ? req.user.id : null,
+      finalCreatedBy,
     ];
 
     const followUpResult = await db.query(insertFollowUpQuery, insertValues);

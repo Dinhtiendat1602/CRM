@@ -27,43 +27,43 @@ const MENU_ITEMS = [
     label: 'Leads',
     icon: Users,
     path: '/leads',
-    roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'],
+    roles: ['SALESMAN'],
   },
   {
     label: 'Opportunities',
     icon: TrendingUp,
     path: '/opportunities',
-    roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'],
+    roles: ['SALESMAN'],
   },
   {
     label: 'Orders',
     icon: ShoppingCart,
     path: '/orders',
-    roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'],
+    roles: ['SALESMAN'],
   },
   {
     label: 'Products',
     icon: Package,
     path: '/products',
-    roles: ['SALE_MANAGER', 'ADMIN'],
+    roles: ['SALE_MANAGER'],
   },
   {
     label: 'Campaigns',
     icon: Megaphone,
     path: '/campaigns',
-    roles: ['SALE_MANAGER', 'ADMIN'],
+    roles: ['SALE_MANAGER'],
   },
   {
     label: 'Forecast',
     icon: BarChart2,
     path: '/forecast/setup',
-    roles: ['SALE_MANAGER', 'ADMIN'],
+    roles: ['SALE_MANAGER'],
   },
   {
     label: 'Reports',
     icon: FileText,
     path: '/reports',
-    roles: ['SALE_MANAGER', 'ADMIN'],
+    roles: ['SALE_MANAGER'],
   },
   {
     label: 'User Mgmt',
@@ -75,7 +75,7 @@ const MENU_ITEMS = [
 
 export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const { user, role } = useAuth();
-  const currentRole = role || user?.role_name || user?.role;
+  const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
 
   // Lọc danh sách menu theo quyền hạn vai trò (RBAC)
   const accessibleItems = MENU_ITEMS.filter((item) =>
@@ -172,7 +172,15 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
               <Shield className="h-4 w-4 text-emerald-400 shrink-0" />
               <div className="truncate">
                 <span className="text-[10px] uppercase font-semibold text-slate-400 block">Quyền hạn</span>
-                <span className="font-bold text-white">{currentRole || 'N/A'}</span>
+                <span className="font-bold text-white">
+                  {currentRole === 'ADMIN'
+                    ? 'Quản trị viên (ADMIN)'
+                    : currentRole === 'SALE_MANAGER'
+                    ? 'Quản lý bán hàng'
+                    : currentRole === 'SALESMAN'
+                    ? 'Nhân viên kinh doanh'
+                    : currentRole || 'N/A'}
+                </span>
               </div>
             </div>
           </div>

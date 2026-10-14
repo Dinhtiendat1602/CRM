@@ -342,9 +342,23 @@ exports.createLead = async (req, res, next) => {
       });
     }
 
-    // 4. Gán người phụ trách (mặc định là người tạo nếu không truyền)
-    const assignedUserId = assigned_to ? parseInt(assigned_to, 10) : req.user?.id || null;
-    const campaignId = campaign_id ? parseInt(campaign_id, 10) : null;
+    // 4. Gán người phụ trách & Chiến dịch (xác thực khóa ngoại an toàn trong CSDL)
+    let finalAssignedTo = null;
+    const targetUserId = assigned_to ? parseInt(assigned_to, 10) : req.user?.id;
+    if (targetUserId) {
+      const userCheck = await db.query('SELECT id FROM users WHERE id = $1', [targetUserId]);
+      if (userCheck.rows.length > 0) {
+        finalAssignedTo = userCheck.rows[0].id;
+      }
+    }
+
+    let finalCampaignId = null;
+    if (campaign_id) {
+      const campCheck = await db.query('SELECT id FROM campaigns WHERE id = $1', [parseInt(campaign_id, 10)]);
+      if (campCheck.rows.length > 0) {
+        finalCampaignId = campCheck.rows[0].id;
+      }
+    }
 
     // 5. Thêm bản ghi vào CSDL
     const insertQuery = `
@@ -362,16 +376,20 @@ exports.createLead = async (req, res, next) => {
       RETURNING *;
     `;
 
+    const cleanDob = (date_of_birth && String(date_of_birth).trim() !== '') ? String(date_of_birth).trim() : null;
+    const cleanCareer = (career || req.body.title || '').trim() || null;
+    const cleanAddress = (address || '').trim() || null;
+
     const insertValues = [
       first_name.trim(),
       last_name.trim(),
       email.trim(),
       phone.trim(),
-      date_of_birth || null,
-      career?.trim() || null,
-      address?.trim() || null,
-      campaignId,
-      assignedUserId,
+      cleanDob,
+      cleanCareer,
+      cleanAddress,
+      finalCampaignId,
+      finalAssignedTo,
     ];
 
     const result = await db.query(insertQuery, insertValues);
@@ -462,6 +480,26 @@ exports.updateLead = async (req, res, next) => {
     }
 
     // 5. Cập nhật vào CSDL
+    let finalAssignedTo = existingCheck.rows[0].assigned_to;
+    if (assigned_to !== undefined) {
+      if (assigned_to) {
+        const uCheck = await db.query('SELECT id FROM users WHERE id = $1', [parseInt(assigned_to, 10)]);
+        finalAssignedTo = uCheck.rows.length > 0 ? uCheck.rows[0].id : null;
+      } else {
+        finalAssignedTo = null;
+      }
+    }
+
+    let finalCampaignId = existingCheck.rows[0].campaign_id;
+    if (campaign_id !== undefined) {
+      if (campaign_id) {
+        const cCheck = await db.query('SELECT id FROM campaigns WHERE id = $1', [parseInt(campaign_id, 10)]);
+        finalCampaignId = cCheck.rows.length > 0 ? cCheck.rows[0].id : null;
+      } else {
+        finalCampaignId = null;
+      }
+    }
+
     const updateQuery = `
       UPDATE leads
       SET
@@ -479,16 +517,20 @@ exports.updateLead = async (req, res, next) => {
       RETURNING *;
     `;
 
+    const cleanDob = (date_of_birth && String(date_of_birth).trim() !== '') ? String(date_of_birth).trim() : null;
+    const cleanCareer = (career || req.body.title || '').trim() || null;
+    const cleanAddress = (address || '').trim() || null;
+
     const updateValues = [
       first_name.trim(),
       last_name.trim(),
       email.trim(),
       phone.trim(),
-      date_of_birth || null,
-      career?.trim() || null,
-      address?.trim() || null,
-      campaign_id ? parseInt(campaign_id, 10) : null,
-      assigned_to ? parseInt(assigned_to, 10) : null,
+      cleanDob,
+      cleanCareer,
+      cleanAddress,
+      finalCampaignId,
+      finalAssignedTo,
       leadId,
     ];
 

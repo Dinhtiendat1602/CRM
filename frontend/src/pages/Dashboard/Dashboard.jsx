@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   TrendingUp,
   Users,
@@ -7,19 +8,23 @@ import {
   ShieldCheck,
   Activity,
   ArrowUpRight,
+  ArrowRight,
+  Sparkles,
+  Package,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
 import axiosClient from '../../api/axiosClient';
 
 export default function Dashboard() {
   const { user, role } = useAuth();
-  const currentRole = role || user?.role_name || user?.role;
+  const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
 
   const [stats] = useState({
     leadsCount: 2,
     oppsCount: 1,
     ordersCount: 0,
     planCompletion: '78.5%',
+    winRate: '65.0%',
   });
 
   const [apiConnected, setApiConnected] = useState(false);
@@ -32,36 +37,172 @@ export default function Dashboard() {
       .catch(() => setApiConnected(false));
   }, []);
 
-  const kpis = [
+  // Cấu hình KPI riêng biệt theo đúng thẩm quyền nghiệp vụ từng vai trò (SRS 2.1)
+  const getRoleKPIs = () => {
+    if (currentRole === 'ADMIN') {
+      return [
+        {
+          label: 'Tổng Tài Khoản Nhân Viên',
+          value: 3,
+          change: 'Hệ thống đang hoạt động',
+          icon: Users,
+          color: 'from-purple-600 to-indigo-600',
+        },
+        {
+          label: 'Tài Khoản Đang Kích Hoạt',
+          value: 3,
+          change: '100% tài khoản active',
+          icon: ShieldCheck,
+          color: 'from-emerald-500 to-teal-600',
+        },
+        {
+          label: 'Tài Khoản Bị Khóa',
+          value: 0,
+          change: 'Không có tài khoản bị khóa',
+          icon: Activity,
+          color: 'from-rose-500 to-pink-600',
+        },
+        {
+          label: 'Cấu Trúc Phân Quyền (RBAC)',
+          value: '3 Vai trò',
+          change: 'ADMIN, MANAGER, SALESMAN',
+          icon: DollarSign,
+          color: 'from-blue-600 to-cyan-600',
+        },
+      ];
+    }
+
+    if (currentRole === 'SALE_MANAGER') {
+      return [
+        {
+          label: 'Danh Mục Sản Phẩm Kho',
+          value: 3,
+          change: 'Điện tử, Phần mềm, Máy ảnh',
+          icon: Package,
+          color: 'from-indigo-600 to-blue-600',
+        },
+        {
+          label: 'Sản Phẩm Đang Kinh Doanh',
+          value: 11,
+          change: 'Đầy đủ tồn kho & đơn giá',
+          icon: ShoppingCart,
+          color: 'from-blue-600 to-cyan-600',
+        },
+        {
+          label: 'Chiến Dịch Tiếp Thị Q4',
+          value: 1,
+          change: 'Đang triển khai thu Lead',
+          icon: TrendingUp,
+          color: 'from-amber-500 to-orange-600',
+        },
+        {
+          label: 'Chỉ Tiêu Doanh Số 2026',
+          value: stats.planCompletion,
+          change: 'Kế hoạch 12 tháng (Forecast)',
+          icon: DollarSign,
+          color: 'from-purple-600 to-pink-600',
+        },
+      ];
+    }
+
+    // Mặc định vai trò SALESMAN
+    return [
+      {
+        label: 'Khách Tiềm Năng (Leads)',
+        value: stats.leadsCount,
+        change: '+12% so với tháng trước',
+        icon: Users,
+        color: 'from-blue-600 to-indigo-600',
+      },
+      {
+        label: 'Cơ Hội Đang Chăm Sóc',
+        value: stats.oppsCount,
+        change: '1 Deal đang thương thảo',
+        icon: TrendingUp,
+        color: 'from-amber-500 to-orange-600',
+      },
+      {
+        label: 'Đơn Hàng Hoàn Tất',
+        value: stats.ordersCount,
+        change: 'Chờ chốt đơn mới',
+        icon: ShoppingCart,
+        color: 'from-emerald-500 to-teal-600',
+      },
+      {
+        label: 'Tỷ Lệ Chốt Deal Cá Nhân',
+        value: stats.winRate,
+        change: 'Hiệu quả tư vấn bán hàng',
+        icon: DollarSign,
+        color: 'from-purple-600 to-pink-600',
+      },
+    ];
+  };
+
+  const kpis = getRoleKPIs();
+
+  // Định nghĩa các lối tắt phân quyền riêng biệt (Role nào không quản lý thì tuyệt đối ẩn)
+  const quickActions = [
     {
-      label: 'Khách tiềm năng (Leads)',
-      value: stats.leadsCount,
-      change: '+12% so với tháng trước',
-      icon: Users,
-      color: 'from-blue-600 to-indigo-600',
+      title: 'Khách tiềm năng',
+      desc: 'Thêm và theo dõi khách hàng mới (SRS 3.1 - 3.5)',
+      path: '/leads',
+      roles: ['SALESMAN'],
+      color: 'text-blue-600 bg-blue-50 border-blue-200',
     },
     {
-      label: 'Cơ hội đang chăm sóc',
-      value: stats.oppsCount,
-      change: '1 Deal đang thương thảo',
-      icon: TrendingUp,
-      color: 'from-amber-500 to-orange-600',
+      title: 'Cơ hội bán hàng',
+      desc: 'Tạo cơ hội và nhật ký Follow-up (SRS 3.6 - 3.11)',
+      path: '/opportunities',
+      roles: ['SALESMAN'],
+      color: 'text-amber-600 bg-amber-50 border-amber-200',
     },
     {
-      label: 'Đơn hàng hoàn tất',
-      value: stats.ordersCount,
-      change: 'Chờ chốt đơn mới',
-      icon: ShoppingCart,
-      color: 'from-emerald-500 to-teal-600',
+      title: 'Đơn hàng (Orders)',
+      desc: 'Xem hóa đơn bán hàng đã chốt (SRS 3.12)',
+      path: '/orders',
+      roles: ['SALESMAN'],
+      color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
     },
     {
-      label: 'Chỉ tiêu Doanh số 2026',
-      value: stats.planCompletion,
-      change: 'Tiến độ quý hiện tại',
-      icon: DollarSign,
-      color: 'from-purple-600 to-pink-600',
+      title: 'Quản lý Sản phẩm',
+      desc: 'Quản trị kho hàng, đơn giá & xem opp theo SP (SRS 3.15 - 3.17)',
+      path: '/products',
+      roles: ['SALE_MANAGER'],
+      color: 'text-indigo-600 bg-indigo-50 border-indigo-200',
+    },
+    {
+      title: 'Chiến dịch Tiếp thị',
+      desc: 'Lập kế hoạch & đo lường hiệu quả ROI (SRS 3.18 - 3.19)',
+      path: '/campaigns',
+      roles: ['SALE_MANAGER'],
+      color: 'text-pink-600 bg-pink-50 border-pink-200',
+    },
+    {
+      title: 'Kế hoạch Doanh số',
+      desc: 'Chỉ tiêu 12 tháng & Báo cáo đối soát (SRS 3.20 - 3.21)',
+      path: '/forecast/setup',
+      roles: ['SALE_MANAGER'],
+      color: 'text-cyan-600 bg-cyan-50 border-cyan-200',
+    },
+    {
+      title: 'Báo cáo Tổng hợp',
+      desc: 'Thống kê Lead, Đơn & Doanh số theo SP/thời gian (SRS 2.1)',
+      path: '/reports',
+      roles: ['SALE_MANAGER'],
+      color: 'text-violet-600 bg-violet-50 border-violet-200',
+    },
+    {
+      title: 'Quản trị Người dùng',
+      desc: 'Xem danh sách, phân vai trò & đặt lại mật khẩu (SRS 2.1)',
+      path: '/admin/users',
+      roles: ['ADMIN'],
+      color: 'text-purple-600 bg-purple-50 border-purple-200',
     },
   ];
+
+  const allowedActions = quickActions.filter((action) =>
+    action.roles.includes(currentRole)
+  );
 
   return (
     <div className="space-y-6">
@@ -78,11 +219,21 @@ export default function Dashboard() {
           </h1>
 
           <p className="text-slate-300 text-sm leading-relaxed">
-            Hệ thống phân quyền đang kích hoạt vai trò{' '}
+            Hệ thống đang hoạt động với vai trò{' '}
             <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md">
-              {currentRole}
+              {currentRole === 'ADMIN'
+                ? 'Quản trị viên (ADMIN)'
+                : currentRole === 'SALE_MANAGER'
+                ? 'Quản lý bán hàng (SALE_MANAGER)'
+                : 'Nhân viên bán hàng (SALESMAN)'}
             </span>
-            . Bạn có thể sử dụng menu điều hướng bên trái để truy cập các phân hệ được cấp phép theo đặc tả SRS v1.1.
+            .{' '}
+            {currentRole === 'ADMIN' &&
+              'Theo đặc tả SRS 2.1, bạn chịu trách nhiệm quản lý tài khoản người dùng, đặt lại mật khẩu, kích hoạt/khóa và gán vai trò nhân viên trong hệ thống.'}
+            {currentRole === 'SALE_MANAGER' &&
+              'Theo đặc tả SRS 2.1, bạn chịu trách nhiệm thiết lập sản phẩm kho, chiến dịch tiếp thị, kế hoạch doanh số 12 tháng và theo dõi báo cáo thống kê.'}
+            {currentRole === 'SALESMAN' &&
+              'Theo đặc tả SRS 2.1, bạn trực tiếp quản lý khách hàng tiềm năng (Leads), theo dõi cơ hội bán hàng (Opportunities), ghi nhật ký chăm sóc và chốt đơn hàng (Orders).'}
           </p>
         </div>
 
@@ -118,6 +269,61 @@ export default function Dashboard() {
             </div>
           );
         })}
+      </div>
+
+      {/* Role-Based Quick Actions (RBAC Visibility) */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h3 className="font-bold text-slate-900 text-base">
+                Chức năng Nghiệp vụ Được Phép Quản Lý
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Hiển thị tự động theo thẩm quyền của vai trò{' '}
+              <strong className="text-indigo-600 font-semibold">{currentRole}</strong> (Chức năng không thuộc thẩm quyền được ẩn tuyệt đối theo quy tắc RBAC).
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 self-start sm:self-auto">
+            {allowedActions.length} phân hệ khả dụng
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {allowedActions.map((action, idx) => (
+            <Link
+              key={idx}
+              to={action.path}
+              className="group p-4 rounded-xl border border-slate-200/80 hover:border-blue-400 hover:shadow-md transition-all flex flex-col justify-between bg-slate-50/50 hover:bg-white"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors text-sm">
+                    {action.title}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                </div>
+                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                  {action.desc}
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-100/80 flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Truy cập ngay
+                </span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${action.color}`}>
+                  {action.roles.includes('ADMIN')
+                    ? 'Chỉ Admin'
+                    : action.roles.includes('SALE_MANAGER')
+                    ? 'Chỉ Manager'
+                    : 'Chỉ Salesman'}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Connectivity & Architecture Card */}

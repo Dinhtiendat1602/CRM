@@ -3,17 +3,13 @@ const assert = require('node:assert');
 const request = require('supertest');
 const app = require('../src/app');
 const { pool } = require('../src/config/db');
+const { getSalesmanToken } = require('./helpers/test-auth');
 
 let salesmanToken;
 let createdLeadId;
 
 before(async () => {
-  // Lấy token đăng nhập của Salesman để thực hiện các bài kiểm tra
-  const res = await request(app)
-    .post('/api/auth/login')
-    .send({ username: 'salesman', password: '11111111' });
-
-  salesmanToken = res.body.data.token;
+  salesmanToken = await getSalesmanToken(app);
   assert.ok(salesmanToken, 'Cần có JWT Token của salesman để chạy test');
 });
 

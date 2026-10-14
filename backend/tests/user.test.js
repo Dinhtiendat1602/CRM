@@ -3,22 +3,14 @@ const assert = require('node:assert');
 const request = require('supertest');
 const app = require('../src/app');
 const { pool } = require('../src/config/db');
+const { getAdminToken, getSalesmanToken } = require('./helpers/test-auth');
 
 let adminToken;
 let salesmanToken;
 
 test.before(async () => {
-  // Login as admin
-  const adminRes = await request(app)
-    .post('/api/auth/login')
-    .send({ username: 'admin', password: '11111111' });
-  adminToken = adminRes.body.data.token;
-
-  // Login as salesman
-  const salesRes = await request(app)
-    .post('/api/auth/login')
-    .send({ username: 'salesman', password: '11111111' });
-  salesmanToken = salesRes.body.data.token;
+  adminToken = await getAdminToken(app);
+  salesmanToken = await getSalesmanToken(app);
 });
 
 test.after(async () => {
@@ -83,7 +75,7 @@ test('GET /api/admin/users - Admin searches users by keyword', async () => {
 
   assert.strictEqual(res.status, 200);
   assert.strictEqual(res.body.success, true);
-  assert.ok(res.body.data.some((u) => u.username === 'manager'));
+  assert.ok(res.body.data.some((u) => u.username.includes('manager')));
 });
 
 test('POST /api/admin/users - Should fail with missing required fields', async () => {
@@ -193,8 +185,10 @@ test('PATCH /api/admin/users/:id/status - Toggle active/inactive and verify logi
 });
 
 test('PATCH /api/admin/users/:id/status - Admin cannot deactivate their own account', async () => {
-  const adminQuery = await pool.query("SELECT id FROM users WHERE username = 'admin'");
-  const adminId = adminQuery.rows[0].id;
+  const meRes = await request(app)
+    .get('/api/auth/me')
+    .set('Authorization', `Bearer ${adminToken}`);
+  const adminId = meRes.body.data.id;
 
   const res = await request(app)
     .patch(`/api/admin/users/${adminId}/status`)
@@ -245,3 +239,48 @@ test('POST /api/admin/users/:id/reset-password - Admin resets staff password dir
   assert.strictEqual(loginRes.status, 200);
   assert.strictEqual(loginRes.body.success, true);
 });
+
+test('DELETE /api/admin/users/:id - Admin cannot delete their own account', async () => {
+  const meRes = await request(app)
+    .get('/api/auth/me')
+    .set('Authorization', `Bearer ${adminToken}`);
+  const adminId = meRes.body.data.id;
+
+  const res = await request(app)
+    .delete(`/api/admin/users/${adminId}`)
+    .set('Authorization', `Bearer ${adminToken}`);
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.success, false);
+});
+
+test('DELETE /api/admin/users/:id - Admin cannot delete default admin user', async () => {
+  const adminQuery = await pool.query("SELECT id FROM users WHERE username = 'admin'");
+  const adminId = adminQuery.rows[0].id;
+
+  const res = await request(app)
+    .delete(`/api/admin/users/${adminId}`)
+    .set('Authorization', `Bearer ${adminToken}`);
+
+  assert.strictEqual(res.status, 400);
+  assert.strictEqual(res.body.success, false);
+});
+
+test('DELETE /api/admin/users/:id - Admin successfully deletes staff user and verifies login block', async () => {
+  const findRes = await pool.query("SELECT id FROM users WHERE username = 'test_user_staff1'");
+  const targetId = findRes.rows[0].id;
+
+  const deleteRes = await request(app)
+    .delete(`/api/admin/users/${targetId}`)
+    .set('Authorization', `Bearer ${adminToken}`);
+
+  assert.strictEqual(deleteRes.status, 200);
+  assert.strictEqual(deleteRes.body.success, true);
+
+  // Deleted user can no longer log in
+  const loginRes = await request(app)
+    .post('/api/auth/login')
+    .send({ username: 'test_user_staff1', password: 'newDirectAdminPass2026' });
+  assert.strictEqual(loginRes.status, 401);
+});
+

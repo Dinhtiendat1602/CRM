@@ -3,6 +3,7 @@ const assert = require('node:assert');
 const request = require('supertest');
 const app = require('../src/app');
 const { pool } = require('../src/config/db');
+const { getAdminToken, getManagerToken, getSalesmanToken } = require('./helpers/test-auth');
 
 let adminToken;
 let managerToken;
@@ -12,21 +13,9 @@ let createdCategoryId;
 let createdProductId;
 
 before(async () => {
-  // Đăng nhập lấy token của các vai trò
-  const adminRes = await request(app)
-    .post('/api/auth/login')
-    .send({ username: 'admin', password: '11111111' });
-  adminToken = adminRes.body.data.token;
-
-  const managerRes = await request(app)
-    .post('/api/auth/login')
-    .send({ username: 'manager', password: '11111111' });
-  managerToken = managerRes.body.data.token;
-
-  const salesRes = await request(app)
-    .post('/api/auth/login')
-    .send({ username: 'salesman', password: '11111111' });
-  salesmanToken = salesRes.body.data.token;
+  adminToken = await getAdminToken(app);
+  managerToken = await getManagerToken(app);
+  salesmanToken = await getSalesmanToken(app);
 
   assert.ok(adminToken && managerToken && salesmanToken, 'Phải có token của cả 3 roles');
 });

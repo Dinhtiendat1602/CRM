@@ -18,6 +18,17 @@ function canDeactivateUser(targetUserId, currentUserId) {
   return { allowed: true };
 }
 
+// Logic kiểm tra xem admin có thể xóa tài khoản không (SRS 2.1)
+function canDeleteUser(targetUser, currentUser) {
+  if (targetUser.id === currentUser.id) {
+    return { allowed: false, reason: 'Admin không thể tự xóa tài khoản của chính mình' };
+  }
+  if (targetUser.username?.toLowerCase() === 'admin') {
+    return { allowed: false, reason: 'Không thể xóa tài khoản Quản trị viên hệ thống mặc định (admin)' };
+  }
+  return { allowed: true };
+}
+
 // Logic validation đổi mật khẩu cá nhân (SRS 3.13)
 function validatePasswordChange(oldPassword, newPassword, confirmPassword) {
   if (!oldPassword) {
@@ -73,6 +84,25 @@ describe('Frontend User Management & Profile UI Tests (feat-007)', () => {
 
     it('cho phép Admin khóa tài khoản của nhân viên khác', () => {
       const check = canDeactivateUser(2, 1);
+      assert.strictEqual(check.allowed, true);
+    });
+  });
+
+  describe('Admin User Deletion Guard (SRS 2.1)', () => {
+    it('chặn Admin tự xóa tài khoản của chính mình', () => {
+      const check = canDeleteUser({ id: 1, username: 'admin' }, { id: 1, username: 'admin' });
+      assert.strictEqual(check.allowed, false);
+      assert.ok(check.reason.includes('không thể tự xóa'));
+    });
+
+    it('chặn xóa tài khoản Quản trị viên hệ thống mặc định (admin)', () => {
+      const check = canDeleteUser({ id: 1, username: 'admin' }, { id: 99, username: 'another_admin' });
+      assert.strictEqual(check.allowed, false);
+      assert.ok(check.reason.includes('mặc định'));
+    });
+
+    it('cho phép Admin xóa tài khoản của nhân viên khác', () => {
+      const check = canDeleteUser({ id: 5, username: 'sales_hn' }, { id: 1, username: 'admin' });
       assert.strictEqual(check.allowed, true);
     });
   });

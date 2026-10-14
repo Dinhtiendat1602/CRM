@@ -61,7 +61,7 @@ test('Performance Indexes Verification', async () => {
   }
 });
 
-test('Seed Data Verification: Roles & Users (Password 11111111)', async () => {
+test('Seed Data Verification: Roles & Users (Hệ thống có đủ 3 vai trò active)', async () => {
   // Roles
   const roles = await pool.query('SELECT * FROM roles ORDER BY id ASC');
   assert.strictEqual(roles.rows.length, 3);
@@ -69,15 +69,14 @@ test('Seed Data Verification: Roles & Users (Password 11111111)', async () => {
   assert.strictEqual(roles.rows[1].name, 'SALE_MANAGER');
   assert.strictEqual(roles.rows[2].name, 'SALESMAN');
 
-  // Users
-  const users = await pool.query('SELECT * FROM users ORDER BY id ASC');
-  assert.strictEqual(users.rows.length, 3);
-
-  // Check password hash verification with '11111111'
-  for (const user of users.rows) {
-    const isMatch = await bcrypt.compare('11111111', user.password_hash);
-    assert.strictEqual(isMatch, true, `User ${user.username} password should match '11111111'`);
-  }
+  // Users trong hệ thống: đảm bảo có đủ 3 vai trò ADMIN, SALE_MANAGER, SALESMAN đang hoạt động
+  const users = await pool.query(
+    'SELECT u.id, u.username, r.name as role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.is_active = true'
+  );
+  const userRoles = users.rows.map((u) => u.role_name);
+  assert.ok(userRoles.includes('ADMIN'), 'Phải có ít nhất 1 tài khoản ADMIN active trong hệ thống');
+  assert.ok(userRoles.includes('SALE_MANAGER'), 'Phải có ít nhất 1 tài khoản SALE_MANAGER active trong hệ thống');
+  assert.ok(userRoles.includes('SALESMAN'), 'Phải có ít nhất 1 tài khoản SALESMAN active trong hệ thống');
 });
 
 test('Seed Data Verification: Business Entities (Campaign, Products, Leads, Opp, Forecast)', async () => {

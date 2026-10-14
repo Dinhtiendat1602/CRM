@@ -11,7 +11,7 @@ import { useAuth } from '../context/authContextDef';
 export default function RoleRoute({ allowedRoles = [] }) {
   const { user, role } = useAuth();
 
-  const currentRole = role || user?.role_name || user?.role;
+  const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
 
   // Nếu không chỉ định allowedRoles hoặc currentRole nằm trong danh sách cho phép
   if (!allowedRoles.length || (currentRole && allowedRoles.includes(currentRole))) {

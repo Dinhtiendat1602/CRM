@@ -83,6 +83,7 @@ exports.login = async (req, res, next) => {
           full_name: user.full_name,
           phone: user.phone,
           role: user.role,
+          role_name: user.role,
         },
       },
     });

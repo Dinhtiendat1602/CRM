@@ -46,7 +46,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
         last_name: lead.last_name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        title: lead.title || '',
+        title: lead.title || lead.career || '',
         company: lead.company || '',
         source: lead.source || 'Website',
         date_of_birth: lead.date_of_birth ? lead.date_of_birth.split('T')[0] : '',
@@ -67,14 +67,14 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
 
   // Kiểm tra trùng lặp realtime khi người dùng rời khỏi ô input (onBlur)
   const handleCheckDuplicate = async (field, value) => {
-    if (!value || isEdit) return; // Nếu edit thì backend sẽ kiểm tra khi submit
+    if (!value || !value.trim() || isEdit) return; // Nếu edit thì backend sẽ kiểm tra khi submit
     try {
-      const res = await leadApi.checkDuplicate({ [field]: value });
-      const dup = res.data?.duplicate || res.duplicate;
-      if (dup?.[field]) {
+      const res = await leadApi.checkDuplicate({ [field]: value.trim() });
+      const data = res.data || res;
+      if (data?.isDuplicate) {
         setDuplicateWarning((prev) => ({
           ...prev,
-          [field]: dup[field].message || `${field === 'email' ? 'Email' : 'Số điện thoại'} này đã tồn tại!`,
+          [field]: `${field === 'email' ? 'Địa chỉ Email' : 'Số điện thoại'} này đã tồn tại trong hệ thống!`,
         }));
       } else {
         setDuplicateWarning((prev) => ({ ...prev, [field]: null }));
@@ -120,23 +120,36 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
 
     if (!validate()) return;
 
+    // Chuẩn hóa payload gửi lên API sạch sẽ
+    const payload = {
+      first_name: formData.first_name.trim(),
+      last_name: formData.last_name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      career: formData.title?.trim() || null,
+      company: formData.company?.trim() || null,
+      source: formData.source || 'Website',
+      date_of_birth: formData.date_of_birth ? formData.date_of_birth : null,
+      address: [formData.address, formData.city].filter(Boolean).map((s) => s.trim()).join(', ') || null,
+      notes: formData.notes?.trim() || null,
+    };
+
     setLoading(true);
     try {
       if (isEdit) {
-        await leadApi.updateLead(lead.id, formData);
+        await leadApi.updateLead(lead.id, payload);
       } else {
-        await leadApi.createLead(formData);
+        await leadApi.createLead(payload);
       }
       onSuccess?.();
       onClose();
     } catch (err) {
-      const status = err.response?.status;
-      const data = err.response?.data;
-      if (status === 409) {
-        setErrorMsg(data?.message || 'Khách hàng tiềm năng bị trùng lặp Số điện thoại hoặc Email.');
-      } else {
-        setErrorMsg(data?.message || 'Có lỗi xảy ra khi lưu thông tin. Vui lòng thử lại.');
-      }
+      const message =
+        err?.message ||
+        err?.response?.data?.message ||
+        err?.error ||
+        (typeof err === 'string' ? err : 'Có lỗi xảy ra khi lưu thông tin. Vui lòng kiểm tra lại.');
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }

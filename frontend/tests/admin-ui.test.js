@@ -1,16 +1,16 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
-// Mô phỏng danh mục MENU_ITEMS của Sidebar
+// Mô phỏng danh mục MENU_ITEMS của Sidebar chuẩn theo SRS 2.1
 const MENU_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'] },
-  { label: 'Leads', path: '/leads', roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'] },
-  { label: 'Opportunities', path: '/opportunities', roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'] },
-  { label: 'Orders', path: '/orders', roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'] },
-  { label: 'Products', path: '/products', roles: ['SALE_MANAGER', 'ADMIN'] },
-  { label: 'Campaigns', path: '/campaigns', roles: ['SALE_MANAGER', 'ADMIN'] },
-  { label: 'Forecast', path: '/forecast/setup', roles: ['SALE_MANAGER', 'ADMIN'] },
-  { label: 'Reports', path: '/reports', roles: ['SALE_MANAGER', 'ADMIN'] },
+  { label: 'Leads', path: '/leads', roles: ['SALESMAN'] },
+  { label: 'Opportunities', path: '/opportunities', roles: ['SALESMAN'] },
+  { label: 'Orders', path: '/orders', roles: ['SALESMAN'] },
+  { label: 'Products', path: '/products', roles: ['SALE_MANAGER'] },
+  { label: 'Campaigns', path: '/campaigns', roles: ['SALE_MANAGER'] },
+  { label: 'Forecast', path: '/forecast/setup', roles: ['SALE_MANAGER'] },
+  { label: 'Reports', path: '/reports', roles: ['SALE_MANAGER'] },
   { label: 'User Mgmt', path: '/admin/users', roles: ['ADMIN'] },
 ];
 
@@ -31,20 +31,24 @@ function formatCountdown(remainingSeconds) {
 
 describe('Frontend Admin UI & RBAC Unit Tests', () => {
   describe('Sidebar RBAC Navigation (SRS 2.1 & SRS 4.1)', () => {
-    it('vai trò ADMIN phải nhìn thấy toàn bộ 9 mục menu bao gồm Quản trị User', () => {
+    it('vai trò ADMIN chỉ nhìn thấy 2 mục menu gồm Dashboard và Quản trị User', () => {
       const items = getAccessibleMenuItems('ADMIN');
-      assert.strictEqual(items.length, 9);
+      assert.strictEqual(items.length, 2);
       const labels = items.map((i) => i.label);
-      assert.ok(labels.includes('User Mgmt'));
-      assert.ok(labels.includes('Products'));
-      assert.ok(labels.includes('Forecast'));
+      assert.deepStrictEqual(labels, ['Dashboard', 'User Mgmt']);
+      assert.ok(!labels.includes('Leads'), 'Admin không được hiển thị Leads');
+      assert.ok(!labels.includes('Opportunities'), 'Admin không được hiển thị Opportunities');
+      assert.ok(!labels.includes('Products'), 'Admin không được hiển thị Products');
+      assert.ok(!labels.includes('Campaigns'), 'Admin không được hiển thị Campaigns');
     });
 
-    it('vai trò SALE_MANAGER phải nhìn thấy 8 mục menu và KHÔNG có User Mgmt', () => {
+    it('vai trò SALE_MANAGER chỉ nhìn thấy 5 mục menu quản lý và KHÔNG có Leads/User Mgmt', () => {
       const items = getAccessibleMenuItems('SALE_MANAGER');
-      assert.strictEqual(items.length, 8);
+      assert.strictEqual(items.length, 5);
       const labels = items.map((i) => i.label);
       assert.ok(!labels.includes('User Mgmt'), 'Manager không được thấy menu User Mgmt');
+      assert.ok(!labels.includes('Leads'), 'Manager không được thấy menu Leads');
+      assert.ok(!labels.includes('Opportunities'), 'Manager không được thấy menu Opportunities');
       assert.ok(labels.includes('Products'));
       assert.ok(labels.includes('Campaigns'));
       assert.ok(labels.includes('Forecast'));
@@ -63,17 +67,22 @@ describe('Frontend Admin UI & RBAC Unit Tests', () => {
   });
 
   describe('RoleRoute RBAC Authorization Guards', () => {
-    it('cho phép ADMIN truy cập các route quản trị và vận hành', () => {
+    it('cho phép ADMIN truy cập các route quản trị của ADMIN và chặn route bán hàng', () => {
       assert.strictEqual(checkRoleAccess('ADMIN', ['ADMIN']), true);
-      assert.strictEqual(checkRoleAccess('ADMIN', ['SALE_MANAGER', 'ADMIN']), true);
+      assert.strictEqual(checkRoleAccess('ADMIN', ['SALESMAN']), false);
+      assert.strictEqual(checkRoleAccess('ADMIN', ['SALE_MANAGER']), false);
     });
 
-    it('chặn SALE_MANAGER truy cập route của ADMIN', () => {
+    it('chặn SALE_MANAGER truy cập route của ADMIN và của SALESMAN', () => {
       assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['ADMIN']), false);
+      assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['SALESMAN']), false);
+      assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['SALE_MANAGER']), true);
     });
 
-    it('chặn SALESMAN truy cập route quản lý Products và Campaigns', () => {
-      assert.strictEqual(checkRoleAccess('SALESMAN', ['SALE_MANAGER', 'ADMIN']), false);
+    it('chặn SALESMAN truy cập route của SALE_MANAGER và của ADMIN', () => {
+      assert.strictEqual(checkRoleAccess('SALESMAN', ['ADMIN']), false);
+      assert.strictEqual(checkRoleAccess('SALESMAN', ['SALE_MANAGER']), false);
+      assert.strictEqual(checkRoleAccess('SALESMAN', ['SALESMAN']), true);
     });
   });
 

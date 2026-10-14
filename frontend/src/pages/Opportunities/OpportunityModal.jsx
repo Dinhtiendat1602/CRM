@@ -60,9 +60,9 @@ export default function OpportunityModal({
         ]);
 
         if (isMounted) {
-          setLeads(leadRes.data?.data || leadRes.data || []);
-          setProducts(prodRes.data?.products || prodRes.data?.data || []);
-          setStatuses(statusRes.data?.data || statusRes.data || []);
+          setLeads(leadRes.data?.data || leadRes.data || leadRes.leads || []);
+          setProducts(prodRes.products || prodRes.data?.products || prodRes.data || []);
+          setStatuses(statusRes.data?.data || statusRes.data || statusRes.statuses || []);
         }
       } catch (err) {
         console.error('Lỗi nạp dữ liệu ban đầu cho Opportunity Modal:', err);

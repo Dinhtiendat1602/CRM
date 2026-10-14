@@ -10,6 +10,7 @@ import {
   Mail,
   UserCheck,
   UserX,
+  Trash2,
 } from 'lucide-react';
 import adminApi from '../../api/adminApi';
 import { useAuth } from '../../context/authContextDef';
@@ -50,6 +51,11 @@ export default function UserManagement() {
   const [confirmStatusOpen, setConfirmStatusOpen] = useState(false);
   const [userToToggleStatus, setUserToToggleStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
+
+  // State xác nhận xóa user (SRS 2.1)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Form tạo user mới
   const [createUserForm, setCreateUserForm] = useState({
@@ -219,6 +225,50 @@ export default function UserManagement() {
     }
   };
 
+  // Mở modal xác nhận xóa tài khoản nhân viên (SRS 2.1)
+  const promptDeleteUser = (u) => {
+    if (u.id === currentUser?.id) {
+      setAlertInfo({
+        type: 'error',
+        message: 'Bạn không thể tự xóa tài khoản quản trị của chính mình.',
+      });
+      return;
+    }
+    if (u.username?.toLowerCase() === 'admin') {
+      setAlertInfo({
+        type: 'error',
+        message: 'Không thể xóa tài khoản Quản trị viên hệ thống mặc định (admin).',
+      });
+      return;
+    }
+    setUserToDelete(u);
+    setConfirmDeleteOpen(true);
+  };
+
+  // Xác nhận thực hiện xóa tài khoản
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setDeleteLoading(true);
+    try {
+      await adminApi.deleteUser(userToDelete.id);
+      setAlertInfo({
+        type: 'success',
+        message: `Đã xóa tài khoản "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) thành công!`,
+      });
+      setConfirmDeleteOpen(false);
+      setUserToDelete(null);
+      setLoading(true);
+      setReloadKey((k) => k + 1);
+    } catch (err) {
+      setAlertInfo({
+        type: 'error',
+        message: err?.message || 'Không thể xóa tài khoản người dùng',
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   // Đổi role trực tiếp trên dropdown của dòng
   const handleChangeRole = async (targetUser, newRoleId) => {
     try {
@@ -274,6 +324,20 @@ export default function UserManagement() {
         return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       default:
         return 'bg-slate-100 text-slate-800 border-slate-200';
+    }
+  };
+
+  // Nhãn hiển thị tiếng Việt chi tiết cho vai trò (SRS 2.1)
+  const getRoleLabel = (roleName) => {
+    switch (roleName) {
+      case 'ADMIN':
+        return 'Quản trị viên (ADMIN)';
+      case 'SALE_MANAGER':
+        return 'Quản lý bán hàng (SALE_MANAGER)';
+      case 'SALESMAN':
+        return 'Nhân viên bán hàng (SALESMAN)';
+      default:
+        return roleName || 'Chưa gán vai trò';
     }
   };
 
@@ -372,12 +436,12 @@ export default function UserManagement() {
               setSelectedRole(e.target.value);
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[170px]"
           >
             <option value="">Tất cả vai trò</option>
             {roles.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.role_name}
+                {getRoleLabel(r.role_name || r.name)}
               </option>
             ))}
           </select>
@@ -480,13 +544,13 @@ export default function UserManagement() {
                           value={u.role_id}
                           disabled={isCurrent}
                           onChange={(e) => handleChangeRole(u, e.target.value)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border cursor-pointer ${getRoleBadge(
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border cursor-pointer min-w-[190px] shadow-2xs ${getRoleBadge(
                             u.role_name
                           )} disabled:opacity-70 disabled:cursor-not-allowed`}
                         >
                           {roles.map((r) => (
-                            <option key={r.id} value={r.id}>
-                              {r.role_name}
+                            <option key={r.id} value={r.id} className="bg-white text-slate-900 font-medium py-1">
+                              {getRoleLabel(r.role_name || r.name)}
                             </option>
                           ))}
                         </select>
@@ -530,22 +594,40 @@ export default function UserManagement() {
                         {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—'}
                       </td>
 
-                      {/* Actions: Reset Password */}
+                      {/* Actions: Reset Password & Delete User */}
                       <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedUserForReset(u);
-                            setResetPwModalOpen(true);
-                            setResetPwError(null);
-                            setResetPwForm({ newPassword: '' });
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-100 hover:text-blue-600 transition-colors cursor-pointer"
-                          title="Đặt lại mật khẩu trực tiếp"
-                        >
-                          <KeyRound className="h-3.5 w-3.5 text-amber-600" />
-                          <span>Reset pass</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedUserForReset(u);
+                              setResetPwModalOpen(true);
+                              setResetPwError(null);
+                              setResetPwForm({ newPassword: '' });
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-100 hover:text-blue-600 transition-colors cursor-pointer"
+                            title="Đặt lại mật khẩu trực tiếp"
+                          >
+                            <KeyRound className="h-3.5 w-3.5 text-amber-600" />
+                            <span>Reset pass</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => promptDeleteUser(u)}
+                            disabled={isCurrent || u.username?.toLowerCase() === 'admin'}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            title={
+                              isCurrent
+                                ? 'Không thể xóa tài khoản của chính bạn'
+                                : u.username?.toLowerCase() === 'admin'
+                                ? 'Không thể xóa tài khoản admin mặc định'
+                                : 'Xóa tài khoản nhân viên'
+                            }
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-red-600" />
+                            <span>Xóa</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -657,7 +739,7 @@ export default function UserManagement() {
             >
               {roles.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {r.role_name} — {r.description || 'Quyền hạn hệ thống'}
+                  {getRoleLabel(r.role_name || r.name)} — {r.description || 'Quyền hạn hệ thống'}
                 </option>
               ))}
             </select>
@@ -744,6 +826,28 @@ export default function UserManagement() {
         }
         confirmText={userToToggleStatus?.is_active ? 'Khóa tài khoản' : 'Kích hoạt ngay'}
         isDangerous={userToToggleStatus?.is_active}
+      />
+
+      {/* Confirm Dialog: Xóa vĩnh viễn tài khoản nhân viên (SRS 2.1) */}
+      <ConfirmDialog
+        isOpen={confirmDeleteOpen}
+        onClose={() => {
+          if (!deleteLoading) {
+            setConfirmDeleteOpen(false);
+            setUserToDelete(null);
+          }
+        }}
+        onConfirm={handleConfirmDeleteUser}
+        loading={deleteLoading}
+        title="Xác nhận xóa tài khoản nhân viên"
+        message={
+          userToDelete
+            ? `Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) khỏi hệ thống Zen CRM? Thao tác này không thể hoàn tác.`
+            : ''
+        }
+        confirmText="Xác nhận xóa"
+        cancelText="Hủy bỏ"
+        isDangerous={true}
       />
     </div>
   );

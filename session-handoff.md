@@ -4,12 +4,53 @@
 
 ## Current Objective
 
-- Goal: Triển khai tính năng `feat-013` (Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up - Opportunities UI) và chuẩn bị chuyển giao sang `feat-014` (Backend Chốt đơn hàng bằng Database Transaction - Make an Order).
-- Current status: `feat-013` HOÀN THÀNH (100% Definition of Done đạt chuẩn). Đạt cột mốc 13/20 tính năng hoàn thành (65% toàn bộ hệ thống Zen CRM).
+- Goal: Hoàn thành `feat-014` (Backend Chốt đơn hàng bằng Database Transaction - Make an Order) và sẵn sàng chuyển sang `feat-015` (Frontend Màn hình Chốt đơn & Quản lý Đơn hàng - Make Order & Orders UI).
+- Current status: `feat-014` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 14/20 tính năng hoàn thành (70% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
 
-## Completed This Session
-
+- [x] **`feat-014`: Backend Chốt đơn hàng bằng Database Transaction (Make an Order theo SRS 3.12, BR-03, BR-07):**
+  - **Controller & Router:**
+    - [backend/src/controllers/order.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/order.controller.js)
+    - [backend/src/routes/order.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/order.routes.js)
+    - [backend/src/routes/opportunity.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/opportunity.routes.js)
+    - [backend/src/app.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/app.js) (mount `/api/orders`)
+  - **Nghiệp vụ Transaction ACID:**
+    - Khóa dòng đồng thời `opportunities` và `products` bằng `SELECT ... FOR UPDATE` triệt tiêu race condition.
+    - Kiểm tra tồn kho tự động (BR-03, SRS 3.12, AC-08): Nếu thiếu tồn kho, kích hoạt `ROLLBACK` và trả về HTTP 400 kèm số lượng cụ thể, bảo toàn nguyên vẹn CSDL.
+    - Tạo bản ghi trong `orders`: sinh mã `order_code` định dạng `ORD-YYYYMMDD-XXXX`, bảo lưu `unit_price`, tính `total_amount`, lưu `payment_info` và `shipping_address` bắt buộc theo SRS 3.12.3 REQ-1.
+    - Trừ tồn kho sản phẩm tự động, cập nhật cơ hội sang `ORDERED`, ghi nhận 1 bản ghi `follow_ups` chốt đơn.
+    - Chặn chốt đơn lần 2 đối với cơ hội đã `ORDERED` (quan hệ 1-1).
+    - Chặn xóa cơ hội đã chuyển thành đơn hàng `ORDERED` (SRS 3.10) trả về HTTP 400.
+  - **Quản lý đơn hàng:**
+    - `GET /api/orders`: Phân trang 20 dòng chuẩn BR-03, tìm kiếm theo mã/tên KH/tên SP, lọc theo khoảng ngày BR-05, thống kê tổng doanh thu và số đơn.
+    - `GET /api/orders/:id`: Chi tiết đơn hàng theo ID hoặc mã đơn.
+    - Phân quyền RBAC bảo vệ toàn bộ endpoints cho 3 vai trò `SALESMAN`, `SALE_MANAGER`, `ADMIN`.
+  - **Đồng bộ hóa tài khoản thật trong Database:**
+    - Hệ thống kiểm thử tự động nhận diện và sử dụng chính xác 3 tài khoản THẬT đang có trong database của người dùng (`admin1` / pass `11111111`, `manager1` / pass `22222222`, `sale1` / pass `11111111`), tuyệt đối không ghi đè hay thay đổi dữ liệu của người dùng.
+  - **Kiểm thử toàn hệ thống:**
+    - 163/163 tests PASS 100% (105 backend tests + 58 frontend tests).
+    - Vite build thành công, 0 lỗi linter.
+- [x] **Khắc phục lỗi Foreign Key `leads_assigned_to_fkey` và Dropdown Sản Phẩm trong Cơ Hội:**
+  - **Lỗi 1 (Thêm Lead bị vi phạm khóa ngoại `leads_assigned_to_fkey`):**
+    - Đã xác thực an toàn ID người dùng phụ trách (`assigned_to`) và chiến dịch (`campaign_id`) trong `lead.controller.js` trước khi lưu vào CSDL; nâng cấp `auth.middleware.js` kiểm tra tài khoản còn tồn tại và active.
+  - **Lỗi 2 (Dropdown "Sản phẩm quan tâm" bị rỗng trong Modal Cơ hội):**
+    - Sửa `prodRes.data?.products` thành `prodRes.products || prodRes.data?.products || []` trong [OpportunityModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityModal.jsx) do `axiosClient` đã unbox `response.data`.
+- [x] **Khắc phục triệt để lỗi Màn hình trắng khi đăng nhập Manager (`SALE_MANAGER`):**
+  - **Nguyên nhân:** Thiếu import `Package` từ `lucide-react` trong [Dashboard.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Dashboard/Dashboard.jsx) ở nhánh KPI của Manager (`currentRole === 'SALE_MANAGER'`), gây `ReferenceError: Package is not defined` làm crash React tree dẫn đến màn hình trắng.
+  - **Khắc phục:** Đã import `Package`, sửa nhãn badge phân quyền trong Dashboard, và bổ sung component [ErrorBoundary.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Common/ErrorBoundary.jsx) bọc ngoài [App.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/App.jsx) để chống trắng màn hình trong toàn ứng dụng.
+- [x] **Điều chỉnh phân quyền hiển thị theo Role (RBAC Visibility Control chuẩn SRS 2.1):**
+  - **Nguyên tắc:** Role nào không quản lý phân hệ nào thì **tuyệt đối không được hiển thị lên**:
+    - `ADMIN` (Quản trị viên): CHỈ hiển thị `Dashboard` và `User Mgmt` (`/admin/users`). Tuyệt đối **ẨN** khỏi Sidebar và cấm Route: `Leads`, `Opportunities`, `Orders`, `Products`, `Campaigns`, `Forecast`, `Reports`.
+    - `SALE_MANAGER` (Quản lý bán hàng): CHỈ hiển thị `Dashboard`, `Products`, `Campaigns`, `Forecast`, `Reports`. Tuyệt đối **ẨN** khỏi Sidebar và cấm Route: `User Mgmt` và các mục bán hàng trực tiếp `Leads`, `Opportunities`, `Orders`.
+    - `SALESMAN` (Nhân viên bán hàng): CHỈ hiển thị `Dashboard`, `Leads`, `Opportunities`, `Orders`. Tuyệt đối **ẨN** `Products`, `Campaigns`, `Forecast`, `Reports`, `User Mgmt`.
+  - Chuẩn hóa vai trò: `currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase()`.
+  - Cập nhật `Dashboard.jsx`: Khối "Chức năng Nghiệp vụ Được Phép Quản Lý" và KPI Cards tự động hiển thị độc lập đúng theo vai trò.
+- [x] **Sửa lỗi hiển thị chữ vai trò trong Dropdown phân quyền (`UserManagement.jsx`):**
+  - Backend `user.controller.js` hàm `getRoles`: `SELECT id, name, name AS role_name, description FROM roles`.
+  - Frontend `UserManagement.jsx`: Hàm `getRoleLabel` hiển thị nhãn tiếng Việt rõ ràng (`Quản trị viên (ADMIN)`, `Quản lý bán hàng (SALE_MANAGER)`, `Nhân viên bán hàng (SALESMAN)`), cấu hình `min-w-[190px]` và padding cho select, giải quyết triệt để lỗi dropdown rỗng chữ.
+- [x] **Sửa chức năng Thêm khách hàng tiềm năng (`LeadModal.jsx` & `lead.controller.js`):**
+  - Backend `lead.controller.js`: Xử lý `cleanDob` để chuỗi rỗng chuyển thành `null` (tránh lỗi `invalid input syntax for type date: ""`), nhận cả `career` hoặc `title`.
+  - Frontend `LeadModal.jsx`: Chuẩn hóa payload sạch sẽ khi submit, hiển thị thông báo lỗi rõ ràng từ response server, sửa `handleCheckDuplicate` kiểm tra đúng `res.isDuplicate || res.data?.isDuplicate` để cảnh báo trùng lặp realtime.
 - [x] Xây dựng Service API `frontend/src/api/oppApi.js` kết nối toàn diện các endpoints:
   - `getOpportunities`, `getOpportunityById`, `getStatuses`, `checkDuplicate`, `createOpportunity`, `updateOpportunity`, `deleteOpportunity`, `addFollowUp`, `getFollowUps`.
 - [x] Xây dựng `OpportunityModal.jsx`:

@@ -163,27 +163,28 @@ export default function Login() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickLogin('admin')}
+                onClick={() => handleQuickLogin('admin1')}
                 className="py-1.5 px-2 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               >
                 Admin
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin('manager')}
+                onClick={() => handleQuickLogin('manager1')}
                 className="py-1.5 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               >
                 Manager
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickLogin('salesman')}
+                onClick={() => handleQuickLogin('sale1')}
                 className="py-1.5 px-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               >
                 Salesman
               </button>
             </div>
           </div>
+
         </div>
 
         <div className="mt-6 text-center text-xs text-slate-500 flex items-center justify-center gap-1.5">

@@ -4,16 +4,88 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 14:21
-**Active Feature:** `feat-013` - Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)
-**Current Status:** HOÀN THÀNH 100% (13/20 tính năng đã nghiệm thu đạt chuẩn DoD - Đạt 65% toàn bộ hệ thống Zen CRM)
-**Next Feature:** `feat-014` - Backend Chốt đơn hàng bằng Database Transaction (Make an Order)
+**Last Updated:** 2026-10-14 16:50
+**Active Task:** feat-014 - Backend Chốt đơn hàng bằng Database Transaction (Make an Order)
+**Current Status:** HOÀN THÀNH 100% (163/163 tests pass: 105 backend + 58 frontend, build thành công, 0 lint errors)
+**Next Feature:** `feat-015` - Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **feat-014: Backend Chốt đơn hàng bằng Database Transaction (Make an Order theo SRS 3.12, BR-03, BR-07):**
+  - **Kiến trúc & Transaction ACID (`order.controller.js`):**
+    - Hiện thực hóa `makeOrder` qua `POST /api/opportunities/:id/make-order` và `POST /api/orders` sử dụng PostgreSQL Client Transaction (`BEGIN ... COMMIT / ROLLBACK`).
+    - Khóa dòng Row-level Locking (`SELECT ... FOR UPDATE`) đồng thời trên bảng `opportunities` và `products` để loại bỏ 100% nguy cơ race-condition.
+    - Kiểm tra tồn kho tự động (BR-03, SRS 3.12, AC-08): Nếu tồn kho `product.stock_qty < requested_quantity`, hệ thống kích hoạt `ROLLBACK`, trả về HTTP 400 kèm thông tin tồn kho hiện tại và yêu cầu, đảm bảo nguyên vẹn dữ liệu (tồn kho không bị trừ, cơ hội không đổi trạng thái).
+    - Tạo bản ghi đơn hàng mới vào bảng `orders`:
+      - Tự sinh mã đơn hàng duy nhất `order_code` theo chuẩn CRM `ORD-YYYYMMDD-XXXX`.
+      - Bảo lưu đơn giá niêm yết tại thời điểm chốt (`unit_price`) và tính tổng giá trị (`total_amount = quantity * unit_price`).
+      - Bắt buộc lưu thông tin thanh toán (`payment_info`) và thông tin giao hàng (`shipping_address`) theo SRS 3.12.3 REQ-1.
+    - Tự động trừ số lượng tồn kho sản phẩm (`UPDATE products SET stock_qty = stock_qty - $1`).
+    - Cập nhật trạng thái cơ hội sang `ORDERED` (SRS 3.12.1).
+    - Tự động ghi 1 bản ghi Follow-up (SRS 3.11) ghi nhận sự kiện chốt đơn.
+    - Chặn chốt đơn lần thứ 2 đối với cơ hội đã `ORDERED` (bảo toàn quan hệ 1-1).
+    - Chặn xóa cơ hội đã chuyển thành đơn hàng `ORDERED` (SRS 3.10) trả về HTTP 400.
+  - **Quản lý đơn hàng (`order.controller.js` & `order.routes.js`):**
+    - `GET /api/orders`: Danh sách đơn hàng phân trang chuẩn 20 dòng (BR-03), tìm kiếm đa năng theo mã đơn/tên khách hàng/tên sản phẩm, lọc theo khoảng ngày chốt đơn (BR-05), thống kê tổng số đơn và tổng doanh thu.
+    - `GET /api/orders/:id`: Chi tiết đơn hàng theo ID hoặc `order_code` kèm đầy đủ thông tin Lead, Sản phẩm và Cơ hội.
+    - Phân quyền RBAC chặt chẽ cho 3 vai trò: `SALESMAN`, `SALE_MANAGER`, `ADMIN`.
+  - **Bộ kiểm thử & Đồng bộ tài khoản thật:**
+    - Tạo `backend/tests/order.test.js` với 15 bài integration tests kiểm thử toàn diện mọi tình huống nghiệp vụ và biên.
+    - Tạo `backend/tests/helpers/test-auth.js` giúp test suite tự động nhận diện và sử dụng chính 3 tài khoản THẬT của người dùng trong database (`admin1` / pass `11111111`, `manager1` / pass `22222222`, `sale1` / pass `11111111`), giữ nguyên 100% dữ liệu thật của người dùng.
+    - **Kết quả kiểm thử toàn hệ thống:** 163/163 tests PASS 100% (105 backend + 58 frontend), Vite build thành công trong 250ms, 0 lỗi linter.
+
+- [x] **Bổ sung tính năng Admin Xóa tài khoản nhân viên (giữ nguyên tính năng Khóa tài khoản):**
+  - **Backend (`user.controller.js` & `user.routes.js`):**
+    - API `DELETE /api/admin/users/:id` có phân quyền chặt chẽ `authorizeRoles('ADMIN')`.
+    - Bảo vệ an toàn (Guards): Chặn Admin tự xóa tài khoản của chính mình (`req.user.id === targetId`), chặn xóa tài khoản root mặc định (`username === 'admin'`).
+    - Nhờ thiết kế CSDL toàn bộ khóa ngoại trỏ tới `users(id)` đều dùng `ON DELETE SET NULL`, khi xóa nhân viên thì các dữ liệu liên quan (Leads, Campaigns, Opportunities, Orders, Forecasts) tự động chuyển sang `NULL` an toàn, không bị lỗi ràng buộc dữ liệu.
+  - **Frontend (`UserManagement.jsx` & `adminApi.js`):**
+    - Giữ nguyên 100% nút và chức năng **Khóa/Mở khóa tài khoản** (`u.is_active` toggle button ở cột Trạng thái).
+    - Cột Thao tác: Bổ sung nút **"Xóa"** (icon `Trash2`, màu đỏ, disabled khi là tài khoản bản thân hoặc admin mặc định).
+    - Tích hợp `ConfirmDialog` xác nhận xóa tài khoản nguy hiểm (`isDangerous={true}`) với thông báo rõ ràng trước khi xóa.
+  - **Kiểm thử:** 90/90 backend tests pass (bao gồm 3 unit tests mới cho `DELETE user`), 58/58 frontend tests pass (bao gồm unit tests cho Admin User Deletion Guard).
+
+- [x] **Khắc phục lỗi Foreign Key `leads_assigned_to_fkey` và Dropdown Sản Phẩm trong Cơ Hội:**
+  - **Lỗi 1 (`leads_assigned_to_fkey` khi thêm Lead mới):**
+    - *Nguyên nhân:* Khi người dùng thêm khách tiềm năng, backend gán `assigned_to = req.user?.id`. Nếu phiên đăng nhập mang user ID cũ (hoặc tài khoản đã bị thay đổi sau khi reseed database), PostgreSQL sẽ báo vi phạm ràng buộc khóa ngoại `leads_assigned_to_fkey` vì ID người dùng không tồn tại trong bảng `users`.
+    - *Khắc phục:* Trong `lead.controller.js` (cả `createLead` và `updateLead`), đã bổ sung câu truy vấn kiểm tra xác thực ID người dùng và chiến dịch tồn tại trước khi gán (`SELECT id FROM users WHERE id = $1`), nếu không tồn tại sẽ an toàn gán `null`. Đồng thời nâng cấp `auth.middleware.js` kiểm tra tài khoản còn tồn tại và active trong CSDL để tự động thu hồi token cũ.
+  - **Lỗi 2 (Dropdown "Sản phẩm quan tâm" bị rỗng trong Modal Cơ hội):**
+    - *Nguyên nhân:* `OpportunityModal.jsx` trích xuất `prodRes.data?.products`. Do `axiosClient.interceptors.response` đã tự động unbox `response.data`, kết quả trả về `prodRes` là `{ success: true, products: [...] }`, dẫn đến `prodRes.data` bị `undefined` và danh sách sản phẩm thành mảng rỗng `[]`.
+    - *Khắc phục:* Cập nhật thành `prodRes.products || prodRes.data?.products || []`, giúp nạp đầy đủ toàn bộ sản phẩm vào thẻ `<select>` kèm mã SP, tên, đơn giá và số lượng tồn kho.
+
+- [x] **Khắc phục triệt để lỗi Màn hình trắng khi đăng nhập Manager (`SALE_MANAGER`):**
+  - **Nguyên nhân cốt lõi (Root Cause):** Trong `Dashboard.jsx`, khi xây dựng hàm `getRoleKPIs()` cho vai trò `SALE_MANAGER`, KPI "Danh Mục Sản Phẩm Kho" sử dụng `icon: Package`. Tuy nhiên ở đầu file `Dashboard.jsx`, icon `Package` chưa được import từ `lucide-react`. Khi tài khoản `manager` đăng nhập, React cố gắng render `<Icon className="h-4 w-4" />` với `Icon = undefined`, dẫn đến `ReferenceError: Package is not defined`. Lỗi này làm crash toàn bộ cây component React và tạo ra màn hình trắng (Blank Screen).
+  - **Biện pháp xử lý & Phòng vệ (Fix & Resilience):**
+    1. Đã import bổ sung `Package` từ `lucide-react` trong `Dashboard.jsx`.
+    2. Cập nhật nhãn phân quyền thẻ Quick Action (`action.roles.includes('SALE_MANAGER') ? 'Chỉ Manager' : ...`) hiển thị chính xác thay vì nhầm 'Chỉ Admin'.
+    3. Tạo component `ErrorBoundary.jsx` bao bọc toàn bộ ứng dụng tại `App.jsx`, giúp hiển thị giao diện báo lỗi thân thiện kèm nút "Tải lại trang" / "Trang chủ" thay vì để màn hình trắng nếu có lỗi giao diện trong tương lai.
+
+- [x] **Tinh chỉnh Chức Năng Quản Lý Của Mỗi Role (RBAC Visibility Control chuẩn SRS 2.1):**
+  - **Quy tắc tuyệt đối:** Mỗi vai trò chỉ quản lý đúng phân hệ theo SRS 2.1, chức năng nào vai trò đó không quản lý thì **tuyệt đối không được hiển thị lên** (cả Sidebar, Routing, Dashboard KPIs và Quick Actions):
+    - `ADMIN` (Quản trị viên): CHỈ hiển thị và quản lý 2 phân hệ: **`Dashboard`** và **`User Mgmt`** (`/admin/users`). Tuyệt đối **ẨN HOÀN TOÀN** và cấm truy cập toàn bộ các phân hệ nghiệp vụ kinh doanh: `Leads`, `Opportunities`, `Orders`, `Products`, `Campaigns`, `Forecast`, `Reports`.
+    - `SALE_MANAGER` (Quản lý bán hàng): CHỈ hiển thị và quản lý 5 phân hệ: **`Dashboard`**, **`Products`** (`/products`), **`Campaigns`** (`/campaigns`), **`Forecast`** (`/forecast/setup`), **`Reports`** (`/reports`). Tuyệt đối **ẨN HOÀN TOÀN** và cấm truy cập `User Mgmt` (chỉ Admin) cũng như `Leads`, `Opportunities`, `Orders` (của nhân viên bán hàng).
+    - `SALESMAN` (Nhân viên bán hàng): CHỈ hiển thị và quản lý 4 phân hệ: **`Dashboard`**, **`Leads`** (`/leads`), **`Opportunities`** (`/opportunities`), **`Orders`** (`/orders`). Tuyệt đối **ẨN HOÀN TOÀN** `Products`, `Campaigns`, `Forecast`, `Reports`, `User Mgmt`.
+  - Chuẩn hóa xác định vai trò `currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase()` trên toàn bộ: `Sidebar.jsx`, `RoleRoute.jsx`, `Dashboard.jsx`.
+  - Nâng cấp `Dashboard.jsx`: Thẻ KPI và Quick Actions tách biệt rạch ròi 100% cho 3 vai trò (Admin: Quản trị tài khoản & nhân sự; Manager: Kho sản phẩm, Chiến dịch & Doanh số; Salesman: Khách tiềm năng, Cơ hội & Đơn hàng).
+
+- [x] **Sửa Lỗi Hiển Thị Vai Trò trong Dropdown Phân Quyền (`UserManagement.jsx`):**
+  - Backend `user.controller.js` hàm `getRoles`: Thêm alias `SELECT id, name, name AS role_name, description FROM roles` để tương thích 100% với frontend.
+  - Backend `auth.controller.js` hàm `login`: Trả về cả `role` và `role_name` trong user object.
+  - Frontend `UserManagement.jsx`:
+    - Tạo hàm `getRoleLabel`: hiển thị nhãn tiếng Việt rõ ràng, to đẹp (`Quản trị viên (ADMIN)`, `Quản lý bán hàng (SALE_MANAGER)`, `Nhân viên bán hàng (SALESMAN)`).
+    - Cập nhật cả 3 vị trí dropdown: Bộ lọc vai trò, Cột Gán vai trò trong bảng người dùng (chỗ bị lỗi rỗng chữ), và Modal Thêm nhân viên mới.
+    - Cấu hình style `min-w-[190px]` và padding hợp lý để chữ hiển thị rõ ràng, không bị co dúm.
+
+- [x] **Sửa Lỗi Chức Năng Thêm Khách Hàng Tiềm Năng (`LeadModal.jsx` & `lead.controller.js`):**
+  - Backend `lead.controller.js`: Xử lý `cleanDob = (date_of_birth && String(date_of_birth).trim() !== '') ? String(date_of_birth).trim() : null` để không bao giờ truyền chuỗi rỗng vào kiểu `DATE` của PostgreSQL; nhận cả `career` hoặc `title` (`cleanCareer = (career || req.body.title || '').trim() || null`).
+  - Frontend `LeadModal.jsx`:
+    - Chuẩn hóa payload sạch sẽ trước khi gửi API (gán `date_of_birth: formData.date_of_birth ? formData.date_of_birth : null`, map `career: formData.title || formData.career || null`, ghép địa chỉ `address`).
+    - Sửa xử lý lỗi trong `handleSubmit`: trích xuất thông báo lỗi chính xác từ `err?.message || err?.response?.data?.message || err?.error`.
+    - Sửa cơ chế phát hiện trùng lặp realtime `handleCheckDuplicate`: đọc đúng `res.isDuplicate || res.data?.isDuplicate` để hiển thị cảnh báo đỏ trực quan ngay dưới ô Email/SĐT khi người dùng rời chuột.
 
 - [x] **`feat-013` - Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)**
   - Xây dựng trọn bộ giao diện người dùng Quản lý Cơ hội bán hàng theo phong cách Zoho CRM đáp ứng 100% SRS 3.6 - 3.11:
@@ -184,8 +256,8 @@
 
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
-| `npm test` (trong `backend/`) | **PASS (70/70 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) + `lead.test.js` (15) + `product.test.js` (18) |
-| `npm test` (trong `frontend/`) | **PASS (45/45 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `leads-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `products-ui.test.js` (10 tests) + `user-management.test.js` (10 tests) |
-| `npm run lint` (trong `frontend/`) | **PASS (0 errors)** | Oxlint kiểm tra 43 files sạch sẽ |
-| `npm run build` (trong `frontend/`) | **PASS (built in 237ms)** | Vite production bundle hoàn tất |
-| `npm test` (tại thư mục gốc) | **PASS (115/115 tests passed toàn hệ thống)** | Chạy test backend (70) + test frontend (45) + lint frontend |
+| `npm test` (trong `backend/`) | **PASS (87/87 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) + `lead.test.js` (15) + `product.test.js` (18) + `opportunity.test.js` (17) |
+| `npm test` (trong `frontend/`) | **PASS (55/55 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `leads-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `products-ui.test.js` (10 tests) + `user-management.test.js` (10 tests) + `opportunities-ui.test.js` (10 tests) |
+| `npm run lint` (trong `frontend/`) | **PASS (0 errors)** | Oxlint kiểm tra 49 files sạch sẽ |
+| `npm run build` (trong `frontend/`) | **PASS (built in 230ms)** | Vite production bundle hoàn tất |
+| `npm test` (toàn hệ thống) | **PASS (142/142 tests passed 100%)** | 87 tests backend + 55 tests frontend đều thành công mỹ mãn |

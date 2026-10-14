@@ -36,41 +36,44 @@ export default function AppRoutes() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* Leads Module (All Roles - SRS 3.1 - 3.5) */}
-          <Route path="/leads" element={<LeadListPage />} />
-          <Route path="/leads/:id" element={<LeadDetailPage />} />
+          {/* Salesman Side Modules (SRS 2.1: Lead, Opportunity, Order Management - Only SALESMAN) */}
+          <Route element={<RoleRoute allowedRoles={['SALESMAN']} />}>
+            {/* Leads Module (SRS 3.1 - 3.5) */}
+            <Route path="/leads" element={<LeadListPage />} />
+            <Route path="/leads/:id" element={<LeadDetailPage />} />
 
-          {/* Opportunities Module (All Roles - SRS 3.6 - 3.11) */}
-          <Route path="/opportunities" element={<OpportunityListPage />} />
-          <Route path="/opportunities/:id" element={<OpportunityDetailPage />} />
+            {/* Opportunities Module (SRS 3.6 - 3.11) */}
+            <Route path="/opportunities" element={<OpportunityListPage />} />
+            <Route path="/opportunities/:id" element={<OpportunityDetailPage />} />
 
-          {/* Orders Module (All Roles) */}
-          <Route
-            path="/orders"
-            element={
-              <PlaceholderPage
-                title="Danh sách Đơn hàng (Orders)"
-                srsRef="SRS 3.12"
-                description="Quản lý hóa đơn đã chốt, bảo toàn giá bán và lịch sử giao hàng."
-                featureId="feat-015"
-              />
-            }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <PlaceholderPage
-                title="Chi tiết Đơn hàng"
-                srsRef="SRS 3.12"
-                description="Xem chi tiết hóa đơn xuất hàng, thông tin thanh toán và địa chỉ giao."
-                featureId="feat-015"
-              />
-            }
-          />
+            {/* Orders Module (SRS 3.12) */}
+            <Route
+              path="/orders"
+              element={
+                <PlaceholderPage
+                  title="Danh sách Đơn hàng (Orders)"
+                  srsRef="SRS 3.12"
+                  description="Quản lý hóa đơn đã chốt, bảo toàn giá bán và lịch sử giao hàng."
+                  featureId="feat-015"
+                />
+              }
+            />
+            <Route
+              path="/orders/:id"
+              element={
+                <PlaceholderPage
+                  title="Chi tiết Đơn hàng"
+                  srsRef="SRS 3.12"
+                  description="Xem chi tiết hóa đơn xuất hàng, thông tin thanh toán và địa chỉ giao."
+                  featureId="feat-015"
+                />
+              }
+            />
+          </Route>
 
-          {/* Manager & Admin Modules (RBAC Guard) */}
-          <Route element={<RoleRoute allowedRoles={['SALE_MANAGER', 'ADMIN']} />}>
-            {/* Products Module (Manager & Admin - SRS 3.15 - 3.17) */}
+          {/* Sale Manager Side Modules (SRS 2.1: Product, Campaign, Forecast, Reports - Only SALE_MANAGER) */}
+          <Route element={<RoleRoute allowedRoles={['SALE_MANAGER']} />}>
+            {/* Products Module (SRS 3.15 - 3.17) */}
             <Route path="/products" element={<ProductListPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route

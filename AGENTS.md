@@ -21,7 +21,9 @@ Before writing code (Trước khi bắt đầu viết code):
    - Nguyên tắc cốt lõi: [docs/design-docs/core-beliefs.md](file:///Users/zen/CNTT/Fullstack/internship/docs/design-docs/core-beliefs.md)
    - Quy chuẩn bảo mật: [docs/SECURITY.md](file:///Users/zen/CNTT/Fullstack/internship/docs/SECURITY.md)
    - Chiến lược kiểm thử: [docs/TESTING.md](file:///Users/zen/CNTT/Fullstack/internship/docs/TESTING.md)
-4. **Đọc `feature_list.json`**: Xem danh sách tính năng, trạng thái hiện tại (`status`) và các mối phụ thuộc (`dependencies`).
+4. **Đọc `feature_list.json` và `session-handoff`**:
+   - Xem danh sách tính năng, trạng thái hiện tại (`status`) và các mối phụ thuộc (`dependencies`) trong `feature_list.json`.
+   - Đọc file `session-handoff` để cập nhật ngữ cảnh, ghi chú và các công việc còn dở dang từ phiên làm việc trước.
 5. **Kiểm tra lịch sử commit gần nhất**: Chạy `git log --oneline -5` (nếu đã khởi tạo git).
 
 ## Working Rules - Nguyên tắc làm việc cốt lõi

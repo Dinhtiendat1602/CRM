@@ -24,6 +24,9 @@ export const adminApi = {
   // Đặt lại mật khẩu trực tiếp cho nhân viên
   resetUserPassword: (id, new_password) =>
     axiosClient.post(`/admin/users/${id}/reset-password`, { new_password }),
+
+  // Xóa tài khoản nhân viên (SRS 2.1)
+  deleteUser: (id) => axiosClient.delete(`/admin/users/${id}`),
 };
 
 export default adminApi;

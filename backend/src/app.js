@@ -29,6 +29,7 @@ app.use('/api/leads', require('./routes/lead.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/products', require('./routes/product.routes'));
 app.use('/api/opportunities', require('./routes/opportunity.routes'));
+app.use('/api/orders', require('./routes/order.routes'));
 
 // Global error handler
 app.use(require('./middlewares/error.middleware'));

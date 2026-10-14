@@ -76,7 +76,9 @@ exports.getUsers = async (req, res, next) => {
  */
 exports.getRoles = async (req, res, next) => {
   try {
-    const result = await db.query('SELECT id, name, description FROM roles ORDER BY id ASC;');
+    const result = await db.query(
+      'SELECT id, name, name AS role_name, description FROM roles ORDER BY id ASC;'
+    );
     return res.status(200).json({
       success: true,
       data: result.rows,
@@ -313,6 +315,70 @@ exports.resetUserPassword = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: `Đã đặt lại mật khẩu cho tài khoản "${userResult.rows[0].username}" thành công.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * SRS 2.1: Quản trị viên xóa tài khoản nhân viên (Delete user account)
+ * DELETE /api/admin/users/:id
+ */
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã người dùng không hợp lệ.',
+      });
+    }
+
+    // 1. Kiểm tra user có tồn tại
+    const userResult = await db.query(
+      `SELECT u.id, u.username, u.email, u.full_name, r.name AS role_name
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE u.id = $1;`,
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy người dùng để xóa.',
+      });
+    }
+
+    const targetUser = userResult.rows[0];
+
+    // 2. Bảo vệ: Admin không được tự xóa tài khoản của chính mình
+    if (req.user && req.user.id === userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bạn không thể tự xóa tài khoản quản trị của chính mình.',
+      });
+    }
+
+    // 3. Bảo vệ: Không cho phép xóa tài khoản gốc 'admin'
+    if (targetUser.username.toLowerCase() === 'admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'Không thể xóa tài khoản Quản trị viên hệ thống mặc định (admin).',
+      });
+    }
+
+    // 4. Xóa người dùng (các bảng liên quan có ON DELETE SET NULL sẽ tự động chuyển về NULL)
+    await db.query('DELETE FROM users WHERE id = $1;', [userId]);
+
+    return res.status(200).json({
+      success: true,
+      message: `Đã xóa tài khoản "${targetUser.username}" thành công.`,
+      data: {
+        id: targetUser.id,
+        username: targetUser.username,
+      },
     });
   } catch (error) {
     next(error);

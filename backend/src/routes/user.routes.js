@@ -17,5 +17,6 @@ router.post('/users', userController.createUser);
 router.patch('/users/:id/status', userController.updateUserStatus);
 router.patch('/users/:id/role', userController.updateUserRole);
 router.post('/users/:id/reset-password', userController.resetUserPassword);
+router.delete('/users/:id', userController.deleteUser);
 
 module.exports = router;

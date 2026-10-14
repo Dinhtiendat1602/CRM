@@ -10,6 +10,8 @@ import ResetPassword from '../pages/Auth/ResetPassword';
 import Forbidden from '../pages/Forbidden';
 import NotFound from '../pages/NotFound';
 import Dashboard from '../pages/Dashboard/Dashboard';
+import UserManagement from '../pages/Admin/UserManagement';
+import ProfilePage from '../pages/Profile/ProfilePage';
 import PlaceholderPage from '../pages/Common/PlaceholderPage';
 
 export default function AppRoutes() {
@@ -183,31 +185,11 @@ export default function AppRoutes() {
 
           {/* Admin Exclusive Modules (RBAC Guard) */}
           <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
-            <Route
-              path="/admin/users"
-              element={
-                <PlaceholderPage
-                  title="Quản trị Người dùng & Phân quyền (Users Management)"
-                  srsRef="SRS 2.1"
-                  description="Quản lý danh sách nhân viên, gán vai trò, Bật/Tắt kích hoạt tài khoản và đặt lại mật khẩu."
-                  featureId="feat-007"
-                />
-              }
-            />
+            <Route path="/admin/users" element={<UserManagement />} />
           </Route>
 
           {/* Profile Route for all logged in users */}
-          <Route
-            path="/profile"
-            element={
-              <PlaceholderPage
-                title="Hồ sơ Cá nhân & Đổi mật khẩu"
-                srsRef="SRS 3.13"
-                description="Cập nhật họ tên, số điện thoại và đổi mật khẩu tài khoản đang đăng nhập."
-                featureId="feat-007"
-              />
-            }
-          />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
 

@@ -72,8 +72,8 @@
         "feat-005",
         "feat-006"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Built UserManagement (/admin/users) adhering to SRS 2.1: 20-row standard Pagination (BR-03), keyword SearchInput (debounced 300ms), role and status filters, status toggle switch with confirmation dialog (admin self-lock prevention enforced), inline role update dropdown, CreateUserModal with default password notice (11111111), and ResetPasswordModal for direct admin overrides. Built ProfilePage (/profile) adhering to SRS 3.13 for personal info updates and password changes. Created reusable components Pagination, SearchInput, Modal, ConfirmDialog and API services authApi & adminApi. Verified with 10 unit tests in frontend/tests/user-management.test.js (20/20 total frontend tests passed, 57/57 total system tests passed), 0 oxlint warnings/errors on 31 files, and clean Vite production build."
     },
     {
       "id": "feat-008",

@@ -21,8 +21,8 @@
       "dependencies": [
         "feat-001"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "PostgreSQL schema created 10 tables DDL (roles, users, campaigns, product_categories, products, leads, opportunities, follow_ups, orders, sale_forecasts) + 10 performance indexes. Seed data populated 3 roles, 3 users (password 11111111 bcrypt-hashed), 1 campaign, 2 categories, 2 products, 2 leads, 1 opp, 1 follow-up, 12 months forecast. Verified with 6/6 passing automated tests in backend/tests/db.test.js."
     },
     {
       "id": "feat-003",

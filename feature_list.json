@@ -125,8 +125,8 @@
         "feat-008",
         "feat-010"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành 100% module Backend Quản lý Cơ hội bán hàng & Nhật ký Chăm sóc (Opportunities & Follow-up Log) theo đúng đặc tả SRS 3.6 - 3.11 và các Business Rules: 1. GET /api/opportunities: Phân trang đúng 20 dòng theo BR-03 (SRS 3.7.3 REQ-1), tìm kiếm đa năng theo tên Lead hoặc tên/mã Sản phẩm (SRS 3.8), sắp xếp theo ngày tạo (BR-04, SRS 3.7.3 REQ-2), lọc theo khoảng ngày (BR-05, SRS 3.7.3 REQ-3), lọc theo trạng thái status và lead_id/product_id, tính nhẩm giá trị ước tính estimated_value và đếm số lượt follow_ups_count. 2. GET /api/opportunities/:id: Trả về chi tiết cơ hội, thông tin đầy đủ của Lead, Sản phẩm (kèm danh mục, giá bán, tồn kho), danh sách toàn bộ lịch sử Follow-up theo dòng thời gian và thông tin đơn hàng nếu đã chốt (SRS 3.7.3 REQ-4). 3. POST /api/opportunities: Tạo cơ hội mới kiểm tra bắt buộc lead_id, product_id, quantity > 0 (BR-01, BR-06); tích hợp cơ chế phát hiện trùng lặp BR-02 (SRS 3.6.2 REQ-4) trả về HTTP 409 Conflict khi khách hàng đang có cơ hội mở cho sản phẩm đó; hỗ trợ GET /api/opportunities/check-duplicate kiểm tra realtime. 4. PUT /api/opportunities/:id: Cập nhật số lượng, ngày dự kiến, ghi chú, trạng thái; bảo vệ không cho đổi khách hàng hoặc sản phẩm nếu đã chốt đơn (SRS 3.9). 5. DELETE /api/opportunities/:id: Xóa cơ hội khỏi CSDL (SRS 3.10), tự động dọn sạch các bản ghi follow-ups liên quan qua CASCADE, chặn xóa trả về HTTP 400 nếu cơ hội đã chuyển đổi thành đơn hàng ORDERED. 6. POST /api/opportunities/:id/follow-ups (và /follow-up): Ghi nhận nhật ký chăm sóc (ngày, phương thức, nội dung, phản hồi khách, kế hoạch tiếp) (SRS 3.11), tự động cập nhật trạng thái cơ hội từ NEW sang CONTACTED hoặc theo trạng thái mới được chọn. 7. Phân quyền RBAC bảo vệ toàn bộ endpoints cho 3 vai trò SALESMAN, SALE_MANAGER, ADMIN. 8. Đã viết 17 bài integration tests tại backend/tests/opportunity.test.js và chạy kiểm thử toàn hệ thống đạt 132/132 tests pass (87 backend + 45 frontend)."
     },
     {
       "id": "feat-013",

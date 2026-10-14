@@ -4,16 +4,30 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 13:33
-**Active Feature:** `feat-011` - Frontend Giao diện Sản phẩm & Kho hàng (Products UI)
-**Current Status:** HOÀN THÀNH 100% (11/20 tính năng đã nghiệm thu đạt chuẩn DoD - Đạt 55% toàn bộ hệ thống Zen CRM)
-**Next Feature:** `feat-012` - Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log)
+**Last Updated:** 2026-10-14 13:48
+**Active Feature:** `feat-012` - Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log)
+**Current Status:** HOÀN THÀNH 100% (12/20 tính năng đã nghiệm thu đạt chuẩn DoD - Đạt 60% toàn bộ hệ thống Zen CRM)
+**Next Feature:** `feat-013` - Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **`feat-012` - Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log)**
+  - Xây dựng trọn bộ RESTful API CRUD Cơ hội bán hàng và Nhật ký chăm sóc (`opportunity.controller.js` và `opportunity.routes.js`):
+    - `GET /api/opportunities`: Lấy danh sách cơ hội phân trang chuẩn 20 dòng theo BR-03 (SRS 3.7.3 REQ-1), tìm kiếm đa năng theo tên Lead hoặc tên/mã Sản phẩm (SRS 3.8), sắp xếp theo ngày tạo (BR-04, SRS 3.7.3 REQ-2), lọc theo khoảng ngày (BR-05, SRS 3.7.3 REQ-3), lọc theo trạng thái status, lead_id, product_id; tính toán giá trị ước tính (`estimated_value`) và đếm số lượt chăm sóc (`follow_ups_count`).
+    - `GET /api/opportunities/:id`: Xem chi tiết Cơ hội kèm toàn bộ hồ sơ khách hàng Lead, chi tiết Sản phẩm (giá bán, tồn kho, danh mục), danh sách dòng thời gian Follow-up (`follow_ups`) và thông tin đơn hàng nếu đã chốt (SRS 3.7.3 REQ-4).
+    - `GET /api/opportunities/statuses`: Danh mục 6 trạng thái cơ hội chuẩn (`NEW`, `CONTACTED`, `QUALIFIED`, `PROPOSAL`, `ORDERED`, `LOST`) kèm nhãn tiếng Việt.
+    - `GET /api/opportunities/check-duplicate`: Kiểm tra realtime cơ hội đang mở giữa khách hàng và sản phẩm (BR-02, SRS 3.6.2 REQ-4).
+    - `POST /api/opportunities`: Thêm mới Cơ hội gắn với Lead + Sản phẩm quan tâm + Số lượng + Ngày dự kiến chốt (SRS 3.6); chống trùng lặp theo BR-02 trả về HTTP 409 Conflict khi khách hàng đang có cơ hội chưa đóng cho sản phẩm đó.
+    - `PUT /api/opportunities/:id`: Cập nhật Cơ hội (số lượng, trạng thái, ngày dự kiến, ghi chú) (SRS 3.9); bảo vệ không cho đổi sản phẩm/khách hàng khi đã chốt đơn.
+    - `DELETE /api/opportunities/:id`: Xóa Cơ hội (SRS 3.10), tự động CASCADE dọn dẹp các bản ghi follow-ups liên quan, chặn xóa trả về HTTP 400 nếu cơ hội đã chuyển đổi thành đơn hàng ORDERED.
+    - `POST /api/opportunities/:id/follow-ups` & `POST /api/opportunities/:id/follow-up`: Ghi nhận nhật ký chăm sóc (ngày, phương thức liên hệ, nội dung, phản hồi khách, kế hoạch tiếp) (SRS 3.11), tự động cập nhật trạng thái cơ hội sang `CONTACTED` hoặc theo trạng thái chỉ định.
+    - `GET /api/opportunities/:id/follow-ups`: Lấy danh sách lịch sử tương tác chăm sóc của cơ hội.
+  - Phân quyền RBAC bảo vệ toàn bộ endpoints cho 3 vai trò: `SALESMAN`, `SALE_MANAGER`, `ADMIN`.
+  - Bộ kiểm thử: 17 integration tests tự động tại `backend/tests/opportunity.test.js` (toàn bộ 132/132 tests pass trên toàn hệ thống: 87 backend + 45 frontend).
 
 - [x] **`feat-011` - Frontend Giao diện Sản phẩm & Kho hàng (Products UI)**
   - Xây dựng trọn bộ giao diện người dùng Quản lý Sản phẩm theo phong cách Zoho CRM và đáp ứng 100% SRS 3.15, 3.16, 3.17:

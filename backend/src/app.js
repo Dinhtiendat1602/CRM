@@ -20,8 +20,9 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use(express.json());
 
-// Base API and Health Check
+// Routes
 app.use('/api', require('./routes/health.routes'));
+app.use('/api/auth', require('./routes/auth.routes'));
 
 // Global error handler
 app.use(require('./middlewares/error.middleware'));

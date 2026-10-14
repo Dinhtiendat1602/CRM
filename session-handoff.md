@@ -4,46 +4,49 @@
 
 ## Current Objective
 
-- Goal: Triển khai tính năng `feat-002` (Thiết kế CSDL PostgreSQL 10 Bảng & Dữ liệu Seed mẫu)
-- Current status: `feat-002` HOÀN THÀNH (100% Definition of Done đạt chuẩn)
+- Goal: Triển khai tính năng `feat-003` (Backend Xác thực JWT & Phân quyền RBAC)
+- Current status: `feat-003` HOÀN THÀNH (100% Definition of Done đạt chuẩn)
 - Branch / commit: `main`
 
 ## Completed This Session
 
-- [x] Tạo file DDL Schema PostgreSQL chuẩn 3NF: `backend/src/database/schema.sql` gồm 10 bảng (`roles`, `users`, `campaigns`, `product_categories`, `products`, `leads`, `opportunities`, `follow_ups`, `orders`, `sale_forecasts`) kèm các ENUM types (`opp_status`, `order_status`), ràng buộc khóa ngoại và 10 index hiệu năng (`idx_users_role_id`, `idx_products_category_id`, `idx_leads_entered_date`, `idx_leads_phone_email`, `idx_leads_name`, `idx_opportunities_created_at`, `idx_opp_lead_product`, `idx_orders_order_date`, `idx_orders_product_id`, `idx_orders_lead_id`).
-- [x] Tạo kịch bản khởi tạo & nạp dữ liệu mẫu tự động: `backend/src/database/init-db.js` (`npm run db:init` / `npm run db:seed`).
-- [x] Tạo dữ liệu mẫu chuẩn SRS: 3 Roles (ADMIN, SALE_MANAGER, SALESMAN), 3 Users với mật khẩu khởi tạo `11111111` đã băm bcrypt 10 rounds, 1 Campaign Q4 2026, 2 Danh mục sản phẩm, 2 Sản phẩm mẫu có gán chiến dịch và tồn kho, 2 Leads mẫu, 1 Opportunity (trạng thái CONTACTED), 1 Follow-up log, 12 tháng chỉ tiêu kế hoạch năm tài chính 2026 (SRS 3.20).
-- [x] Lưu trữ file `backend/seeds/seed.sql` phục vụ đối soát và khôi phục nhanh.
-- [x] Viết bộ kiểm thử tự động `backend/tests/db.test.js` kiểm tra toàn vẹn schema, index và seed records.
+- [x] Xây dựng Controller Xác thực & Hồ sơ cá nhân: `backend/src/controllers/auth.controller.js` gồm:
+  - `login`: Hỗ trợ đăng nhập linh hoạt bằng username hoặc email, so khớp mật khẩu bcrypt, kiểm tra cờ kích hoạt `is_active`, sinh JWT Access Token thời hạn 24h kèm role payload.
+  - `getProfile` (aliased `/me`): Lấy thông tin tài khoản người dùng đang đăng nhập kèm tên vai trò (không lộ mật khẩu).
+  - `updateProfile`: Cập nhật họ tên, SĐT và đổi mật khẩu an toàn (kiểm tra mật khẩu cũ, hash mật khẩu mới).
+- [x] Hoàn thiện `backend/src/middlewares/auth.middleware.js`: Trích xuất Bearer Token từ header Authorization, giải mã bằng `JWT_SECRET`, gắn `req.user` vào context xử lý của request. Chặn 401 khi token thiếu hoặc không hợp lệ.
+- [x] Hoàn thiện `backend/src/middlewares/role.middleware.js`: Hàm `authorizeRoles('ADMIN', 'SALE_MANAGER', 'SALESMAN')` chặn truy cập 403 Forbidden nếu không đủ quyền.
+- [x] Định tuyến RESTful API: `backend/src/routes/auth.routes.js` gắn vào `/api/auth` trong `backend/src/app.js`.
+- [x] Viết bộ kiểm thử tích hợp 12 kịch bản tại `backend/tests/auth.test.js`: Kiểm tra đăng nhập (đúng/sai/thiếu trường/non-existent), xác thực token, xem/sửa profile, và chặn phân quyền RBAC giữa Admin và Salesman. Toàn bộ 18/18 tests backend pass 100%.
 
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
 |---|---|---|---|
-| DB Migration & Seed | `npm run db:init` (trong `backend/`) | PASS (Thành công 100%) | Tạo 10 bảng, enum, index và nạp toàn bộ seed data |
-| Backend & DB Tests | `npm test` (trong `backend/`) | PASS (6/6 tests passed) | Kiểm tra 10 bảng, 10 index, 3 roles, 3 users (pass: 11111111), entities, 12 tháng forecast |
+| Backend Auth & DB Tests | `npm test` (trong `backend/`) | PASS (18/18 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4) chạy trong 1.2s |
 | Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors, 0 warnings) | Oxlint sạch sẽ không cảnh báo |
-| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 264ms) | Bundle client production thành công |
-| Full Suite Test | `npm test` (tại thư mục gốc) | PASS (0 failures) | Chạy đồng bộ cả backend tests và frontend lint |
+| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 267ms) | Vite bundle client production thành công |
+| Full Suite Test | `npm test` (tại thư mục gốc) | PASS (0 failures) | Toàn bộ kiểm thử hệ thống đạt 100% |
 
 ## Files Changed
 
-- `backend/src/database/schema.sql`: DDL 10 bảng, 2 enums, ràng buộc và performance indexes.
-- `backend/src/database/init-db.js`: Kịch bản thực thi tạo bảng, sequence và nạp seed data.
-- `backend/seeds/seed.sql`: File SQL lưu trữ dữ liệu seed mẫu.
-- `backend/tests/db.test.js`: Bộ kiểm thử tự động 10 bảng, indexes và dữ liệu seed.
-- `backend/package.json`: Bổ sung scripts `db:init` và `db:seed`.
-- `feature_list.json`: Cập nhật trạng thái `feat-002` thành `completed`.
-- `session-handoff.md`: Ghi nhận tiến độ bàn giao.
+- `backend/src/controllers/auth.controller.js`: Xử lý login, getProfile, updateProfile.
+- `backend/src/routes/auth.routes.js`: Định tuyến /api/auth/*.
+- `backend/src/app.js`: Mount `/api/auth` routes.
+- `backend/tests/auth.test.js`: 12 integration tests cho phân hệ xác thực và phân quyền RBAC.
+- `feature_list.json`: Cập nhật trạng thái `feat-003` thành `completed`.
+- `progress.md`: Cập nhật tiến độ `feat-003`.
+- `session-handoff.md`: Ghi nhận biên bản bàn giao.
 
 ## Decisions Made
 
-- Thống nhất mật khẩu mặc định của 3 tài khoản khởi tạo (admin, manager, salesman) là `11111111` theo yêu cầu người dùng, được mã hóa an toàn bằng `bcryptjs` với 10 rounds salt.
-- Cấu hình hook `test.after` đóng kết nối pool ngay khi kiểm thử kết thúc, giúp bộ test chạy siêu tốc trong ~480ms.
+- Cho phép đăng nhập bằng cả `username` hoặc `email` để tiện lợi cho người dùng (vẫn tuân thủ chuẩn SRS 3.13).
+- Tuyệt đối không trả `password_hash` trong bất kỳ response nào (kể cả GET/PUT profile cá nhân) nhằm tuân thủ quy chuẩn an ninh `docs/SECURITY.md`.
+- Trả về mã lỗi HTTP 403 Forbidden chuẩn RESTful khi nhân viên truy cập các endpoint không đúng vai trò phân quyền.
 
 ## Blockers / Risks
 
-- Không có blocker. CSDL đã sẵn sàng để tích hợp vào các API ở các tính năng tiếp theo.
+- Không có blocker. Hệ thống sẵn sàng cho phân hệ Quên mật khẩu & Gửi mail SMTP (Nodemailer).
 
 ## Next Session Startup
 
@@ -54,4 +57,4 @@
 
 ## Recommended Next Step
 
-- Tiến hành thực hiện tính năng tiếp theo: `feat-003` - "Backend Xác thực JWT & Phân quyền RBAC" (`POST /api/auth/login`, `GET /api/auth/me`, `PUT /api/auth/profile`, `auth.middleware.js`, `role.middleware.js`).
+- Tiến hành thực hiện tính năng tiếp theo: `feat-004` - "Backend Quên mật khẩu & Gửi mail SMTP (Nodemailer)" (`POST /api/auth/forgot-password`, `POST /api/auth/reset-password`).

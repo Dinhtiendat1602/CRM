@@ -31,8 +31,8 @@
       "dependencies": [
         "feat-002"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "POST /api/auth/login validates credentials (username/email + bcrypt) and returns JWT with role. auth.middleware verifies JWT Bearer tokens and rejects unauthenticated/tampered requests. role.middleware enforces RBAC (ADMIN, SALE_MANAGER, SALESMAN; 403 Forbidden on unauthorized roles). GET /api/auth/me and PUT /api/auth/profile return & update authenticated user profile. Verified with 12 integration tests in backend/tests/auth.test.js (18/18 total backend tests passed in 1.2s)."
     },
     {
       "id": "feat-004",

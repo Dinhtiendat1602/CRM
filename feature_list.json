@@ -11,8 +11,8 @@
       "name": "Khởi tạo môi trường & Cấu trúc khung dự án Full-Stack",
       "description": "Thiết lập thư mục monorepo/separate backend (Express.js 3-layer architecture: controllers, services, routes) và frontend (Vite React 18, Tailwind CSS), file .env.example, script npm run dev chạy đồng thời hai môi trường.",
       "dependencies": [],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Backend: 'npm test' (2/2 passed, GET /api/health 200 OK). Frontend: 'npm run lint' (0 errors, 0 warnings), 'npm run build' (built in 368ms). Full-stack dev: 'npm run dev' runs Express (:5001) & Vite (:5173) concurrently; curl /api/health returned 200 OK."
     },
     {
       "id": "feat-002",

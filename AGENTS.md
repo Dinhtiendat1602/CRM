@@ -28,13 +28,14 @@ Before writing code (Trước khi bắt đầu viết code):
 
 - **One feature at a time (Mỗi lần chỉ thực hiện một tính năng)**: Chọn đúng một tính năng chưa hoàn thành từ `feature_list.json`. Không bao giờ làm nhiều tính năng cùng lúc để tránh phân mảnh ngữ cảnh.
 - **Verification required (Bắt buộc phải kiểm thử và có bằng chứng)**: Tuyệt đối không tự ý đánh dấu hoàn thành nếu chưa chạy lệnh kiểm thử thực tế và ghi lại kết quả bằng chứng (evidence).
-- **Update artifacts (Cập nhật trạng thái)**: Trước khi kết thúc phiên, cập nhật trạng thái vào `feature_list.json` và `session-handoff.md`.
+- **Update artifacts (Cập nhật trạng thái)**: Trước khi kết thúc phiên, cập nhật trạng thái vào `feature_list.json`, `progress.md` và `session-handoff.md`.
 - **Stay in scope (Giữ đúng phạm vi công việc)**: Không chỉnh sửa các file hoặc tính năng nằm ngoài phạm vi của task hiện tại.
 - **Leave clean state (Để lại trạng thái mã nguồn sạch sẽ)**: Đảm bảo code sạch sẽ, không có lỗi lặt vặt cho phiên tiếp theo.
 
 ## Required Artifacts - Các tệp bắt buộc trong bộ khung
 
 - `feature_list.json` — Nguồn chân lý (source of truth) theo dõi các tính năng, trạng thái và phụ thuộc.
+- `progress.md` — Nhật ký phiên làm việc (những việc đã làm, việc đang làm, rủi ro, bằng chứng kiểm thử).
 - `session-handoff.md` — Biên bản bàn giao giữa các phiên làm việc của Agent.
 - `ARCHITECTURE.md` — Tài liệu kiến trúc toàn diện của dự án.
 - `AGENTS.md` — Hướng dẫn tối thượng và quy tắc vận hành cho AI.

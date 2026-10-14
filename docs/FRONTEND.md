@@ -1,3 +1,5 @@
+<!-- Chức năng: Cẩm nang quy chuẩn UI/UX: thư viện component, phong cách CSS, quản lý State, xử lý lỗi API -->
+
 # KIẾN TRÚC FRONTEND VÀ GIAO DIỆN NGƯỜI DÙNG (REACT 18 + VITE)
 > **Dự án:** Zen CRM  
 > **Tech Stack:** React 18 (Vite), React Router v6, Axios, Chart.js, Lucide Icons  

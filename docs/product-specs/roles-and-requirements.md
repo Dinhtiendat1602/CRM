@@ -1,3 +1,5 @@
+<!-- Chức năng: Ma trận phân quyền (Admin, Staff, Customer) và yêu cầu chi tiết của từng chức năng -->
+
 # ĐẶC TẢ PHÂN QUYỀN VÀ YÊU CẦU NGHIỆP VỤ (RBAC & SRS REQUIREMENTS)
 > **Dự án:** Zen CRM  
 > **Căn cứ:** Software Requirements Specification (SRS) - Version 1.1 (iViettech Education, Oct 24, 2019)  

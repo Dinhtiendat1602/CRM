@@ -1,4 +1,6 @@
- Ċ32# LỘ TRÌNH THỰC THI 4 TUẦN VÀ KỊCH BẢN BẢO VỆ ĐỒ ÁN (ROADMAP & DEFENSE)
+<!-- Chức năng: Lộ trình tổng thể: các mốc bàn giao (Milestones), deadline từng sprint và kịch bản demo bảo vệ -->
+
+# LỘ TRÌNH THỰC THI 4 TUẦN VÀ KỊCH BẢN BẢO VỆ ĐỒ ÁN (ROADMAP & DEFENSE)
 > **Dự án:** Zen CRM  
 > **Thời gian:** 4 Tuần (Sprint Method)  
 > **Mục tiêu:** Hoàn thiện 100% tất cả yêu cầu SRS Ver 1.1 và bảo vệ đồ án thực tập xuất sắc  

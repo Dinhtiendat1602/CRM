@@ -1,3 +1,5 @@
+<!-- Chức năng: Biên bản bàn giao phiên: ghi lại việc đang làm dở, blocker và bước tiếp theo khi mở chat mới -->
+
 # Session Handoff
 
 ## Current Objective
@@ -31,9 +33,9 @@
 ## Next Session Startup
 
 1. Read `AGENTS.md`.
-2. Read `feature_list.json` and `progress.md`.
+2. Read `feature_list.json`.
 3. Review this handoff.
-4. Run `./init.sh` or the documented verification command before editing.
+4. Run verification commands in `backend/` or `frontend/` before editing.
 
 ## Recommended Next Step
 

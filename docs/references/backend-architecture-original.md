@@ -1,3 +1,5 @@
+<!-- Chức năng: Tài liệu đối chiếu kiến trúc Backend Express và đặc tả RESTful API gốc -->
+
 # KIẾN TRÚC BACKEND VÀ ĐẶC TẢ RESTFUL API (NODE.JS + EXPRESS)
 > **Dự án:** Zen CRM  
 > **Pattern:** Clean MVC Pattern  

@@ -1,162 +1,221 @@
 {
+  "_comment": "Chức năng: Bảng theo dõi tiến độ (machine-readable): danh sách tính năng, trạng thái và kiểm thử riêng",
+  "project_name": "Zen CRM System",
+  "tech_stack": {
+    "backend": "Node.js, Express.js, PostgreSQL (pg pool), JWT, bcryptjs, Nodemailer",
+    "frontend": "React 18 (Vite), React Router DOM v6, Axios Interceptors, Chart.js, Lucide Icons, Tailwind CSS"
+  },
   "features": [
     {
       "id": "feat-001",
-      "name": "Khởi tạo môi trường & Cấu trúc khung dự án",
-      "description": "Thiết lập backend package.json (Express), frontend Vite React 18, file cấu hình biến môi trường mẫu (.env.example), đảm bảo ./init.sh chạy pass sạch sẽ",
+      "name": "Khởi tạo môi trường & Cấu trúc khung dự án Full-Stack",
+      "description": "Thiết lập thư mục monorepo/separate backend (Express.js 3-layer architecture: controllers, services, routes) và frontend (Vite React 18, Tailwind CSS), file .env.example, script npm run dev chạy đồng thời hai môi trường.",
       "dependencies": [],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-002",
-      "name": "Thiết kế CSDL PostgreSQL & Dữ liệu mẫu (Seed Data)",
-      "description": "Khởi tạo 10 bảng DDL (roles, users, campaigns, product_categories, products, leads, opportunities, follow_ups, orders, sale_forecasts), ENUM types, Indexes, và nạp seed data 3 vai trò chuẩn (Admin, Manager, Salesman), 3 tài khoản demo, danh mục sản phẩm cùng sản phẩm mẫu",
-      "dependencies": ["feat-001"],
+      "name": "Thiết kế CSDL PostgreSQL 10 Bảng & Dữ liệu Seed mẫu",
+      "description": "Khởi tạo SQL Schema 10 bảng DDL (roles, users, campaigns, product_categories, products, leads, opportunities, follow_ups, orders, sale_forecasts) chuẩn 3NF, ràng buộc FK, INDEXES (entered_date, product_code, lead_id) và Seed Data tài khoản mẫu (Admin, Manager, Salesman) cùng chỉ tiêu 12 tháng năm tài chính (SRS 3.20).",
+      "dependencies": [
+        "feat-001"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-003",
-      "name": "Backend Xác thực & Phân quyền RBAC",
-      "description": "Xây dựng JWT authentication, mã hóa bcryptjs, truy vấn nối bảng roles lấy tên vai trò, middleware xác thực auth.middleware.js, phân quyền 3 role role.middleware.js, và API cập nhật hồ sơ cá nhân (SRS 3.13)",
-      "dependencies": ["feat-002"],
+      "name": "Backend Xác thực JWT & Phân quyền RBAC",
+      "description": "Xây dựng POST /api/auth/login xác thực username/password mã hóa bcryptjs, trả về JWT Access Token kèm thông tin Role. Xây dựng auth.middleware.js (verify token) và role.middleware.js (phân quyền ADMIN, SALE_MANAGER, SALESMAN) kết hợp API GET/PUT /api/auth/profile (SRS 3.13).",
+      "dependencies": [
+        "feat-002"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-004",
-      "name": "Backend Quên mật khẩu & Gửi mail SMTP",
-      "description": "Tạo token đặt lại mật khẩu an toàn, tích hợp Nodemailer SMTP gửi email kích hoạt link reset, và API xác nhận đổi mật khẩu mới (SRS 3.14)",
-      "dependencies": ["feat-003"],
+      "name": "Backend Quên mật khẩu & Gửi mail SMTP (Nodemailer)",
+      "description": "Xây dựng POST /api/auth/forgot-password kiểm tra email tồn tại, sinh reset token có thời hạn và gửi email chứa link đặt lại qua Nodemailer SMTP. Xây dựng POST /api/auth/reset-password cập nhật mật khẩu mới (SRS 3.14).",
+      "dependencies": [
+        "feat-003"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-005",
-      "name": "Backend Quản trị người dùng (Admin User Management)",
-      "description": "Xây dựng các API cho Admin: xem danh sách người dùng kèm role_name, API danh sách vai trò (GET /api/admin/roles), tạo tài khoản mới gán role_id, gán/đổi vai trò, bật/tắt kích hoạt trạng thái (Active/Inactive), và đổi mật khẩu trực tiếp (SRS 2.1)",
-      "dependencies": ["feat-003"],
+      "name": "Backend Quản trị Người dùng & Phân quyền (Admin Users Management)",
+      "description": "Xây dựng RESTful APIs cho Admin: GET /api/admin/users (lấy danh sách kèm role_name), GET /api/admin/roles, POST /api/admin/users (tạo tài khoản gán role), PATCH /api/admin/users/:id/status (Bật/Tắt Active/De-active), và POST /api/admin/users/:id/reset-password (SRS 2.1).",
+      "dependencies": [
+        "feat-003"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-006",
-      "name": "Frontend Khung giao diện, Design System & Phân quyền RBAC",
-      "description": "Khởi tạo React 18 Vite, xây dựng Design System CSS thuần (phong cách Zoho CRM), cấu hình Axios Interceptor tự động gắn Bearer Token, AuthContext, PrivateRoute, và Hook tự động đăng xuất sau 30 phút không hoạt động (SRS 5.3)",
-      "dependencies": ["feat-001"],
+      "name": "Frontend Khung giao diện Admin UI, Axios Interceptor & Session Timeout 30m",
+      "description": "Xây dựng MainLayout (Sidebar điều hướng động theo Role, Header, Breadcrumbs), axiosClient tự động gắn Bearer Token và bắt lỗi 401, bọc PrivateRoute/RoleRoute, và custom hook useIdleTimeout tự động đăng xuất xóa session sau 30 phút không thao tác (SRS 5.3).",
+      "dependencies": [
+        "feat-001"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-007",
-      "name": "Frontend Trang xác thực & Quản lý người dùng",
-      "description": "Xây dựng giao diện Đăng nhập, Quên mật khẩu, Đặt lại mật khẩu, và Màn hình Quản trị người dùng (User Management) cho Admin với bộ lọc vai trò và chuyển đổi trạng thái (SRS 2.1, 3.13, 3.14)",
-      "dependencies": ["feat-005", "feat-006"],
+      "name": "Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI)",
+      "description": "Giao diện LoginPage, ForgotPasswordPage, ResetPasswordPage và Màn hình Quản trị nhân viên AdminUserPage (bảng hiển thị, bộ lọc vai trò, toggle kích hoạt tài khoản, modal tạo mới/reset mật khẩu) (SRS 2.1, 3.13, 3.14).",
+      "dependencies": [
+        "feat-005",
+        "feat-006"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-008",
       "name": "Backend Quản lý Khách hàng tiềm năng (Leads Module)",
-      "description": "Xây dựng CRUD Leads, phân trang mặc định 20 dòng mới nhất (REQ-1), sắp xếp/lọc theo khoảng ngày (REQ-2, REQ-3), tìm kiếm theo tên (SRS 3.3), và chặn trùng lặp SĐT/Email (REQ-4) (SRS 3.1-3.5)",
-      "dependencies": ["feat-003"],
+      "description": "Xây dựng RESTful API Leads: GET /api/leads (mặc định 20 bản ghi mới nhất REQ-1, phân trang, lọc/sort theo entered_date REQ-2 REQ-3, tìm kiếm theo tên SRS 3.3), POST /api/leads (kiểm tra trùng SĐT/Email trả về HTTP 409 REQ-4), PUT /api/leads/:id, DELETE /api/leads/:id (SRS 3.1-3.5).",
+      "dependencies": [
+        "feat-003"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-009",
-      "name": "Frontend Giao diện Khách hàng tiềm năng (Leads UI)",
-      "description": "Xây dựng bảng LeadList (20 dòng/trang, sort, lọc ngày, tìm kiếm), LeadModal (thêm/sửa form có cảnh báo trùng SĐT/email), và trang LeadDetail hiển thị tab danh sách Cơ hội liên quan (3.2.3 REQ-4)",
-      "dependencies": ["feat-006", "feat-008"],
+      "name": "Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)",
+      "description": "Xây dựng LeadListPage (bảng 20 dòng/trang, sort ngày nhập, thanh tìm kiếm), LeadModal (form thêm/sửa có validation và thông báo đỏ nếu phát hiện trùng SĐT/Email), và LeadDetailPage hiển thị tab thông tin chi tiết kèm danh sách Cơ hội liên quan (SRS 3.1-3.5).",
+      "dependencies": [
+        "feat-006",
+        "feat-008"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-010",
-      "name": "Backend Quản lý Danh mục & Sản phẩm (Categories & Products Module)",
-      "description": "Xây dựng CRUD Danh mục sản phẩm (product_categories), CRUD Sản phẩm (products liên kết category_id và campaign_id), tìm kiếm theo tên/mã SP, lọc theo danh mục, API GET /api/products/:id/opportunities và GET /api/products/:id/orders (SRS 3.15-3.17)",
-      "dependencies": ["feat-003"],
+      "name": "Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)",
+      "description": "Xây dựng CRUD Danh mục (product_categories), CRUD Sản phẩm (products liên kết category_id, campaign_id, mã SP, đơn giá, tồn kho stock_qty), tìm kiếm theo mã/tên, lọc theo danh mục, cùng 2 APIs đặc thù: GET /api/products/:id/opportunities (SRS 3.16) và GET /api/products/:id/orders (SRS 3.17).",
+      "dependencies": [
+        "feat-003"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-011",
-      "name": "Frontend Giao diện Sản phẩm & Danh mục (Products & Categories UI)",
-      "description": "Xây dựng ProductList (bộ lọc theo Danh mục, tìm kiếm mã/tên), ProductModal (chọn Danh mục từ product_categories, chọn Chiến dịch), Quản lý Danh mục sản phẩm (CategoryModal/CategoryList), và ProductDetail với 2 tab riêng: Xem Cơ hội và Xem Đơn hàng (SRS 3.16, 3.17)",
-      "dependencies": ["feat-006", "feat-010"],
+      "name": "Frontend Giao diện Sản phẩm & Kho hàng (Products UI)",
+      "description": "Xây dựng ProductListPage (bộ lọc danh mục, tìm kiếm mã/tên), ProductModal (chọn danh mục và chiến dịch), CategoryModal, và ProductDetailPage chứa 2 tabs con riêng biệt: View Opportunities (xem các cơ hội liên quan) và View Orders (xem lịch sử đơn hàng phát sinh) (SRS 3.15-3.17).",
+      "dependencies": [
+        "feat-006",
+        "feat-010"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-012",
-      "name": "Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up)",
-      "description": "Xây dựng CRUD Opportunities, phân trang 20 dòng, tìm kiếm theo tên Lead hoặc tên Sản phẩm (SRS 3.8), và API ghi nhận lịch sử tương tác Follow-up (ngày, kênh, nội dung, phản hồi khách, kế hoạch tiếp theo) (SRS 3.6-3.11)",
-      "dependencies": ["feat-008", "feat-010"],
+      "name": "Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log)",
+      "description": "Xây dựng RESTful API Opportunities: GET /api/opportunities (phân trang 20 dòng, search theo tên Lead hoặc Sản phẩm SRS 3.8), POST /api/opportunities (liên kết lead_id + product_id + quantity), và POST /api/opportunities/:id/follow-up (lưu nhật ký: ngày, kênh, nội dung, phản hồi khách, kế hoạch tiếp theo) (SRS 3.6-3.11).",
+      "dependencies": [
+        "feat-008",
+        "feat-010"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-013",
-      "name": "Frontend Giao diện Cơ hội & Nhật ký Chăm sóc (Opportunities UI)",
-      "description": "Xây dựng OppList (bảng 20 dòng, search tên KH/SP), OppModal (tạo cơ hội liên kết Lead và Sản phẩm), FollowUpModal, và màn hình chi tiết kèm dòng thời gian lịch sử chăm sóc (SRS 3.6-3.11)",
-      "dependencies": ["feat-006", "feat-012"],
+      "name": "Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI)",
+      "description": "Xây dựng OpportunityListPage (bảng 20 dòng, bộ lọc status OPEN/FOLLOWING/ORDERED/CANCELLED), OpportunityModal (form chọn Lead và Sản phẩm), FollowUpModal (nhập nhật ký tư vấn), và màn hình chi tiết hiển thị Timeline lịch sử chăm sóc (SRS 3.6-3.11).",
+      "dependencies": [
+        "feat-006",
+        "feat-012"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-014",
       "name": "Backend Chốt đơn hàng bằng Database Transaction (Make an Order)",
-      "description": "Xây dựng POST /api/opportunities/:id/make-order áp dụng ACID Transaction (BEGIN/COMMIT/ROLLBACK): khóa dòng Row-level Lock, kiểm tra tồn kho, tạo đơn hàng Orders, chuyển trạng thái Cơ hội thành ORDERED, trừ tồn kho Products, rollback hoàn toàn nếu không đủ hàng (SRS 3.12)",
-      "dependencies": ["feat-012"],
+      "description": "Xây dựng POST /api/opportunities/:id/make-order áp dụng PostgreSQL ACID Transaction (BEGIN ... COMMIT/ROLLBACK): khóa dòng Row-level Locking, kiểm tra tồn kho stock_qty, sinh mã đơn hàng, tạo bản ghi trong bảng Orders, chuyển trạng thái Cơ hội thành ORDERED và trừ tồn kho tự động (SRS 3.12).",
+      "dependencies": [
+        "feat-012"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-015",
-      "name": "Frontend Chốt đơn & Quản lý Đơn hàng (Orders UI)",
-      "description": "Xây dựng MakeOrderModal (nhập thông tin giao hàng & thanh toán), danh sách đơn hàng OrderList, và chi tiết đơn hàng OrderDetail bảo toàn lịch sử đơn giá unit_price (SRS 3.12)",
-      "dependencies": ["feat-006", "feat-014"],
+      "name": "Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI)",
+      "description": "Xây dựng MakeOrderModal (popup kế thừa giá/số lượng từ Opportunity, nhập thông tin giao hàng & thanh toán để chốt đơn), OrderListPage (danh sách hóa đơn đã chốt), và OrderDetailPage hiển thị chi tiết hóa đơn bảo tồn giá bán tại thời điểm chốt (SRS 3.12).",
+      "dependencies": [
+        "feat-006",
+        "feat-014"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-016",
-      "name": "Backend Quản lý Chiến dịch & Báo cáo Hiệu quả Chiến dịch",
-      "description": "Xây dựng CRUD Campaigns, gắn sản phẩm mục tiêu vào chiến dịch, và API báo cáo hiệu quả chiến dịch GET /api/campaigns/:id/report (tổng Lead phát sinh, tổng Opportunity chuyển đổi, danh sách Lead) (SRS 3.18, 3.19)",
-      "dependencies": ["feat-010", "feat-012"],
+      "name": "Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng",
+      "description": "Xây dựng CRUD Campaigns (tên, ngân sách, ngày bắt đầu/kết thúc), API gán sản phẩm vào chiến dịch, API GET /api/campaigns/:id/report (Campaign Performance Report: tổng Lead thu được, tổng Opportunity chuyển đổi SRS 3.18, 3.19), cùng các API Báo cáo tổng hợp Lead/Order/Doanh thu theo ngày/tháng/năm (SRS 2.1).",
+      "dependencies": [
+        "feat-010",
+        "feat-012"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-017",
-      "name": "Frontend Quản lý Chiến dịch & Báo cáo Chiến dịch (Campaigns UI)",
-      "description": "Xây dựng CampaignList, CampaignModal (form tạo/sửa chiến dịch), và giao diện báo cáo CampaignReport hiển thị bảng chỉ số đo lường hiệu quả (SRS 3.18, 3.19)",
-      "dependencies": ["feat-006", "feat-016"],
+      "name": "Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns UI)",
+      "description": "Xây dựng CampaignListPage, CampaignModal, và CampaignReportPage (hiển thị các thẻ chỉ số đo lường ROI, danh sách Lead phát sinh từ chiến dịch) cùng GeneralReportsPage (báo cáo doanh thu theo thời gian) (SRS 2.1, 3.18, 3.19).",
+      "dependencies": [
+        "feat-006",
+        "feat-016"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-018",
-      "name": "Backend Thiết lập Dự báo & Báo cáo Hiệu suất Doanh số (Forecast)",
-      "description": "Xây dựng POST /api/forecasts/setup (nhập chỉ tiêu kế hoạch 12 tháng theo năm tài chính) và GET /api/forecasts/performance (tính bảng đối soát Tháng | Kế hoạch Plan | Doanh số thực tế Actual | % Đạt, tính từ các đơn hàng không bị hủy) (SRS 3.20, 3.21)",
-      "dependencies": ["feat-014"],
+      "name": "Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance",
+      "description": "Xây dựng POST /api/forecasts/setup (cho Sale Manager nhập/cập nhật kế hoạch 12 tháng năm tài chính SRS 3.20) và GET /api/forecasts/performance (truy vấn SQL LEFT JOIN giữa sale_forecasts và orders để đối soát Tháng | Plan ($) | Actually Value ($) | % Hoàn thành SRS 3.21).",
+      "dependencies": [
+        "feat-014"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-019",
-      "name": "Frontend Thiết lập Dự báo & Báo cáo Biểu đồ Phân tích Doanh số",
-      "description": "Xây dựng SetupPlan (bảng nhập chỉ tiêu 12 tháng), PerformanceReport (bảng đối soát Plan vs Actual vs % và Biểu đồ đường/cột Chart.js), cùng các báo cáo tổng hợp General Reports theo ngày/tháng/năm (SRS 2.1, 3.20, 3.21)",
-      "dependencies": ["feat-006", "feat-018"],
+      "name": "Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI)",
+      "description": "Xây dựng SetupPlanPage (bảng nhập chỉ tiêu 12 tháng cho Manager) và SalesDashboardPage (Bảng đối soát 12 tháng Plan vs Actual vs % kèm Biểu đồ đường/cột tương tác bằng Chart.js) (SRS 2.1, 3.20, 3.21).",
+      "dependencies": [
+        "feat-006",
+        "feat-018"
+      ],
       "status": "not-started",
       "evidence": ""
     },
     {
       "id": "feat-020",
-      "name": "Kiểm thử Toàn diện E2E, Nghiệm thu 100% SRS & Chuẩn bị Bảo vệ Đồ án",
-      "description": "Xác minh 15 tiêu chí nghiệm thu (AC-01 đến AC-15), chạy thử kịch bản demo bảo vệ 6 bước (Admin -> Salesman -> Sale Manager), chuẩn bị dữ liệu demo thực tế, và hoàn thiện bộ kiểm thử tự động",
-      "dependencies": ["feat-007", "feat-009", "feat-011", "feat-013", "feat-015", "feat-017", "feat-019"],
+      "name": "Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án",
+      "description": "Chạy kiểm thử liên vết toàn hệ thống: Admin tạo tài khoản -> Manager lập plan & tạo sản phẩm/chiến dịch -> Salesman tạo Lead (test duplicate check) -> Tạo Opportunity -> Ghi Follow-up log -> Make Order chốt đơn (test trừ tồn kho) -> Đối soát số liệu tự động nhảy lên Dashboard.",
+      "dependencies": [
+        "feat-007",
+        "feat-009",
+        "feat-011",
+        "feat-013",
+        "feat-015",
+        "feat-017",
+        "feat-019"
+      ],
       "status": "not-started",
       "evidence": ""
     }

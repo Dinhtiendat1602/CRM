@@ -1,3 +1,5 @@
+<!-- Chức năng: Thiết kế chi tiết CSDL: danh sách bảng, trường dữ liệu, khóa chính, khóa ngoại, quan hệ -->
+
 # THIẾT KẾ CƠ SỞ DỮ LIỆU POSTGRESQL (DATABASE DESIGN & DDL)
 > **Dự án:** Zen CRM  
 > **Hệ quản trị CSDL:** PostgreSQL 14+ (Chuẩn hóa 3NF)  

@@ -1,3 +1,5 @@
+<!-- Chức năng: Tổng quan dự án: mục tiêu bài toán, phạm vi tính năng và đối tượng người dùng -->
+
 # BÁO CÁO PHÂN TÍCH YÊU CẦU PHẦN MỀM (SRS ANALYSIS SPECIFICATION)
 > **Tài liệu gốc:** [CRM_SRS_Ver 1.1-Update-Aug-2020.docx](./CRM_SRS_Ver%201.1-Update-Aug-2020.docx)  
 > **Đơn vị ban hành:** iViettech Education (Author: Viet Vy - Ver 1.1, Oct 24, 2019)  

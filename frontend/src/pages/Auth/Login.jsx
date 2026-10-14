@@ -36,9 +36,12 @@ export default function Login() {
         password: formData.password,
       });
 
-      // API trả về { success: true, token, user }
-      if (res.token && res.user) {
-        login(res.user, res.token);
+      // API trả về chuẩn { success: true, message, data: { token, user } }
+      const token = res.data?.token || res.token;
+      const user = res.data?.user || res.user;
+
+      if (token && user) {
+        login(user, token);
         navigate(from, { replace: true });
       } else {
         setError('Phản hồi từ máy chủ không hợp lệ');

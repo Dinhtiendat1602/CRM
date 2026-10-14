@@ -103,8 +103,8 @@
       "dependencies": [
         "feat-003"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành toàn bộ module Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module) theo đúng đặc tả SRS 3.15, 3.16, 3.17 và các Business Rules: 1. Phân hệ Danh mục (product_categories): Xây dựng đầy đủ CRUD APIs (/api/categories), tự động đếm số lượng sản phẩm liên kết (products_count), chống trùng tên danh mục (HTTP 409) và chặn xóa nếu đang có sản phẩm liên kết (HTTP 400). 2. Phân hệ Sản phẩm (products): Xây dựng đầy đủ CRUD APIs (/api/products) với phân trang mặc định đúng 20 dòng theo BR-03 (limit=20), tìm kiếm đa năng theo mã sản phẩm hoặc tên sản phẩm, lọc theo danh mục (category_id) và chiến dịch (campaign_id), sắp xếp linh hoạt, kiểm tra giá không âm (unit_price >= 0), chống trùng mã sản phẩm product_code (HTTP 409), và bảo vệ toàn vẹn dữ liệu chặn xóa nếu sản phẩm đã phát sinh cơ hội hoặc đơn hàng (HTTP 400). 3. Hai APIs đặc thù theo chuẩn SRS: GET /api/products/:id/opportunities (SRS 3.16) xem toàn bộ danh sách các Cơ hội bán hàng liên quan đến sản phẩm kèm thông tin chi tiết khách hàng Lead; GET /api/products/:id/orders (SRS 3.17) xem toàn bộ danh sách các Đơn hàng thực tế đã xuất bán sản phẩm kèm doanh số và khách hàng. 4. Phân quyền RBAC: Bảo vệ bằng authMiddleware và authorizeRoles: Quản lý (SALE_MANAGER) và Quản trị viên (ADMIN) được toàn quyền CRUD; Nhân viên bán hàng (SALESMAN) được xem danh sách và chi tiết sản phẩm. 5. Đã viết 18 bài kiểm thử tự động tại backend/tests/product.test.js và chạy kiểm thử toàn hệ thống đạt 105/105 tests pass (70 backend + 35 frontend)."
     },
     {
       "id": "feat-011",

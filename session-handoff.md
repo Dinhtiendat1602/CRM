@@ -4,76 +4,75 @@
 
 ## Current Objective
 
-- Goal: Triển khai tính năng `feat-009` (Frontend Giao diện Quản lý Khách tiềm năng - Leads UI) và chuẩn bị chuyển giao sang `feat-010` (Backend Quản lý Danh mục & Sản phẩm Kho).
-- Current status: `feat-009` HOÀN THÀNH (100% Definition of Done đạt chuẩn). 9/20 tính năng hoàn thành (45% dự án).
+- Goal: Triển khai tính năng `feat-010` (Backend Quản lý Danh mục & Sản phẩm Kho - Products & Categories Module) và chuẩn bị chuyển giao sang `feat-011` (Frontend Products UI).
+- Current status: `feat-010` HOÀN THÀNH (100% Definition of Done đạt chuẩn). Đạt cột mốc 10/20 tính năng hoàn thành (50% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
 
 ## Completed This Session
 
-- [x] Xây dựng Service API `frontend/src/api/leadApi.js` kết nối toàn diện 6 endpoints Backend:
-  - `getLeads`: Lấy danh sách Leads có phân trang, tìm kiếm, lọc theo ngày, sort theo ngày nhập.
-  - `getLeadById`: Lấy chi tiết Lead kèm danh sách Opportunities liên quan.
-  - `checkDuplicate`: Kiểm tra trùng email/phone trong thời gian thực.
-  - `createLead`: Tạo Lead mới.
-  - `updateLead`: Cập nhật thông tin Lead.
-  - `deleteLead`: Xóa Lead.
-- [x] Xây dựng `LeadModal.jsx`:
-  - Biểu mẫu popup hiện đại, hỗ trợ cả 2 chế độ Tạo mới (Create) và Chỉnh sửa (Edit).
-  - Đánh dấu sao đỏ các trường bắt buộc (Họ, Tên, Email, SĐT).
-  - Tích hợp kiểm tra trùng lặp thời gian thực `onBlur` (`checkDuplicate`) và bắt lỗi HTTP 409 Conflict từ Backend để hiển thị cảnh báo đỏ nổi bật.
-- [x] Xây dựng `LeadListPage.jsx` (`/leads`):
-  - Bảng dữ liệu phân trang đúng 20 dòng theo BR-03 (SRS 3.2.3 REQ-1).
-  - Ô tìm kiếm theo họ tên khách hàng có debounce 300ms (SRS 3.3).
-  - Bộ lọc theo khoảng ngày nhập `startDate` đến `endDate` (BR-05).
-  - Nút chuyển đổi chiều sắp xếp ngày nhập `entered_date` ASC/DESC (BR-04).
-  - Cột hành động: Xem chi tiết (View), Sửa (Edit), Xóa (Delete) tích hợp hộp thoại `ConfirmDialog`.
-- [x] Xây dựng `LeadDetailPage.jsx` (`/leads/:id`):
-  - Hiển thị đầy đủ hồ sơ chi tiết khách hàng tiềm năng theo SRS 3.2.3 REQ-4.
-  - Các nút hành động: Quay lại danh sách, Sửa thông tin, Xóa Lead, và Tạo cơ hội mới.
-  - Bảng danh sách Các Cơ hội liên quan (Associated Opportunities) kèm trạng thái, số lượng và tổng doanh số dự kiến.
-- [x] Cập nhật định tuyến `frontend/src/routes/AppRoutes.jsx` gắn `LeadListPage` và `LeadDetailPage` vào router hệ thống.
-- [x] Viết 10 bài unit tests tại `frontend/tests/leads-ui.test.js` kiểm tra validation, parse duplicate error 409, query params và tính toán cơ hội liên quan.
-- [x] Chạy kiểm thử toàn hệ thống đạt 87/87 tests pass (52 backend + 35 frontend), build client production thành công trong 241ms.
+- [x] Xây dựng Bộ điều khiển `backend/src/controllers/category.controller.js` quản lý Danh mục sản phẩm:
+  - `getCategories`: Lấy danh sách danh mục có đếm số lượng sản phẩm liên kết (`products_count`).
+  - `getCategoryById`: Lấy chi tiết 1 danh mục.
+  - `createCategory`: Tạo danh mục mới, chống trùng tên danh mục (HTTP 409).
+  - `updateCategory`: Cập nhật tên và mô tả danh mục.
+  - `deleteCategory`: Xóa danh mục (bảo vệ toàn vẹn: chặn xóa nếu danh mục đang chứa sản phẩm - HTTP 400).
+- [x] Xây dựng Bộ điều khiển `backend/src/controllers/product.controller.js` quản lý Sản phẩm kho theo SRS 3.15, 3.16, 3.17:
+  - `getProducts`: Lấy danh sách sản phẩm phân trang mặc định đúng 20 dòng theo BR-03, tìm kiếm theo tên hoặc mã SP, lọc theo danh mục (`category_id`) và chiến dịch (`campaign_id`), sắp xếp linh hoạt theo ngày/giá/kho.
+  - `getProductById`: Xem chi tiết sản phẩm kèm thông tin danh mục và chiến dịch.
+  - `createProduct`: Tạo mới sản phẩm, kiểm tra đơn giá và số lượng kho không âm, chống trùng mã sản phẩm `product_code` (HTTP 409).
+  - `updateProduct`: Cập nhật thông tin sản phẩm và chặn trùng mã sản phẩm.
+  - `deleteProduct`: Xóa sản phẩm (bảo vệ toàn vẹn: chặn xóa nếu sản phẩm đã phát sinh cơ hội hoặc đơn hàng - HTTP 400).
+  - `getProductOpportunities` (SRS 3.16): Xem toàn bộ danh sách các Cơ hội bán hàng liên quan đến sản phẩm kèm thông tin chi tiết khách hàng Lead.
+  - `getProductOrders` (SRS 3.17): Xem toàn bộ danh sách các Đơn hàng thực tế đã xuất bán sản phẩm kèm thông tin khách hàng và tổng doanh số.
+- [x] Xây dựng Tuyến đường `category.routes.js` và `product.routes.js` bọc bởi `authMiddleware` và `authorizeRoles`:
+  - Quyền Quản lý (`SALE_MANAGER`) và Quản trị viên (`ADMIN`) có toàn quyền CRUD.
+  - Quyền Nhân viên bán hàng (`SALESMAN`) được xem danh mục và sản phẩm để tạo cơ hội.
+- [x] Mount vào `backend/src/app.js` tại prefix `/api/categories` và `/api/products`.
+- [x] Xây dựng bộ kiểm thử tích hợp 18 bài test tại `backend/tests/product.test.js` kiểm tra toàn bộ luồng RBAC, validation, chống trùng mã SP/danh mục, phân trang 20 dòng, tìm kiếm, lọc danh mục, 2 APIs đặc thù SRS 3.16 & 3.17, và ràng buộc khóa ngoại khi xóa.
+- [x] Khôi phục toàn bộ mật khẩu tài khoản mặc định `admin`, `manager`, `salesman` về `11111111` bằng `npm run db:seed`.
+- [x] Chạy kiểm thử toàn hệ thống đạt 105/105 tests pass (70 backend + 35 frontend), build client production thành công.
 
 ## Verification Evidence
 
 | Check | Command | Result | Notes |
 |---|---|---|---|
-| Backend Test Suite | `npm test` (trong `backend/`) | PASS (52/52 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4), `forgot-password.test.js` (6), `user.test.js` (13), `lead.test.js` (15) |
+| Backend Test Suite | `npm test` (trong `backend/`) | PASS (70/70 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4), `forgot-password.test.js` (6), `user.test.js` (13), `lead.test.js` (15), `product.test.js` (18) |
 | Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (35/35 tests passed) | `admin-ui.test.js` (10 tests) + `leads-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
 | Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors) | Oxlint kiểm tra 37 files sạch sẽ |
 | Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 241ms) | Vite production bundle hoàn tất |
-| Full System Test | `npm test` (tại thư mục gốc) | PASS (87/87 tests passed) | Chạy đồng bộ toàn bộ backend tests, frontend tests và frontend lint |
+| Full System Test | `npm test` (tại thư mục gốc) | PASS (105/105 tests passed) | Chạy đồng bộ toàn bộ backend tests, frontend tests và frontend lint |
 
 ## Files Changed
 
-- `frontend/src/api/leadApi.js`: API Service cho module Leads.
-- `frontend/src/pages/Leads/LeadModal.jsx`: Modal form thêm/sửa Lead có validation và chống trùng.
-- `frontend/src/pages/Leads/LeadListPage.jsx`: Bảng quản lý Leads 20 dòng, search, sort, filter ngày.
-- `frontend/src/pages/Leads/LeadDetailPage.jsx`: Chi tiết Lead và danh sách Opportunities.
-- `frontend/src/routes/AppRoutes.jsx`: Định tuyến `/leads` và `/leads/:id`.
-- `frontend/tests/leads-ui.test.js`: 10 bài unit tests cho Leads UI.
-- `feature_list.json`: Cập nhật `feat-009` thành `completed`.
-- `progress.md`: Cập nhật tiến độ 9/20 tính năng hoàn thành.
+- `backend/src/controllers/category.controller.js`: Xử lý CRUD Danh mục sản phẩm.
+- `backend/src/controllers/product.controller.js`: Xử lý CRUD Sản phẩm, lọc, tìm kiếm và 2 APIs đặc thù SRS 3.16, 3.17.
+- `backend/src/routes/category.routes.js`: Định tuyến và phân quyền RBAC cho module Categories.
+- `backend/src/routes/product.routes.js`: Định tuyến và phân quyền RBAC cho module Products.
+- `backend/src/app.js`: Mount `/api/categories` và `/api/products`.
+- `backend/tests/product.test.js`: 18 bài kiểm thử tích hợp cho Products & Categories module.
+- `feature_list.json`: Cập nhật `feat-010` thành `completed`.
+- `progress.md`: Cập nhật tiến độ 10/20 tính năng hoàn thành (50%).
 - `session-handoff.md`: Cập nhật biên bản bàn giao.
 
 ## Decisions Made
 
-- Phân trang chuẩn BR-03: Mọi bảng dữ liệu hiển thị đúng 20 dòng mỗi trang.
-- Chống trùng lặp 2 lớp: Kiểm tra realtime qua `checkDuplicate` khi blur ô input và bắt lỗi HTTP 409 khi submit.
-- Cột sắp xếp mặc định theo `entered_date DESC` (ngày nhập mới nhất đưa lên đầu).
+- Phân quyền RBAC: Chỉ `SALE_MANAGER` và `ADMIN` được quyền tạo, sửa, xóa sản phẩm và danh mục; `SALESMAN` được xem danh sách.
+- Toàn vẹn dữ liệu: Không cho phép xóa sản phẩm nếu đã có Cơ hội hoặc Đơn hàng liên kết (HTTP 400); không cho phép xóa danh mục nếu đang có sản phẩm (HTTP 400).
+- Hai APIs đặc thù theo SRS: `GET /api/products/:id/opportunities` (SRS 3.16) và `GET /api/products/:id/orders` (SRS 3.17) được triển khai đầy đủ và kiểm thử tự động.
 
 ## Blockers / Risks
 
-- Không có rào cản kỹ thuật. Phân hệ Leads (Backend + Frontend) đã hoàn thiện 100%.
+- Không có rào cản kỹ thuật. Backend Products & Categories module hoạt động trơn tru và toàn vẹn.
 
 ## Next Steps
 
-1. Bắt đầu triển khai **`feat-010: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)`**:
-   - Xây dựng Controller `category.controller.js` và Tuyến đường `category.routes.js`: CRUD Danh mục sản phẩm (`product_categories`).
-   - Xây dựng Controller `product.controller.js` và Tuyến đường `product.routes.js`: CRUD Sản phẩm (`products`), tìm kiếm theo mã/tên, lọc theo danh mục.
-   - Xây dựng 2 APIs đặc thù theo SRS:
-     - `GET /api/products/:id/opportunities`: Xem toàn bộ cơ hội quan tâm sản phẩm này (SRS 3.16).
-     - `GET /api/products/:id/orders`: Xem toàn bộ đơn hàng đã bán sản phẩm này (SRS 3.17).
-   - Phân quyền RBAC: Chỉ `SALE_MANAGER` và `ADMIN` được quyền tạo, sửa, xóa; `SALESMAN` được xem danh sách.
-   - Viết bài kiểm thử tự động cho module Products & Categories.
+1. Bắt đầu triển khai **`feat-011: Frontend Giao diện Sản phẩm & Kho hàng (Products UI)`**:
+   - Xây dựng `frontend/src/api/productApi.js` (kết nối APIs sản phẩm và danh mục).
+   - Xây dựng `ProductListPage.jsx` (`/products`): Bảng danh sách sản phẩm 20 dòng, tìm kiếm theo tên/mã, bộ lọc danh mục dropdown, nút Thêm sản phẩm và Quản lý danh mục.
+   - Xây dựng `ProductModal.jsx`: Form thêm/sửa sản phẩm, chọn danh mục, chọn chiến dịch, kiểm tra trùng mã SP.
+   - Xây dựng `CategoryModal.jsx`: Modal popup quản lý danh mục (danh sách danh mục, thêm mới, sửa, xóa danh mục).
+   - Xây dựng `ProductDetailPage.jsx` (`/products/:id`): Xem chi tiết sản phẩm và 2 tabs con riêng biệt:
+     - Tab 1: **View Opportunities** (SRS 3.16) - danh sách khách hàng đang quan tâm.
+     - Tab 2: **View Orders** (SRS 3.17) - lịch sử các đơn hàng đã xuất bán sản phẩm.
+   - Cập nhật định tuyến `AppRoutes.jsx` gắn các trang vào router hệ thống.
+   - Viết unit tests kiểm thử Products UI và chạy kiểm thử toàn hệ thống.

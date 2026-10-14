@@ -26,6 +26,8 @@ app.use('/api', require('./routes/health.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/admin', require('./routes/user.routes'));
 app.use('/api/leads', require('./routes/lead.routes'));
+app.use('/api/categories', require('./routes/category.routes'));
+app.use('/api/products', require('./routes/product.routes'));
 
 // Global error handler
 app.use(require('./middlewares/error.middleware'));

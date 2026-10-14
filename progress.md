@@ -4,16 +4,33 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 13:06
-**Active Feature:** `feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)
-**Current Status:** HOÀN THÀNH 100% (9/20 tính năng đã nghiệm thu đạt chuẩn DoD)
-**Next Feature:** `feat-010` - Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)
+**Last Updated:** 2026-10-14 13:17
+**Active Feature:** `feat-010` - Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)
+**Current Status:** HOÀN THÀNH 100% (10/20 tính năng đã nghiệm thu đạt chuẩn DoD - Đạt 50% toàn bộ hệ thống Zen CRM)
+**Next Feature:** `feat-011` - Frontend Giao diện Sản phẩm & Kho hàng (Products UI)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **`feat-010` - Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module)**
+  - Xây dựng trọn bộ RESTful API CRUD Danh mục sản phẩm (`category.controller.js` và `category.routes.js`):
+    - `GET /api/categories`: Lấy toàn bộ danh mục, tự động đếm số lượng sản phẩm liên kết (`products_count`).
+    - `POST /api/categories`: Tạo danh mục mới, chống trùng tên danh mục (HTTP 409 Conflict).
+    - `PUT /api/categories/:id`: Cập nhật thông tin danh mục.
+    - `DELETE /api/categories/:id`: Xóa danh mục (bảo vệ toàn vẹn: chặn xóa nếu đang có sản phẩm thuộc danh mục - HTTP 400).
+  - Xây dựng trọn bộ RESTful API CRUD Sản phẩm kho (`product.controller.js` và `product.routes.js`):
+    - `GET /api/products`: Lấy danh sách sản phẩm phân trang 20 dòng mặc định theo BR-03 (SRS 3.15), tìm kiếm đa năng theo mã sản phẩm hoặc tên sản phẩm, lọc theo danh mục (`category_id`) và chiến dịch (`campaign_id`), sắp xếp linh hoạt theo ngày tạo/đơn giá/tồn kho.
+    - `GET /api/products/:id`: Xem chi tiết sản phẩm kèm tên danh mục và tên chiến dịch quảng bá.
+    - `POST /api/products`: Tạo mới sản phẩm, kiểm tra đơn giá và số lượng kho không âm, chống trùng mã sản phẩm `product_code` (HTTP 409 Conflict).
+    - `PUT /api/products/:id`: Cập nhật thông tin sản phẩm và chặn đổi sang mã sản phẩm đã được sử dụng.
+    - `DELETE /api/products/:id`: Xóa sản phẩm (bảo vệ toàn vẹn: chặn xóa nếu sản phẩm đã phát sinh cơ hội bán hàng hoặc đơn hàng - HTTP 400).
+    - `GET /api/products/:id/opportunities`: API đặc thù theo SRS 3.16: Xem toàn bộ danh sách các Cơ hội bán hàng liên quan đến sản phẩm kèm thông tin chi tiết khách hàng Lead.
+    - `GET /api/products/:id/orders`: API đặc thù theo SRS 3.17: Xem toàn bộ danh sách các Đơn hàng thực tế đã xuất bán sản phẩm kèm doanh số và khách hàng.
+  - Phân quyền RBAC đa cấp độ: Quản lý (`SALE_MANAGER`) và Quản trị viên (`ADMIN`) có quyền toàn quyền CRUD; Nhân viên bán hàng (`SALESMAN`) được cấp quyền xem danh mục và sản phẩm để tạo cơ hội bán hàng.
+  - Bộ kiểm thử: 18 integration tests tự động tại `backend/tests/product.test.js` (toàn bộ 70/70 tests backend pass 100%).
 
 - [x] **`feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)**
   - Xây dựng trọn bộ giao diện người dùng theo chuẩn phong cách Zoho CRM và đáp ứng 100% SRS 3.1 - 3.5:
@@ -100,21 +117,21 @@
 
 ### What's In Progress (Việc đang thực hiện)
 
-- Sẵn sàng chuyển giao sang `feat-010` - Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module: CRUD categories, CRUD products, GET opportunities by product SRS 3.16, GET orders by product SRS 3.17).
+- Sẵn sàng chuyển giao sang `feat-011` - Frontend Giao diện Sản phẩm & Kho hàng (Products UI: `ProductListPage`, `ProductModal`, `CategoryModal`, `ProductDetailPage` với 2 tabs con: View Opportunities SRS 3.16 và View Orders SRS 3.17).
 
 ---
 
 ### What's Next (Các bước tiếp theo)
 
-1. `feat-010`: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module).
-2. `feat-011`: Frontend Giao diện Sản phẩm & Kho hàng (Products UI).
-3. `feat-012`: Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log).
+1. `feat-011`: Frontend Giao diện Sản phẩm & Kho hàng (Products UI).
+2. `feat-012`: Backend Quản lý Cơ hội & Nhật ký Chăm sóc (Opportunities & Follow-up Log).
+3. `feat-013`: Frontend Giao diện Quản lý Cơ hội & Timeline Follow-up (Opportunities UI).
 
 ---
 
 ## Blockers / Risks (Rào Cản & Rủi Ro)
 
-- **Không có rào cản**: Toàn bộ phân hệ Quản lý Khách hàng tiềm năng (Leads Module) đã hoàn thiện 100% cả Backend API và Frontend UI, vượt qua toàn bộ 87 tests hệ thống và build Vite thành công.
+- **Không có rào cản**: Backend Products & Categories Module đã hoàn thiện trọn vẹn, vượt qua toàn bộ 18 integration tests độc lập và 70 tests backend toàn hệ thống.
 
 ---
 
@@ -122,8 +139,9 @@
 
 - Backend chuyển sang cổng 8888, Frontend chạy cổng 8080 để tránh xung đột cổng.
 - Toàn bộ các bảng danh sách tuân thủ nguyên tắc BR-03: hiển thị đúng 20 bản ghi mỗi trang kèm thanh phân trang chuẩn.
-- Endpoint chống trùng realtime `GET /api/leads/check-duplicate` hỗ trợ kiểm tra tức thời khi gõ SĐT/Email trên form kết hợp bắt lỗi HTTP 409 từ Backend.
-- Chi tiết Lead (`LeadDetailPage`) hiển thị đồng thời danh sách Cơ hội (Opportunities) và tính toán tổng doanh thu dự kiến (SRS 3.2.3 REQ-4).
+- Cơ chế bảo vệ toàn vẹn: Không cho phép xóa sản phẩm nếu đã có Cơ hội hoặc Đơn hàng liên kết (HTTP 400); không cho phép xóa danh mục nếu đang chứa sản phẩm (HTTP 400).
+- Chống trùng mã sản phẩm `product_code` và tên danh mục `name` (HTTP 409 Conflict).
+- Hai APIs đặc thù theo chuẩn SRS: `GET /api/products/:id/opportunities` (SRS 3.16) và `GET /api/products/:id/orders` (SRS 3.17) được bảo vệ bởi quyền Quản lý (`SALE_MANAGER`) và Quản trị viên (`ADMIN`).
 
 ---
 
@@ -131,8 +149,8 @@
 
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
-| `npm test` (trong `backend/`) | **PASS (52/52 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) + `lead.test.js` (15) |
+| `npm test` (trong `backend/`) | **PASS (70/70 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) + `lead.test.js` (15) + `product.test.js` (18) |
 | `npm test` (trong `frontend/`) | **PASS (35/35 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `leads-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
 | `npm run lint` (trong `frontend/`) | **PASS (0 errors)** | Oxlint kiểm tra 37 files sạch sẽ |
 | `npm run build` (trong `frontend/`) | **PASS (built in 241ms)** | Vite production bundle hoàn tất |
-| `npm test` (tại thư mục gốc) | **PASS (87/87 tests passed toàn hệ thống)** | Chạy test backend (52) + test frontend (35) + lint frontend |
+| `npm test` (tại thư mục gốc) | **PASS (105/105 tests passed toàn hệ thống)** | Chạy test backend (70) + test frontend (35) + lint frontend |

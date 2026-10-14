@@ -147,7 +147,7 @@ export default function Dashboard() {
                 apiConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
               }`}
             />
-            {apiConnected ? 'Backend:5001 Đang kết nối' : 'Đang kiểm tra API...'}
+            {apiConnected ? 'Backend:8888 Đang kết nối' : 'Đang kiểm tra API...'}
           </span>
         </div>
 

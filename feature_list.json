@@ -12,7 +12,7 @@
       "description": "Thiết lập thư mục monorepo/separate backend (Express.js 3-layer architecture: controllers, services, routes) và frontend (Vite React 18, Tailwind CSS), file .env.example, script npm run dev chạy đồng thời hai môi trường.",
       "dependencies": [],
       "status": "completed",
-      "evidence": "Backend: 'npm test' (2/2 passed, GET /api/health 200 OK). Frontend: 'npm run lint' (0 errors, 0 warnings), 'npm run build' (built in 368ms). Full-stack dev: 'npm run dev' runs Express (:5001) & Vite (:5173) concurrently; curl /api/health returned 200 OK."
+      "evidence": "Backend: Chạy 'npm test' (2/2 bài kiểm tra đạt, GET /api/health trả về 200 OK). Frontend: Chạy 'npm run lint' (0 lỗi, 0 cảnh báo), 'npm run build' thành công. Môi trường phát triển Full-Stack: Lệnh 'npm run dev' điều phối chạy đồng thời Express (:5001) và Vite (:8080); kiểm tra curl /api/health trả về HTTP 200 OK."
     },
     {
       "id": "feat-002",
@@ -22,7 +22,7 @@
         "feat-001"
       ],
       "status": "completed",
-      "evidence": "PostgreSQL schema created 10 tables DDL (roles, users, campaigns, product_categories, products, leads, opportunities, follow_ups, orders, sale_forecasts) + 10 performance indexes. Seed data populated 3 roles, 3 users (password 11111111 bcrypt-hashed), 1 campaign, 2 categories, 2 products, 2 leads, 1 opp, 1 follow-up, 12 months forecast. Verified with 6/6 passing automated tests in backend/tests/db.test.js."
+      "evidence": "CSDL PostgreSQL đã tạo hoàn chỉnh DDL 10 bảng chuẩn 3NF (roles, users, campaigns, product_categories, products, leads, opportunities, follow_ups, orders, sale_forecasts) kèm 10 performance indexes. Dữ liệu mẫu (Seed Data) đã nạp thành công 3 vai trò, 3 người dùng (mật khẩu khởi tạo 11111111 đã băm bcrypt), 1 chiến dịch, 2 danh mục, 2 sản phẩm, 2 khách tiềm năng, 1 cơ hội, 1 nhật ký chăm sóc, và kế hoạch doanh số 12 tháng năm 2026. Đã kiểm thử tự động đạt 6/6 bài kiểm tra trong backend/tests/db.test.js."
     },
     {
       "id": "feat-003",
@@ -32,7 +32,7 @@
         "feat-002"
       ],
       "status": "completed",
-      "evidence": "POST /api/auth/login validates credentials (username/email + bcrypt) and returns JWT with role. auth.middleware verifies JWT Bearer tokens and rejects unauthenticated/tampered requests. role.middleware enforces RBAC (ADMIN, SALE_MANAGER, SALESMAN; 403 Forbidden on unauthorized roles). GET /api/auth/me and PUT /api/auth/profile return & update authenticated user profile. Verified with 12 integration tests in backend/tests/auth.test.js (18/18 total backend tests passed in 1.2s)."
+      "evidence": "API POST /api/auth/login xác thực tài khoản (hỗ trợ cả username hoặc email kết hợp bcrypt) và cấp phát JWT token 24h kèm vai trò RBAC. Middleware auth.middleware.js kiểm tra Bearer token hợp lệ và từ chối các yêu cầu thiếu hoặc sửa đổi token trái phép. Middleware role.middleware.js thực thi phân quyền 3 vai trò (ADMIN, SALE_MANAGER, SALESMAN; trả về 403 Forbidden nếu không đủ quyền). API GET /api/auth/me và PUT /api/auth/profile trả về và cập nhật hồ sơ cá nhân. Đã kiểm thử đạt 12/12 bài kiểm tra tích hợp trong backend/tests/auth.test.js (18/18 tests backend đạt 100%)."
     },
     {
       "id": "feat-004",
@@ -42,7 +42,7 @@
         "feat-003"
       ],
       "status": "completed",
-      "evidence": "POST /api/auth/forgot-password validates email, creates secure 64-char hex token expiring in 15 mins, and dispatches reset link via Gmail Nodemailer SMTP. GET /api/auth/verify-reset-token/:token verifies token validity. POST /api/auth/reset-password updates password with bcrypt, clears token (single-use), and enables immediate login with new credentials. Verified with 6 integration tests in backend/tests/forgot-password.test.js (24/24 total backend tests passing)."
+      "evidence": "API POST /api/auth/forgot-password kiểm tra email hợp lệ, tạo token hex ngẫu nhiên 64 ký tự thời hạn 15 phút và gửi liên kết đặt lại mật khẩu qua Gmail SMTP bằng Nodemailer. API GET /api/auth/verify-reset-token/:token xác thực tính hợp lệ của token. API POST /api/auth/reset-password cập nhật mật khẩu mới bằng bcrypt, hủy token (single-use) và cho phép đăng nhập ngay với mật khẩu mới. Đã kiểm thử tích hợp đạt 6/6 bài kiểm tra trong backend/tests/forgot-password.test.js."
     },
     {
       "id": "feat-005",
@@ -52,7 +52,7 @@
         "feat-003"
       ],
       "status": "completed",
-      "evidence": "Built RESTful Admin APIs protected by auth & ADMIN role guard: GET /api/admin/roles returns system roles; GET /api/admin/users provides paginated user list with role_name, search and filters; POST /api/admin/users creates new user with initial password; PATCH /api/admin/users/:id/status toggles active state and blocks inactive logins (admin self-deactivation blocked); PATCH /api/admin/users/:id/role updates role; POST /api/admin/users/:id/reset-password resets staff password directly. Verified with 13 integration tests in backend/tests/user.test.js (37/37 total backend tests passing in 4.8s)."
+      "evidence": "Xây dựng trọn bộ RESTful API quản trị bảo vệ bởi 2 lớp bảo vệ auth & ADMIN role guard: GET /api/admin/roles lấy danh mục vai trò; GET /api/admin/users phân trang 20 dòng, tìm kiếm và lọc trạng thái/vai trò; POST /api/admin/users tạo tài khoản nhân viên mới với mật khẩu khởi tạo mặc định; PATCH /api/admin/users/:id/status bật/tắt kích hoạt và chặn Admin tự vô hiệu hóa chính mình; PATCH /api/admin/users/:id/role gán vai trò; POST /api/admin/users/:id/reset-password đặt lại mật khẩu nhân viên trực tiếp. Đã kiểm thử đạt 13/13 bài kiểm tra tích hợp trong backend/tests/user.test.js (37/37 tests backend đạt 100%)."
     },
     {
       "id": "feat-006",
@@ -62,7 +62,7 @@
         "feat-001"
       ],
       "status": "completed",
-      "evidence": "Built comprehensive Frontend Admin UI framework complying with SRS 2.1, 4.1, 5.3: MainLayout with collapsible Sidebar dynamically filtered by RBAC roles (ADMIN: 9 items, SALE_MANAGER: 8 items, SALESMAN: 4 items); Header with breadcrumbs, role badges, profile access and logout; PrivateRoute and RoleRoute route guards; axiosClient interceptors with automatic Bearer token injection and 401 handling; and useIdleTimeout session security hook with 30-minute auto-logout and 2-minute countdown warning modal (TimeoutWarning). Built Login, ForgotPassword, ResetPassword, Dashboard, Forbidden (403), NotFound (404), and module Placeholders. Verified with 10 unit tests in frontend/tests/admin-ui.test.js, 0 oxlint warnings/errors on 22 files, and successful Vite production build."
+      "evidence": "Xây dựng khung giao diện Admin UI chuẩn SRS 2.1, 4.1, 5.3: MainLayout với Sidebar điều hướng động theo 3 vai trò RBAC (ADMIN: 9 mục, SALE_MANAGER: 8 mục, SALESMAN: 4 mục); Header hiển thị breadcrumbs, badge vai trò, thông tin người dùng và nút đăng xuất; Route guard PrivateRoute và RoleRoute; Axios client interceptor tự động gắn Bearer token và xử lý lỗi 401; Hook useIdleTimeout bảo mật phiên làm việc 30 phút tự động đăng xuất kèm modal popup cảnh báo đếm ngược 2 phút cuối (TimeoutWarning). Xây dựng các trang Login, ForgotPassword, ResetPassword, Dashboard, Forbidden (403), NotFound (404) và khung Placeholder các module. Đã kiểm thử đạt 10/10 bài kiểm tra trong frontend/tests/admin-ui.test.js, linter oxlint đạt 0 lỗi/cảnh báo và Vite build thành công."
     },
     {
       "id": "feat-007",
@@ -73,7 +73,7 @@
         "feat-006"
       ],
       "status": "completed",
-      "evidence": "Built UserManagement (/admin/users) adhering to SRS 2.1: 20-row standard Pagination (BR-03), keyword SearchInput (debounced 300ms), role and status filters, status toggle switch with confirmation dialog (admin self-lock prevention enforced), inline role update dropdown, CreateUserModal with default password notice (11111111), and ResetPasswordModal for direct admin overrides. Built ProfilePage (/profile) adhering to SRS 3.13 for personal info updates and password changes. Created reusable components Pagination, SearchInput, Modal, ConfirmDialog and API services authApi & adminApi. Verified with 10 unit tests in frontend/tests/user-management.test.js (20/20 total frontend tests passed, 57/57 total system tests passed), 0 oxlint warnings/errors on 31 files, and clean Vite production build."
+      "evidence": "Xây dựng trang Quản trị người dùng UserManagement (/admin/users) tuân thủ SRS 2.1: Phân trang chuẩn 20 dòng (BR-03), thanh tìm kiếm SearchInput debounce 300ms, bộ lọc vai trò và trạng thái, nút gạt kích hoạt tài khoản kèm hộp thoại xác nhận ConfirmDialog (chặn admin tự khóa tài khoản của chính mình), dropdown gán vai trò trực tiếp, modal tạo nhân viên mới CreateUserModal với thông báo mật khẩu khởi tạo (11111111) và ResetPasswordModal đặt lại mật khẩu trực tiếp cho nhân viên. Xây dựng trang ProfilePage (/profile) tuân thủ SRS 3.13 cho phép cập nhật thông tin cá nhân và đổi mật khẩu an toàn. Xây dựng các component dùng chung Pagination, SearchInput, Modal, ConfirmDialog và service authApi, adminApi. Đã kiểm thử đạt 10/10 bài kiểm tra trong frontend/tests/user-management.test.js (20/20 tests frontend và 57/57 tests toàn hệ thống đạt 100%), oxlint 0 lỗi trên 31 files."
     },
     {
       "id": "feat-008",
@@ -155,7 +155,7 @@
       "description": "Xây dựng MakeOrderModal (popup kế thừa giá/số lượng từ Opportunity, nhập thông tin giao hàng & thanh toán để chốt đơn), OrderListPage (danh sách hóa đơn đã chốt), và OrderDetailPage hiển thị chi tiết hóa đơn bảo tồn giá bán tại thời điểm chốt (SRS 3.12).",
       "dependencies": [
         "feat-006",
-        "feat-014"
+        "feat-015"
       ],
       "status": "not-started",
       "evidence": ""
@@ -177,7 +177,7 @@
       "description": "Xây dựng CampaignListPage, CampaignModal, và CampaignReportPage (hiển thị các thẻ chỉ số đo lường ROI, danh sách Lead phát sinh từ chiến dịch) cùng GeneralReportsPage (báo cáo doanh thu theo thời gian) (SRS 2.1, 3.18, 3.19).",
       "dependencies": [
         "feat-006",
-        "feat-016"
+        "feat-017"
       ],
       "status": "not-started",
       "evidence": ""

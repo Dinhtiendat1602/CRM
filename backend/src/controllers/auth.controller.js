@@ -100,7 +100,7 @@ exports.getProfile = async (req, res, next) => {
     const userId = req.user.id;
 
     const result = await db.query(
-      `SELECT u.id, u.username, u.email, u.full_name, u.phone, u.is_active, r.name AS role, u.created_at, u.updated_at
+      `SELECT u.id, u.username, u.email, u.full_name, u.phone, u.is_active, r.name AS role, r.name AS role_name, u.created_at, u.updated_at
        FROM users u
        JOIN roles r ON u.role_id = r.id
        WHERE u.id = $1;`,

@@ -260,7 +260,7 @@ exports.forgotPassword = async (req, res, next) => {
       [resetToken, resetExpires, user.id]
     );
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
     const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
 
     // Gửi email qua Nodemailer SMTP

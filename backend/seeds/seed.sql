@@ -7,7 +7,7 @@ INSERT INTO roles (id, name, description) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO users (username, email, password_hash, full_name, phone, role_id) VALUES
-  ('admin', 'admin@zencrm.com', '$2b$10$g0YNpSyWaK14GHalv1nS5uQBidPCqrBPqvj9BuXQ0yk7uA8fwcmjy', 'System Administrator', '0900000001', 1),
-  ('manager', 'manager@zencrm.com', '$2b$10$g0YNpSyWaK14GHalv1nS5uQBidPCqrBPqvj9BuXQ0yk7uA8fwcmjy', 'Nguyen Van Manager', '0900000002', 2),
-  ('salesman', 'salesman@zencrm.com', '$2b$10$g0YNpSyWaK14GHalv1nS5uQBidPCqrBPqvj9BuXQ0yk7uA8fwcmjy', 'Tran Thi Salesman', '0900000003', 3)
+  ('admin', 'admin@zencrm.com', '$2b$10$MX/P0piGxqsfBMbgslloS.9HHExahgXIGTrvlnGYh1TRCBEBBmJ2q', 'System Administrator', '0900000001', 1),
+  ('manager', 'manager@zencrm.com', '$2b$10$MX/P0piGxqsfBMbgslloS.9HHExahgXIGTrvlnGYh1TRCBEBBmJ2q', 'Nguyen Van Manager', '0900000002', 2),
+  ('salesman', 'salesman@zencrm.com', '$2b$10$MX/P0piGxqsfBMbgslloS.9HHExahgXIGTrvlnGYh1TRCBEBBmJ2q', 'Tran Thi Salesman', '0900000003', 3)
 ON CONFLICT (username) DO NOTHING;

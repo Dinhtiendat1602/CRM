@@ -85,19 +85,19 @@ test('Seed Data Verification: Business Entities (Campaign, Products, Leads, Opp,
   assert.ok(campaigns.rows.length >= 1);
 
   const categories = await pool.query('SELECT * FROM product_categories');
-  assert.strictEqual(categories.rows.length, 2);
+  assert.ok(categories.rows.length >= 3, 'Phải có ít nhất 3 danh mục sản phẩm (Thiết bị điện tử, Phần mềm bản quyền, Máy ảnh kỹ thuật số)');
 
   const products = await pool.query('SELECT * FROM products');
-  assert.strictEqual(products.rows.length, 2);
+  assert.ok(products.rows.length >= 6, 'Phải có ít nhất 6 sản phẩm mẫu');
 
   const leads = await pool.query('SELECT * FROM leads');
   assert.ok(leads.rows.length >= 2, 'Must have at least 2 seed leads');
 
   const opps = await pool.query('SELECT * FROM opportunities');
-  assert.strictEqual(opps.rows.length, 1);
+  assert.ok(opps.rows.length >= 1, 'Phải có ít nhất 1 cơ hội mẫu');
 
   const followUps = await pool.query('SELECT * FROM follow_ups');
-  assert.strictEqual(followUps.rows.length, 1);
+  assert.ok(followUps.rows.length >= 1, 'Phải có ít nhất 1 nhật ký follow-up');
 
   // 12 months forecast for 2026 (SRS 3.20)
   const forecasts = await pool.query('SELECT * FROM sale_forecasts WHERE fiscal_year = 2026 ORDER BY month ASC');

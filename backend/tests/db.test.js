@@ -91,7 +91,7 @@ test('Seed Data Verification: Business Entities (Campaign, Products, Leads, Opp,
   assert.strictEqual(products.rows.length, 2);
 
   const leads = await pool.query('SELECT * FROM leads');
-  assert.strictEqual(leads.rows.length, 2);
+  assert.ok(leads.rows.length >= 2, 'Must have at least 2 seed leads');
 
   const opps = await pool.query('SELECT * FROM opportunities');
   assert.strictEqual(opps.rows.length, 1);

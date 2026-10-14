@@ -4,16 +4,27 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 10:38
-**Active Feature:** `feat-007` - Frontend Màn hình Xác thực & Quản lý Người dùng (Users Management UI)
-**Current Status:** HOÀN THÀNH 100% (7/20 tính năng đã nghiệm thu đạt chuẩn DoD)
-**Next Feature:** `feat-008` - Backend Quản lý Khách hàng tiềm năng (Leads Module - phân trang 20 dòng, chống trùng SĐT/Email)
+**Last Updated:** 2026-10-14 12:55
+**Active Feature:** `feat-008` - Backend Quản lý Khách hàng tiềm năng (Leads Module)
+**Current Status:** HOÀN THÀNH 100% (8/20 tính năng đã nghiệm thu đạt chuẩn DoD)
+**Next Feature:** `feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **`feat-008` - Backend Quản lý Khách hàng tiềm năng (Leads Module)**
+  - Xây dựng trọn bộ RESTful API CRUD Khách hàng tiềm năng (`lead.controller.js` và `lead.routes.js`) tuân thủ nghiêm ngặt SRS 3.1 - 3.5:
+    - `GET /api/leads`: Lấy danh sách Leads có phân trang mặc định 20 bản ghi/trang (BR-03, SRS 3.2.3 REQ-1), lọc theo khoảng ngày nhập `startDate` / `endDate` (BR-05, SRS 3.2.3 REQ-2), sắp xếp tăng/giảm theo `entered_date` (BR-04, SRS 3.2.3 REQ-3), tìm kiếm theo tên khách hàng (SRS 3.3).
+    - `GET /api/leads/:id`: Xem chi tiết Lead kèm theo danh sách Cơ hội (Opportunities) liên quan (SRS 3.2.3 REQ-4).
+    - `GET /api/leads/check-duplicate`: API kiểm tra phát hiện trùng lặp Email hoặc Số điện thoại trong thời gian thực khi người dùng nhập liệu trên form.
+    - `POST /api/leads`: Tạo mới Khách tiềm năng với cơ chế kiểm tra chống trùng SĐT/Email (BR-02, SRS 3.1.2 REQ-4), trả về mã lỗi HTTP 409 Conflict rõ ràng khi phát hiện trùng.
+    - `PUT /api/leads/:id`: Cập nhật thông tin Khách tiềm năng, có ràng buộc chống đổi sang Email/SĐT đã thuộc về Lead khác (HTTP 409).
+    - `DELETE /api/leads/:id`: Xóa Khách tiềm năng (SRS 3.5).
+  - Tích hợp middleware phân quyền RBAC: Bảo vệ toàn bộ router với `authMiddleware` và `authorizeRoles('SALESMAN', 'SALE_MANAGER', 'ADMIN')`.
+  - Bộ kiểm thử: 15 integration tests tự động tại `backend/tests/lead.test.js` (toàn bộ 52/52 tests backend pass 100%).
 
 - [x] **`feat-001` - Khởi tạo môi trường & Cấu trúc khung dự án Full-Stack**
   - Cấu trúc monorepo hoàn chỉnh với orchestration script `npm run dev` (`concurrently`).
@@ -80,28 +91,29 @@
 
 ### What's In Progress (Việc đang thực hiện)
 
-- Sẵn sàng chuyển giao sang `feat-008` - Backend Quản lý Khách hàng tiềm năng (Leads Module).
+- Đang chuẩn bị triển khai `feat-009` - Frontend Giao diện Quản lý Khách tiềm năng (Leads UI: `LeadListPage`, `LeadModal`, `LeadDetailPage`).
 
 ---
 
 ### What's Next (Các bước tiếp theo)
 
-1. `feat-008`: Backend Quản lý Khách hàng tiềm năng (Leads Module - phân trang 20 dòng, chống trùng SĐT/Email, CRUD Leads).
-2. `feat-009`: Frontend Giao diện Quản lý Khách tiềm năng (Leads UI: bảng 20 dòng, modal thêm/sửa có validation trùng SĐT/Email, màn hình chi tiết kèm danh sách cơ hội).
-3. `feat-010`: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module).
+1. `feat-009`: Frontend Giao diện Quản lý Khách tiềm năng (Leads UI: bảng 20 dòng, modal thêm/sửa có validation trùng SĐT/Email, màn hình chi tiết kèm danh sách cơ hội).
+2. `feat-010`: Backend Quản lý Danh mục & Sản phẩm Kho (Products & Categories Module).
+3. `feat-011`: Frontend Giao diện Sản phẩm & Kho hàng (Products UI).
 
 ---
 
 ## Blockers / Risks (Rào Cản & Rủi Ro)
 
-- **Không có rào cản**: Phân hệ Quản trị người dùng & Hồ sơ cá nhân đã hoàn thiện trọn vẹn ở cả Frontend và Backend, hoạt động ổn định và kiểm thử toàn diện.
+- **Không có rào cản**: Backend Leads Module đã hoàn thiện trọn vẹn, vượt qua toàn bộ 15 integration tests độc lập và 52 tests backend toàn hệ thống.
 
 ---
 
 ## Decisions Made (Các Quyết Định Đã Thống Nhất)
 
+- Backend chuyển sang cổng 8888, Frontend chạy cổng 8080 để tránh xung đột cổng.
 - Toàn bộ các bảng danh sách tuân thủ nguyên tắc BR-03: hiển thị đúng 20 bản ghi mỗi trang kèm thanh phân trang chuẩn.
-- Form tìm kiếm tự động debounce 300ms trước khi gửi query đến backend để tối ưu hiệu năng.
+- Endpoint chống trùng realtime `GET /api/leads/check-duplicate` hỗ trợ kiểm tra tức thời khi gõ SĐT/Email trên form.
 - Nút toggle trạng thái tài khoản bắt buộc hiển thị hộp thoại xác nhận `ConfirmDialog` và chặn tuyệt đối hành vi Admin tự vô hiệu hóa tài khoản của chính mình.
 
 ---
@@ -110,8 +122,8 @@
 
 | Lệnh kiểm thử | Kết quả | Chi tiết |
 |---|---|---|
-| `npm test` (trong `backend/`) | **PASS (37/37 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) |
-| `npm test` (trong `frontend/`) | **PASS (20/20 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `user-management.test.js` (10 tests) |
-| `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 31 files sạch sẽ |
-| `npm run build` (trong `frontend/`) | **PASS (built in 294ms)** | Vite production bundle thành công |
-| `npm test` (tại thư mục gốc) | **PASS (57/57 passed toàn hệ thống)** | Chạy test backend + test frontend + lint frontend |
+| `npm test` (trong `backend/`) | **PASS (52/52 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (4) + `forgot-password.test.js` (6) + `user.test.js` (13) + `lead.test.js` (15) |
+| `npm test` (trong `frontend/`) | **PASS (25/25 passed, 0 failures)** | `admin-ui.test.js` (10 tests) + `login-flow.test.js` (5 tests) + `user-management.test.js` (10 tests) |
+| `npm run lint` (trong `frontend/`) | **PASS (0 warnings, 0 errors)** | Oxlint kiểm tra 32 files sạch sẽ |
+| `npm run build` (trong `frontend/`) | **PASS (built thành công)** | Vite production bundle hoàn tất |
+| `npm test` (tại thư mục gốc) | **PASS (77/77 tests passed toàn hệ thống)** | Chạy test backend (52) + test frontend (25) + lint frontend |

@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use('/api', require('./routes/health.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/admin', require('./routes/user.routes'));
+app.use('/api/leads', require('./routes/lead.routes'));
 
 // Global error handler
 app.use(require('./middlewares/error.middleware'));

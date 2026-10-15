@@ -4,35 +4,41 @@
 
 ## Current Objective
 
-- Goal: Hoàn thành `feat-015` (Frontend Màn hình Chốt đơn & Quản lý Đơn hàng - Make Order & Orders UI) và sẵn sàng chuyển sang `feat-016` (Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng - Campaigns & Sales Reporting).
-- Current status: `feat-015` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 15/20 tính năng hoàn thành (75% toàn bộ hệ thống Zen CRM).
+- Goal: Hoàn thành `feat-016` (Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng - Campaigns & Sales Reporting) và sẵn sàng chuyển sang `feat-017` (Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả - Campaigns & Reports UI).
+- Current status: `feat-016` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 16/20 tính năng hoàn thành (80% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
 
-- [x] **`feat-015`: Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI theo SRS 3.12, BR-03, BR-05, BR-07):**
-  - **MakeOrderModal (`MakeOrderModal.jsx`):**
-    - Modal chốt đơn từ Cơ hội bán hàng, tự động kế thừa đơn giá niêm yết, số lượng và địa chỉ của Lead.
-    - Tính tổng tiền thời gian thực (`total_amount = quantity * unit_price`), kiểm tra tồn kho và cảnh báo đỏ tức thì nếu vượt quá tồn kho (SRS 3.12, AC-08).
-    - Cung cấp preset phương thức thanh toán và bắt buộc nhập thông tin thanh toán (`payment_info`) cùng địa chỉ giao hàng (`shipping_address`) theo SRS 3.12.3 REQ-1.
-    - Gọi API `oppApi.makeOrder` với transaction ACID, xử lý trạng thái loading và phản hồi lỗi thân thiện.
-  - **Tích hợp vào Opportunity Pages:**
-    - `OpportunityDetailPage.jsx`: Kích hoạt `MakeOrderModal`, reload tự động chi tiết cơ hội sau khi chốt (hiển thị ngay card Đơn Hàng Đã Được Khởi Tạo Thành Công và badge `ORDERED`).
-    - `OpportunityListPage.jsx`: Cột Thao tác bổ sung nút `ShoppingBag` màu xanh lá cho các cơ hội chưa chốt.
-  - **OrderListPage (`OrderListPage.jsx`):**
-    - Trang danh sách đơn hàng đã chốt tại `/orders`.
-    - Phân trang chuẩn 20 dòng/trang theo quy chuẩn BR-03 (`limit=20`).
-    - 3 thẻ thống kê KPI: Tổng số đơn hàng, Tổng doanh thu đã chốt (VND), Tổng số lượng sản phẩm xuất kho.
-    - Tìm kiếm đa năng (mã đơn, tên khách hàng, tên sản phẩm), bộ lọc khoảng ngày chốt đơn theo BR-05 (`from_date`, `to_date`), bộ lọc trạng thái và sắp xếp theo ngày chốt/tổng tiền.
-  - **OrderDetailPage (`OrderDetailPage.jsx`):**
-    - Trang chi tiết đơn hàng tại `/orders/:id`.
-    - Hiển thị hóa đơn bán hàng chuyên nghiệp bảo tồn giá bán tại thời điểm chốt (SRS 3.12).
-    - Tích hợp tính năng In phiếu xuất kho / Hóa đơn (`window.print()`) kèm mẫu chữ ký khách hàng và nhân viên lập phiếu.
-  - **AppRoutes & orderApi:**
-    - Gắn `OrderListPage` và `OrderDetailPage` vào `AppRoutes.jsx` thay thế `PlaceholderPage`.
-    - `orderApi.js` cung cấp đầy đủ các phương thức kết nối API đơn hàng.
+- [x] **`feat-016`: Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting theo SRS 3.18, 3.19, SRS 2.1):**
+  - **Controllers & Routers:**
+    - [backend/src/controllers/campaign.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/campaign.controller.js)
+    - [backend/src/routes/campaign.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/campaign.routes.js)
+    - [backend/src/controllers/report.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/report.controller.js)
+    - [backend/src/routes/report.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/report.routes.js)
+    - [backend/src/app.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/app.js) (mount `/api/campaigns` và `/api/reports`)
+  - **CRUD Campaigns (SRS 3.18):**
+    - `GET /api/campaigns`: Phân trang 20 dòng chuẩn BR-03, tìm kiếm theo tên/mô tả, lọc khoảng ngày BR-05, lọc trạng thái `ACTIVE` (đang chạy), `UPCOMING` (sắp diễn ra), `ENDED` (đã kết thúc), sắp xếp linh hoạt.
+    - `POST /api/campaigns`: Thêm mới chiến dịch với validate tên, ngày bắt đầu/kết thúc (`end_date >= start_date`) và ngân sách (`budget >= 0`).
+    - `GET /api/campaigns/:id`: Lấy chi tiết chiến dịch kèm danh sách sản phẩm gán và số Leads phát sinh.
+    - `PUT /api/campaigns/:id`: Cập nhật thông tin chiến dịch.
+    - `DELETE /api/campaigns/:id`: Xóa chiến dịch an toàn, tự động ngắt liên kết `campaign_id` trên bảng `products` và `leads`.
+  - **Gán Sản phẩm vào Chiến dịch (SRS 3.18.1):**
+    - `POST /api/campaigns/:id/products`: Gán danh sách mã sản phẩm vào chiến dịch tiếp thị.
+    - `DELETE /api/campaigns/:id/products/:productId`: Gỡ sản phẩm khỏi chiến dịch.
+  - **Báo cáo Hiệu quả Chiến dịch (Campaign Performance Report - SRS 3.19):**
+    - `GET /api/campaigns/:id/report`: Đo lường toàn diện hiệu quả chiến dịch gồm ngân sách (`budget`), tổng số Leads thu được, tổng số Cơ hội chuyển đổi, tổng số Đơn hàng thành công, doanh thu thực tế, chỉ số ROI (`(doanh thu - ngân sách) / ngân sách * 100%`) và tỷ lệ chuyển đổi (`conversion_rate`).
+    - Trả về danh sách chi tiết các Leads thu được và các Sản phẩm đang quảng bá trong chiến dịch.
+  - **Hệ thống Báo cáo Bán hàng Tổng hợp (Sales & Business Reports - SRS 2.1):**
+    - `GET /api/reports/summary`: Báo cáo nhanh KPI hôm nay / tháng này / năm nay và so sánh tiến độ với chỉ tiêu kế hoạch năm tài chính.
+    - `GET /api/reports/leads`: Báo cáo chuỗi thời gian Leads theo ngày/tháng và phân bổ nguồn theo từng chiến dịch.
+    - `GET /api/reports/orders`: Báo cáo chuỗi thời gian số lượng đơn hàng, giá trị trung bình đơn (AOV) và trạng thái đơn hàng.
+    - `GET /api/reports/revenue`: Báo cáo doanh thu theo chu kỳ, phân bổ doanh thu theo từng Sản phẩm (Revenue by Product) kèm tỷ trọng đóng góp `%` và phân bổ theo Danh mục sản phẩm (SRS 2.1).
+  - **Phân quyền RBAC:**
+    - Salesman được phép xem danh sách chiến dịch để gắn Lead nhưng bị chặn 100% quyền tạo/sửa/xóa và xem báo cáo (HTTP 403 Forbidden).
+    - Toàn quyền quản trị và phân tích báo cáo thuộc về `SALE_MANAGER` và `ADMIN`.
   - **Bộ kiểm thử & Build:**
-    - Viết 12 bài unit tests tại `frontend/tests/orders-ui.test.js` kiểm tra validation, tính tiền realtime, query params BR-03/BR-05, format mã đơn và thống kê KPI.
-    - Kết quả kiểm thử toàn hệ thống: **175/175 tests PASS 100%** (105 backend + 70 frontend).
-    - Vite build client thành công trong 306ms, 0 lỗi linter.
+    - Viết 19 bài integration tests tại `backend/tests/campaign.test.js`.
+    - Kết quả kiểm thử toàn hệ thống: **194/194 tests PASS 100%** (124 backend + 70 frontend).
+    - Vite build client thành công trong 250ms, 0 lỗi linter.
 - [x] **Khắc phục lỗi Foreign Key `leads_assigned_to_fkey` và Dropdown Sản Phẩm trong Cơ Hội:**
   - **Lỗi 1 (Thêm Lead bị vi phạm khóa ngoại `leads_assigned_to_fkey`):**
     - Đã xác thực an toàn ID người dùng phụ trách (`assigned_to`) và chiến dịch (`campaign_id`) trong `lead.controller.js` trước khi lưu vào CSDL; nâng cấp `auth.middleware.js` kiểm tra tài khoản còn tồn tại và active.

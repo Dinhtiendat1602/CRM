@@ -165,11 +165,12 @@
       "name": "Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng",
       "description": "Xây dựng CRUD Campaigns (tên, ngân sách, ngày bắt đầu/kết thúc), API gán sản phẩm vào chiến dịch, API GET /api/campaigns/:id/report (Campaign Performance Report: tổng Lead thu được, tổng Opportunity chuyển đổi SRS 3.18, 3.19), cùng các API Báo cáo tổng hợp Lead/Order/Doanh thu theo ngày/tháng/năm (SRS 2.1).",
       "dependencies": [
+        "feat-003",
         "feat-010",
-        "feat-012"
+        "feat-014"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành 100% module Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting Module) tuân thủ nghiêm ngặt đặc tả SRS 3.18, 3.19, SRS 2.1 và các Business Rules BR-03, BR-05: 1. CRUD Campaigns (SRS 3.18): Xây dựng đầy đủ RESTful APIs gồm GET /api/campaigns (phân trang 20 dòng chuẩn BR-03, tìm kiếm theo tên/mô tả, lọc theo khoảng ngày BR-05, lọc trạng thái ACTIVE/UPCOMING/ENDED), POST /api/campaigns (thêm mới chiến dịch với validate tên, ngày bắt đầu/kết thúc end_date >= start_date và ngân sách budget), GET /api/campaigns/:id (chi tiết chiến dịch kèm danh sách sản phẩm và số leads), PUT /api/campaigns/:id (cập nhật chiến dịch), DELETE /api/campaigns/:id (xóa chiến dịch an toàn và tự động ngắt liên kết products/leads). 2. Gán sản phẩm vào chiến dịch (SRS 3.18.1): Xây dựng POST /api/campaigns/:id/products (gán danh sách mã sản phẩm vào chiến dịch) và DELETE /api/campaigns/:id/products/:productId (gỡ sản phẩm khỏi chiến dịch). 3. Báo cáo hiệu quả chiến dịch (Campaign Performance Report - SRS 3.19): Xây dựng GET /api/campaigns/:id/report trả về các chỉ số đo lường hiệu quả (ngân sách budget, tổng số Leads thu được, tổng số Opportunities chuyển đổi, tổng số Orders thành công, doanh thu thực tế, tính chỉ số ROI và tỷ lệ chuyển đổi Leads -> Orders conversion_rate) kèm danh sách chi tiết Leads và Sản phẩm quảng bá trong chiến dịch. 4. Báo cáo tổng hợp bán hàng (SRS 2.1): Xây dựng hệ thống báo cáo kinh doanh dành riêng cho Sale Manager & Admin gồm GET /api/reports/summary (KPI nhanh hôm nay/tháng này/năm nay và so sánh chỉ tiêu kế hoạch), GET /api/reports/leads (thống kê Leads theo chu kỳ ngày/tháng/năm và nguồn chiến dịch), GET /api/reports/orders (thống kê Đơn hàng theo chu kỳ và trạng thái), GET /api/reports/revenue (thống kê Doanh thu theo chu kỳ, phân bổ theo từng Sản phẩm Revenue by Product kèm % tỷ trọng đóng góp và phân bổ theo Danh mục sản phẩm). 5. Phân quyền RBAC nghiêm ngặt: Cho phép Salesman xem danh sách chiến dịch để chọn khi tạo Lead nhưng chặn 100% quyền tạo/sửa/xóa và xem báo cáo (HTTP 403 Forbidden). 6. Đã viết 19 bài integration tests tại backend/tests/campaign.test.js và chạy kiểm thử toàn hệ thống đạt 194/194 tests PASS 100% (124 backend + 70 frontend), Vite client build thành công trong 250ms."
     },
     {
       "id": "feat-017",

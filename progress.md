@@ -4,16 +4,42 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-15 09:30
-**Active Task:** feat-015 - Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI)
-**Current Status:** HOÀN THÀNH 100% (175/175 tests pass: 105 backend + 70 frontend, build thành công, 0 lint errors)
-**Next Feature:** `feat-016` - Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting)
+**Last Updated:** 2026-10-15 10:05
+**Active Task:** feat-016 - Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting)
+**Current Status:** HOÀN THÀNH 100% (194/194 tests pass: 124 backend + 70 frontend, build thành công, 0 lint errors)
+**Next Feature:** `feat-017` - Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **feat-016: Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting theo SRS 3.18, 3.19, SRS 2.1):**
+  - **CRUD Campaigns (`campaign.controller.js` & `campaign.routes.js`):**
+    - `GET /api/campaigns`: Phân trang 20 dòng chuẩn BR-03, tìm kiếm đa năng theo tên/mô tả, lọc theo khoảng ngày BR-05, lọc trạng thái thời gian chiến dịch `ACTIVE` (đang chạy), `UPCOMING` (sắp diễn ra), `ENDED` (đã kết thúc), sắp xếp linh hoạt.
+    - `POST /api/campaigns`: Thêm chiến dịch mới với validate bắt buộc tên, ngày bắt đầu/kết thúc (`end_date >= start_date`) và ngân sách (`budget >= 0`).
+    - `GET /api/campaigns/:id`: Lấy chi tiết chiến dịch kèm danh sách sản phẩm gán và số Leads phát sinh.
+    - `PUT /api/campaigns/:id`: Cập nhật thông tin chiến dịch.
+    - `DELETE /api/campaigns/:id`: Xóa chiến dịch an toàn, tự động ngắt liên kết `campaign_id` trên bảng `products` và `leads`.
+  - **Gán Sản phẩm vào Chiến dịch (`assignProducts` & `removeProductFromCampaign` - SRS 3.18.1):**
+    - `POST /api/campaigns/:id/products`: Gán mảng mã sản phẩm vào chiến dịch tiếp thị.
+    - `DELETE /api/campaigns/:id/products/:productId`: Gỡ sản phẩm khỏi chiến dịch.
+  - **Báo cáo Hiệu quả Chiến dịch (Campaign Performance Report - SRS 3.19):**
+    - `GET /api/campaigns/:id/report`: Đo lường toàn diện hiệu quả chiến dịch gồm ngân sách (`budget`), tổng số Leads thu được, tổng số Cơ hội chuyển đổi, tổng số Đơn hàng thành công, doanh thu thực tế, chỉ số ROI (`(doanh thu - ngân sách) / ngân sách * 100%`) và tỷ lệ chuyển đổi (`conversion_rate`).
+    - Trả về danh sách chi tiết các Leads thu được và các Sản phẩm đang quảng bá trong chiến dịch.
+  - **Hệ thống Báo cáo Bán hàng Tổng hợp (Sales & Business Reports - SRS 2.1):**
+    - `GET /api/reports/summary`: Báo cáo nhanh KPI hôm nay / tháng này / năm nay và so sánh tiến độ với chỉ tiêu kế hoạch năm tài chính.
+    - `GET /api/reports/leads`: Báo cáo chuỗi thời gian Leads theo ngày/tháng và phân bổ nguồn theo từng chiến dịch.
+    - `GET /api/reports/orders`: Báo cáo chuỗi thời gian số lượng đơn hàng, giá trị trung bình đơn (AOV) và trạng thái đơn hàng.
+    - `GET /api/reports/revenue`: Báo cáo doanh thu theo chu kỳ, phân bổ doanh thu theo từng Sản phẩm (Revenue by Product) kèm tỷ trọng đóng góp `%` và phân bổ theo Danh mục sản phẩm (SRS 2.1).
+  - **Phân quyền RBAC:**
+    - Salesman được phép xem danh sách chiến dịch để gắn Lead nhưng bị chặn 100% quyền tạo/sửa/xóa và xem báo cáo (HTTP 403 Forbidden).
+    - Toàn quyền quản trị và phân tích báo cáo thuộc về `SALE_MANAGER` và `ADMIN`.
+  - **Kiểm thử tích hợp:**
+    - Viết 19 bài integration tests tại `backend/tests/campaign.test.js`.
+    - Kết quả kiểm thử toàn hệ thống: **194/194 tests PASS 100%** (124 backend + 70 frontend).
+    - Vite build client thành công trong 250ms, 0 lỗi linter.
 
 - [x] **feat-015: Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI theo SRS 3.12, BR-03, BR-05, BR-07):**
   - **MakeOrderModal (`MakeOrderModal.jsx`):**

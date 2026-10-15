@@ -4,9 +4,36 @@
 
 ## Current Objective
 
-- Goal: Hoàn thành `feat-017` (Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả - Campaigns & Reports UI) và sẵn sàng chuyển sang `feat-018` (Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance).
-- Current status: `feat-017` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 17/20 tính năng hoàn thành (85% toàn bộ hệ thống Zen CRM).
+- Goal: Hoàn thành `feat-018` (Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance) và sẵn sàng chuyển sang `feat-019` (Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số - Dashboard UI).
+- Current status: `feat-018` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 18/20 tính năng hoàn thành (90% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
+
+- [x] **`feat-018`: Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (Sales Forecast & Planning Module theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
+  - **Controllers & Routers:**
+    - [backend/src/controllers/forecast.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/forecast.controller.js): Xây dựng đầy đủ các methods `setupPlan`, `getPlansByYear`, `getPerformanceReport`, `getAvailableYears`.
+    - [backend/src/routes/forecast.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/forecast.routes.js): Cấu hình router `/api/forecasts`, bảo vệ bởi xác thực JWT và RBAC chỉ dành cho `SALE_MANAGER` và `ADMIN`.
+    - [backend/src/app.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/app.js): Mount router `/api/forecasts`.
+  - **Thiết lập Kế hoạch Doanh số 12 Tháng (`POST /api/forecasts/setup` - SRS 3.20):**
+    - Cho phép Sale Manager và Admin thiết lập hoặc cập nhật chỉ tiêu doanh số cho 12 tháng của năm tài chính (`fiscal_year`).
+    - Hỗ trợ linh hoạt cả định dạng mảng `plans` và object `targets`.
+    - Validate nghiêm ngặt: Kiểm tra năm tài chính `2000 <= fiscal_year <= 2100`, chỉ tiêu `target_amount >= 0`.
+    - Sử dụng PostgreSQL Database Transaction ACID với cơ chế UPSERT (`INSERT INTO sale_forecasts ... ON CONFLICT (fiscal_year, month) DO UPDATE`).
+  - **Lấy Kế hoạch theo Năm (`GET /api/forecasts/plans` - SRS 3.20):**
+    - Lấy kế hoạch 12 tháng của năm tài chính, luôn trả về đủ 12 tháng kể cả tháng chưa nhập chỉ tiêu (mặc định 0), tính tổng chỉ tiêu năm (`total_plan`).
+  - **Báo cáo Đối soát Kế hoạch vs Thực tế (`GET /api/forecasts/performance` - SRS 3.21 & BR-07):**
+    - Truy vấn đối soát 12 tháng bằng SQL (`generate_series(1, 12)` kết hợp `LEFT JOIN` giữa `sale_forecasts` và `orders`).
+    - Tự động tính toán các cột chuẩn SRS 3.21.3 REQ-1: `Month`, `Plan ($)`, `Actually Value ($)`, `%`, `Variance ($)`.
+    - Thực thi chuẩn xác toán tử so sánh BR-07: `% = (Actually Value / Plan Value) * 100`, nếu `Plan = 0` thì `% = 0%`.
+    - Tổng kết toàn diện KPI cả năm: `total_plan`, `total_actual`, `total_orders`, `total_items_sold`, `variance`, `overall_percentage`.
+  - **Helper API (`GET /api/forecasts/years`):**
+    - Lấy danh sách các năm tài chính khả dụng có dữ liệu để phục vụ dropdown chọn năm ở frontend.
+  - **Phân quyền RBAC:**
+    - Cấm 100% quyền truy cập của SALESMAN (HTTP 403 Forbidden).
+    - Toàn quyền quản trị và đối soát thuộc về `SALE_MANAGER` và `ADMIN`.
+  - **Kiểm thử Tích hợp (Integration Tests):**
+    - Viết 15 bài integration tests tại [backend/tests/forecast.test.js](file:///Users/zen/CNTT/Fullstack/internship/backend/tests/forecast.test.js).
+    - Kết quả kiểm thử toàn hệ thống: **223/223 tests PASS 100%** (139 backend + 84 frontend).
+    - Vite production client build thành công trong 243ms, 0 lỗi linter.
 
 - [x] **`feat-017`: Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI theo SRS 3.18, 3.19, SRS 2.1, BR-03, BR-05):**
   - **API Services Client:**

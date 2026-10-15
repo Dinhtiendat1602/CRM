@@ -4,16 +4,43 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-15 10:20
-**Active Task:** feat-017 - Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI)
-**Current Status:** HOÀN THÀNH 100% (208/208 tests pass: 124 backend + 84 frontend, build 254ms, 0 lint errors)
-**Next Feature:** `feat-018` - Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (SRS 3.20, 3.21)
+**Last Updated:** 2026-10-15 10:35
+**Active Task:** feat-018 - Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance
+**Current Status:** HOÀN THÀNH 100% (223/223 tests pass: 139 backend + 84 frontend, build 243ms, 0 lint errors)
+**Next Feature:** `feat-019` - Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI - SRS 2.1, 3.20, 3.21)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **feat-018: Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (Sales Forecast & Planning Module theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
+  - **Controllers & Routers:**
+    - `forecast.controller.js`: Xây dựng đầy đủ các methods `setupPlan`, `getPlansByYear`, `getPerformanceReport`, `getAvailableYears`.
+    - `forecast.routes.js`: Cấu hình router `/api/forecasts`, bảo vệ bởi xác thực JWT và RBAC chỉ dành cho `SALE_MANAGER` và `ADMIN`.
+    - `app.js`: Mount router `/api/forecasts`.
+  - **Thiết lập Kế hoạch Doanh số 12 Tháng (`POST /api/forecasts/setup` - SRS 3.20):**
+    - Cho phép Sale Manager và Admin thiết lập hoặc cập nhật chỉ tiêu doanh số cho 12 tháng của năm tài chính (`fiscal_year`).
+    - Hỗ trợ linh hoạt cả định dạng mảng `plans` và object `targets`.
+    - Validate nghiêm ngặt: Kiểm tra năm tài chính `2000 <= fiscal_year <= 2100`, chỉ tiêu `target_amount >= 0`.
+    - Sử dụng PostgreSQL Database Transaction ACID với cơ chế UPSERT (`INSERT INTO sale_forecasts ... ON CONFLICT (fiscal_year, month) DO UPDATE`).
+  - **Lấy Kế hoạch theo Năm (`GET /api/forecasts/plans` - SRS 3.20):**
+    - Lấy kế hoạch 12 tháng của năm tài chính, luôn trả về đủ 12 tháng kể cả tháng chưa nhập chỉ tiêu (mặc định 0), tính tổng chỉ tiêu năm (`total_plan`).
+  - **Báo cáo Đối soát Kế hoạch vs Thực tế (`GET /api/forecasts/performance` - SRS 3.21 & BR-07):**
+    - Truy vấn đối soát 12 tháng bằng SQL (`generate_series(1, 12)` kết hợp `LEFT JOIN` giữa `sale_forecasts` và `orders`).
+    - Tự động tính toán các cột chuẩn SRS 3.21.3 REQ-1: `Month`, `Plan ($)`, `Actually Value ($)`, `%`, `Variance ($)`.
+    - Thực thi chuẩn xác toán tử so sánh BR-07: `% = (Actually Value / Plan Value) * 100`, nếu `Plan = 0` thì `% = 0%`.
+    - Tổng kết toàn diện KPI cả năm: `total_plan`, `total_actual`, `total_orders`, `total_items_sold`, `variance`, `overall_percentage`.
+  - **Helper API (`GET /api/forecasts/years`):**
+    - Lấy danh sách các năm tài chính khả dụng có dữ liệu để phục vụ dropdown chọn năm ở frontend.
+  - **Phân quyền RBAC:**
+    - Cấm 100% quyền truy cập của SALESMAN (HTTP 403 Forbidden).
+    - Toàn quyền quản trị và đối soát thuộc về `SALE_MANAGER` và `ADMIN`.
+  - **Kiểm thử Tích hợp (Integration Tests):**
+    - Viết 15 bài integration tests tại `backend/tests/forecast.test.js`.
+    - Kết quả kiểm thử toàn hệ thống: **223/223 tests PASS 100%** (139 backend + 84 frontend).
+    - Vite production client build thành công trong 243ms, 0 lỗi linter.
 
 - [x] **feat-017: Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI theo SRS 3.18, 3.19, SRS 2.1, BR-03, BR-05):**
   - **API Services Client (`campaignApi.js` & `reportApi.js`):**

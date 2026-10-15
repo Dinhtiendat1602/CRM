@@ -32,6 +32,7 @@ app.use('/api/opportunities', require('./routes/opportunity.routes'));
 app.use('/api/orders', require('./routes/order.routes'));
 app.use('/api/campaigns', require('./routes/campaign.routes'));
 app.use('/api/reports', require('./routes/report.routes'));
+app.use('/api/forecasts', require('./routes/forecast.routes'));
 
 // Global error handler
 app.use(require('./middlewares/error.middleware'));

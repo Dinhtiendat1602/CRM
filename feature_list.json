@@ -190,8 +190,8 @@
       "dependencies": [
         "feat-014"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành 100% module Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (Sales Forecast & Planning Module) tuân thủ nghiêm ngặt đặc tả SRS 3.20, 3.21, SRS 2.1 và Business Rule BR-07: 1. POST /api/forecasts/setup (SRS 3.20): Cho phép Sale Manager và Admin thiết lập/cập nhật kế hoạch doanh thu cho 12 tháng của năm tài chính (fiscal_year), hỗ trợ định dạng mảng plans lẫn object targets, validate bắt buộc fiscal_year (2000-2100) và target_amount >= 0, sử dụng PostgreSQL Transaction ACID với cơ chế UPSERT an toàn (INSERT ... ON CONFLICT (fiscal_year, month) DO UPDATE). 2. GET /api/forecasts/plans (SRS 3.20): Lấy danh sách kế hoạch 12 tháng của năm tài chính chỉ định, luôn trả về đủ 12 tháng kể cả tháng chưa nhập chỉ tiêu (mặc định 0), tính tổng chỉ tiêu năm (total_plan). 3. GET /api/forecasts/performance (SRS 3.21): Báo cáo đối soát 12 tháng Plan vs Actual bằng truy vấn SQL mạnh mẽ (generate_series kết hợp LEFT JOIN giữa sale_forecasts và orders), tính toán tự động các cột chuẩn SRS 3.21.3 REQ-1 (Month, Plan $, Actually Value $, %, Variance $) và khối KPI tổng kết cả năm (total_plan, total_actual, total_orders, variance, overall_percentage), áp dụng chuẩn xác quy tắc BR-07 (% = (Actually / Plan) * 100, khi Plan = 0 thì % = 0). 4. GET /api/forecasts/years: Endpoint helper lấy danh sách các năm tài chính khả dụng có dữ liệu. 5. Phân quyền RBAC nghiêm ngặt: Cho phép SALE_MANAGER và ADMIN toàn quyền lập kế hoạch và xem đối soát, chặn 100% quyền truy cập của SALESMAN (HTTP 403 Forbidden). 6. Đã viết 15 bài integration tests tại backend/tests/forecast.test.js và chạy kiểm thử toàn hệ thống đạt 223/223 tests PASS 100% (139 backend + 84 frontend), Vite client build thành công trong 243ms."
     },
     {
       "id": "feat-019",

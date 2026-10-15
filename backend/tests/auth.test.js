@@ -70,14 +70,18 @@ test('POST /api/auth/login - Should succeed with Salesman credentials', async ()
 test('POST /api/auth/login - Should succeed with Email identifier', async () => {
   // Lấy email và mật khẩu của manager thực tế trong DB
   const mgrUser = await pool.query(
-    "SELECT u.email, u.username FROM users u JOIN roles r ON u.role_id = r.id WHERE r.name = 'SALE_MANAGER' AND u.is_active = true LIMIT 1"
+    "SELECT u.email, u.username FROM users u JOIN roles r ON u.role_id = r.id WHERE (u.username = 'manager1' OR u.username = 'manager') AND u.is_active = true LIMIT 1"
   );
   const email = mgrUser.rows[0]?.email || 'zen.sniper.vn@gmail.com';
-  const password = mgrUser.rows[0]?.username === 'manager1' ? '22222222' : '11111111';
-
-  const res = await request(app)
+  let res = await request(app)
     .post('/api/auth/login')
-    .send({ username: email, password });
+    .send({ username: email, password: '11111111' });
+
+  if (res.status !== 200) {
+    res = await request(app)
+      .post('/api/auth/login')
+      .send({ username: email, password: '22222222' });
+  }
 
   assert.strictEqual(res.status, 200);
   assert.strictEqual(res.body.success, true);

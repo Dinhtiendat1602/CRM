@@ -155,10 +155,10 @@
       "description": "Xây dựng MakeOrderModal (popup kế thừa giá/số lượng từ Opportunity, nhập thông tin giao hàng & thanh toán để chốt đơn), OrderListPage (danh sách hóa đơn đã chốt), và OrderDetailPage hiển thị chi tiết hóa đơn bảo tồn giá bán tại thời điểm chốt (SRS 3.12).",
       "dependencies": [
         "feat-006",
-        "feat-015"
+        "feat-014"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành 100% giao diện Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI) tuân thủ nghiêm ngặt đặc tả SRS 3.12 (Make an Order) và các Business Rules BR-03, BR-05, BR-07: 1. MakeOrderModal.jsx: Modal chốt đơn từ Cơ hội bán hàng, tự động kế thừa đơn giá niêm yết và số lượng từ Opportunity, tính tổng tiền thời gian thực (total_amount = quantity * unit_price), tính toán tồn kho còn lại và cảnh báo đỏ khi số lượng chốt vượt quá tồn kho (SRS 3.12, AC-08). Cho phép chọn các phương thức thanh toán phổ biến và bắt buộc nhập thông tin thanh toán (payment_info) cùng địa chỉ nhận hàng (shipping_address) theo SRS 3.12.3 REQ-1. Gọi oppApi.makeOrder an toàn với Database Transaction ACID. 2. Tích hợp MakeOrderModal vào màn hình OpportunityDetailPage.jsx và OpportunityListPage.jsx (cột Thao tác bổ sung nút ShoppingBag chốt đơn nhanh cho các cơ hội chưa chốt). 3. OrderListPage.jsx (/orders): Danh sách đơn hàng phân trang chuẩn 20 dòng theo BR-03, 3 thẻ KPI đo lường (Tổng số đơn, Tổng doanh thu, Tổng sản phẩm xuất kho), ô tìm kiếm đa năng có debounce (mã đơn, tên khách hàng, tên sản phẩm), bộ lọc khoảng ngày chốt đơn (BR-05), lọc trạng thái đơn hàng và sắp xếp linh hoạt theo ngày chốt hoặc tổng tiền. 4. OrderDetailPage.jsx (/orders/:id): Màn hình chi tiết hóa đơn bảo tồn giá bán tại thời điểm chốt (SRS 3.12), hiển thị đầy đủ thông số hóa đơn, hồ sơ khách hàng nhận hàng, chi tiết sản phẩm xuất kho, thông tin thanh toán và giao nhận; tích hợp tính năng In hóa đơn bán hàng chuyên nghiệp (window.print()) có mẫu chữ ký người mua và người lập phiếu. 5. orderApi.js: Service client axios kết nối đầy đủ các endpoints đơn hàng. 6. Cập nhật AppRoutes.jsx thay thế PlaceholderPage cho /orders và /orders/:id. 7. Đã viết 12 bài unit tests tại frontend/tests/orders-ui.test.js và chạy kiểm thử toàn hệ thống đạt 175/175 tests PASS 100% (105 backend + 70 frontend), Vite client production build thành công trong 306ms."
     },
     {
       "id": "feat-016",

@@ -4,32 +4,35 @@
 
 ## Current Objective
 
-- Goal: Hoàn thành `feat-014` (Backend Chốt đơn hàng bằng Database Transaction - Make an Order) và sẵn sàng chuyển sang `feat-015` (Frontend Màn hình Chốt đơn & Quản lý Đơn hàng - Make Order & Orders UI).
-- Current status: `feat-014` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 14/20 tính năng hoàn thành (70% toàn bộ hệ thống Zen CRM).
+- Goal: Hoàn thành `feat-015` (Frontend Màn hình Chốt đơn & Quản lý Đơn hàng - Make Order & Orders UI) và sẵn sàng chuyển sang `feat-016` (Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng - Campaigns & Sales Reporting).
+- Current status: `feat-015` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 15/20 tính năng hoàn thành (75% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
 
-- [x] **`feat-014`: Backend Chốt đơn hàng bằng Database Transaction (Make an Order theo SRS 3.12, BR-03, BR-07):**
-  - **Controller & Router:**
-    - [backend/src/controllers/order.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/order.controller.js)
-    - [backend/src/routes/order.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/order.routes.js)
-    - [backend/src/routes/opportunity.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/opportunity.routes.js)
-    - [backend/src/app.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/app.js) (mount `/api/orders`)
-  - **Nghiệp vụ Transaction ACID:**
-    - Khóa dòng đồng thời `opportunities` và `products` bằng `SELECT ... FOR UPDATE` triệt tiêu race condition.
-    - Kiểm tra tồn kho tự động (BR-03, SRS 3.12, AC-08): Nếu thiếu tồn kho, kích hoạt `ROLLBACK` và trả về HTTP 400 kèm số lượng cụ thể, bảo toàn nguyên vẹn CSDL.
-    - Tạo bản ghi trong `orders`: sinh mã `order_code` định dạng `ORD-YYYYMMDD-XXXX`, bảo lưu `unit_price`, tính `total_amount`, lưu `payment_info` và `shipping_address` bắt buộc theo SRS 3.12.3 REQ-1.
-    - Trừ tồn kho sản phẩm tự động, cập nhật cơ hội sang `ORDERED`, ghi nhận 1 bản ghi `follow_ups` chốt đơn.
-    - Chặn chốt đơn lần 2 đối với cơ hội đã `ORDERED` (quan hệ 1-1).
-    - Chặn xóa cơ hội đã chuyển thành đơn hàng `ORDERED` (SRS 3.10) trả về HTTP 400.
-  - **Quản lý đơn hàng:**
-    - `GET /api/orders`: Phân trang 20 dòng chuẩn BR-03, tìm kiếm theo mã/tên KH/tên SP, lọc theo khoảng ngày BR-05, thống kê tổng doanh thu và số đơn.
-    - `GET /api/orders/:id`: Chi tiết đơn hàng theo ID hoặc mã đơn.
-    - Phân quyền RBAC bảo vệ toàn bộ endpoints cho 3 vai trò `SALESMAN`, `SALE_MANAGER`, `ADMIN`.
-  - **Đồng bộ hóa tài khoản thật trong Database:**
-    - Hệ thống kiểm thử tự động nhận diện và sử dụng chính xác 3 tài khoản THẬT đang có trong database của người dùng (`admin1` / pass `11111111`, `manager1` / pass `22222222`, `sale1` / pass `11111111`), tuyệt đối không ghi đè hay thay đổi dữ liệu của người dùng.
-  - **Kiểm thử toàn hệ thống:**
-    - 163/163 tests PASS 100% (105 backend tests + 58 frontend tests).
-    - Vite build thành công, 0 lỗi linter.
+- [x] **`feat-015`: Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI theo SRS 3.12, BR-03, BR-05, BR-07):**
+  - **MakeOrderModal (`MakeOrderModal.jsx`):**
+    - Modal chốt đơn từ Cơ hội bán hàng, tự động kế thừa đơn giá niêm yết, số lượng và địa chỉ của Lead.
+    - Tính tổng tiền thời gian thực (`total_amount = quantity * unit_price`), kiểm tra tồn kho và cảnh báo đỏ tức thì nếu vượt quá tồn kho (SRS 3.12, AC-08).
+    - Cung cấp preset phương thức thanh toán và bắt buộc nhập thông tin thanh toán (`payment_info`) cùng địa chỉ giao hàng (`shipping_address`) theo SRS 3.12.3 REQ-1.
+    - Gọi API `oppApi.makeOrder` với transaction ACID, xử lý trạng thái loading và phản hồi lỗi thân thiện.
+  - **Tích hợp vào Opportunity Pages:**
+    - `OpportunityDetailPage.jsx`: Kích hoạt `MakeOrderModal`, reload tự động chi tiết cơ hội sau khi chốt (hiển thị ngay card Đơn Hàng Đã Được Khởi Tạo Thành Công và badge `ORDERED`).
+    - `OpportunityListPage.jsx`: Cột Thao tác bổ sung nút `ShoppingBag` màu xanh lá cho các cơ hội chưa chốt.
+  - **OrderListPage (`OrderListPage.jsx`):**
+    - Trang danh sách đơn hàng đã chốt tại `/orders`.
+    - Phân trang chuẩn 20 dòng/trang theo quy chuẩn BR-03 (`limit=20`).
+    - 3 thẻ thống kê KPI: Tổng số đơn hàng, Tổng doanh thu đã chốt (VND), Tổng số lượng sản phẩm xuất kho.
+    - Tìm kiếm đa năng (mã đơn, tên khách hàng, tên sản phẩm), bộ lọc khoảng ngày chốt đơn theo BR-05 (`from_date`, `to_date`), bộ lọc trạng thái và sắp xếp theo ngày chốt/tổng tiền.
+  - **OrderDetailPage (`OrderDetailPage.jsx`):**
+    - Trang chi tiết đơn hàng tại `/orders/:id`.
+    - Hiển thị hóa đơn bán hàng chuyên nghiệp bảo tồn giá bán tại thời điểm chốt (SRS 3.12).
+    - Tích hợp tính năng In phiếu xuất kho / Hóa đơn (`window.print()`) kèm mẫu chữ ký khách hàng và nhân viên lập phiếu.
+  - **AppRoutes & orderApi:**
+    - Gắn `OrderListPage` và `OrderDetailPage` vào `AppRoutes.jsx` thay thế `PlaceholderPage`.
+    - `orderApi.js` cung cấp đầy đủ các phương thức kết nối API đơn hàng.
+  - **Bộ kiểm thử & Build:**
+    - Viết 12 bài unit tests tại `frontend/tests/orders-ui.test.js` kiểm tra validation, tính tiền realtime, query params BR-03/BR-05, format mã đơn và thống kê KPI.
+    - Kết quả kiểm thử toàn hệ thống: **175/175 tests PASS 100%** (105 backend + 70 frontend).
+    - Vite build client thành công trong 306ms, 0 lỗi linter.
 - [x] **Khắc phục lỗi Foreign Key `leads_assigned_to_fkey` và Dropdown Sản Phẩm trong Cơ Hội:**
   - **Lỗi 1 (Thêm Lead bị vi phạm khóa ngoại `leads_assigned_to_fkey`):**
     - Đã xác thực an toàn ID người dùng phụ trách (`assigned_to`) và chiến dịch (`campaign_id`) trong `lead.controller.js` trước khi lưu vào CSDL; nâng cấp `auth.middleware.js` kiểm tra tài khoản còn tồn tại và active.

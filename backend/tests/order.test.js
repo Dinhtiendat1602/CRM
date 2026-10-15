@@ -26,10 +26,15 @@ before(async () => {
   salesmanToken = salesRes.body.data?.token;
   assert.ok(salesmanToken, 'Cần JWT Token của salesman (sale1 hoặc salesman)');
 
-  // Lấy token đăng nhập của Sale Manager (hỗ trợ tài khoản thật manager1: 22222222 hoặc manager: 11111111)
+  // Lấy token đăng nhập của Sale Manager (hỗ trợ tài khoản thật manager1: 11111111 / 22222222 hoặc manager: 11111111)
   let mgrRes = await request(app)
     .post('/api/auth/login')
-    .send({ username: 'manager1', password: '22222222' });
+    .send({ username: 'manager1', password: '11111111' });
+  if (!mgrRes.body.data?.token) {
+    mgrRes = await request(app)
+      .post('/api/auth/login')
+      .send({ username: 'manager1', password: '22222222' });
+  }
   if (!mgrRes.body.data?.token) {
     mgrRes = await request(app)
       .post('/api/auth/login')

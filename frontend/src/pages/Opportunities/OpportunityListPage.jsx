@@ -6,6 +6,7 @@ import SearchInput from '../../components/Common/SearchInput';
 import ConfirmDialog from '../../components/Common/ConfirmDialog';
 import OpportunityModal from './OpportunityModal';
 import FollowUpModal from './FollowUpModal';
+import MakeOrderModal from './MakeOrderModal';
 import { 
   Briefcase, 
   Plus, 
@@ -18,7 +19,8 @@ import {
   AlertCircle, 
   ArrowUpDown, 
   CheckCircle2, 
-  Package 
+  Package,
+  ShoppingBag
 } from 'lucide-react';
 
 const STATUS_BADGES = {
@@ -60,6 +62,7 @@ export default function OpportunityListPage() {
   const [initialProductId, setInitialProductId] = useState(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [followUpTargetOpp, setFollowUpTargetOpp] = useState(null);
+  const [makeOrderState, setMakeOrderState] = useState({ isOpen: false, opportunity: null });
 
   // Tự động mở modal khi có query param từ trang Lead hoặc Product
   useEffect(() => {
@@ -456,6 +459,15 @@ export default function OpportunityListPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                          {opp.status !== 'ORDERED' && (
+                            <button
+                              onClick={() => setMakeOrderState({ isOpen: true, opportunity: opp })}
+                              title="Chốt đơn hàng (Make an Order - SRS 3.12)"
+                              className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                            >
+                              <ShoppingBag className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleOpenEditModal(opp)}
                             title="Chỉnh sửa cơ hội"
@@ -519,6 +531,16 @@ export default function OpportunityListPage() {
           isOpen={isFollowUpModalOpen}
           onClose={() => setIsFollowUpModalOpen(false)}
           opportunity={followUpTargetOpp}
+          onSuccess={fetchOpportunities}
+        />
+      )}
+
+      {/* Modal Chốt Đơn Hàng (Make an Order - SRS 3.12) */}
+      {makeOrderState.isOpen && (
+        <MakeOrderModal
+          isOpen={makeOrderState.isOpen}
+          onClose={() => setMakeOrderState({ isOpen: false, opportunity: null })}
+          opportunity={makeOrderState.opportunity}
           onSuccess={fetchOpportunities}
         />
       )}

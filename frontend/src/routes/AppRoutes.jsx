@@ -18,6 +18,8 @@ import ProductListPage from '../pages/Products/ProductListPage';
 import ProductDetailPage from '../pages/Products/ProductDetailPage';
 import OpportunityListPage from '../pages/Opportunities/OpportunityListPage';
 import OpportunityDetailPage from '../pages/Opportunities/OpportunityDetailPage';
+import OrderListPage from '../pages/Orders/OrderListPage';
+import OrderDetailPage from '../pages/Orders/OrderDetailPage';
 import PlaceholderPage from '../pages/Common/PlaceholderPage';
 
 export default function AppRoutes() {
@@ -47,28 +49,8 @@ export default function AppRoutes() {
             <Route path="/opportunities/:id" element={<OpportunityDetailPage />} />
 
             {/* Orders Module (SRS 3.12) */}
-            <Route
-              path="/orders"
-              element={
-                <PlaceholderPage
-                  title="Danh sách Đơn hàng (Orders)"
-                  srsRef="SRS 3.12"
-                  description="Quản lý hóa đơn đã chốt, bảo toàn giá bán và lịch sử giao hàng."
-                  featureId="feat-015"
-                />
-              }
-            />
-            <Route
-              path="/orders/:id"
-              element={
-                <PlaceholderPage
-                  title="Chi tiết Đơn hàng"
-                  srsRef="SRS 3.12"
-                  description="Xem chi tiết hóa đơn xuất hàng, thông tin thanh toán và địa chỉ giao."
-                  featureId="feat-015"
-                />
-              }
-            />
+            <Route path="/orders" element={<OrderListPage />} />
+            <Route path="/orders/:id" element={<OrderDetailPage />} />
           </Route>
 
           {/* Sale Manager Side Modules (SRS 2.1: Product, Campaign, Forecast, Reports - Only SALE_MANAGER) */}

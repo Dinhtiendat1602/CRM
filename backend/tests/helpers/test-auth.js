@@ -20,6 +20,11 @@ async function getSalesmanToken(app) {
 async function getManagerToken(app) {
   let res = await request(app)
     .post('/api/auth/login')
+    .send({ username: 'manager1', password: '11111111' });
+  if (res.body.data?.token) return res.body.data.token;
+
+  res = await request(app)
+    .post('/api/auth/login')
     .send({ username: 'manager1', password: '22222222' });
   if (res.body.data?.token) return res.body.data.token;
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import oppApi from '../../api/oppApi';
 import OpportunityModal from './OpportunityModal';
 import FollowUpModal from './FollowUpModal';
+import MakeOrderModal from './MakeOrderModal';
 import ConfirmDialog from '../../components/Common/ConfirmDialog';
 import { 
   Briefcase, 
@@ -52,6 +53,7 @@ export default function OpportunityDetailPage() {
   // Modals state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [isMakeOrderModalOpen, setIsMakeOrderModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({
     isOpen: false,
     loading: false,
@@ -157,7 +159,7 @@ export default function OpportunityDetailPage() {
 
           {opportunity.status !== 'ORDERED' && (
             <button
-              onClick={() => alert(`Tính năng Chốt đơn hàng (Make an Order) cho Cơ hội #${opportunity.id} sẽ được thực hiện tại bước tiếp theo (feat-014)!`)}
+              onClick={() => setIsMakeOrderModalOpen(true)}
               className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
             >
               <ShoppingBag className="w-4 h-4" />
@@ -515,6 +517,16 @@ export default function OpportunityDetailPage() {
         <FollowUpModal
           isOpen={isFollowUpModalOpen}
           onClose={() => setIsFollowUpModalOpen(false)}
+          opportunity={opportunity}
+          onSuccess={fetchDetail}
+        />
+      )}
+
+      {/* Modal Chốt Đơn Hàng (Make an Order - SRS 3.12) */}
+      {isMakeOrderModalOpen && (
+        <MakeOrderModal
+          isOpen={isMakeOrderModalOpen}
+          onClose={() => setIsMakeOrderModalOpen(false)}
           opportunity={opportunity}
           onSuccess={fetchDetail}
         />

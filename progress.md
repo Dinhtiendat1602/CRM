@@ -4,16 +4,45 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-14 16:50
-**Active Task:** feat-014 - Backend Chốt đơn hàng bằng Database Transaction (Make an Order)
-**Current Status:** HOÀN THÀNH 100% (163/163 tests pass: 105 backend + 58 frontend, build thành công, 0 lint errors)
-**Next Feature:** `feat-015` - Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI)
+**Last Updated:** 2026-10-15 09:30
+**Active Task:** feat-015 - Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI)
+**Current Status:** HOÀN THÀNH 100% (175/175 tests pass: 105 backend + 70 frontend, build thành công, 0 lint errors)
+**Next Feature:** `feat-016` - Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **feat-015: Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI theo SRS 3.12, BR-03, BR-05, BR-07):**
+  - **MakeOrderModal (`MakeOrderModal.jsx`):**
+    - Modal chốt đơn từ cơ hội bán hàng, tự động kế thừa thông tin Lead, Sản phẩm, Đơn giá niêm yết và số lượng nhu cầu.
+    - Tính toán tổng giá trị đơn hàng thời gian thực (`total_amount = quantity * unit_price`) hiển thị dạng card nổi bật.
+    - Tính nhẩm tồn kho còn lại sau khi chốt (`stock_qty - quantity`), tự động đổi màu cảnh báo và hiển thị banner đỏ nếu số lượng yêu cầu vượt quá tồn kho (SRS 3.12, AC-08).
+    - Lựa chọn nhanh phương thức thanh toán (COD, Chuyển khoản, Thẻ tín dụng, Công nợ 30 ngày) và bắt buộc nhập thông tin thanh toán (`payment_info`) theo SRS 3.12.3 REQ-1.
+    - Bắt buộc nhập địa chỉ giao nhận hàng (`shipping_address`) theo SRS 3.12.3 REQ-1, tự động điền địa chỉ Lead nếu có.
+    - Xử lý submit gọi `oppApi.makeOrder(oppId, payload)` an toàn qua Database Transaction ACID, hiển thị spinner và bắt lỗi tồn kho 400 rõ ràng.
+  - **Tích hợp MakeOrderModal vào Cơ hội bán hàng:**
+    - `OpportunityDetailPage.jsx`: Thay thế nút bấm alert thành kích hoạt `MakeOrderModal`, reload tự động chi tiết cơ hội sau khi chốt (hiển thị ngay card Đơn Hàng Đã Được Khởi Tạo Thành Công và badge `ORDERED`).
+    - `OpportunityListPage.jsx`: Cột Thao tác bổ sung nút `ShoppingBag` màu xanh lá cho các cơ hội chưa chốt, cho phép chốt đơn trực tiếp ngay tại danh sách.
+  - **OrderListPage (`OrderListPage.jsx`):**
+    - Trang danh sách đơn hàng đã chốt tại `/orders`.
+    - Phân trang chuẩn 20 dòng/trang theo quy chuẩn BR-03 (`limit=20`).
+    - 3 thẻ thống kê KPI: Tổng số đơn hàng, Tổng doanh thu đã chốt (VND), Tổng số lượng sản phẩm xuất kho.
+    - Bộ lọc & Tìm kiếm: Ô tìm kiếm đa năng có debounce (mã đơn, tên khách hàng, tên sản phẩm), bộ lọc khoảng ngày chốt đơn theo BR-05 (`from_date`, `to_date`), bộ lọc trạng thái đơn hàng và sắp xếp linh hoạt theo ngày chốt hoặc tổng tiền.
+  - **OrderDetailPage (`OrderDetailPage.jsx`):**
+    - Trang chi tiết đơn hàng tại `/orders/:id`.
+    - Hiển thị hóa đơn bán hàng chuyên nghiệp bảo tồn giá bán tại thời điểm chốt (SRS 3.12).
+    - 4 khối thông tin: Thông số hóa đơn, Hồ sơ khách hàng nhận hàng, Chi tiết sản phẩm xuất kho (giá chốt vs giá niêm yết), Thông tin giao nhận và thanh toán.
+    - Tích hợp tính năng In phiếu xuất kho / Hóa đơn (`window.print()`) kèm mẫu chữ ký khách hàng và nhân viên lập phiếu.
+  - **AppRoutes & orderApi:**
+    - Gắn `OrderListPage` và `OrderDetailPage` vào `AppRoutes.jsx` thay thế `PlaceholderPage`.
+    - Tạo `orderApi.js` cung cấp đầy đủ các phương thức kết nối API đơn hàng.
+  - **Bộ kiểm thử & Build:**
+    - Viết 12 bài unit tests tại `frontend/tests/orders-ui.test.js` kiểm tra validation, tính tiền realtime, query params BR-03/BR-05, format mã đơn và thống kê KPI.
+    - Kết quả kiểm thử toàn hệ thống: **175/175 tests PASS 100%** (105 backend + 70 frontend).
+    - Vite build client thành công trong 306ms, 0 lỗi linter.
 
 - [x] **feat-014: Backend Chốt đơn hàng bằng Database Transaction (Make an Order theo SRS 3.12, BR-03, BR-07):**
   - **Kiến trúc & Transaction ACID (`order.controller.js`):**

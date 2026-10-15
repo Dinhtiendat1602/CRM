@@ -73,6 +73,15 @@ const oppApi = {
   getFollowUps: (oppId) => {
     return axiosClient.get(`/opportunities/${oppId}/follow-ups`);
   },
+
+  /**
+   * Chốt đơn hàng từ Cơ hội bán hàng (Make an Order - SRS 3.12, BR-03, BR-07)
+   * @param {number|string} oppId
+   * @param {Object} data { payment_info, shipping_address, order_date, quantity, notes }
+   */
+  makeOrder: (oppId, data) => {
+    return axiosClient.post(`/opportunities/${oppId}/make-order`, data);
+  },
 };
 
 export default oppApi;

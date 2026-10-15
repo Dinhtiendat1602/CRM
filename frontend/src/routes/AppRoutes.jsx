@@ -20,6 +20,9 @@ import OpportunityListPage from '../pages/Opportunities/OpportunityListPage';
 import OpportunityDetailPage from '../pages/Opportunities/OpportunityDetailPage';
 import OrderListPage from '../pages/Orders/OrderListPage';
 import OrderDetailPage from '../pages/Orders/OrderDetailPage';
+import CampaignListPage from '../pages/Campaigns/CampaignListPage';
+import CampaignReportPage from '../pages/Campaigns/CampaignReportPage';
+import GeneralReportsPage from '../pages/Reports/GeneralReportsPage';
 import PlaceholderPage from '../pages/Common/PlaceholderPage';
 
 export default function AppRoutes() {
@@ -58,28 +61,11 @@ export default function AppRoutes() {
             {/* Products Module (SRS 3.15 - 3.17) */}
             <Route path="/products" element={<ProductListPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
-            <Route
-              path="/campaigns"
-              element={
-                <PlaceholderPage
-                  title="Chiến dịch Tiếp thị (Campaigns)"
-                  srsRef="SRS 3.18"
-                  description="Lập kế hoạch chiến dịch, phân bổ ngân sách và gắn sản phẩm mục tiêu."
-                  featureId="feat-017"
-                />
-              }
-            />
-            <Route
-              path="/campaigns/:id/report"
-              element={
-                <PlaceholderPage
-                  title="Báo cáo Hiệu quả Chiến dịch (Campaign Report)"
-                  srsRef="SRS 3.19"
-                  description="Đo lường ROI: Tổng Lead thu được, Tổng Cơ hội chuyển đổi và danh sách chi tiết."
-                  featureId="feat-017"
-                />
-              }
-            />
+            {/* Campaigns Module (SRS 3.18, 3.19) */}
+            <Route path="/campaigns" element={<CampaignListPage />} />
+            <Route path="/campaigns/:id/report" element={<CampaignReportPage />} />
+
+            {/* Sales Forecast Modules (SRS 3.20, 3.21) */}
             <Route
               path="/forecast/setup"
               element={
@@ -102,17 +88,9 @@ export default function AppRoutes() {
                 />
               }
             />
-            <Route
-              path="/reports"
-              element={
-                <PlaceholderPage
-                  title="Báo cáo Thống kê Toàn diện (General Reports)"
-                  srsRef="SRS 2.1"
-                  description="Báo cáo thống kê Leads, Đơn hàng và Doanh thu theo Ngày / Tháng / Năm."
-                  featureId="feat-017"
-                />
-              }
-            />
+
+            {/* General Sales Reports Module (SRS 2.1) */}
+            <Route path="/reports" element={<GeneralReportsPage />} />
           </Route>
 
           {/* Admin Exclusive Modules (RBAC Guard) */}

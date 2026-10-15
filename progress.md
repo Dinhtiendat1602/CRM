@@ -4,16 +4,49 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-15 10:05
-**Active Task:** feat-016 - Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting)
-**Current Status:** HOÀN THÀNH 100% (194/194 tests pass: 124 backend + 70 frontend, build thành công, 0 lint errors)
-**Next Feature:** `feat-017` - Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI)
+**Last Updated:** 2026-10-15 10:20
+**Active Task:** feat-017 - Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI)
+**Current Status:** HOÀN THÀNH 100% (208/208 tests pass: 124 backend + 84 frontend, build 254ms, 0 lint errors)
+**Next Feature:** `feat-018` - Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (SRS 3.20, 3.21)
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **feat-017: Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI theo SRS 3.18, 3.19, SRS 2.1, BR-03, BR-05):**
+  - **API Services Client (`campaignApi.js` & `reportApi.js`):**
+    - `campaignApi.js`: Cung cấp các methods `getCampaigns`, `getCampaignById`, `createCampaign`, `updateCampaign`, `deleteCampaign`, `assignProducts`, `removeProduct`, `getCampaignReport`.
+    - `reportApi.js`: Cung cấp các methods `getSummaryReport`, `getLeadReport`, `getOrderReport`, `getRevenueReport`.
+  - **CampaignModal (`CampaignModal.jsx`):**
+    - Biểu mẫu tạo mới và chỉnh sửa chiến dịch (SRS 3.18.1): Bắt buộc tên chiến dịch, kiểm tra ngày bắt đầu/kết thúc (`end_date >= start_date`), kiểm soát ngân sách `budget >= 0`.
+    - Hiển thị spinner và thông báo lỗi thân thiện tiếng Việt.
+  - **CampaignAssignProductsModal (`CampaignAssignProductsModal.jsx`):**
+    - Modal gán sản phẩm vào chiến dịch tiếp thị (SRS 3.18.1): Tìm kiếm sản phẩm nhanh theo mã/tên/danh mục, checkbox chọn hàng loạt, đánh dấu rõ sản phẩm đã gán và tồn kho còn lại.
+  - **CampaignListPage (`CampaignListPage.jsx` - `/campaigns`):**
+    - Danh sách chiến dịch phân trang chuẩn 20 dòng theo BR-03.
+    - 4 thẻ KPI nhanh: Tổng chiến dịch, Đang chạy (`ACTIVE`), Sắp diễn ra (`UPCOMING`), Tổng ngân sách.
+    - Ô tìm kiếm đa năng có debounce, bộ lọc trạng thái thời gian, bộ lọc khoảng ngày (BR-05), sắp xếp linh hoạt.
+    - Cột Thao tác: Xem Báo cáo hiệu quả ROI, Gán sản phẩm, Sửa, Xóa kèm Modal xác nhận an toàn.
+  - **CampaignReportPage (`CampaignReportPage.jsx` - `/campaigns/:id/report`):**
+    - Màn hình Báo cáo Hiệu quả Chiến dịch (SRS 3.19) với 6 Thẻ KPI: Ngân sách đầu tư, Doanh thu thực tế mang về, Chỉ số **ROI (%)** đổi màu trực quan, Tổng số Leads, Tổng số Cơ hội, Tỷ lệ chuyển đổi Leads -> Orders.
+    - 2 Bảng chi tiết: Danh sách Sản phẩm quảng bá (có nút gỡ sản phẩm) và Danh sách Khách hàng tiềm năng phát sinh.
+    - Tích hợp nút In Báo Cáo chuyên nghiệp với `window.print()` và layout in ấn chuẩn.
+  - **GeneralReportsPage (`GeneralReportsPage.jsx` - `/reports`):**
+    - Màn hình Báo cáo Bán hàng & Doanh số toàn diện dành riêng cho `SALE_MANAGER` và `ADMIN` theo SRS 2.1.
+    - Bộ lọc toàn cục: Khoảng ngày (`from_date`, `to_date`), Chu kỳ (`day` / `month`), nút In ấn và Làm mới.
+    - 4 Tabs nghiệp vụ:
+      * Tab 1 (Executive Summary): So sánh doanh thu, đơn hàng, leads hôm nay / tháng này / năm nay và % hoàn thành kế hoạch năm; Sức khỏe pipeline bán hàng.
+      * Tab 2 (Leads Report): Chuỗi thời gian leads mới, phân bổ theo nguồn chiến dịch, phân bổ theo nhân viên phụ trách.
+      * Tab 3 (Orders Report): Chuỗi thời gian đơn hàng & giá trị trung bình đơn AOV, phân bổ theo trạng thái đơn, top nhân viên chốt sale hiệu quả nhất.
+      * Tab 4 (Revenue Report): Phân bổ doanh thu theo từng sản phẩm (Revenue by Product) kèm % tỷ trọng đóng góp và thanh progress sinh động; Phân bổ doanh thu theo danh mục sản phẩm (Revenue by Category).
+  - **Cập nhật Routing (`AppRoutes.jsx`):**
+    - Thay thế các `PlaceholderPage` của `/campaigns`, `/campaigns/:id/report` và `/reports`.
+  - **Kiểm thử Unit Tests:**
+    - Viết 14 bài tests tại `frontend/tests/campaigns-ui.test.js`.
+    - Kết quả kiểm thử toàn hệ thống: **208/208 tests PASS 100%** (124 backend + 84 frontend).
+    - Vite production client build thành công trong 254ms, 0 lỗi linter.
 
 - [x] **feat-016: Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting theo SRS 3.18, 3.19, SRS 2.1):**
   - **CRUD Campaigns (`campaign.controller.js` & `campaign.routes.js`):**

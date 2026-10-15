@@ -4,9 +4,38 @@
 
 ## Current Objective
 
-- Goal: Hoàn thành `feat-016` (Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng - Campaigns & Sales Reporting) và sẵn sàng chuyển sang `feat-017` (Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả - Campaigns & Reports UI).
-- Current status: `feat-016` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 16/20 tính năng hoàn thành (80% toàn bộ hệ thống Zen CRM).
+- Goal: Hoàn thành `feat-017` (Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả - Campaigns & Reports UI) và sẵn sàng chuyển sang `feat-018` (Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance).
+- Current status: `feat-017` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 17/20 tính năng hoàn thành (85% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
+
+- [x] **`feat-017`: Frontend Giao diện Chiến dịch & Báo cáo Hiệu quả (Campaigns & Reports UI theo SRS 3.18, 3.19, SRS 2.1, BR-03, BR-05):**
+  - **API Services Client:**
+    - [frontend/src/api/campaignApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/campaignApi.js): Cung cấp các methods `getCampaigns`, `getCampaignById`, `createCampaign`, `updateCampaign`, `deleteCampaign`, `assignProducts`, `removeProduct`, `getCampaignReport`.
+    - [frontend/src/api/reportApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/reportApi.js): Cung cấp các methods `getSummaryReport`, `getLeadReport`, `getOrderReport`, `getRevenueReport`.
+  - **CampaignModal ([frontend/src/pages/Campaigns/CampaignModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignModal.jsx)):**
+    - Biểu mẫu tạo mới và chỉnh sửa chiến dịch (SRS 3.18.1): Bắt buộc tên chiến dịch, kiểm tra ngày bắt đầu/kết thúc (`end_date >= start_date`), kiểm soát ngân sách `budget >= 0`.
+    - Hiển thị spinner và thông báo lỗi thân thiện tiếng Việt.
+  - **CampaignAssignProductsModal ([frontend/src/pages/Campaigns/CampaignAssignProductsModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignAssignProductsModal.jsx)):**
+    - Modal gán sản phẩm vào chiến dịch tiếp thị (SRS 3.18.1): Tìm kiếm sản phẩm nhanh theo mã/tên/danh mục, checkbox chọn hàng loạt, đánh dấu rõ sản phẩm đã gán và tồn kho còn lại.
+  - **CampaignListPage ([frontend/src/pages/Campaigns/CampaignListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignListPage.jsx) - `/campaigns`):**
+    - Danh sách chiến dịch phân trang chuẩn 20 dòng theo BR-03.
+    - 4 thẻ KPI nhanh: Tổng chiến dịch, Đang chạy (`ACTIVE`), Sắp diễn ra (`UPCOMING`), Tổng ngân sách.
+    - Ô tìm kiếm đa năng có debounce, bộ lọc trạng thái thời gian, bộ lọc khoảng ngày (BR-05), sắp xếp linh hoạt.
+    - Cột Thao tác: Xem Báo cáo hiệu quả ROI, Gán sản phẩm, Sửa, Xóa kèm Modal xác nhận an toàn.
+  - **CampaignReportPage ([frontend/src/pages/Campaigns/CampaignReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignReportPage.jsx) - `/campaigns/:id/report`):**
+    - Màn hình Báo cáo Hiệu quả Chiến dịch (SRS 3.19) với 6 Thẻ KPI: Ngân sách đầu tư, Doanh thu thực tế mang về, Chỉ số **ROI (%)** đổi màu trực quan, Tổng số Leads, Tổng số Cơ hội, Tỷ lệ chuyển đổi Leads -> Orders.
+    - 2 Bảng chi tiết: Danh sách Sản phẩm quảng bá (có nút gỡ sản phẩm) và Danh sách Khách hàng tiềm năng phát sinh.
+    - Tích hợp nút In Báo Cáo chuyên nghiệp với `window.print()` và layout in ấn chuẩn.
+  - **GeneralReportsPage ([frontend/src/pages/Reports/GeneralReportsPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Reports/GeneralReportsPage.jsx) - `/reports`):**
+    - Màn hình Báo cáo Bán hàng & Doanh số toàn diện dành riêng cho `SALE_MANAGER` và `ADMIN` theo SRS 2.1.
+    - Bộ lọc toàn cục: Khoảng ngày (`from_date`, `to_date`), Chu kỳ (`day` / `month`), nút In ấn và Làm mới.
+    - 4 Tabs nghiệp vụ: Executive Summary, Leads Report, Orders Report, Revenue by Product/Category kèm % tỷ trọng đóng góp và thanh progress sinh động.
+  - **Cập nhật Routing ([frontend/src/routes/AppRoutes.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/routes/AppRoutes.jsx)):**
+    - Thay thế các `PlaceholderPage` của `/campaigns`, `/campaigns/:id/report` và `/reports`.
+  - **Kiểm thử Unit Tests:**
+    - Viết 14 bài tests tại [frontend/tests/campaigns-ui.test.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/tests/campaigns-ui.test.js).
+    - Kết quả kiểm thử toàn hệ thống: **208/208 tests PASS 100%** (124 backend + 84 frontend).
+    - Vite production client build thành công trong 254ms, 0 lỗi linter.
 
 - [x] **`feat-016`: Backend Quản lý Chiến dịch Marketing & Báo cáo Bán hàng (Campaigns & Sales Reporting theo SRS 3.18, 3.19, SRS 2.1):**
   - **Controllers & Routers:**

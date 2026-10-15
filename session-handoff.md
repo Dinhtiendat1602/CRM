@@ -4,9 +4,33 @@
 
 ## Current Objective
 
-- Goal: Hoàn thành `feat-018` (Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance) và sẵn sàng chuyển sang `feat-019` (Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số - Dashboard UI).
-- Current status: `feat-018` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 18/20 tính năng hoàn thành (90% toàn bộ hệ thống Zen CRM).
+- Goal: Hoàn thành `feat-019` (Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số - Dashboard UI) và sẵn sàng chuyển sang `feat-020` (Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án).
+- Current status: `feat-019` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 19/20 tính năng hoàn thành (95% toàn bộ hệ thống Zen CRM).
 - Branch / commit: `main`
+
+- [x] **`feat-019`: Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
+  - **API Service Client:**
+    - [frontend/src/api/forecastApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/forecastApi.js): Cung cấp các methods `setupPlan`, `getPlans`, `getPerformanceReport`, `getAvailableYears`.
+  - **SetupPlanPage ([frontend/src/pages/Forecast/SetupPlanPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/SetupPlanPage.jsx) - `/forecast/setup`):**
+    - Biểu mẫu nhập định mức doanh số 12 tháng theo bảng SRS 3.20 (`Month (1->12) | Value ($)`).
+    - Hộp chọn năm tài chính linh hoạt (mặc định năm hiện hành và kế tiếp).
+    - 3 thẻ KPI nhanh: Tổng chỉ tiêu năm, Mục tiêu trung bình/tháng, Phân bổ chi tiết 4 Quý (Q1-Q4).
+    - Bộ công cụ phân bổ nhanh thông minh (Smart Allocation Tools): Chia đều tổng năm cho 12 tháng, Tăng trưởng +10%, +20%, Đặt lại về 0.
+    - Bảng nhập 12 tháng trực quan kèm thanh phân bổ % tỷ trọng năm thời gian thực.
+    - Lưu dữ liệu an toàn qua PostgreSQL Transaction ACID, thông báo kết quả thân thiện.
+  - **PerformanceReportPage ([frontend/src/pages/Forecast/PerformanceReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/PerformanceReportPage.jsx) - `/forecast/performance`):**
+    - Bảng đối soát 12 tháng chuẩn SRS 3.21: `Month | Plan ($) | Actually Value ($) | % Đạt`.
+    - 5 Thẻ KPIs tổng kết cả năm: Kế hoạch (Plan $), Thực tế (Actually Value $) từ N đơn chốt, Tỷ lệ hoàn thành %, Chênh lệch Variance (đổi màu xanh/đỏ trực quan), Đánh giá tiến độ (Xuất sắc, Tăng trưởng tốt, Cần đẩy mạnh).
+    - Biểu đồ trực quan hóa kết hợp (Mixed Bar & Line Chart) bằng Chart.js: Cột Kế hoạch (xanh dương), Cột Thực tế (xanh ngọc) và Đường Tỷ lệ hoàn thành % (vàng cam) với 2 trục Y độc lập.
+    - Bảng số liệu chi tiết 12 tháng kèm badge đánh giá (Vượt chỉ tiêu / Đạt tốt / Đang tiến triển / Chưa đạt).
+    - Layout In Báo Cáo chuyên nghiệp (`window.print()`): Tự động hiển thị tiêu đề báo cáo, ngày giờ in ấn và khu vực ký duyệt của Trưởng phòng kinh doanh & Ban Giám đốc.
+  - **Cập nhật Định tuyến ([frontend/src/routes/AppRoutes.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/routes/AppRoutes.jsx)):**
+    - Gắn `SetupPlanPage` và `PerformanceReportPage` vào `/forecast/setup` và `/forecast/performance` thay thế `PlaceholderPage`.
+    - Tích hợp sẵn trong menu Sidebar và Header điều hướng.
+  - **Kiểm thử Unit Tests:**
+    - Viết 10 bài unit tests tại [frontend/tests/forecast-ui.test.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/tests/forecast-ui.test.js).
+    - Kết quả kiểm thử toàn hệ thống: **233/233 tests PASS 100%** (139 backend + 94 frontend).
+    - Vite production client build thành công trong 268ms, 0 lỗi linter.
 
 - [x] **`feat-018`: Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (Sales Forecast & Planning Module theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
   - **Controllers & Routers:**
@@ -146,35 +170,29 @@
 
 | Check | Command | Result | Notes |
 |---|---|---|---|
-| Backend Test Suite | `npm test` (trong `backend/`) | PASS (87/87 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4), `forgot-password.test.js` (6), `user.test.js` (13), `lead.test.js` (15), `product.test.js` (18), `opportunity.test.js` (17) |
-| Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (55/55 tests passed) | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `products-ui.test.js` (10) + `user-management.test.js` (10) + `opportunities-ui.test.js` (10) |
-| Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors) | Oxlint kiểm tra 49 files sạch sẽ |
-| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 228ms) | Vite production bundle hoàn tất |
-| Full System Test | `npm test` (tại thư mục gốc) | PASS (142/142 tests passed) | Chạy đồng bộ toàn bộ backend tests, frontend tests và frontend lint |
+| Backend Test Suite | `npm test` (trong `backend/`) | PASS (139/139 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4), `forgot-password.test.js` (6), `user.test.js` (13), `lead.test.js` (15), `product.test.js` (18), `opportunity.test.js` (17), `order.test.js` (15), `campaign.test.js` (19), `forecast.test.js` (15) |
+| Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (94/94 tests passed) | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `products-ui.test.js` (10) + `user-management.test.js` (10) + `opportunities-ui.test.js` (10) + `orders-ui.test.js` (12) + `campaigns-ui.test.js` (14) + `forecast-ui.test.js` (10) |
+| Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors) | Oxlint kiểm tra toàn bộ files sạch sẽ |
+| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 268ms) | Vite production bundle hoàn tất |
+| Full System Test | Toàn bộ kiểm thử | PASS (233/233 tests passed) | 100% tests PASS, không có bất kỳ regression nào |
 
 ## Files Changed
 
-- `frontend/src/api/oppApi.js`: API Service kết nối module Cơ hội và Follow-up.
-- `frontend/src/pages/Opportunities/OpportunityModal.jsx`: Modal thêm/sửa cơ hội kèm kiểm tra trùng lặp và tính nhẩm giá trị.
-- `frontend/src/pages/Opportunities/FollowUpModal.jsx`: Modal ghi nhận nhật ký tương tác tư vấn khách hàng.
-- `frontend/src/pages/Opportunities/OpportunityListPage.jsx`: Bảng danh sách cơ hội 20 dòng, search, sort, filter ngày.
-- `frontend/src/pages/Opportunities/OpportunityDetailPage.jsx`: Chi tiết cơ hội kèm dòng thời gian Follow-up timeline.
-- `frontend/src/routes/AppRoutes.jsx`: Gắn định tuyến `/opportunities` và `/opportunities/:id`.
-- `frontend/tests/opportunities-ui.test.js`: 10 bài unit tests cho Opportunities UI.
-- `feature_list.json`: Cập nhật `feat-013` sang `completed` với evidence tiếng Việt.
-- `progress.md`: Cập nhật tiến độ 13/20 tính năng (65%).
+- [frontend/src/api/forecastApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/forecastApi.js): Client API lập kế hoạch doanh số 12 tháng & đối soát hiệu suất.
+- [frontend/src/pages/Forecast/SetupPlanPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/SetupPlanPage.jsx): Giao diện lập kế hoạch doanh số 12 tháng theo bảng SRS 3.20 kèm bộ công cụ phân bổ nhanh thông minh.
+- [frontend/src/pages/Forecast/PerformanceReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/PerformanceReportPage.jsx): Giao diện báo cáo đối soát 12 tháng SRS 3.21, BR-07, Biểu đồ Chart.js (Bar & Line), 5 thẻ KPI và hỗ trợ In ấn chuẩn doanh nghiệp.
+- [frontend/src/routes/AppRoutes.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/routes/AppRoutes.jsx): Gắn định tuyến `/forecast/setup` và `/forecast/performance` thay thế PlaceholderPage.
+- [frontend/tests/forecast-ui.test.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/tests/forecast-ui.test.js): 10 bài unit tests kiểm tra toàn diện nghiệp vụ giao diện lập kế hoạch & đối soát.
+- `feature_list.json`: Cập nhật `feat-019` sang `completed` với evidence đầy đủ.
+- `progress.md`: Cập nhật tiến độ 19/20 tính năng (95%).
+- `session-handoff.md`: Cập nhật biên bản bàn giao phiên làm việc.
 
 ## Next Steps
 
-1. Triển khai tính năng tiếp theo: **`feat-014: Backend Chốt đơn hàng bằng Database Transaction (Make an Order)`**:
-   - `backend/src/controllers/order.controller.js` hoặc endpoint trong controller: `POST /api/opportunities/:id/make-order` (SRS 3.12).
-   - Thiết kế PostgreSQL ACID Transaction (`BEGIN ... COMMIT / ROLLBACK`):
-     - Khóa dòng sản phẩm bằng Row-level locking: `SELECT stock_qty, unit_price FROM products WHERE id = $1 FOR UPDATE`.
-     - Kiểm tra tồn kho `stock_qty >= quantity`, nếu không đủ trả về HTTP 400 Bad Request kèm thông báo lỗi rõ ràng.
-     - Tự động sinh mã đơn hàng duy nhất `order_code` (ví dụ: `ORD-YYYYMMDD-XXXX`).
-     - INSERT đơn hàng mới vào bảng `orders` (bảo tồn đơn giá và tổng tiền tại thời điểm chốt).
-     - Trừ tồn kho tự động trong bảng `products`: `UPDATE products SET stock_qty = stock_qty - $1 WHERE id = $2`.
-     - Cập nhật trạng thái cơ hội trong bảng `opportunities` sang `'ORDERED'`.
-     - COMMIT transaction.
-   - Viết integration test tại `backend/tests/make-order.test.js`.
-2. Chuyển giao sang `feat-015: Frontend Màn hình Chốt đơn & Quản lý Đơn hàng (Make Order & Orders UI)`.
+1. Triển khai tính năng cuối cùng của dự án: **`feat-020: Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án`**:
+   - Viết kịch bản kiểm thử liên vết toàn hệ thống (E2E User Journey Script):
+     - **Bước 1 (Admin):** Đăng nhập Admin (`admin1` / `11111111`) -> Tạo tài khoản nhân viên mới hoặc quản lý danh sách -> Thử khóa/mở khóa/xóa tài khoản.
+     - **Bước 2 (Manager):** Đăng nhập Manager (`manager1` / `11111111`) -> Tạo danh mục & sản phẩm mới (test chống trùng mã SP `product_code`) -> Tạo chiến dịch tiếp thị mới & gán sản phẩm -> Thiết lập chỉ tiêu kế hoạch 12 tháng (`/forecast/setup`).
+     - **Bước 3 (Salesman):** Đăng nhập Salesman (`sale1` / `11111111`) -> Thêm Khách hàng tiềm năng mới (kiểm tra chống trùng lặp Lead BR-02) -> Tạo Cơ hội bán hàng liên kết Lead và Sản phẩm vừa tạo (kiểm tra chống trùng lặp cơ hội) -> Ghi nhật ký tư vấn chăm sóc Follow-up (đổi trạng thái cơ hội sang CONTACTED) -> Chốt đơn hàng Make Order (kiểm tra khóa dòng Row-level Lock, trừ tồn kho tự động, sinh mã đơn `ORD-YYYYMMDD-XXXX`).
+     - **Bước 4 (Manager & Executive):** Manager đăng nhập lại -> Xem Dashboard và Báo cáo Đối soát Doanh số (`/forecast/performance`): Xác nhận số tiền đơn hàng vừa chốt tự động nhảy lên cột Thực tế (Actually Value $), tỷ lệ hoàn thành % và chênh lệch Variance được tính đúng 100% theo quy tắc BR-07.
+   - Chuẩn bị tài liệu kịch bản demo bảo vệ đồ án thực tập chi tiết theo từng role để người dùng tự tin thuyết trình.

@@ -4,16 +4,40 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-**Last Updated:** 2026-10-15 10:35
-**Active Task:** feat-018 - Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance
-**Current Status:** HOÀN THÀNH 100% (223/223 tests pass: 139 backend + 84 frontend, build 243ms, 0 lint errors)
-**Next Feature:** `feat-019` - Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI - SRS 2.1, 3.20, 3.21)
+**Last Updated:** 2026-10-15 10:45
+**Active Task:** feat-019 - Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI)
+**Current Status:** HOÀN THÀNH 100% (233/233 tests pass: 139 backend + 94 frontend, build 268ms, 0 lint errors)
+**Next Feature:** `feat-020` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án
 
 ---
 
 ## Status (Trạng Thái Tính Năng)
 
 ### What's Done (Những việc đã hoàn thành)
+
+- [x] **feat-019: Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
+  - **API Service Client (`forecastApi.js`):**
+    - Cung cấp đầy đủ các phương thức: `setupPlan` (POST /api/forecasts/setup), `getPlans` (GET /api/forecasts/plans), `getPerformanceReport` (GET /api/forecasts/performance), `getAvailableYears` (GET /api/forecasts/years).
+  - **Màn hình Lập Kế hoạch Doanh số 12 Tháng (`SetupPlanPage.jsx` - `/forecast/setup`):**
+    - Tuân thủ 100% biểu mẫu bảng SRS 3.20 (`Month (1->12) | Value ($)`).
+    - Hộp chọn năm tài chính linh hoạt (mặc định năm hiện hành và kế tiếp).
+    - 3 thẻ thống kê KPI tổng quan: Tổng chỉ tiêu năm, Mục tiêu trung bình/tháng, Phân bổ chi tiết 4 Quý (Q1-Q4).
+    - Bộ công cụ phân bổ nhanh thông minh (Smart Allocation Tools): Chia đều tổng năm cho 12 tháng, Tăng trưởng +10%, +20%, Đặt lại về 0.
+    - Bảng nhập chỉ tiêu 12 tháng trực quan kèm thanh phân bổ % tỷ trọng năm thời gian thực.
+    - Lưu dữ liệu an toàn qua PostgreSQL Transaction ACID, thông báo thành công / lỗi thân thiện.
+  - **Màn hình Báo cáo Đối soát Kế hoạch vs Thực tế (`PerformanceReportPage.jsx` - `/forecast/performance`):**
+    - Bảng đối soát 12 tháng chuẩn SRS 3.21: `Month | Plan ($) | Actually Value ($) | % Đạt`.
+    - 5 Thẻ KPIs tổng kết cả năm: Kế hoạch (Plan $), Thực tế (Actually Value $) từ N đơn chốt, Tỷ lệ hoàn thành %, Chênh lệch Variance (đổi màu xanh/đỏ trực quan), Đánh giá tiến độ (Xuất sắc, Tăng trưởng tốt, Cần đẩy mạnh).
+    - Biểu đồ trực quan hóa kết hợp (Mixed Bar & Line Chart) bằng Chart.js: Cột Kế hoạch (xanh dương), Cột Thực tế (xanh ngọc) và Đường Tỷ lệ hoàn thành % (vàng cam) với 2 trục Y độc lập.
+    - Bảng số liệu chi tiết 12 tháng kèm badge đánh giá (Vượt chỉ tiêu / Đạt tốt / Đang tiến triển / Chưa đạt).
+    - Layout In Báo Cáo chuyên nghiệp (`window.print()`): Ẩn các nút điều khiển không cần thiết, tự động hiển thị tiêu đề báo cáo, ngày giờ in ấn và khu vực ký duyệt của Trưởng phòng kinh doanh & Ban Giám đốc.
+  - **Cập nhật Điều hướng AppRoutes:**
+    - Gắn `SetupPlanPage` và `PerformanceReportPage` vào `/forecast/setup` và `/forecast/performance` thay thế `PlaceholderPage`.
+    - Tích hợp sẵn trong menu Sidebar và Header điều hướng.
+  - **Bộ kiểm thử & Build:**
+    - Viết 10 bài unit tests tại `frontend/tests/forecast-ui.test.js` kiểm tra validation năm tài chính, định mức tháng, tính toán tổng năm/quý, phân bổ nhanh, quy tắc BR-07 (% = Actually/Plan * 100, Plan = 0 => % = 0) và cấu hình Chart.js.
+    - Kết quả kiểm thử toàn hệ thống: **233/233 tests PASS 100%** (139 backend + 94 frontend).
+    - Vite build client thành công trong 268ms, 0 lỗi linter.
 
 - [x] **feat-018: Backend Lập Kế hoạch Doanh số 12 Tháng & Báo cáo Đối soát Performance (Sales Forecast & Planning Module theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
   - **Controllers & Routers:**

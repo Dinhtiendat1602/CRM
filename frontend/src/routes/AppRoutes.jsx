@@ -23,7 +23,8 @@ import OrderDetailPage from '../pages/Orders/OrderDetailPage';
 import CampaignListPage from '../pages/Campaigns/CampaignListPage';
 import CampaignReportPage from '../pages/Campaigns/CampaignReportPage';
 import GeneralReportsPage from '../pages/Reports/GeneralReportsPage';
-import PlaceholderPage from '../pages/Common/PlaceholderPage';
+import SetupPlanPage from '../pages/Forecast/SetupPlanPage';
+import PerformanceReportPage from '../pages/Forecast/PerformanceReportPage';
 
 export default function AppRoutes() {
   return (
@@ -66,28 +67,8 @@ export default function AppRoutes() {
             <Route path="/campaigns/:id/report" element={<CampaignReportPage />} />
 
             {/* Sales Forecast Modules (SRS 3.20, 3.21) */}
-            <Route
-              path="/forecast/setup"
-              element={
-                <PlaceholderPage
-                  title="Lập Kế hoạch Doanh số 12 Tháng"
-                  srsRef="SRS 3.20"
-                  description="Thiết lập chỉ tiêu doanh số năm tài chính cho từng tháng trong năm."
-                  featureId="feat-019"
-                />
-              }
-            />
-            <Route
-              path="/forecast/performance"
-              element={
-                <PlaceholderPage
-                  title="Báo cáo Đối soát Doanh số (Performance Report)"
-                  srsRef="SRS 3.21"
-                  description="Đối soát 12 tháng: Tháng | Kế hoạch ($) | Thực tế ($) | % Đạt và Biểu đồ Chart.js."
-                  featureId="feat-019"
-                />
-              }
-            />
+            <Route path="/forecast/setup" element={<SetupPlanPage />} />
+            <Route path="/forecast/performance" element={<PerformanceReportPage />} />
 
             {/* General Sales Reports Module (SRS 2.1) */}
             <Route path="/reports" element={<GeneralReportsPage />} />

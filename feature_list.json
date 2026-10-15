@@ -201,8 +201,8 @@
         "feat-006",
         "feat-018"
       ],
-      "status": "not-started",
-      "evidence": ""
+      "status": "completed",
+      "evidence": "Đã hoàn thành 100% module Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI - feat-019) tuân thủ tuyệt đối đặc tả SRS v1.1 Mục 3.20, 3.21, SRS 2.1 và Business Rule BR-07: 1. SetupPlanPage.jsx (/forecast/setup): Màn hình lập kế hoạch 12 tháng theo đúng mẫu SRS 3.20 (Month 1->12 | Value ($)), chọn năm tài chính linh hoạt, 3 thẻ thống kê tổng quan (Tổng chỉ tiêu năm, Mục tiêu trung bình/tháng, Phân bổ chi tiết 4 Quý), bộ công cụ phân bổ thông minh (Chia đều 12 tháng, Tăng trưởng +10%, +20%, Đặt lại về 0), bảng nhập 12 tháng trực quan kèm thanh tỷ trọng % năm, lưu dữ liệu an toàn qua Database Transaction. 2. PerformanceReportPage.jsx (/forecast/performance): Báo cáo đối soát 12 tháng chuẩn SRS 3.21 (Month | Plan ($) | Actually Value ($) | %), 5 thẻ KPIs tổng kết cả năm (Tổng kế hoạch, Doanh thu thực tế và số đơn chốt, Tỷ lệ hoàn thành %, Chênh lệch Variance có chỉ báo màu, Đánh giá tiến độ); Biểu đồ đa trục kết hợp Bar & Line chart bằng Chart.js (Cột Plan xanh dương, Cột Actual xanh ngọc, Đường % hoàn thành vàng cam); Bảng số liệu đối soát 12 tháng chi tiết với badge trạng thái (Vượt chỉ tiêu / Đạt tốt / Đang tiến triển / Chưa đạt); Layout in ấn chuyên nghiệp chuẩn doanh nghiệp (hỗ trợ window.print() với tiêu đề, ngày giờ in và khu vực ký duyệt của Trưởng phòng kinh doanh & Giám đốc). 3. forecastApi.js: Service client axios kết nối đầy đủ các endpoints lập kế hoạch và đối soát. 4. Cập nhật AppRoutes.jsx thay thế hoàn toàn PlaceholderPage, tích hợp sẵn trên Sidebar và Header. 5. Đã viết 10 bài unit tests tại frontend/tests/forecast-ui.test.js và chạy kiểm thử toàn hệ thống đạt 233/233 tests PASS 100% (139 backend + 94 frontend), Vite client production build thành công trong 268ms, 0 lỗi linter."
     },
     {
       "id": "feat-020",

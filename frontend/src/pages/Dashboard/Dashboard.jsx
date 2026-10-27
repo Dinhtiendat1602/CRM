@@ -11,61 +11,166 @@ import {
   ArrowRight,
   Sparkles,
   Package,
+  Megaphone,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Layers,
+  FileText,
+  AlertCircle,
+  RefreshCw,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
-import axiosClient from '../../api/axiosClient';
+import dashboardApi from '../../api/dashboardApi';
+
+// Hàm format tiền tệ VNĐ
+const formatVND = (amount) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(amount || 0);
+};
+
+// Hàm format ngày giờ Việt Nam
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—';
+  try {
+    if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+      const [y, m, d] = dateStr.slice(0, 10).split('-');
+      return `${d}/${m}/${y}`;
+    }
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  } catch {
+    return dateStr;
+  }
+};
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  } catch {
+    return dateStr;
+  }
+};
+
+const OPP_STATUS_COLORS = {
+  NEW: 'bg-blue-100 text-blue-800 border-blue-200',
+  QUALIFIED: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  PROPOSAL: 'bg-purple-100 text-purple-800 border-purple-200',
+  NEGOTIATION: 'bg-amber-100 text-amber-800 border-amber-200',
+  ORDERED: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  LOST: 'bg-rose-100 text-rose-800 border-rose-200',
+};
+
+const OPP_STATUS_LABELS = {
+  NEW: 'Mới tạo',
+  QUALIFIED: 'Đủ điều kiện',
+  PROPOSAL: 'Đã gửi báo giá',
+  NEGOTIATION: 'Đang đàm phán',
+  ORDERED: 'Đã chốt đơn',
+  LOST: 'Thất bại',
+};
 
 export default function Dashboard() {
   const { user, role } = useAuth();
   const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
 
-  const [stats] = useState({
-    leadsCount: 2,
-    oppsCount: 1,
-    ordersCount: 0,
-    planCompletion: '78.5%',
-    winRate: '65.0%',
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [dashboardData, setDashboardData] = useState({
+    summary: {
+      leadsCount: 0,
+      todayLeadsCount: 0,
+      oppsCount: 0,
+      openOppsCount: 0,
+      closedWonOppsCount: 0,
+      pipelineValue: 0,
+      ordersCount: 0,
+      totalRevenue: 0,
+      todayRevenue: 0,
+      productsCount: 0,
+      totalStock: 0,
+      categoriesCount: 0,
+      campaignsCount: 0,
+      activeCampaignsCount: 0,
+      usersCount: 0,
+      activeUsersCount: 0,
+      inactiveUsersCount: 0,
+      rolesCount: 0,
+      yearTarget: 0,
+      planCompletion: '0%',
+      winRate: '0%',
+    },
+    personal: null,
+    recentOrders: [],
+    recentOpportunities: [],
+    recentLeads: [],
+    recentUsers: [],
   });
 
-  const [apiConnected, setApiConnected] = useState(false);
+  const fetchDashboardStats = async (isManualRefresh = false) => {
+    if (isManualRefresh) setRefreshing(true);
+    else setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const res = await dashboardApi.getStats();
+      if (res.data) {
+        setDashboardData(res.data);
+      }
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Không thể trích xuất dữ liệu tổng quan từ Database.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    // Kiểm tra kết nối API qua axiosClient
-    axiosClient
-      .get('/health')
-      .then(() => setApiConnected(true))
-      .catch(() => setApiConnected(false));
+    fetchDashboardStats();
   }, []);
 
-  // Cấu hình KPI riêng biệt theo đúng thẩm quyền nghiệp vụ từng vai trò (SRS 2.1)
+  const summary = dashboardData.summary;
+
+  // Cấu hình KPI động lấy 100% từ Database
   const getRoleKPIs = () => {
     if (currentRole === 'ADMIN') {
       return [
         {
           label: 'Tổng Tài Khoản Nhân Viên',
-          value: 3,
-          change: 'Hệ thống đang hoạt động',
+          value: summary.usersCount,
+          change: `${summary.activeUsersCount} đang hoạt động trong DB`,
           icon: Users,
           color: 'from-purple-600 to-indigo-600',
         },
         {
           label: 'Tài Khoản Đang Kích Hoạt',
-          value: 3,
-          change: '100% tài khoản active',
+          value: summary.activeUsersCount,
+          change: 'Sẵn sàng đăng nhập & tác vụ',
           icon: ShieldCheck,
           color: 'from-emerald-500 to-teal-600',
         },
         {
           label: 'Tài Khoản Bị Khóa',
-          value: 0,
-          change: 'Không có tài khoản bị khóa',
+          value: summary.inactiveUsersCount,
+          change: summary.inactiveUsersCount === 0 ? 'Không có tài khoản bị khóa' : 'Cần kiểm tra trạng thái',
           icon: Activity,
           color: 'from-rose-500 to-pink-600',
         },
         {
           label: 'Cấu Trúc Phân Quyền (RBAC)',
-          value: '3 Vai trò',
-          change: 'ADMIN, MANAGER, SALESMAN',
+          value: `${summary.rolesCount} Vai trò`,
+          change: 'ADMIN, SALE_MANAGER, SALESMAN',
           icon: DollarSign,
           color: 'from-blue-600 to-cyan-600',
         },
@@ -75,32 +180,32 @@ export default function Dashboard() {
     if (currentRole === 'SALE_MANAGER') {
       return [
         {
-          label: 'Danh Mục Sản Phẩm Kho',
-          value: 3,
-          change: 'Điện tử, Phần mềm, Máy ảnh',
+          label: 'Sản Phẩm & Kho Hàng',
+          value: summary.productsCount,
+          change: `${summary.totalStock.toLocaleString()} sản phẩm tồn kho`,
           icon: Package,
           color: 'from-indigo-600 to-blue-600',
         },
         {
-          label: 'Sản Phẩm Đang Kinh Doanh',
-          value: 11,
-          change: 'Đầy đủ tồn kho & đơn giá',
+          label: 'Tổng Doanh Thu Đã Chốt',
+          value: formatVND(summary.totalRevenue),
+          change: `Từ ${summary.ordersCount} đơn hàng thực tế`,
           icon: ShoppingCart,
-          color: 'from-blue-600 to-cyan-600',
+          color: 'from-emerald-600 to-teal-600',
         },
         {
-          label: 'Chiến Dịch Tiếp Thị Q4',
-          value: 1,
-          change: 'Đang triển khai thu Lead',
+          label: 'Chiến Dịch Tiếp Thị',
+          value: summary.campaignsCount,
+          change: `${summary.activeCampaignsCount} chiến dịch đang hoạt động`,
+          icon: Megaphone,
+          color: 'from-pink-600 to-rose-600',
+        },
+        {
+          label: 'Tiến Độ Kế Hoạch 12 Tháng',
+          value: summary.planCompletion,
+          change: `Chỉ tiêu: ${formatVND(summary.yearTarget)}`,
           icon: TrendingUp,
-          color: 'from-amber-500 to-orange-600',
-        },
-        {
-          label: 'Chỉ Tiêu Doanh Số 2026',
-          value: stats.planCompletion,
-          change: 'Kế hoạch 12 tháng (Forecast)',
-          icon: DollarSign,
-          color: 'from-purple-600 to-pink-600',
+          color: 'from-purple-600 to-indigo-600',
         },
       ];
     }
@@ -109,29 +214,29 @@ export default function Dashboard() {
     return [
       {
         label: 'Khách Tiềm Năng (Leads)',
-        value: stats.leadsCount,
-        change: '+12% so với tháng trước',
+        value: summary.leadsCount,
+        change: `${summary.todayLeadsCount} lead mới phát sinh hôm nay`,
         icon: Users,
         color: 'from-blue-600 to-indigo-600',
       },
       {
         label: 'Cơ Hội Đang Chăm Sóc',
-        value: stats.oppsCount,
-        change: '1 Deal đang thương thảo',
+        value: summary.openOppsCount,
+        change: `Pipeline: ${formatVND(summary.pipelineValue)}`,
         icon: TrendingUp,
         color: 'from-amber-500 to-orange-600',
       },
       {
         label: 'Đơn Hàng Hoàn Tất',
-        value: stats.ordersCount,
-        change: 'Chờ chốt đơn mới',
+        value: summary.ordersCount,
+        change: `Doanh số: ${formatVND(summary.totalRevenue)}`,
         icon: ShoppingCart,
         color: 'from-emerald-500 to-teal-600',
       },
       {
-        label: 'Tỷ Lệ Chốt Deal Cá Nhân',
-        value: stats.winRate,
-        change: 'Hiệu quả tư vấn bán hàng',
+        label: 'Tỷ Lệ Chốt Deal (Win Rate)',
+        value: summary.winRate,
+        change: `${summary.closedWonOppsCount}/${summary.oppsCount} cơ hội chốt thành công`,
         icon: DollarSign,
         color: 'from-purple-600 to-pink-600',
       },
@@ -140,53 +245,53 @@ export default function Dashboard() {
 
   const kpis = getRoleKPIs();
 
-  // Định nghĩa các lối tắt phân quyền riêng biệt (Role nào không quản lý thì tuyệt đối ẩn)
+  // Lối tắt phân quyền
   const quickActions = [
     {
       title: 'Khách tiềm năng',
-      desc: 'Thêm và theo dõi khách hàng mới (SRS 3.1 - 3.5)',
+      desc: 'Quản lý thông tin & nguồn khách hàng mới (SRS 3.1 - 3.5)',
       path: '/leads',
-      roles: ['SALESMAN'],
+      roles: ['SALESMAN', 'SALE_MANAGER'],
       color: 'text-blue-600 bg-blue-50 border-blue-200',
     },
     {
       title: 'Cơ hội bán hàng',
-      desc: 'Tạo cơ hội và nhật ký Follow-up (SRS 3.6 - 3.11)',
+      desc: 'Theo dõi tiến trình đàm phán & nhật ký Follow-up (SRS 3.6 - 3.11)',
       path: '/opportunities',
-      roles: ['SALESMAN'],
+      roles: ['SALESMAN', 'SALE_MANAGER'],
       color: 'text-amber-600 bg-amber-50 border-amber-200',
     },
     {
       title: 'Đơn hàng (Orders)',
-      desc: 'Xem hóa đơn bán hàng đã chốt (SRS 3.12)',
+      desc: 'Xem hóa đơn bán hàng & lịch sử chốt đơn (SRS 3.12)',
       path: '/orders',
-      roles: ['SALESMAN'],
+      roles: ['SALESMAN', 'SALE_MANAGER'],
       color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
     },
     {
       title: 'Quản lý Sản phẩm',
-      desc: 'Quản trị kho hàng, đơn giá & xem opp theo SP (SRS 3.15 - 3.17)',
+      desc: 'Quản trị kho hàng, đơn giá & cơ hội theo SP (SRS 3.15 - 3.17)',
       path: '/products',
       roles: ['SALE_MANAGER'],
       color: 'text-indigo-600 bg-indigo-50 border-indigo-200',
     },
     {
       title: 'Chiến dịch Tiếp thị',
-      desc: 'Lập kế hoạch & đo lường hiệu quả ROI (SRS 3.18 - 3.19)',
+      desc: 'Lập kế hoạch & đo lường hiệu quả ROI tiếp thị (SRS 3.18 - 3.19)',
       path: '/campaigns',
       roles: ['SALE_MANAGER'],
       color: 'text-pink-600 bg-pink-50 border-pink-200',
     },
     {
       title: 'Kế hoạch Doanh số',
-      desc: 'Chỉ tiêu 12 tháng & Báo cáo đối soát (SRS 3.20 - 3.21)',
+      desc: 'Chỉ tiêu 12 tháng & Báo cáo đối soát thực tế (SRS 3.20 - 3.21)',
       path: '/forecast/setup',
       roles: ['SALE_MANAGER'],
       color: 'text-cyan-600 bg-cyan-50 border-cyan-200',
     },
     {
-      title: 'Báo cáo Tổng hợp',
-      desc: 'Thống kê Lead, Đơn & Doanh số theo SP/thời gian (SRS 2.1)',
+      title: 'Báo cáo Bán hàng',
+      desc: 'Báo cáo Lead, Đơn & Doanh số theo Sản phẩm (SRS 2.1)',
       path: '/reports',
       roles: ['SALE_MANAGER'],
       color: 'text-violet-600 bg-violet-50 border-violet-200',
@@ -208,10 +313,22 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 text-xs font-semibold backdrop-blur-xs border border-blue-400/20">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            Khung giao diện Admin UI & RBAC sẵn sàng
+        <div className="relative z-10 max-w-3xl space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-xs font-semibold backdrop-blur-xs border border-emerald-400/30">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              Dữ liệu Thời Gian Thực từ Database PostgreSQL
+            </span>
+
+            <button
+              onClick={() => fetchDashboardStats(true)}
+              disabled={refreshing}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-200 transition-colors border border-white/10"
+              title="Làm mới dữ liệu từ Database"
+            >
+              <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin text-blue-400' : ''}`} />
+              {refreshing ? 'Đang tải...' : 'Làm mới số liệu'}
+            </button>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
@@ -229,11 +346,11 @@ export default function Dashboard() {
             </span>
             .{' '}
             {currentRole === 'ADMIN' &&
-              'Theo đặc tả SRS 2.1, bạn chịu trách nhiệm quản lý tài khoản người dùng, đặt lại mật khẩu, kích hoạt/khóa và gán vai trò nhân viên trong hệ thống.'}
+              'Toàn bộ số liệu tài khoản người dùng, phân quyền RBAC và trạng thái kích hoạt được đồng bộ trực tiếp từ Database.'}
             {currentRole === 'SALE_MANAGER' &&
-              'Theo đặc tả SRS 2.1, bạn chịu trách nhiệm thiết lập sản phẩm kho, chiến dịch tiếp thị, kế hoạch doanh số 12 tháng và theo dõi báo cáo thống kê.'}
+              'Bạn có thể theo dõi toàn diện số lượng Sản phẩm trong kho, Khách hàng tiềm năng, Cơ hội bán hàng, Đơn hàng chốt và Tiến độ kế hoạch 12 tháng.'}
             {currentRole === 'SALESMAN' &&
-              'Theo đặc tả SRS 2.1, bạn trực tiếp quản lý khách hàng tiềm năng (Leads), theo dõi cơ hội bán hàng (Opportunities), ghi nhật ký chăm sóc và chốt đơn hàng (Orders).'}
+              'Theo dõi khách hàng tiềm năng được giao, cơ hội bán hàng đang mở, tỷ lệ chốt deal và đơn hàng mới nhất trên hệ thống.'}
           </p>
         </div>
 
@@ -241,14 +358,21 @@ export default function Dashboard() {
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-blue-500/20 to-transparent pointer-events-none" />
       </div>
 
-      {/* KPI Cards */}
+      {errorMsg && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-center gap-3 text-rose-700 text-sm">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {/* KPI Cards (Được tính toán động từ DB) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
             <div
               key={idx}
-              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-slate-500">{kpi.label}</span>
@@ -260,7 +384,11 @@ export default function Dashboard() {
               </div>
 
               <div className="mt-3">
-                <div className="text-2xl font-bold text-slate-900">{kpi.value}</div>
+                {loading ? (
+                  <div className="h-8 w-24 bg-slate-100 rounded animate-pulse" />
+                ) : (
+                  <div className="text-2xl font-bold text-slate-900 tracking-tight">{kpi.value}</div>
+                )}
                 <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
                   <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" />
                   <span>{kpi.change}</span>
@@ -271,19 +399,400 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Role-Based Quick Actions (RBAC Visibility) */}
+      {/* Grid 2 Cột: Bảng Đơn Hàng Mới Nhất & Cơ Hội Bán Hàng Gần Đây từ Database */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Khối 1: Đơn Hàng Mới Nhất từ Database */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-emerald-600" />
+              <h3 className="font-bold text-slate-900 text-base">Đơn Hàng Mới Nhất</h3>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                {dashboardData.recentOrders.length} đơn
+              </span>
+            </div>
+
+            {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
+              <Link
+                to="/orders"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
+              >
+                Xem tất cả
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            )}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                  <th className="pb-2.5 font-medium">Mã đơn</th>
+                  <th className="pb-2.5 font-medium">Khách hàng</th>
+                  <th className="pb-2.5 font-medium">Sản phẩm</th>
+                  <th className="pb-2.5 font-medium text-right">Tổng tiền</th>
+                  <th className="pb-2.5 font-medium text-right">Ngày chốt</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {dashboardData.recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-400">
+                      Chưa có đơn hàng nào trong cơ sở dữ liệu.
+                    </td>
+                  </tr>
+                ) : (
+                  dashboardData.recentOrders.map((ord) => (
+                    <tr key={ord.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 font-semibold text-blue-600 font-mono">
+                        <Link to={`/orders/${ord.id}`} className="hover:underline">
+                          {ord.order_code}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 text-slate-800 font-medium max-w-[120px] truncate">
+                        {ord.lead_id ? (
+                          <Link to={`/leads/${ord.lead_id}`} className="hover:text-blue-600 hover:underline">
+                            {ord.customer_name || 'Khách hàng'}
+                          </Link>
+                        ) : (
+                          ord.customer_name || 'Khách hàng'
+                        )}
+                      </td>
+                      <td className="py-2.5 text-slate-600 max-w-[140px] truncate" title={ord.product_name}>
+                        {ord.product_id ? (
+                          <Link to={`/products/${ord.product_id}`} className="hover:text-blue-600 hover:underline">
+                            {ord.product_name}
+                          </Link>
+                        ) : (
+                          ord.product_name
+                        )}
+                      </td>
+                      <td className="py-2.5 text-right font-bold text-slate-900">
+                        {formatVND(ord.total_amount)}
+                      </td>
+                      <td className="py-2.5 text-right text-slate-500 whitespace-nowrap" title={formatDateTime(ord.order_date)}>
+                        {formatDate(ord.order_date)}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Khối 2: Cơ Hội Bán Hàng Tiềm Năng Mới từ Database */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-amber-600" />
+              <h3 className="font-bold text-slate-900 text-base">Cơ Hội Bán Hàng Đang Xử Lý</h3>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
+                {dashboardData.recentOpportunities.length} deal
+              </span>
+            </div>
+
+            {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
+              <Link
+                to="/opportunities"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
+              >
+                Xem tất cả
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            )}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                  <th className="pb-2.5 font-medium">Khách hàng</th>
+                  <th className="pb-2.5 font-medium">Sản phẩm</th>
+                  <th className="pb-2.5 font-medium text-right">SL</th>
+                  <th className="pb-2.5 font-medium text-right">Dự kiến (VNĐ)</th>
+                  <th className="pb-2.5 font-medium text-center">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {dashboardData.recentOpportunities.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-400">
+                      Chưa có cơ hội bán hàng nào trong cơ sở dữ liệu.
+                    </td>
+                  </tr>
+                ) : (
+                  dashboardData.recentOpportunities.map((opp) => (
+                    <tr key={opp.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 text-slate-800 font-semibold max-w-[120px] truncate">
+                        <Link to={`/opportunities/${opp.id}`} className="hover:text-blue-600 hover:underline">
+                          {opp.lead_name}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 text-slate-600 max-w-[130px] truncate" title={opp.product_name}>
+                        {opp.product_id ? (
+                          <Link to={`/products/${opp.product_id}`} className="hover:text-blue-600 hover:underline">
+                            {opp.product_name}
+                          </Link>
+                        ) : (
+                          opp.product_name
+                        )}
+                      </td>
+                      <td className="py-2.5 text-right font-medium text-slate-700">
+                        x{opp.quantity}
+                      </td>
+                      <td className="py-2.5 text-right font-bold text-slate-900">
+                        {formatVND(opp.estimated_value)}
+                      </td>
+                      <td className="py-2.5 text-center">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            OPP_STATUS_COLORS[opp.status] || 'bg-slate-100 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {OPP_STATUS_LABELS[opp.status] || opp.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid 2: Khách Hàng Tiềm Năng Mới & (Nếu là Admin: Nhân Sự Mới) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Khối 3: Khách hàng tiềm năng mới tiếp cận (Leads) */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-600" />
+              <h3 className="font-bold text-slate-900 text-base">Khách Tiềm Năng Mới Nhập</h3>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
+                {dashboardData.recentLeads.length} khách hàng
+              </span>
+            </div>
+
+            {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
+              <Link
+                to="/leads"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
+              >
+                Xem danh sách Lead
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            )}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                  <th className="pb-2.5 font-medium">Họ và tên</th>
+                  <th className="pb-2.5 font-medium">Số điện thoại</th>
+                  <th className="pb-2.5 font-medium">Email</th>
+                  <th className="pb-2.5 font-medium">Nguồn chiến dịch</th>
+                  <th className="pb-2.5 font-medium text-right">Ngày nhập</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {dashboardData.recentLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-400">
+                      Chưa có khách hàng tiềm năng nào.
+                    </td>
+                  </tr>
+                ) : (
+                  dashboardData.recentLeads.map((l) => (
+                    <tr key={l.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 font-semibold text-slate-800">
+                        <Link to={`/leads/${l.id}`} className="hover:text-blue-600 hover:underline">
+                          {l.name}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 text-slate-600 font-mono">
+                        {l.phone}
+                      </td>
+                      <td className="py-2.5 text-slate-500 max-w-[130px] truncate" title={l.email}>
+                        {l.email}
+                      </td>
+                      <td className="py-2.5 text-slate-600 max-w-[120px] truncate">
+                        {l.campaign_id ? (
+                          <Link to={`/campaigns/${l.campaign_id}/report`} className="hover:text-blue-600 hover:underline">
+                            {l.campaign_name}
+                          </Link>
+                        ) : (
+                          l.campaign_name || 'Tiếp cận trực tiếp'
+                        )}
+                      </td>
+                      <td className="py-2.5 text-right text-slate-500 whitespace-nowrap" title={formatDateTime(l.entered_date)}>
+                        {formatDate(l.entered_date)}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Khối 4: Nếu là Admin -> Hiển thị danh sách Nhân sự hệ thống; Nếu là Manager/Salesman -> Hiển thị Thống Kê Nhanh Kho & Tiếp Thị */}
+        {currentRole === 'ADMIN' ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-purple-600" />
+                <h3 className="font-bold text-slate-900 text-base">Tài Khoản Nhân Sự Gần Đây</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-200">
+                  {dashboardData.recentUsers.length} tài khoản
+                </span>
+              </div>
+
+              <Link
+                to="/admin/users"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
+              >
+                Quản lý User
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                    <th className="pb-2.5 font-medium">Username</th>
+                    <th className="pb-2.5 font-medium">Họ và tên</th>
+                    <th className="pb-2.5 font-medium">Vai trò</th>
+                    <th className="pb-2.5 font-medium text-center">Trạng thái</th>
+                    <th className="pb-2.5 font-medium text-right">Ngày tạo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {dashboardData.recentUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-slate-400">
+                        Chưa có tài khoản nào.
+                      </td>
+                    </tr>
+                  ) : (
+                    dashboardData.recentUsers.map((u) => (
+                      <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-2.5 font-semibold text-slate-800 font-mono">
+                          {u.username}
+                        </td>
+                        <td className="py-2.5 text-slate-600 font-medium">
+                          {u.full_name}
+                        </td>
+                        <td className="py-2.5">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
+                              u.role_name === 'ADMIN'
+                                ? 'bg-purple-100 text-purple-800 border-purple-200'
+                                : u.role_name === 'SALE_MANAGER'
+                                ? 'bg-blue-100 text-blue-800 border-blue-200'
+                                : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            }`}
+                          >
+                            {u.role_name}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-center">
+                          <span
+                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                              u.is_active
+                                ? 'bg-emerald-50 text-emerald-700'
+                                : 'bg-rose-50 text-rose-700'
+                            }`}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                u.is_active ? 'bg-emerald-500' : 'bg-rose-500'
+                              }`}
+                            />
+                            {u.is_active ? 'Active' : 'Khóa'}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-right text-slate-500 whitespace-nowrap">
+                          {formatDate(u.created_at)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-bold text-slate-900 text-base">Tổng Quan Vận Hành Bán Hàng</h3>
+              </div>
+              <span className="text-xs text-slate-400 font-medium">Dữ liệu PostgreSQL</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3.5 pt-1">
+              <div className="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                <span className="text-xs text-indigo-600 font-medium block">Danh Mục Sản Phẩm</span>
+                <span className="text-xl font-bold text-slate-900 mt-1 block">
+                  {summary.categoriesCount} nhóm hàng
+                </span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">
+                  {summary.productsCount} mặt hàng đang bán
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-pink-50/60 border border-pink-100">
+                <span className="text-xs text-pink-600 font-medium block">Chiến Dịch Tiếp Thị</span>
+                <span className="text-xl font-bold text-slate-900 mt-1 block">
+                  {summary.activeCampaignsCount} đang chạy
+                </span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">
+                  Ngân sách: {formatVND(summary.totalBudget)}
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
+                <span className="text-xs text-emerald-600 font-medium block">Tồn Kho Sản Phẩm</span>
+                <span className="text-xl font-bold text-slate-900 mt-1 block">
+                  {summary.totalStock.toLocaleString()} đơn vị
+                </span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">
+                  Sẵn sàng xuất đơn (SRS 3.12)
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100">
+                <span className="text-xs text-purple-600 font-medium block">Chỉ Tiêu Năm 2026</span>
+                <span className="text-xl font-bold text-slate-900 mt-1 block">
+                  {summary.planCompletion}
+                </span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">
+                  Mục tiêu: {formatVND(summary.yearTarget)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Role-Based Quick Actions */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amber-500" />
               <h3 className="font-bold text-slate-900 text-base">
-                Chức năng Nghiệp vụ Được Phép Quản Lý
+                Chức Năng Nghiệp Vụ Được Phép Quản Lý
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Hiển thị tự động theo thẩm quyền của vai trò{' '}
-              <strong className="text-indigo-600 font-semibold">{currentRole}</strong> (Chức năng không thuộc thẩm quyền được ẩn tuyệt đối theo quy tắc RBAC).
+              Phân quyền thông minh cho vai trò{' '}
+              <strong className="text-indigo-600 font-semibold">{currentRole}</strong> (Chức năng không thuộc quyền hạn được ẩn theo chuẩn RBAC).
             </p>
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 self-start sm:self-auto">
@@ -323,61 +832,6 @@ export default function Dashboard() {
               </div>
             </Link>
           ))}
-        </div>
-      </div>
-
-      {/* Connectivity & Architecture Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-              <Activity className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-base">Hệ thống Trạng thái Kỹ thuật</h3>
-              <p className="text-xs text-slate-500">
-                Axios Interceptor tự động gắn Bearer Token & Timeout 30 phút (SRS 5.3)
-              </p>
-            </div>
-          </div>
-
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-              apiConnected
-                ? 'bg-emerald-100 text-emerald-800'
-                : 'bg-amber-100 text-amber-800'
-            }`}
-          >
-            <span
-              className={`h-2 w-2 rounded-full ${
-                apiConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-              }`}
-            />
-            {apiConnected ? 'Backend:8888 Đang kết nối' : 'Đang kiểm tra API...'}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-slate-400 block font-medium">Bảo mật Phiên</span>
-            <span className="font-bold text-slate-800 mt-1 block">
-              30 Phút Tự động Đăng xuất (SRS 5.3)
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-slate-400 block font-medium">Cảnh báo Đếm ngược</span>
-            <span className="font-bold text-slate-800 mt-1 block">
-              Modal Cảnh báo 2 Phút Cuối (Pop-up)
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-slate-400 block font-medium">Phân quyền Giao diện</span>
-            <span className="font-bold text-slate-800 mt-1 block">
-              Dynamic Sidebar & RoleRoute Guard
-            </span>
-          </div>
         </div>
       </div>
     </div>

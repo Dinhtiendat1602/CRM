@@ -11,7 +11,6 @@ import {
   UserCog,
   ChevronLeft,
   ChevronRight,
-  Shield,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
@@ -27,19 +26,19 @@ const MENU_ITEMS = [
     label: 'Leads',
     icon: Users,
     path: '/leads',
-    roles: ['SALESMAN'],
+    roles: ['SALESMAN', 'SALE_MANAGER'],
   },
   {
     label: 'Opportunities',
     icon: TrendingUp,
     path: '/opportunities',
-    roles: ['SALESMAN'],
+    roles: ['SALESMAN', 'SALE_MANAGER'],
   },
   {
     label: 'Orders',
     icon: ShoppingCart,
     path: '/orders',
-    roles: ['SALESMAN'],
+    roles: ['SALESMAN', 'SALE_MANAGER'],
   },
   {
     label: 'Products',
@@ -94,12 +93,12 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-slate-900 text-slate-200 border-r border-slate-800 transition-all duration-300 ease-in-out lg:static ${
+        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col bg-slate-900 text-slate-200 border-r border-slate-800 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:shrink-0 ${
           collapsed ? 'w-20' : 'w-64'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Brand Logo & Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
+        <div className="shrink-0 h-16 flex items-center justify-between px-4 border-b border-slate-800">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 font-bold text-xl">
               Z
@@ -142,10 +141,9 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`
                 }
                 title={collapsed ? item.label : undefined}
@@ -165,29 +163,8 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
           })}
         </nav>
 
-        {/* Role & System Badge */}
-        {!collapsed && (
-          <div className="p-3 mx-3 mb-2 rounded-xl bg-slate-800/70 border border-slate-700/60">
-            <div className="flex items-center gap-2 text-xs text-slate-300">
-              <Shield className="h-4 w-4 text-emerald-400 shrink-0" />
-              <div className="truncate">
-                <span className="text-[10px] uppercase font-semibold text-slate-400 block">Quyền hạn</span>
-                <span className="font-bold text-white">
-                  {currentRole === 'ADMIN'
-                    ? 'Quản trị viên (ADMIN)'
-                    : currentRole === 'SALE_MANAGER'
-                    ? 'Quản lý bán hàng'
-                    : currentRole === 'SALESMAN'
-                    ? 'Nhân viên kinh doanh'
-                    : currentRole || 'N/A'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Desktop Collapse Toggle Button */}
-        <div className="hidden lg:flex items-center justify-between p-3 border-t border-slate-800 text-slate-400">
+        <div className="shrink-0 hidden lg:flex items-center justify-between p-3 border-t border-slate-800 text-slate-400">
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}

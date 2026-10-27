@@ -8,6 +8,11 @@ const request = require('supertest');
 async function getSalesmanToken(app) {
   let res = await request(app)
     .post('/api/auth/login')
+    .send({ username: 'sale', password: '11111111' });
+  if (res.body.data?.token) return res.body.data.token;
+
+  res = await request(app)
+    .post('/api/auth/login')
     .send({ username: 'sale1', password: '11111111' });
   if (res.body.data?.token) return res.body.data.token;
 

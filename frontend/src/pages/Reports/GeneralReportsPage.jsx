@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import reportApi from '../../api/reportApi';
 import {
   BarChart3,
@@ -482,7 +483,16 @@ export default function GeneralReportsPage() {
                         {leadsData.by_campaign.map((c, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/70">
                             <td className="px-3 py-2.5 font-medium text-slate-900">
-                              {c.campaign_name}
+                              {c.campaign_id && parseInt(c.campaign_id, 10) > 0 ? (
+                                <Link
+                                  to={`/campaigns/${c.campaign_id}/report`}
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {c.campaign_name}
+                                </Link>
+                              ) : (
+                                c.campaign_name
+                              )}
                             </td>
                             <td className="px-3 py-2.5 text-center font-bold text-blue-600">
                               {c.leads_count}
@@ -713,7 +723,16 @@ export default function GeneralReportsPage() {
                               {item.product_code}
                             </td>
                             <td className="px-4 py-3 font-semibold text-slate-900">
-                              {item.product_name}
+                              {item.product_id ? (
+                                <Link
+                                  to={`/products/${item.product_id}`}
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {item.product_name}
+                                </Link>
+                              ) : (
+                                item.product_name
+                              )}
                             </td>
                             <td className="px-4 py-3 text-xs text-slate-600">
                               {item.category_name || 'Mặc định'}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import orderApi from '../../api/orderApi';
 import Pagination from '../../components/Common/Pagination';
 import SearchInput from '../../components/Common/SearchInput';
@@ -18,6 +18,18 @@ import {
   Printer,
   RotateCcw,
 } from 'lucide-react';
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  } catch {
+    return dateStr;
+  }
+};
 
 const STATUS_BADGES = {
   COMPLETED: { label: 'Đã hoàn tất', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
@@ -273,6 +285,16 @@ export default function OrderListPage() {
           </div>
         </div>
 
+        {/* Thông báo tối ưu tải dữ liệu 1 năm */}
+        {!fromDate && !toDate && (
+          <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-2 rounded-xl">
+            <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <span>
+              Hệ thống mặc định tối ưu tải dữ liệu trong <strong>1 năm gần nhất</strong>. Vui lòng chọn <strong>Từ ngày / Đến ngày</strong> bên trên nếu muốn tải dữ liệu các năm trước đó.
+            </span>
+          </div>
+        )}
+
         {/* Thông tin quy chuẩn & Sắp xếp */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100 text-xs text-gray-500">
           <div>
@@ -379,9 +401,18 @@ export default function OrderListPage() {
                       {/* Khách Hàng (Lead) */}
                       <td className="py-3.5 px-4">
                         <div>
-                          <p className="font-semibold text-gray-900">
-                            {ord.lead_name || `Khách hàng #${ord.lead_id}`}
-                          </p>
+                          {ord.lead_id ? (
+                            <Link
+                              to={`/leads/${ord.lead_id}`}
+                              className="font-semibold text-gray-900 hover:text-blue-600 hover:underline"
+                            >
+                              {ord.lead_name || `Khách hàng #${ord.lead_id}`}
+                            </Link>
+                          ) : (
+                            <p className="font-semibold text-gray-900">
+                              {ord.lead_name || 'Khách hàng'}
+                            </p>
+                          )}
                           <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
                             <span>{ord.lead_phone}</span>
                             {ord.lead_email && (
@@ -397,7 +428,16 @@ export default function OrderListPage() {
                       {/* Sản Phẩm */}
                       <td className="py-3.5 px-4">
                         <div>
-                          <p className="font-medium text-gray-800 line-clamp-1">{ord.product_name}</p>
+                          {ord.product_id ? (
+                            <Link
+                              to={`/products/${ord.product_id}`}
+                              className="font-medium text-gray-800 hover:text-blue-600 hover:underline line-clamp-1"
+                            >
+                              {ord.product_name}
+                            </Link>
+                          ) : (
+                            <p className="font-medium text-gray-800 line-clamp-1">{ord.product_name}</p>
+                          )}
                           <code className="text-xs font-mono bg-gray-100 px-1 py-0.5 rounded text-gray-600">
                             {ord.product_code}
                           </code>
@@ -431,9 +471,9 @@ export default function OrderListPage() {
 
                       {/* Ngày Chốt Đơn */}
                       <td className="py-3.5 px-4 text-xs text-gray-600 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5" title={formatDateTime(ord.order_date)}>
                           <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{new Date(ord.order_date).toLocaleDateString('vi-VN')}</span>
+                          <span>{formatDateTime(ord.order_date)}</span>
                         </div>
                       </td>
 

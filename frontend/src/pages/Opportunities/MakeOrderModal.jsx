@@ -49,9 +49,8 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
       
       // Ngày hiện tại định dạng YYYY-MM-DD
       const now = new Date();
-      const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 10);
+      const pad = (n) => String(n).padStart(2, '0');
+      const localDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
       setOrderDate(localDate);
 
       // Điền địa chỉ khách hàng nếu có
@@ -113,7 +112,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
     try {
       const payload = {
         quantity: numQuantity,
-        order_date: orderDate || new Date().toISOString(),
+        order_date: orderDate || undefined,
         payment_info: finalPaymentInfo,
         shipping_address: shippingAddress.trim(),
         notes: notes.trim() || undefined,

@@ -42,9 +42,10 @@ export default function LeadDetailPage() {
     setErrorMsg('');
     try {
       const res = await leadApi.getLeadById(id);
-      const data = res.data || res;
-      setLead(data.lead || null);
-      setOpportunities(data.opportunities || []);
+      const data = res.data?.data || res.data || res;
+      const leadObj = data.lead || (data.id ? data : null);
+      setLead(leadObj);
+      setOpportunities(data.opportunities || leadObj?.opportunities || []);
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Không tìm thấy thông tin khách hàng tiềm năng.');
     } finally {
@@ -70,12 +71,14 @@ export default function LeadDetailPage() {
   const formatDate = (isoString) => {
     if (!isoString) return '—';
     try {
+      if (typeof isoString === 'string' && /^\d{4}-\d{2}-\d{2}/.test(isoString)) {
+        const [y, m, d] = isoString.slice(0, 10).split('-');
+        return `${d}/${m}/${y}`;
+      }
       const d = new Date(isoString);
-      return d.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
+      if (isNaN(d.getTime())) return isoString;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     } catch {
       return isoString;
     }
@@ -85,13 +88,9 @@ export default function LeadDetailPage() {
     if (!isoString) return '—';
     try {
       const d = new Date(isoString);
-      return d.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      if (isNaN(d.getTime())) return isoString;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     } catch {
       return isoString;
     }
@@ -99,7 +98,7 @@ export default function LeadDetailPage() {
 
   const formatCurrency = (val) => {
     const num = Number(val) || 0;
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+    return `${num.toLocaleString('vi-VN')} đ`;
   };
 
   const getOppStatusBadge = (status) => {
@@ -221,7 +220,7 @@ export default function LeadDetailPage() {
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Briefcase className="w-4 h-4 text-slate-400" />
-                  {lead.title || 'Chưa cập nhật'}
+                  {lead.career || lead.title || 'Chưa cập nhật'}
                 </span>
               </div>
 
@@ -261,10 +260,22 @@ export default function LeadDetailPage() {
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Nguồn Khách Hàng (Source)
+                  Chiến Dịch Nguồn (Campaign)
                 </span>
-                <span className="inline-block mt-0.5 px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-xs font-medium">
-                  {lead.source || 'Website'}
+                <span className="inline-block mt-0.5 text-xs font-medium">
+                  {lead.campaign_id ? (
+                    <Link
+                      to={`/campaigns/${lead.campaign_id}/report`}
+                      className="px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md font-semibold inline-flex items-center gap-1 border border-indigo-200"
+                    >
+                      <Target className="w-3.5 h-3.5" />
+                      <span>{lead.campaign_name || `Chiến dịch #${lead.campaign_id}`}</span>
+                    </Link>
+                  ) : (
+                    <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md">
+                      {lead.source || 'Website / Trực tiếp'}
+                    </span>
+                  )}
                 </span>
               </div>
 
@@ -369,13 +380,28 @@ export default function LeadDetailPage() {
                         onClick={() => navigate(`/opportunities/${opp.id}`)}
                       >
                         <td className="py-3 px-3 font-semibold text-slate-800">
-                          {opp.product_name || `Sản phẩm #${opp.product_id}`}
+                          <Link
+                            to={`/opportunities/${opp.id}`}
+                            className="hover:underline text-indigo-600 block"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {opp.product_name || `Sản phẩm #${opp.product_id}`}
+                          </Link>
+                          {opp.product_id && (
+                            <Link
+                              to={`/products/${opp.product_id}`}
+                              className="text-[11px] text-slate-400 hover:text-slate-600 hover:underline mt-0.5 inline-block"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Mã SP: {opp.product_code || `#${opp.product_id}`}
+                            </Link>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-slate-600">
                           {opp.quantity || 1}
                         </td>
-                        <td className="py-3 px-3 font-semibold text-indigo-600">
-                          {formatCurrency(opp.expected_revenue || (opp.product_price * (opp.quantity || 1)))}
+                        <td className="py-3 px-3 font-semibold text-emerald-600">
+                          {formatCurrency(opp.estimated_amount || opp.estimated_value || (opp.unit_price * (opp.quantity || 1)))}
                         </td>
                         <td className="py-3 px-3">
                           <span
@@ -386,8 +412,8 @@ export default function LeadDetailPage() {
                             {opp.status}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-slate-400">
-                          {formatDate(opp.created_at)}
+                        <td className="py-3 px-3 text-slate-500 font-mono text-[11px]">
+                          {formatDateTime(opp.created_at)}
                         </td>
                       </tr>
                     ))}

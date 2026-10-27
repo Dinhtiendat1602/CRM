@@ -18,9 +18,9 @@ async function initDatabase() {
     await client.query(`
       INSERT INTO roles (id, name, description) VALUES
         (1, 'ADMIN', 'Quản trị viên toàn quyền hệ thống'),
-        (2, 'SALE_MANAGER', 'Trưởng phòng kinh doanh / Quản lý bán hàng'),
+        (2, 'SALE_MANAGER', 'Quản lý toàn diện: Khách hàng tiềm năng (Leads), Cơ hội bán hàng (Opportunities), Đơn hàng (Orders), Sản phẩm, Chiến dịch tiếp thị, Dự báo doanh số và Báo cáo thống kê'),
         (3, 'SALESMAN', 'Nhân viên kinh doanh')
-      ON CONFLICT (id) DO NOTHING;
+      ON CONFLICT (id) DO UPDATE SET description = EXCLUDED.description;
     `);
 
     // 2. Users (Admin, Manager, Salesman)
@@ -136,9 +136,9 @@ async function initDatabase() {
 -- Mật khẩu mặc định của 3 tài khoản là: 11111111 (đã băm bcrypt 10 rounds)
 INSERT INTO roles (id, name, description) VALUES
   (1, 'ADMIN', 'Quản trị viên toàn quyền hệ thống'),
-  (2, 'SALE_MANAGER', 'Trưởng phòng kinh doanh / Quản lý bán hàng'),
+  (2, 'SALE_MANAGER', 'Quản lý toàn diện: Khách hàng tiềm năng (Leads), Cơ hội bán hàng (Opportunities), Đơn hàng (Orders), Sản phẩm, Chiến dịch tiếp thị, Dự báo doanh số và Báo cáo thống kê'),
   (3, 'SALESMAN', 'Nhân viên kinh doanh')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET description = EXCLUDED.description;
 
 INSERT INTO users (username, email, password_hash, full_name, phone, role_id) VALUES
   ('admin', 'admin@zencrm.com', '${passwordHash}', 'System Administrator', '0900000001', 1),

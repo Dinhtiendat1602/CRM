@@ -5,9 +5,12 @@ import {
   LogOut,
   User,
   Shield,
+  ShieldCheck,
   ChevronDown,
   Clock,
+  Calendar,
   ExternalLink,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
 
@@ -27,10 +30,45 @@ const ROUTE_TITLES = {
 };
 
 export default function Header({ onToggleMobileSidebar }) {
-  const { user, role, logout } = useAuth();
+  const { 
+    user, 
+    role, 
+    logout,
+    formattedSessionTime,
+    sessionRemainingSeconds,
+    resetSessionTimer,
+    setDemoTimeout,
+  } = useAuth();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const [sessionOpen, setSessionOpen] = useState(false);
+  const sessionDropdownRef = useRef(null);
+
+  const [currentDateTime, setCurrentDateTime] = useState('');
+
+  // Đồng hồ thời gian thực cập nhật từng giây cho toàn bộ trang
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('vi-VN', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      const timeStr = now.toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      setCurrentDateTime(`${dateStr} • ${timeStr}`);
+    };
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const currentRole = role || user?.role_name || user?.role || 'User';
   const pageTitle = ROUTE_TITLES[location.pathname] || 'Phân hệ Làm việc';
@@ -40,6 +78,9 @@ export default function Header({ onToggleMobileSidebar }) {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
+      }
+      if (sessionDropdownRef.current && !sessionDropdownRef.current.contains(e.target)) {
+        setSessionOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -89,12 +130,97 @@ export default function Header({ onToggleMobileSidebar }) {
         </div>
       </div>
 
-      {/* Right: Security Indicator & User Profile Dropdown */}
+      {/* Right: Security Indicator & Live Clock & User Profile Dropdown */}
       <div className="flex items-center gap-3">
-        {/* Security / Session Timeout indicator badge */}
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">
-          <Clock className="h-3.5 w-3.5 text-blue-600" />
-          <span>Phiên 30m an toàn</span>
+        {/* Đồng hồ Ngày Giờ thực tế hiển thị trên toàn bộ các trang */}
+        {currentDateTime && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200/90 shadow-2xs">
+            <Calendar className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+            <span className="font-mono">{currentDateTime}</span>
+          </div>
+        )}
+
+        {/* Security / Session Timeout indicator badge with live countdown & interactive menu */}
+        <div className="relative" ref={sessionDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setSessionOpen(!sessionOpen)}
+            title="Phiên làm việc tự động đếm ngược 30 phút bất hoạt (SRS 5.3). Bấm để xem chi tiết hoặc gia hạn."
+            className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-medium border transition-all cursor-pointer ${
+              sessionRemainingSeconds && sessionRemainingSeconds <= 120
+                ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse font-bold'
+                : sessionRemainingSeconds && sessionRemainingSeconds <= 300
+                ? 'bg-amber-50 text-amber-700 border-amber-300 font-semibold'
+                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+            }`}
+          >
+            <Clock className={`h-3.5 w-3.5 ${
+              sessionRemainingSeconds && sessionRemainingSeconds <= 120
+                ? 'text-rose-600 animate-spin'
+                : sessionRemainingSeconds && sessionRemainingSeconds <= 300
+                ? 'text-amber-600'
+                : 'text-blue-600'
+            }`} />
+            <span className="font-mono">
+              Phiên: {formattedSessionTime || '30:00'}
+            </span>
+          </button>
+
+          {/* Session Dropdown Popover */}
+          {sessionOpen && (
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 animate-fade-in text-xs space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span className="font-bold text-slate-800">Bảo Mật Phiên Làm Việc (SRS 5.3)</span>
+              </div>
+
+              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Thời gian còn lại:</span>
+                  <strong className={`font-mono text-sm ${
+                    sessionRemainingSeconds && sessionRemainingSeconds <= 120
+                      ? 'text-rose-600 font-bold'
+                      : 'text-blue-700'
+                  }`}>
+                    {formattedSessionTime || '30:00'}
+                  </strong>
+                </div>
+                <div className="flex justify-between text-slate-500 text-[11px]">
+                  <span>Hạn định phiên:</span>
+                  <span>30 phút bất hoạt</span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Hệ thống tự động gia hạn khi bạn di chuột hoặc gõ phím. Nếu không thao tác trong 30 phút, hệ thống sẽ tự động đăng xuất để bảo đảm an toàn dữ liệu.
+              </p>
+
+              <div className="space-y-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetSessionTimer();
+                    setSessionOpen(false);
+                  }}
+                  className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Gia hạn phiên (30:00)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDemoTimeout(10000);
+                    setSessionOpen(false);
+                  }}
+                  className="w-full py-1.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-[11px]"
+                  title="Thử nghiệm auto-logout sau 10 giây (Kịch bản bảo vệ đồ án)"
+                >
+                  <Clock className="w-3.5 h-3.5 text-amber-600" /> Thử nghiệm Auto-Logout (10s)
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* User Dropdown */}

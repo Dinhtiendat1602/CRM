@@ -44,8 +44,15 @@ export function AuthProvider({ children }) {
     }
   }, [token]);
 
-  // Hook theo dõi 30 phút bất hoạt (cảnh báo trước 2 phút)
-  const { isWarning, remainingSeconds, resetTimer } = useIdleTimeout({
+  // Hook theo dõi 30 phút bất hoạt (cảnh báo trước 2 phút, đếm ngược tự động theo SRS 5.3)
+  const {
+    isWarning,
+    remainingSeconds,
+    totalRemainingSeconds,
+    formattedSessionTime,
+    resetTimer,
+    setDemoTimeout,
+  } = useIdleTimeout({
     onTimeout: handleTimeout,
     timeoutDuration: 30 * 60 * 1000, // 30 phút
     warnDuration: 2 * 60 * 1000,      // 2 phút đếm ngược
@@ -63,6 +70,10 @@ export function AuthProvider({ children }) {
     login,
     logout,
     stayLoggedIn,
+    sessionRemainingSeconds: totalRemainingSeconds,
+    formattedSessionTime,
+    resetSessionTimer: resetTimer,
+    setDemoTimeout,
   };
 
   return (

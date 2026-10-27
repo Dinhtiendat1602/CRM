@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import Modal from '../../components/Common/Modal';
 import oppApi from '../../api/oppApi';
-import { 
-  PhoneCall, 
-  Mail, 
-  Users, 
-  MessageSquare, 
-  Calendar, 
-  AlertCircle, 
-  Loader2, 
-  CheckCircle2, 
-  ArrowRightCircle 
+import {
+  PhoneCall,
+  Mail,
+  Users,
+  MessageSquare,
+  Calendar,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
+  ArrowRightCircle
 } from 'lucide-react';
 
 const CONTACT_METHODS = [
@@ -23,8 +23,8 @@ const CONTACT_METHODS = [
 export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess }) {
   const getNowFormatted = () => {
     const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    return now.toISOString().slice(0, 16);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
   };
 
   const [formData, setFormData] = useState({
@@ -92,8 +92,17 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
     setErrorMsg('');
 
     try {
+      const formatLocalPayload = (dateTimeStr) => {
+        if (!dateTimeStr) {
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, '0');
+          return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+        return dateTimeStr.replace('T', ' ') + (dateTimeStr.length === 16 ? ':00' : '');
+      };
+
       const payload = {
-        follow_date: formData.follow_date ? new Date(formData.follow_date).toISOString() : new Date().toISOString(),
+        follow_date: formatLocalPayload(formData.follow_date),
         contact_method: formData.contact_method,
         content: formData.content.trim(),
         customer_response: formData.customer_response ? formData.customer_response.trim() : null,
@@ -198,11 +207,10 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             rows={3}
             value={formData.content}
             onChange={handleChange}
-            className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 ${
-              fieldErrors.content 
-                ? 'border-red-400 focus:ring-red-300' 
+            className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.content
+                ? 'border-red-400 focus:ring-red-300'
                 : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-            }`}
+              }`}
             placeholder="Ví dụ: Gọi điện tư vấn tính năng máy ảnh Sony A7 IV, báo giá khuyến mãi ống kính combo, giải đáp thắc mắc về bảo hành chính hãng..."
           />
           {fieldErrors.content && (

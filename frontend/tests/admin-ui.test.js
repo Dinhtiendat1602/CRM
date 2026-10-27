@@ -4,9 +4,9 @@ import assert from 'node:assert';
 // Mô phỏng danh mục MENU_ITEMS của Sidebar chuẩn theo SRS 2.1
 const MENU_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'] },
-  { label: 'Leads', path: '/leads', roles: ['SALESMAN'] },
-  { label: 'Opportunities', path: '/opportunities', roles: ['SALESMAN'] },
-  { label: 'Orders', path: '/orders', roles: ['SALESMAN'] },
+  { label: 'Leads', path: '/leads', roles: ['SALESMAN', 'SALE_MANAGER'] },
+  { label: 'Opportunities', path: '/opportunities', roles: ['SALESMAN', 'SALE_MANAGER'] },
+  { label: 'Orders', path: '/orders', roles: ['SALESMAN', 'SALE_MANAGER'] },
   { label: 'Products', path: '/products', roles: ['SALE_MANAGER'] },
   { label: 'Campaigns', path: '/campaigns', roles: ['SALE_MANAGER'] },
   { label: 'Forecast', path: '/forecast/setup', roles: ['SALE_MANAGER'] },
@@ -42,13 +42,14 @@ describe('Frontend Admin UI & RBAC Unit Tests', () => {
       assert.ok(!labels.includes('Campaigns'), 'Admin không được hiển thị Campaigns');
     });
 
-    it('vai trò SALE_MANAGER chỉ nhìn thấy 5 mục menu quản lý và KHÔNG có Leads/User Mgmt', () => {
+    it('vai trò SALE_MANAGER nhìn thấy 8 mục menu gồm Leads, Opportunities, Orders, Products, Campaigns, Forecast, Reports và KHÔNG có User Mgmt', () => {
       const items = getAccessibleMenuItems('SALE_MANAGER');
-      assert.strictEqual(items.length, 5);
+      assert.strictEqual(items.length, 8);
       const labels = items.map((i) => i.label);
       assert.ok(!labels.includes('User Mgmt'), 'Manager không được thấy menu User Mgmt');
-      assert.ok(!labels.includes('Leads'), 'Manager không được thấy menu Leads');
-      assert.ok(!labels.includes('Opportunities'), 'Manager không được thấy menu Opportunities');
+      assert.ok(labels.includes('Leads'), 'Manager nhìn thấy menu Leads');
+      assert.ok(labels.includes('Opportunities'), 'Manager nhìn thấy menu Opportunities');
+      assert.ok(labels.includes('Orders'), 'Manager nhìn thấy menu Orders');
       assert.ok(labels.includes('Products'));
       assert.ok(labels.includes('Campaigns'));
       assert.ok(labels.includes('Forecast'));
@@ -73,9 +74,9 @@ describe('Frontend Admin UI & RBAC Unit Tests', () => {
       assert.strictEqual(checkRoleAccess('ADMIN', ['SALE_MANAGER']), false);
     });
 
-    it('chặn SALE_MANAGER truy cập route của ADMIN và của SALESMAN', () => {
+    it('chặn SALE_MANAGER truy cập route của ADMIN và cho phép truy cập route bán hàng & quản lý', () => {
       assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['ADMIN']), false);
-      assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['SALESMAN']), false);
+      assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['SALESMAN', 'SALE_MANAGER']), true);
       assert.strictEqual(checkRoleAccess('SALE_MANAGER', ['SALE_MANAGER']), true);
     });
 

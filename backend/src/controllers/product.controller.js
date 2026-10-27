@@ -11,7 +11,18 @@ const getProducts = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20; // BR-03: mặc định 20 dòng
     const offset = (page - 1) * limit;
 
-    const { search, category_id, campaign_id, sortBy = 'created_at', sortOrder = 'DESC' } = req.query;
+    const userRole = (req.user?.role || '').trim().toUpperCase();
+    const userId = req.user?.id;
+
+    const {
+      search,
+      category_id,
+      campaign_id,
+      for_salesman_id,
+      assigned_user_id,
+      sortBy = 'created_at',
+      sortOrder = 'DESC',
+    } = req.query;
 
     const allowedSortFields = ['created_at', 'product_code', 'name', 'unit_price', 'stock_qty'];
     const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
@@ -20,6 +31,18 @@ const getProducts = async (req, res) => {
     const conditions = [];
     const values = [];
     let paramIndex = 1;
+
+    // Phân quyền: Nếu vai trò là SALESMAN, chỉ xem các sản phẩm được phân quyền cho mình
+    if (userRole === 'SALESMAN' && userId) {
+      conditions.push(`p.id IN (SELECT product_id FROM salesman_products WHERE user_id = $${paramIndex})`);
+      values.push(userId);
+      paramIndex++;
+    } else if (for_salesman_id) {
+      // Cho phép Quản lý/Admin lọc sản phẩm theo một Salesman cụ thể
+      conditions.push(`p.id IN (SELECT product_id FROM salesman_products WHERE user_id = $${paramIndex})`);
+      values.push(parseInt(for_salesman_id, 10));
+      paramIndex++;
+    }
 
     // Tìm kiếm theo mã sản phẩm hoặc tên sản phẩm
     if (search && search.trim()) {
@@ -49,6 +72,17 @@ const getProducts = async (req, res) => {
     const countResult = await db.query(countQuery, values);
     const totalRecords = countResult.rows[0].total;
 
+    // Hỗ trợ kiểm tra cờ is_assigned nếu Quản lý truyền assigned_user_id
+    let assignmentSelect = '';
+    let assignmentJoin = '';
+    if (assigned_user_id) {
+      const spIdx = paramIndex;
+      values.push(parseInt(assigned_user_id, 10));
+      paramIndex++;
+      assignmentSelect = `, (sp.id IS NOT NULL) AS is_assigned`;
+      assignmentJoin = `LEFT JOIN salesman_products sp ON p.id = sp.product_id AND sp.user_id = $${spIdx}`;
+    }
+
     // Lấy dữ liệu sản phẩm kèm danh mục và chiến dịch
     const dataQuery = `
       SELECT 
@@ -64,9 +98,11 @@ const getProducts = async (req, res) => {
         cmp.name AS campaign_name,
         p.created_at,
         p.updated_at
+        ${assignmentSelect}
       FROM products p
       LEFT JOIN product_categories c ON p.category_id = c.id
       LEFT JOIN campaigns cmp ON p.campaign_id = cmp.id
+      ${assignmentJoin}
       ${whereClause}
       ORDER BY p.${validSortBy} ${validSortOrder}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -520,6 +556,168 @@ const getProductOrders = async (req, res) => {
   }
 };
 
+/**
+ * Lấy danh sách nhân viên bán hàng (SALESMAN) kèm số lượng sản phẩm được phân quyền
+ * GET /api/products/salesmen
+ */
+const getSalesmenList = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        u.id, 
+        u.username, 
+        u.full_name, 
+        u.email, 
+        u.phone,
+        COUNT(sp.product_id)::int AS assigned_products_count
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      LEFT JOIN salesman_products sp ON u.id = sp.user_id
+      WHERE r.name = 'SALESMAN' AND u.is_active = true
+      GROUP BY u.id, u.username, u.full_name, u.email, u.phone
+      ORDER BY u.full_name ASC;
+    `;
+    const result = await db.query(query);
+    return res.status(200).json({
+      success: true,
+      salesmen: result.rows,
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách nhân viên bán hàng:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi máy chủ khi lấy danh sách nhân viên.',
+    });
+  }
+};
+
+/**
+ * Lấy danh sách mã sản phẩm được phân quyền cho 1 nhân viên
+ * GET /api/products/assignments/:userId
+ */
+const getSalesmanAssignments = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mã nhân viên không hợp lệ.',
+      });
+    }
+
+    const userCheck = await db.query(`
+      SELECT u.id, u.full_name, u.username, r.name as role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      WHERE u.id = $1;
+    `, [userId]);
+
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy nhân viên.',
+      });
+    }
+
+    const query = `
+      SELECT product_id
+      FROM salesman_products
+      WHERE user_id = $1;
+    `;
+    const result = await db.query(query, [userId]);
+    const assignedProductIds = result.rows.map(r => r.product_id);
+
+    return res.status(200).json({
+      success: true,
+      user: userCheck.rows[0],
+      assigned_product_ids: assignedProductIds,
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách phân quyền sản phẩm:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi máy chủ khi lấy phân quyền sản phẩm.',
+    });
+  }
+};
+
+/**
+ * Cập nhật phân quyền sản phẩm cho 1 nhân viên (Gán hoặc thu hồi quyền bán)
+ * PUT /api/products/assignments/:userId
+ * Body: { product_ids: [1, 2, 3] }
+ */
+const updateSalesmanAssignments = async (req, res) => {
+  const client = await db.pool.connect();
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    const { product_ids } = req.body;
+
+    if (!userId || isNaN(userId)) {
+      client.release();
+      return res.status(400).json({
+        success: false,
+        message: 'Mã nhân viên không hợp lệ.',
+      });
+    }
+
+    if (!Array.isArray(product_ids)) {
+      client.release();
+      return res.status(400).json({
+        success: false,
+        message: 'Danh sách mã sản phẩm (product_ids) phải là một mảng.',
+      });
+    }
+
+    const userCheck = await client.query(`
+      SELECT u.id, u.full_name, r.name as role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      WHERE u.id = $1;
+    `, [userId]);
+
+    if (userCheck.rows.length === 0) {
+      client.release();
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy nhân viên.',
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Xóa phân quyền cũ của nhân viên này
+    await client.query('DELETE FROM salesman_products WHERE user_id = $1', [userId]);
+
+    // Thêm các sản phẩm mới được phân quyền
+    const validProductIds = product_ids.map(id => parseInt(id, 10)).filter(id => !isNaN(id) && id > 0);
+    for (const prodId of validProductIds) {
+      await client.query(
+        `INSERT INTO salesman_products (user_id, product_id, assigned_by) VALUES ($1, $2, $3)
+         ON CONFLICT (user_id, product_id) DO NOTHING`,
+        [userId, prodId, req.user?.id || null]
+      );
+    }
+
+    await client.query('COMMIT');
+
+    return res.status(200).json({
+      success: true,
+      message: `Đã cập nhật phân quyền ${validProductIds.length} sản phẩm cho nhân viên ${userCheck.rows[0].full_name}.`,
+      assigned_count: validProductIds.length,
+      assigned_product_ids: validProductIds,
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi khi cập nhật phân quyền sản phẩm:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi máy chủ khi cập nhật phân quyền sản phẩm.',
+    });
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
@@ -528,4 +726,7 @@ module.exports = {
   deleteProduct,
   getProductOpportunities,
   getProductOrders,
+  getSalesmenList,
+  getSalesmanAssignments,
+  updateSalesmanAssignments,
 };

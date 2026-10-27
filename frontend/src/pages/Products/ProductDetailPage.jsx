@@ -101,18 +101,32 @@ export default function ProductDetailPage() {
 
   const formatCurrency = (val) => {
     const num = Number(val) || 0;
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+    return `${num.toLocaleString('vi-VN')} đ`;
   };
 
   const formatDate = (isoString) => {
     if (!isoString) return '—';
     try {
+      if (typeof isoString === 'string' && /^\d{4}-\d{2}-\d{2}/.test(isoString)) {
+        const [y, m, d] = isoString.slice(0, 10).split('-');
+        return `${d}/${m}/${y}`;
+      }
       const d = new Date(isoString);
-      return d.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
+      if (isNaN(d.getTime())) return isoString;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch {
+      return isoString;
+    }
+  };
+
+  const formatDateTime = (isoString) => {
+    if (!isoString) return '—';
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     } catch {
       return isoString;
     }

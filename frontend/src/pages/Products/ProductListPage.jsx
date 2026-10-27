@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import productApi from '../../api/productApi';
 import { useAuth } from '../../context/authContextDef';
 import Pagination from '../../components/Common/Pagination';
@@ -7,6 +7,7 @@ import SearchInput from '../../components/Common/SearchInput';
 import ConfirmDialog from '../../components/Common/ConfirmDialog';
 import ProductModal from './ProductModal';
 import CategoryModal from './CategoryModal';
+import ProductAssignmentModal from './ProductAssignmentModal';
 import { 
   Package, 
   Plus, 
@@ -17,7 +18,8 @@ import {
   Layers, 
   Flag, 
   AlertCircle,
-  Tag
+  Tag,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function ProductListPage() {
@@ -46,6 +48,7 @@ export default function ProductListPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState({
     isOpen: false,
@@ -162,6 +165,15 @@ export default function ProductListPage() {
 
         {isManagerOrAdmin && (
           <div className="flex items-center gap-2.5 flex-shrink-0">
+            <button
+              onClick={() => setIsAssignmentModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+              title="Phân quyền những sản phẩm mà từng nhân viên được phép bán"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Phân Quyền Bán Hàng</span>
+            </button>
+
             <button
               onClick={() => setIsCategoryModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
@@ -346,12 +358,22 @@ export default function ProductListPage() {
                     </td>
 
                     {/* Chiến dịch quảng bá */}
-                    <td className="py-3.5 px-4 text-xs">
+                    <td className="py-3.5 px-4 text-xs" onClick={(e) => e.stopPropagation()}>
                       {prod.campaign_name ? (
-                        <span className="inline-flex items-center gap-1 text-purple-700 font-medium bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
-                          <Flag className="w-3 h-3" />
-                          <span>{prod.campaign_name}</span>
-                        </span>
+                        prod.campaign_id ? (
+                          <Link
+                            to={`/campaigns/${prod.campaign_id}/report`}
+                            className="inline-flex items-center gap-1 text-purple-700 font-medium bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-100 transition-colors"
+                          >
+                            <Flag className="w-3 h-3" />
+                            <span>{prod.campaign_name}</span>
+                          </Link>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-purple-700 font-medium bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                            <Flag className="w-3 h-3" />
+                            <span>{prod.campaign_name}</span>
+                          </span>
+                        )
                       ) : (
                         <span className="text-slate-400">—</span>
                       )}
@@ -430,6 +452,17 @@ export default function ProductListPage() {
           fetchProducts();
         }}
       />
+
+      {/* Modal Phân quyền sản phẩm cho Nhân viên Bán hàng */}
+      {isManagerOrAdmin && (
+        <ProductAssignmentModal
+          isOpen={isAssignmentModalOpen}
+          onClose={() => setIsAssignmentModalOpen(false)}
+          onSuccess={() => {
+            fetchProducts();
+          }}
+        />
+      )}
 
       {/* Dialog xác nhận xóa */}
       <ConfirmDialog

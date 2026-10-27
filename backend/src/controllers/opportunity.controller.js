@@ -82,6 +82,11 @@ exports.getOpportunities = async (req, res, next) => {
       conditions.push(`o.created_at <= ($${values.length}::date + INTERVAL '1 day' - INTERVAL '1 second')`);
     }
 
+    // Tối ưu query khi mở ứng dụng: Mặc định trong vòng 1 năm gần nhất nếu người dùng không chọn ngày
+    if (!from_date && !to_date && req.query.all_time !== 'true') {
+      conditions.push(`o.created_at >= (CURRENT_TIMESTAMP - INTERVAL '1 year')`);
+    }
+
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     // Ràng buộc cột sắp xếp an toàn (BR-04)
@@ -389,6 +394,21 @@ exports.createOpportunity = async (req, res, next) => {
       });
     }
 
+    // Kiểm tra phân quyền: Nhân viên bán hàng (SALESMAN) chỉ được bán các sản phẩm được Quản lý phân quyền
+    const userRole = (req.user?.role || '').trim().toUpperCase();
+    if (userRole === 'SALESMAN' && req.user?.id) {
+      const permCheck = await db.query(
+        'SELECT 1 FROM salesman_products WHERE user_id = $1 AND product_id = $2;',
+        [req.user.id, product_id]
+      );
+      if (permCheck.rows.length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Bạn chưa được phân quyền bán sản phẩm này. Vui lòng liên hệ Quản lý bán hàng.',
+        });
+      }
+    }
+
     // 3. Chống trùng lặp (BR-02, SRS 3.6.2 REQ-4)
     if (!confirm_duplicate) {
       const duplicateQuery = `
@@ -658,7 +678,17 @@ exports.addFollowUp = async (req, res, next) => {
         customer_response,
         next_plan,
         created_by
-      ) VALUES ($1, COALESCE($2::timestamp, CURRENT_TIMESTAMP), $3, $4, $5, $6, $7)
+      ) VALUES (
+        $1,
+        COALESCE(
+          CASE
+            WHEN $2 ~ 'Z$' OR $2 ~ '[+-]\\d{2}:?\\d{2}$' THEN ($2::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')
+            ELSE $2::timestamp
+          END,
+          CURRENT_TIMESTAMP
+        ),
+        $3, $4, $5, $6, $7
+      )
       RETURNING *;
     `;
     let finalCreatedBy = null;

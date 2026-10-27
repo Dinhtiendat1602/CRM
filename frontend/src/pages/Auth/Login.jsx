@@ -53,11 +53,6 @@ export default function Login() {
     }
   };
 
-  // Nút điền nhanh tài khoản demo phục vụ kiểm thử tiện lợi
-  const handleQuickLogin = (uname) => {
-    setFormData({ username: uname, password: '11111111' });
-    setError(null);
-  };
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
@@ -105,7 +100,7 @@ export default function Login() {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  placeholder="admin, manager hoặc salesman"
+                  placeholder="Email hoặc tên đăng nhập"
                   className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900"
                 />
               </div>
@@ -155,35 +150,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Quick Login Bar for testing convenience */}
-          <div className="pt-4 border-t border-slate-100">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">
-              Chọn nhanh tài khoản kiểm thử (Pass: 11111111)
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin1')}
-                className="py-1.5 px-2 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('manager1')}
-                className="py-1.5 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Manager
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('sale1')}
-                className="py-1.5 px-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Salesman
-              </button>
-            </div>
-          </div>
 
         </div>
 

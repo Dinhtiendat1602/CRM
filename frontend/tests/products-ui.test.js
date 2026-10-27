@@ -182,4 +182,53 @@ describe('Frontend Products UI & Business Logic Tests (feat-011)', () => {
       assert.strictEqual(totals.totalRevenue, 0);
     });
   });
+
+  describe('Salesman Product Assignment & 1-Year Query Default Logic', () => {
+    // 5. Logic lọc sản phẩm theo quyền của Salesman
+    function filterProductsByAssignment(products, assignedIds, userRole) {
+      if (userRole !== 'SALESMAN') return products;
+      const set = new Set(assignedIds.map(Number));
+      return products.filter((p) => set.has(Number(p.id)));
+    }
+
+    // 6. Logic kiểm tra mốc thời gian tối ưu 1 năm
+    function check1YearOptimization(fromDate, toDate) {
+      if (!fromDate && !toDate) {
+        return { isOptimized1Year: true, message: 'Đang hiển thị 1 năm gần nhất' };
+      }
+      return { isOptimized1Year: false, message: 'Đang lọc theo ngày tùy chọn' };
+    }
+
+    it('Salesman chỉ nhìn thấy các sản phẩm đã được phân quyền', () => {
+      const allProducts = [
+        { id: 1, name: 'Sản phẩm A' },
+        { id: 2, name: 'Sản phẩm B' },
+        { id: 3, name: 'Sản phẩm C' },
+      ];
+      const assignedIds = [1, 3];
+      const filtered = filterProductsByAssignment(allProducts, assignedIds, 'SALESMAN');
+      assert.strictEqual(filtered.length, 2);
+      assert.deepStrictEqual(filtered.map((p) => p.id), [1, 3]);
+    });
+
+    it('Quản lý và Admin nhìn thấy toàn bộ sản phẩm không bị giới hạn', () => {
+      const allProducts = [
+        { id: 1, name: 'Sản phẩm A' },
+        { id: 2, name: 'Sản phẩm B' },
+      ];
+      const assignedIds = [1];
+      const managerProducts = filterProductsByAssignment(allProducts, assignedIds, 'SALE_MANAGER');
+      assert.strictEqual(managerProducts.length, 2);
+    });
+
+    it('Mặc định kích hoạt cờ tối ưu 1 năm khi người dùng chưa chọn khoảng ngày', () => {
+      const status = check1YearOptimization('', '');
+      assert.strictEqual(status.isOptimized1Year, true);
+    });
+
+    it('Tắt cờ 1 năm mặc định và nạp dữ liệu đầy đủ khi người dùng chọn ngày tháng', () => {
+      const status = check1YearOptimization('2024-01-01', '2026-12-31');
+      assert.strictEqual(status.isOptimized1Year, false);
+    });
+  });
 });

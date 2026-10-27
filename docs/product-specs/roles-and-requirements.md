@@ -14,7 +14,7 @@ Có **3 vai trò người dùng** được SRS (Mục 1.4 - Term) định nghĩa
 | Vai trò | Định nghĩa theo SRS | Màu định danh trong code |
 | :--- | :--- | :--- |
 | **Sales man** | Who is using CRM to manage and follow up customers. They can use phone, social network or website to follow up customers. | `'SALESMAN'` |
-| **Sale manager** | Who setup products and manage the sellers. | `'SALE_MANAGER'` |
+| **Sale manager** | Quản lý toàn diện: Khách hàng tiềm năng (Leads), Cơ hội bán hàng (Opportunities), Đơn hàng (Orders), Sản phẩm, Chiến dịch tiếp thị, Dự báo doanh số và Báo cáo thống kê. | `'SALE_MANAGER'` |
 | **Administrator** | Who manage users on the CRM system. | `'ADMIN'` |
 | *(Ngầm định)* System Timer | Đếm ngược 30 phút bất hoạt để tự động Logout (SRS 5.3) | — |
 | *(Ngầm định)* SMTP Service | Gửi email link reset mật khẩu qua dịch vụ thư ngoài (SRS 3.14) | — |
@@ -61,8 +61,8 @@ Có **3 vai trò người dùng** được SRS (Mục 1.4 - Term) định nghĩa
 ---
 
 ### 2.2. Vai trò 2: Quản lý bán hàng (Sale Manager — `SALE_MANAGER`)
-*Các tính năng thuộc phía "Sale Manager Side" theo SRS 2.1:*  
-*Lưu ý: Sale Manager kế thừa toàn bộ quyền của Sale Man để quản lý toàn bộ hoạt động.*
+*Các tính năng thuộc thẩm quyền của Sale Manager theo SRS 2.1:*  
+*Quyền hạn chính: Quản lý toàn diện Khách hàng tiềm năng (Leads), Cơ hội bán hàng (Opportunities), Đơn hàng (Orders), Quản lý Sản phẩm, Chiến dịch tiếp thị, Dự báo & Kế hoạch doanh số 12 tháng, cùng các Báo cáo tổng hợp.*
 
 #### Quản lý Sản phẩm (Product Management — SRS 3.15 → 3.17):
 | Chức năng | SRS Ref | Mô tả nghiệp vụ |
@@ -129,31 +129,3 @@ Có **3 vai trò người dùng** được SRS (Mục 1.4 - Term) định nghĩa
 | **BR-11** | Bảo mật phiên làm việc Timeout | SRS 5.3 | Hệ thống tự động Logout nếu **không có hành động nào** trong vòng **30 phút**. Phân quyền theo vai trò. |
 
 ---
-
-## 4. TÓM TẮT CHỨC NĂNG THEO SRS SECTION (FEATURE MAP)
-
-| SRS Section | Tên chức năng | Vai trò sử dụng |
-| :--- | :--- | :--- |
-| 3.1 | Add a New Lead | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.2 | View the Leads | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.3 | Search a Lead by name | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.4 | Edit a Lead | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.5 | Delete a Lead | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.6 | Add a New Opportunity | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.7 | View Opportunity | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.8 | Search Opportunity | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.9 | Edit an Opportunity | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.10 | Delete an Opportunity | SALESMAN, SALE_MANAGER, ADMIN |
-| 3.11 | Follow up an Opportunity | SALESMAN, SALE_MANAGER |
-| 3.12 | Make an Order | SALESMAN, SALE_MANAGER |
-| 3.13 | Login, Logout, Update Profile | Tất cả vai trò |
-| 3.14 | Forget Password | Tất cả vai trò (Public) |
-| 3.15 | Product CRUD & Search | SALE_MANAGER, ADMIN |
-| 3.16 | View Opportunity for Product | SALE_MANAGER, ADMIN |
-| 3.17 | View Order for Product | SALE_MANAGER, ADMIN |
-| 3.18 | Campaign CRUD & Search | SALE_MANAGER, ADMIN |
-| 3.19 | Campaign Performance Report | SALE_MANAGER, ADMIN |
-| 3.20 | Setup Sale Forecast Plan | SALE_MANAGER, ADMIN |
-| 3.21 | Performance Report (Plan vs Actual) | SALE_MANAGER, ADMIN |
-| 2.1 Report | Report Lead/Order/Revenue | SALE_MANAGER, ADMIN |
-| 2.1 Admin | User & Role Management | ADMIN |

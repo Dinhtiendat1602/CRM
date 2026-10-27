@@ -7,8 +7,8 @@ const transporter = nodemailer.createTransport({
   port: parseInt(process.env.SMTP_PORT || '587', 10),
   secure: false, // true for 465, false for 587
   auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
+    user: (process.env.SMTP_USER || '').trim(),
+    pass: (process.env.SMTP_PASS || '').replace(/\s+/g, ''),
   },
 });
 
@@ -19,6 +19,20 @@ const transporter = nodemailer.createTransport({
  * @param {string} userName
  */
 const sendResetPasswordEmail = async (toEmail, resetLink, userName = 'Quý khách') => {
+  // Chặn gửi email SMTP thật trong môi trường test hoặc khi gửi tới email giả định để tránh bị Google Mail Delivery Subsystem gửi spam cảnh báo lỗi
+  if (
+    process.env.NODE_ENV === 'test' ||
+    toEmail.endsWith('@zencrm.com') ||
+    toEmail.endsWith('@example.com') ||
+    toEmail.endsWith('@test.com')
+  ) {
+    console.log(`\n================== [ZEN CRM MAILER MOCK] ==================`);
+    console.log(`[Mailer Mock] Bỏ qua gửi SMTP thực tế tới email giả định: ${toEmail}`);
+    console.log(`[Mailer Mock] Link đặt lại mật khẩu: ${resetLink}`);
+    console.log(`===========================================================\n`);
+    return { messageId: 'mock-test-email-id', response: 'Mock email delivery avoided' };
+  }
+
   const mailOptions = {
     from: process.env.SMTP_FROM || `"Zen CRM" <${process.env.SMTP_USER}>`,
     to: toEmail,

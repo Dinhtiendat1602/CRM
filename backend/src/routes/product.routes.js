@@ -7,7 +7,12 @@ const { authorizeRoles } = require('../middlewares/role.middleware');
 // Mọi route đều yêu cầu xác thực
 router.use(authMiddleware);
 
-// Xem danh sách và chi tiết sản phẩm (Mọi vai trò: Salesman cần xem để chọn khi tạo cơ hội)
+// Phân quyền sản phẩm cho Nhân viên bán hàng (Chỉ Quản lý & Admin)
+router.get('/salesmen', authorizeRoles('SALE_MANAGER', 'ADMIN'), productController.getSalesmenList);
+router.get('/assignments/:userId', authorizeRoles('SALE_MANAGER', 'ADMIN'), productController.getSalesmanAssignments);
+router.put('/assignments/:userId', authorizeRoles('SALE_MANAGER', 'ADMIN'), productController.updateSalesmanAssignments);
+
+// Xem danh sách và chi tiết sản phẩm (Mọi vai trò: Salesman chỉ xem sản phẩm được phân quyền)
 router.get('/', authorizeRoles('SALESMAN', 'SALE_MANAGER', 'ADMIN'), productController.getProducts);
 router.get('/:id', authorizeRoles('SALESMAN', 'SALE_MANAGER', 'ADMIN'), productController.getProductById);
 

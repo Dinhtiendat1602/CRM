@@ -55,7 +55,12 @@ test('POST /api/auth/login - Should succeed with Admin credentials and return JW
 test('POST /api/auth/login - Should succeed with Salesman credentials', async () => {
   let res = await request(app)
     .post('/api/auth/login')
-    .send({ username: 'sale1', password: '11111111' });
+    .send({ username: 'sale', password: '11111111' });
+  if (res.status !== 200) {
+    res = await request(app)
+      .post('/api/auth/login')
+      .send({ username: 'sale1', password: '11111111' });
+  }
   if (res.status !== 200) {
     res = await request(app)
       .post('/api/auth/login')

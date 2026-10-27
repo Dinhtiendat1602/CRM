@@ -205,7 +205,23 @@
       "evidence": "Đã hoàn thành 100% module Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI - feat-019) tuân thủ tuyệt đối đặc tả SRS v1.1 Mục 3.20, 3.21, SRS 2.1 và Business Rule BR-07: 1. SetupPlanPage.jsx (/forecast/setup): Màn hình lập kế hoạch 12 tháng theo đúng mẫu SRS 3.20 (Month 1->12 | Value ($)), chọn năm tài chính linh hoạt, 3 thẻ thống kê tổng quan (Tổng chỉ tiêu năm, Mục tiêu trung bình/tháng, Phân bổ chi tiết 4 Quý), bộ công cụ phân bổ thông minh (Chia đều 12 tháng, Tăng trưởng +10%, +20%, Đặt lại về 0), bảng nhập 12 tháng trực quan kèm thanh tỷ trọng % năm, lưu dữ liệu an toàn qua Database Transaction. 2. PerformanceReportPage.jsx (/forecast/performance): Báo cáo đối soát 12 tháng chuẩn SRS 3.21 (Month | Plan ($) | Actually Value ($) | %), 5 thẻ KPIs tổng kết cả năm (Tổng kế hoạch, Doanh thu thực tế và số đơn chốt, Tỷ lệ hoàn thành %, Chênh lệch Variance có chỉ báo màu, Đánh giá tiến độ); Biểu đồ đa trục kết hợp Bar & Line chart bằng Chart.js (Cột Plan xanh dương, Cột Actual xanh ngọc, Đường % hoàn thành vàng cam); Bảng số liệu đối soát 12 tháng chi tiết với badge trạng thái (Vượt chỉ tiêu / Đạt tốt / Đang tiến triển / Chưa đạt); Layout in ấn chuyên nghiệp chuẩn doanh nghiệp (hỗ trợ window.print() với tiêu đề, ngày giờ in và khu vực ký duyệt của Trưởng phòng kinh doanh & Giám đốc). 3. forecastApi.js: Service client axios kết nối đầy đủ các endpoints lập kế hoạch và đối soát. 4. Cập nhật AppRoutes.jsx thay thế hoàn toàn PlaceholderPage, tích hợp sẵn trên Sidebar và Header. 5. Đã viết 10 bài unit tests tại frontend/tests/forecast-ui.test.js và chạy kiểm thử toàn hệ thống đạt 233/233 tests PASS 100% (139 backend + 94 frontend), Vite client production build thành công trong 268ms, 0 lỗi linter."
     },
     {
-      "id": "feat-020",
+      "id": "feat-20",
+      "name": "trích xuất hết dữ liệu từ database cho cho toàn bộ trang giao diện.",
+      "description": "sửa lại giao diện và lấy hết dữ liệu từ database cho toàn bộ trang giao diện .",
+      "dependencies": [
+        "feat-007",
+        "feat-009",
+        "feat-011",
+        "feat-013",
+        "feat-015",
+        "feat-017",
+        "feat-019"
+      ],
+      "status": "completed",
+      "evidence": "Đã hoàn thành 100% việc trích xuất và hiển thị dữ liệu thời gian thực từ database PostgreSQL cho toàn bộ trang giao diện hệ thống Zen CRM: 1. Backend Service & Endpoint: Xây dựng GET /api/dashboard/stats (dashboard.controller.js & dashboard.routes.js), trích xuất trực tiếp số liệu thực tế từ 10 bảng trong database (leads, opportunities, orders, products, product_categories, campaigns, users, roles, sale_forecasts), tính toán tổng quan pipeline, doanh thu, win rate, tiến độ kế hoạch năm 12 tháng, dữ liệu riêng của salesman và danh sách hoạt động gần nhất (5 đơn hàng mới nhất, 5 cơ hội mới nhất, 5 khách hàng tiềm năng mới nhất, 5 tài khoản nhân sự mới nhất). 2. Frontend Client (dashboardApi.js): Cung cấp method getStats() kết nối axiosClient có gắn JWT Token. 3. Giao diện Dashboard (Dashboard.jsx): Nâng cấp toàn diện loại bỏ hoàn toàn số liệu hardcode; kết nối API tự động tải dữ liệu khi render; bổ sung nút làm mới dữ liệu từ Database thời gian thực; hiển thị KPI thích ứng theo 3 vai trò (ADMIN, SALE_MANAGER, SALESMAN); tích hợp 4 bảng dữ liệu thời gian thực hiển thị chi tiết mã đơn, khách hàng, sản phẩm, doanh thu, cơ hội, trạng thái deal; phân quyền hiển thị thông minh theo RBAC. 4. Viết 4 bài integration tests tại backend/tests/dashboard.test.js và 6 bài unit tests tại frontend/tests/dashboard-ui.test.js. 5. Kết quả kiểm thử toàn hệ thống đạt 243/243 tests PASS 100% (143 backend + 100 frontend), Vite client production build thành công trong 411ms, 0 lỗi."
+    },
+    {
+      "id": "feat-021",
       "name": "Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án",
       "description": "Chạy kiểm thử liên vết toàn hệ thống: Admin tạo tài khoản -> Manager lập plan & tạo sản phẩm/chiến dịch -> Salesman tạo Lead (test duplicate check) -> Tạo Opportunity -> Ghi Follow-up log -> Make Order chốt đơn (test trừ tồn kho) -> Đối soát số liệu tự động nhảy lên Dashboard.",
       "dependencies": [
@@ -219,6 +235,19 @@
       ],
       "status": "not-started",
       "evidence": ""
+    },
+    {
+      "id": "feat-022",
+      "name": "Phân quyền Sản phẩm Bán hàng cho Salesman & Tối ưu Query 1 Năm Mặc định",
+      "description": "Quản lý bán hàng (SALE_MANAGER) và ADMIN phân quyền những sản phẩm mà Nhân viên bán hàng (SALESMAN) được phép bán. Nhân viên chỉ xem và tạo cơ hội bán hàng cho sản phẩm mình được phân quyền (chặn HTTP 403 khi tạo cơ hội trái phép). Tối ưu query khi mở ứng dụng mặc định chỉ tải dữ liệu trong 1 năm gần nhất (Orders, Opportunities, Leads, Dashboard) và nạp thêm khi người dùng chọn ngày tháng.",
+      "dependencies": [
+        "feat-003",
+        "feat-011",
+        "feat-013",
+        "feat-015"
+      ],
+      "status": "completed",
+      "evidence": "1. CSDL PostgreSQL: Đã tạo bảng salesman_products (user_id, product_id, assigned_by, assigned_at) kèm ràng buộc UNIQUE và FOREIGN KEY, đánh 2 indexes hiệu năng. Đã cập nhật schema.sql và seed.sql. 2. Backend APIs: GET /api/products/salesmen (danh sách salesman kèm số lượng sản phẩm được gán), GET /api/products/assignments/:userId, PUT /api/products/assignments/:userId (cập nhật phân quyền bằng PostgreSQL Transaction ACID). Tự động cô lập danh sách sản phẩm theo quyền cho SALESMAN trong GET /api/products. Chặn HTTP 403 Forbidden trong POST /api/opportunities nếu salesman tạo cơ hội cho sản phẩm chưa được phân quyền. 3. Tối ưu Query 1 năm: Mặc định lọc >= CURRENT_TIMESTAMP - INTERVAL '1 year' trong getOrders, getOpportunities, getLeads và Dashboard khi không truyền khoảng ngày; hỗ trợ nạp dữ liệu đầy đủ hoặc tùy chỉnh khoảng ngày khi người dùng chọn bộ lọc. 4. Frontend UI: Component ProductAssignmentModal.jsx cho phép Quản lý chọn nhân viên, tìm kiếm và tick chọn sản phẩm được phép bán với checkbox, bộ lọc danh mục và lưu phân quyền thời gian thực; tích hợp nút 'Phân Quyền Bán Hàng' tại ProductListPage; gắn badge thông báo tối ưu 1 năm tại OrderListPage, OpportunityListPage, LeadListPage. 5. Kiểm thử: 146/146 tests backend (thêm test tại product.test.js và opportunity.test.js) + 110/110 tests frontend (thêm test tại products-ui.test.js) PASS 100% (Tổng 256/256 tests); Vite client build thành công."
     }
   ]
 }

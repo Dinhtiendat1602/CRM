@@ -42,8 +42,8 @@ export default function AppRoutes() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* Salesman Side Modules (SRS 2.1: Lead, Opportunity, Order Management - Only SALESMAN) */}
-          <Route element={<RoleRoute allowedRoles={['SALESMAN']} />}>
+          {/* Sales Operations Modules (SRS 2.1: Lead, Opportunity, Order Management - SALESMAN, SALE_MANAGER) */}
+          <Route element={<RoleRoute allowedRoles={['SALESMAN', 'SALE_MANAGER']} />}>
             {/* Leads Module (SRS 3.1 - 3.5) */}
             <Route path="/leads" element={<LeadListPage />} />
             <Route path="/leads/:id" element={<LeadDetailPage />} />
@@ -57,7 +57,7 @@ export default function AppRoutes() {
             <Route path="/orders/:id" element={<OrderDetailPage />} />
           </Route>
 
-          {/* Sale Manager Side Modules (SRS 2.1: Product, Campaign, Forecast, Reports - Only SALE_MANAGER) */}
+          {/* Sale Manager Side Modules (SRS 2.1: Product, Campaign, Forecast, Reports - SALE_MANAGER) */}
           <Route element={<RoleRoute allowedRoles={['SALE_MANAGER']} />}>
             {/* Products Module (SRS 3.15 - 3.17) */}
             <Route path="/products" element={<ProductListPage />} />

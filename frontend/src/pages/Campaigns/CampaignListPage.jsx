@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import campaignApi from '../../api/campaignApi';
 import CampaignModal from './CampaignModal';
 import CampaignAssignProductsModal from './CampaignAssignProductsModal';
@@ -48,6 +48,22 @@ export default function CampaignListPage() {
   const [toDate, setToDate] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('DESC');
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        const [y, m, d] = dateStr.slice(0, 10).split('-');
+        return `${d}/${m}/${y}`;
+      }
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch {
+      return dateStr;
+    }
+  };
 
   // Phân trang chuẩn 20 dòng theo BR-03
   const [pagination, setPagination] = useState({
@@ -364,7 +380,12 @@ export default function CampaignListPage() {
                       {/* Tên & Mô tả */}
                       <td className="px-4 py-3.5">
                         <div className="font-semibold text-slate-900 flex items-center gap-1.5">
-                          <span>{c.name}</span>
+                          <Link
+                            to={`/campaigns/${c.id}/report`}
+                            className="hover:text-blue-600 transition-colors hover:underline"
+                          >
+                            {c.name}
+                          </Link>
                         </div>
                         {c.description && (
                           <div className="text-xs text-slate-500 line-clamp-1 mt-0.5 max-w-xs">
@@ -387,11 +408,11 @@ export default function CampaignListPage() {
                         <div className="flex items-center gap-1 text-xs text-slate-700">
                           <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                           <span>
-                            {c.start_date ? new Date(c.start_date).toLocaleDateString('vi-VN') : '—'}
+                            {formatDate(c.start_date)}
                           </span>
                           <span className="text-slate-400">→</span>
                           <span>
-                            {c.end_date ? new Date(c.end_date).toLocaleDateString('vi-VN') : '—'}
+                            {formatDate(c.end_date)}
                           </span>
                         </div>
                       </td>

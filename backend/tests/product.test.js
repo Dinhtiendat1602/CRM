@@ -184,6 +184,29 @@ test('POST /api/products - Chống trùng mã sản phẩm product_code (HTTP 40
   assert.strictEqual(res.body.success, false);
 });
 
+test('GET /api/products/salesmen - Quản lý lấy danh sách nhân viên bán hàng (HTTP 200)', async () => {
+  const res = await request(app)
+    .get('/api/products/salesmen')
+    .set('Authorization', `Bearer ${managerToken}`);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.success, true);
+  assert.ok(Array.isArray(res.body.salesmen));
+  assert.ok(res.body.salesmen.length >= 1);
+});
+
+test('PUT /api/products/assignments/:userId - Quản lý phân quyền sản phẩm cho Salesman', async () => {
+  // Gán sản phẩm vừa tạo (createdProductId) cho Salesman ID 3
+  const res = await request(app)
+    .put('/api/products/assignments/3')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({ product_ids: [createdProductId, 1, 2, 3] });
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.success, true);
+  assert.ok(res.body.assigned_product_ids.includes(createdProductId));
+});
+
 test('GET /api/products - Tìm kiếm theo tên hoặc mã sản phẩm (SRS 3.15)', async () => {
   const res = await request(app)
     .get('/api/products?search=Quản lý Kho')

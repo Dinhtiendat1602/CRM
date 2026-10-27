@@ -114,7 +114,7 @@ export default function PerformanceReportPage() {
       datasets: [
         {
           type: 'bar',
-          label: 'Kế hoạch Plan ($)',
+          label: 'Kế hoạch Plan (VNĐ)',
           data: planValues,
           backgroundColor: 'rgba(59, 130, 246, 0.75)', // Blue-500
           borderColor: 'rgb(37, 99, 235)',
@@ -124,7 +124,7 @@ export default function PerformanceReportPage() {
         },
         {
           type: 'bar',
-          label: 'Thực tế Actually Value ($)',
+          label: 'Thực tế Actually Value (VNĐ)',
           data: actualValues,
           backgroundColor: 'rgba(16, 185, 129, 0.75)', // Emerald-500
           borderColor: 'rgb(5, 150, 105)',
@@ -248,7 +248,7 @@ export default function PerformanceReportPage() {
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Đối chiếu số liệu 12 tháng: Kế hoạch (Plan $) vs Thực tế (Actually Value $) vs Tỷ lệ hoàn thành % (BR-07)
+            Đối chiếu số liệu 12 tháng: Kế hoạch (Plan VNĐ) vs Thực tế (Actually Value VNĐ) vs Tỷ lệ hoàn thành % (BR-07)
           </p>
         </div>
 
@@ -317,7 +317,7 @@ export default function PerformanceReportPage() {
         {/* 1. Tổng Kế Hoạch */}
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-medium">Chỉ tiêu Plan ($)</span>
+            <span className="text-xs font-medium">Chỉ tiêu Plan (VNĐ)</span>
             <DollarSign className="w-4 h-4 text-blue-500" />
           </div>
           <div className="text-lg font-bold text-slate-900">
@@ -330,7 +330,7 @@ export default function PerformanceReportPage() {
         {/* 2. Thực Tế Đạt Được */}
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-medium">Thực tế Actually ($)</span>
+            <span className="text-xs font-medium">Thực tế Actually (VNĐ)</span>
             <ShoppingCart className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="text-lg font-bold text-emerald-700">

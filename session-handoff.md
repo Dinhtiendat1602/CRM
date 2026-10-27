@@ -4,9 +4,134 @@
 
 ## Current Objective
 
-- Goal: Hoàn thành `feat-019` (Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số - Dashboard UI) và sẵn sàng chuyển sang `feat-020` (Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án).
-- Current status: `feat-019` HOÀN THÀNH 100% (100% Definition of Done đạt chuẩn). Đạt cột mốc 19/20 tính năng hoàn thành (95% toàn bộ hệ thống Zen CRM).
+- Goal: 
+  1. Thay đổi phân quyền sản phẩm bán hàng: Quản lý bán hàng (`SALE_MANAGER`) & Admin phân chia những sản phẩm nào thì Nhân viên (`SALESMAN`) được phép bán. Nhân viên chỉ xem và tạo cơ hội (`Opportunity`) cho các sản phẩm mình được phân quyền (chặn HTTP 403 Forbidden nếu vi phạm).
+  2. Tối ưu truy vấn khi mở ứng dụng: Mặc định query giới hạn trong 1 năm gần nhất (từ 365 ngày trước đến hiện tại) trên các module Đơn hàng, Cơ hội, Khách tiềm năng & Dashboard. Khi người dùng chọn khoảng ngày trên bộ lọc thì dữ liệu mới tải tiếp theo thời gian đã chọn.
+- Current status: HOÀN THÀNH 100% (`feat-022`). Toàn bộ 256/256 tests PASS (146 backend + 110 frontend), Vite client production build 814ms không có lỗi. Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
 - Branch / commit: `main`
+
+- [x] **Phân Quyền Sản Phẩm Bán Hàng Cho Nhân Viên & Tối Ưu Truy Vấn 1 Năm Mặc Định (`feat-022`):**
+  - **1. CSDL PostgreSQL (`salesman_products`):**
+    - Tạo bảng `salesman_products` (`id`, `user_id`, `product_id`, `assigned_by`, `assigned_at`) kèm ràng buộc `UNIQUE(user_id, product_id)` và Foreign Key liên kết `users` và `products` (cascade delete).
+    - Đánh 2 indexes hiệu năng: `idx_salesman_products_user` và `idx_salesman_products_product`.
+    - Cập nhật [schema.sql](file:///Users/zen/CNTT/Fullstack/internship/backend/src/database/schema.sql) và [seed.sql](file:///Users/zen/CNTT/Fullstack/internship/backend/seeds/seed.sql).
+  - **2. Backend APIs & Controllers:**
+    - [product.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/product.controller.js):
+      - `getProducts`: Nếu `req.user.role === 'SALESMAN'`, tự động cô lập danh sách chỉ trả về các sản phẩm nhân viên được phân quyền qua `salesman_products`. Hỗ trợ thêm `assigned_user_id` và `for_salesman_id` cho Quản lý.
+      - `getSalesmenList`: `GET /api/products/salesmen` trả về danh sách nhân viên Salesman kèm số lượng sản phẩm được gán (`assigned_products_count`).
+      - `getSalesmanAssignments`: `GET /api/products/assignments/:userId` trả về mảng `assigned_product_ids`.
+      - `updateSalesmanAssignments`: `PUT /api/products/assignments/:userId` cập nhật mảng sản phẩm được phân quyền với PostgreSQL Transaction ACID.
+    - [product.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/product.routes.js): Đăng ký 3 endpoints phân quyền sản phẩm trước route `/:id`.
+    - [opportunity.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/opportunity.controller.js): Chặn nhân viên Salesman tạo cơ hội cho sản phẩm chưa được phân quyền (trả về HTTP 403: "Bạn chưa được phân quyền bán sản phẩm này. Vui lòng liên hệ Quản lý bán hàng.").
+    - **Tối ưu query 1 năm mặc định:**
+      - [order.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/order.controller.js): Mặc định lọc `ord.order_date >= CURRENT_TIMESTAMP - INTERVAL '1 year'` khi không truyền ngày.
+      - [opportunity.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/opportunity.controller.js): Mặc định lọc `o.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year'`.
+      - [lead.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/lead.controller.js): Mặc định lọc `entered_date >= CURRENT_TIMESTAMP - INTERVAL '1 year'`.
+      - [dashboard.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/dashboard.controller.js): Tối ưu truy vấn đếm và tính tổng doanh thu/cơ hội trong 1 năm gần nhất.
+  - **3. Frontend Client & UI:**
+    - [productApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/productApi.js): Bổ sung `getSalesmenList`, `getSalesmanAssignments`, `updateSalesmanAssignments`.
+    - [ProductAssignmentModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Products/ProductAssignmentModal.jsx): Modal chuyên nghiệp cho Quản lý & Admin chọn Salesman, xem danh sách sản phẩm kèm checkbox, tìm kiếm nhanh theo mã/tên, lọc theo danh mục, nút "Chọn tất cả" / "Bỏ chọn" và Lưu phân quyền thời gian thực.
+    - [ProductListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Products/ProductListPage.jsx): Thêm nút "Phân Quyền Bán Hàng" cho `SALE_MANAGER` và `ADMIN`.
+    - Gắn badge thông báo tối ưu truy vấn 1 năm mặc định và hướng dẫn chọn ngày để tải thêm dữ liệu trên [OrderListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Orders/OrderListPage.jsx), [OpportunityListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityListPage.jsx), [LeadListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx).
+  - **4. Bằng chứng kiểm thử:**
+    - Backend: 146/146 tests PASS (thêm 3 test phân quyền và chặn salesman tại `product.test.js` & `opportunity.test.js`).
+    - Frontend: 110/110 tests PASS (thêm 4 unit tests tại `products-ui.test.js`).
+    - Frontend build: Vite production build thành công trong 814ms.
+
+- [x] **Đồng Hồ Đếm Ngược Phiên Làm Việc Tự Động & Auto-Logout Sau 30 Phút Bất Hoạt (SRS 5.3, BR-11):**
+  - **Khắc phục giao diện tĩnh "Phiên 30m" thành Đồng hồ Đếm ngược Thời gian thực:**
+    - Hook [useIdleTimeout.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/hooks/useIdleTimeout.js): Theo dõi liên tục từng giây thời gian còn lại `totalRemainingSeconds` (1800s -> 00:00). Tự động reset về 30:00 khi người dùng di chuột/gõ phím (throttled 1s).
+    - Context [AuthContext.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/context/AuthContext.jsx): Phân phối `formattedSessionTime`, `sessionRemainingSeconds`, `resetSessionTimer`, `setDemoTimeout` cho các component con.
+    - Giao diện [Header.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/Header.jsx):
+      - Huy hiệu trên thanh Header hiển thị trực quan `Phiên: MM:SS` (ví dụ `Phiên: 29:59`).
+      - Tự đổi màu cảnh báo (Xanh lam > 5p, Vàng cam 2 - 5p, Đỏ nhấp nháy < 2p).
+      - Popover tương tác cho phép bấm "Gia hạn phiên (30:00)" hoặc "Thử nghiệm Auto-Logout (10s)" phục vụ trình chiếu/bảo vệ đồ án.
+  - **Cơ chế Tự động Đăng xuất (Auto-Logout) khi hết 30 phút:**
+    - Khi đồng hồ chạm mốc `00:00`: Hệ thống tự động xóa Token JWT & User data khỏi `localStorage`, phát thông báo cảnh báo bảo mật và chuyển hướng tức thì về `/login`.
+    - Modal [TimeoutWarning.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/TimeoutWarning.jsx) xuất hiện cảnh báo khi còn 2 phút cuối.
+  - **Kiểm thử:** Tạo mới [session-timeout.test.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/tests/session-timeout.test.js) (6/6 tests pass). Tổng 106 frontend tests pass, 143 backend tests pass, build 381ms.
+
+- [x] **Chuẩn hóa Ngày Giờ Toàn Hệ Thống & Khắc phục triệt để lỗi lệch múi giờ 7 tiếng (Timezone Offset):**
+  - **Khắc phục lỗi 02:42 AM thay vì 09:42 AM:**
+    - Frontend ([FollowUpModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/FollowUpModal.jsx)): Bỏ gọi `toISOString()` (chuyển sang UTC gây mất 7 tiếng). Sử dụng `formatLocalPayload` giữ nguyên chuỗi `YYYY-MM-DD HH:mm:ss`.
+    - Backend ([opportunity.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/opportunity.controller.js)): Cập nhật câu lệnh insert timestamptz với `AT TIME ZONE 'Asia/Ho_Chi_Minh'`.
+    - Backend ([order.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/order.controller.js)): Chuyển insert follow-up tự động từ `CURRENT_DATE` sang `CURRENT_TIMESTAMP`, ghi nhận chính xác từng giây tạo đơn.
+    - PostgreSQL Type Parser ([db.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/config/db.js)): Đăng ký `types.setTypeParser(1082, val => val)` cho kiểu DATE, trả về đúng chuỗi YYYY-MM-DD, chống nhảy lùi ngày.
+    - Centralized Utils ([dateUtils.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/utils/dateUtils.js)): Viết bộ hàm tiện ích `formatDate`, `formatDateTime` chuẩn hóa toàn frontend.
+    - Đồng bộ hiển thị trên: [OpportunityDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityDetailPage.jsx), [OpportunityListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityListPage.jsx), [OrderListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Orders/OrderListPage.jsx), [OrderDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Orders/OrderDetailPage.jsx), [LeadListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx), [LeadDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadDetailPage.jsx), [CampaignListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignListPage.jsx), [CampaignReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignReportPage.jsx), [Dashboard.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Dashboard/Dashboard.jsx), [UserManagement.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Admin/UserManagement.jsx).
+    - Cập nhật lại bản ghi ID 25 thành `09:42:00 21/10/2026`, ID 24 thành `09:15:00 21/10/2026` trong CSDL.
+  - **Kiểm thử:** 143/143 backend tests pass, 100/100 frontend tests pass, build 327ms.
+
+- [x] **Khắc phục lỗi "Không tìm thấy khách hàng" & Chuẩn hóa liên kết + Ngày giờ toàn hệ thống:**
+  - **Sửa triệt để lỗi 404 Không tìm thấy khách hàng ([LeadDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadDetailPage.jsx)):** Sửa lỗi data unboxing từ axiosClient, bổ sung link Chiến dịch & Sản phẩm liên kết, tiền tệ VNĐ và ngày giờ chuẩn Việt Nam.
+  - **Widget Ngày Giờ Thời Gian Thực trên mọi trang ([Header.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/Header.jsx)):** Chạy từng giây `Thứ ..., dd/MM/yyyy • HH:mm:ss`, hiển thị ở mọi kích thước màn hình.
+  - **Chuẩn hóa liên kết chéo và ngày giờ trên tất cả các trang:**
+    - Orders: [OrderDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Orders/OrderDetailPage.jsx) (link cơ hội), [OrderListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Orders/OrderListPage.jsx) (link lead, product, ngày giờ formatDateTime).
+    - Opportunities: [OpportunityDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityDetailPage.jsx) (link hóa đơn đơn hàng đã chốt), [OpportunityListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityListPage.jsx) (link lead, product, opportunity).
+    - Products: [ProductListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Products/ProductListPage.jsx) (link báo cáo chiến dịch), [ProductDetailPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Products/ProductDetailPage.jsx) (link cơ hội, đơn hàng).
+    - Campaigns: [CampaignReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignReportPage.jsx) (link sản phẩm), [CampaignListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignListPage.jsx) (link báo cáo).
+    - Dashboard: [Dashboard.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Dashboard/Dashboard.jsx) (link đơn hàng, lead, cơ hội, user, sản phẩm, chiến dịch; backend trả về IDs).
+    - Báo cáo & Dự báo: [GeneralReportsPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Reports/GeneralReportsPage.jsx) (link sản phẩm và chiến dịch), [PerformanceReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/PerformanceReportPage.jsx) và [SetupPlanPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/SetupPlanPage.jsx) (chuẩn hóa nhãn VNĐ).
+  - **Kiểm thử:** 143 backend tests pass, 100 frontend tests pass, build thành công 467ms.
+
+- [x] **Sửa triệt để lỗi tính toán & hiển thị dữ liệu Báo cáo Chiến dịch Tiếp thị (Campaign Performance Report - SRS 3.19):**
+  - **Khắc phục lỗi nhân chéo dòng (Cartesian Product) trong SQL:** Thay thế 3 LEFT JOIN lồng nhau bằng independent subqueries trong `backend/src/controllers/campaign.controller.js`, loại bỏ hoàn toàn việc nhân bản đơn hàng 39 lần làm vọt doanh thu lên 3.489.900.000 đ và ROI +5716.5%.
+  - **Chuẩn hóa Tỷ lệ chuyển đổi (Conversion Rate):** Định nghĩa chuẩn Marketing/CRM: `(converted_leads / total_leads) * 100`, đạt 100% khi 2/2 leads chốt đơn, triệt tiêu lỗi 400%.
+  - **Đồng bộ hóa 100% KPI tổng quan với Bảng chi tiết:**
+    - Doanh thu: **506.800.000 đ** từ **5 đơn hàng** khớp 100% với Bảng Sản phẩm mục tiêu (1 đơn Fujinon 13.5M + 4 đơn Sony A7M4 493.3M).
+    - ROI: **+744.67%** (tính từ ngân sách 60M).
+    - Cơ hội bán hàng: **2** cơ hội khớp với 2 Leads trong chiến dịch.
+    - Bổ sung dòng `<tfoot>` tổng cộng cho cả 2 bảng.
+    - Bảo toàn `campaign_id` trong test suite `backend/tests/campaign.test.js`.
+  - **Bằng chứng kiểm thử:**
+    - Backend: 143/143 tests PASS 100%.
+    - Frontend: 100/100 tests PASS 100%.
+    - Frontend build: 546ms (0 lỗi).
+
+- [x] **`feat-20`: Trích xuất hết dữ liệu từ Database cho toàn bộ trang giao diện & Tối ưu dữ liệu đến ngày 20/10/2026:**
+  - **Khắc phục triệt để hiển thị Khách hàng tiềm năng & Cơ hội bán hàng:**
+    - [LeadListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx): Sửa lỗi bóc tách dữ liệu (`res.data.leads` -> đọc trực tiếp mảng `res.data` từ axiosClient), hỗ trợ đồng bộ bộ lọc ngày `from_date`/`startDate`. Danh sách hiển thị đầy đủ 20 khách hàng tiềm năng.
+    - [OpportunityListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityListPage.jsx): Sửa lỗi bóc tách (`res.data.data` -> `res.data`), hiển thị ngay lập tức 20 cơ hội bán hàng.
+  - **Thu gọn Danh mục Sản phẩm thành ĐÚNG 5 Danh mục:**
+    - Cập nhật [seed.sql](file:///Users/zen/CNTT/Fullstack/internship/backend/seeds/seed.sql) bảng `product_categories` thành 5 nhóm hàng tiêu chuẩn:
+      1. *Đồ điện tử & Công nghệ* (Màn hình Dell, Bàn phím Logitech, SSD SanDisk, Máy in Xprinter...)
+      2. *Máy ảnh & Thiết bị Studio* (Sony A7M4, Canon R6M2, Lens Fujinon, Flycam DJI, Gimbal, Đèn Godox...)
+      3. *Phần mềm bản quyền & Giải pháp CRM* (Zen CRM Standard, Enterprise, Zen WMS...)
+      4. *Thiết bị An ninh & Camera AI* (Camera AI Hanwha/ZenCam, Đầu ghi NVR Dahua, Tủ chống ẩm...)
+      5. *Hạ tầng Mạng & Viễn thông* (Router DrayTek, Cloud VPS Server...)
+    - 20 sản phẩm công nghệ được gắn lại `category_id` (1 -> 5) chuẩn xác.
+  - **Mở rộng dòng thời gian đến ngày 20/10/2026 (Hiện tại):**
+    - Phân bổ 25 đơn hàng trải đều từ **Tháng 1 đến Tháng 10/2026** (có đơn chốt đúng ngày hôm nay 20/10/2026): Bảng đối soát doanh số 12 tháng (`/forecast/performance`) hiển thị đầy đủ doanh số thực tế từ T1 -> T10 đạt từ 86% đến 137% chỉ tiêu, không còn bị 0đ hay 0% nữa.
+    - Gán phần lớn Leads, Opportunities, Orders cho tài khoản nhân viên của bạn (`sale` - ID 3) và quản lý (`manager` - ID 2), giúp trang cá nhân và Dashboard hiển thị rực rỡ dữ liệu thực tế.
+  - **Bằng chứng kiểm thử:**
+    - Backend: **143/143 tests PASS 100%**.
+    - Frontend: **100/100 tests PASS 100%**.
+    - Frontend Build: Hoàn tất trong **875ms**, 0 lỗi.
+
+- [x] **Nạp Dữ liệu Mẫu Toàn Diện từ `seed.sql` vào Cơ sở Dữ liệu Thực tế (`CRM`):**
+  - **Khởi tạo và làm sạch chuẩn hóa:** Thực thi `seed.sql` thành công 100% vào database PostgreSQL `CRM` với đầy đủ 20 bản ghi chất lượng cho mỗi bảng nghiệp vụ:
+    - `roles`: 3 bản ghi (`ADMIN`, `SALE_MANAGER`, `SALESMAN`)
+    - `users`: 20 bản ghi (IDs 1 -> 20), chuẩn hóa mật khẩu `11111111` bằng hash bcrypt chuẩn 60 ký tự (`$2b$10$b5ORgei1knYoXLLX/s1D8.zlK1PJWpGluXDbaTUY5oUpZn.gJvxLy`). Cả 3 tài khoản chính (`admin`, `manager`, `sale`) đăng nhập thành công tuyệt đối cả bằng Username và Email.
+    - `campaigns`: 20 chiến dịch tiếp thị
+    - `product_categories`: 20 danh mục sản phẩm
+    - `products`: 20 sản phẩm công nghệ (Máy ảnh, Camera AI, Ống kính...)
+    - `leads`: 20 khách hàng tiềm năng
+    - `opportunities`: 20 cơ hội bán hàng
+    - `follow_ups`: 20 nhật ký chăm sóc khách hàng
+    - `orders`: 20 đơn hàng đã xuất hóa đơn
+    - `sale_forecasts`: 20 bản ghi kế hoạch dự báo doanh số
+  - **Khắc phục Cleanup Hook trong Test Suite:** Sửa `backend/tests/user.test.js` để tránh xóa nhầm tài khoản gốc `admin` sau khi chạy test; hỗ trợ username `sale` đồng bộ trong `order.test.js`, `auth.test.js` và `login-flow.test.js`.
+  - **Bằng chứng kiểm thử:**
+    - Backend: **139/139 tests PASS 100%** (0 lỗi).
+    - Frontend: **94/94 tests PASS 100%** (0 lỗi).
+    - Frontend Build: `npm run build` thành công trong 498ms (0 lỗi).
+
+- [x] **Cập nhật quyền hạn toàn diện cho Quản lý bán hàng (`SALE_MANAGER`) & Tối ưu giao diện Sidebar:**
+  - **Cố định Sidebar khi cuộn trang dài (Sticky Sidebar):** Nâng cấp `<aside>` trong [Sidebar.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/Sidebar.jsx) thành `lg:sticky lg:top-0 lg:h-screen lg:shrink-0`, đảm bảo thanh Sidebar luôn cố định 100% bên trái màn hình khi cuộn nội dung trang dài, phần danh mục menu cuộn độc lập (`overflow-y-auto`).
+  - **Loại bỏ khối Quyền hạn:** Xóa bỏ hoàn toàn khối thẻ "QUYỀN HẠN" chiếm diện tích ở đáy Sidebar theo yêu cầu để giao diện gọn gàng, thoáng đãng.
+  - **Mở khóa điều hướng & Route phân quyền:** Bổ sung `SALE_MANAGER` vào danh mục menu điều hướng [Sidebar.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/Sidebar.jsx), route bảo vệ [AppRoutes.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/routes/AppRoutes.jsx), và các lối tắt nhanh tại [Dashboard.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Dashboard/Dashboard.jsx) cho cả 3 phân hệ cốt lõi: **Khách hàng tiềm năng (`/leads`)**, **Cơ hội bán hàng (`/opportunities`)** và **Đơn hàng (`/orders`)**.
+  - **Mô tả vai trò `SALE_MANAGER`:** Cập nhật đồng bộ mô tả thành: *"Quản lý toàn diện: Khách hàng tiềm năng (Leads), Cơ hội bán hàng (Opportunities), Đơn hàng (Orders), Sản phẩm, Chiến dịch tiếp thị, Dự báo doanh số và Báo cáo thống kê"* trên Database PostgreSQL (bảng `roles`), file seed [seed.sql](file:///Users/zen/CNTT/Fullstack/internship/backend/seeds/seed.sql), bộ khởi tạo [init-db.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/database/init-db.js), tài liệu [db-schema.md](file:///Users/zen/CNTT/Fullstack/internship/docs/generated/db-schema.md) và đặc tả [roles-and-requirements.md](file:///Users/zen/CNTT/Fullstack/internship/docs/product-specs/roles-and-requirements.md).
+  - **Giao diện Đăng nhập ([Login.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Auth/Login.jsx)):** Loại bỏ khối nút chọn nhanh tài khoản kiểm thử (Admin, Manager, Salesman) và hàm `handleQuickLogin`, cập nhật placeholder thành `"Email hoặc tên đăng nhập"`.
 
 - [x] **`feat-019`: Frontend Màn hình Lập Kế hoạch & Dashboard Đối soát Doanh số (Dashboard UI theo SRS 3.20, 3.21, SRS 2.1, BR-07):**
   - **API Service Client:**
@@ -170,26 +295,15 @@
 
 | Check | Command | Result | Notes |
 |---|---|---|---|
-| Backend Test Suite | `npm test` (trong `backend/`) | PASS (139/139 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (4), `forgot-password.test.js` (6), `user.test.js` (13), `lead.test.js` (15), `product.test.js` (18), `opportunity.test.js` (17), `order.test.js` (15), `campaign.test.js` (19), `forecast.test.js` (15) |
-| Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (94/94 tests passed) | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `products-ui.test.js` (10) + `user-management.test.js` (10) + `opportunities-ui.test.js` (10) + `orders-ui.test.js` (12) + `campaigns-ui.test.js` (14) + `forecast-ui.test.js` (10) |
-| Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors) | Oxlint kiểm tra toàn bộ files sạch sẽ |
-| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 268ms) | Vite production bundle hoàn tất |
-| Full System Test | Toàn bộ kiểm thử | PASS (233/233 tests passed) | 100% tests PASS, không có bất kỳ regression nào |
-
-## Files Changed
-
-- [frontend/src/api/forecastApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/forecastApi.js): Client API lập kế hoạch doanh số 12 tháng & đối soát hiệu suất.
-- [frontend/src/pages/Forecast/SetupPlanPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/SetupPlanPage.jsx): Giao diện lập kế hoạch doanh số 12 tháng theo bảng SRS 3.20 kèm bộ công cụ phân bổ nhanh thông minh.
-- [frontend/src/pages/Forecast/PerformanceReportPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/PerformanceReportPage.jsx): Giao diện báo cáo đối soát 12 tháng SRS 3.21, BR-07, Biểu đồ Chart.js (Bar & Line), 5 thẻ KPI và hỗ trợ In ấn chuẩn doanh nghiệp.
-- [frontend/src/routes/AppRoutes.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/routes/AppRoutes.jsx): Gắn định tuyến `/forecast/setup` và `/forecast/performance` thay thế PlaceholderPage.
-- [frontend/tests/forecast-ui.test.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/tests/forecast-ui.test.js): 10 bài unit tests kiểm tra toàn diện nghiệp vụ giao diện lập kế hoạch & đối soát.
-- `feature_list.json`: Cập nhật `feat-019` sang `completed` với evidence đầy đủ.
-- `progress.md`: Cập nhật tiến độ 19/20 tính năng (95%).
-- `session-handoff.md`: Cập nhật biên bản bàn giao phiên làm việc.
+| Backend Test Suite | `npm test` (trong `backend/`) | PASS (143/143 tests passed) | `app.test.js` (2), `auth.test.js` (12), `db.test.js` (6), `forgot-password.test.js` (6), `user.test.js` (16), `lead.test.js` (15), `product.test.js` (18), `opportunity.test.js` (17), `order.test.js` (15), `campaign.test.js` (19), `forecast.test.js` (15), `dashboard.test.js` (4) |
+| Frontend Test Suite | `npm test` (trong `frontend/`) | PASS (106/106 tests passed) | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `opportunities-ui.test.js` (10) + `orders-ui.test.js` (12) + `products-ui.test.js` (10) + `session-timeout.test.js` (6) + `user-management.test.js` (10) + `campaigns-ui.test.js` (14) + `forecast-ui.test.js` (10) + `dashboard-ui.test.js` (6) |
+| Frontend Lint | `npm run lint` (trong `frontend/`) | PASS (0 errors) | Oxlint kiểm tra toàn bộ files sạch sẽ 100% |
+| Frontend Build | `npm run build` (trong `frontend/`) | PASS (built in 385ms) | Vite production client bundle hoàn tất |
+| Full System Test | Toàn bộ kiểm thử | PASS (249/249 tests passed) | 100% tests PASS (143 backend + 106 frontend), không có bất kỳ regression nào |
 
 ## Next Steps
 
-1. Triển khai tính năng cuối cùng của dự án: **`feat-020: Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án`**:
+1. Triển khai tính năng cuối cùng của dự án: **`feat-021: Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án`**:
    - Viết kịch bản kiểm thử liên vết toàn hệ thống (E2E User Journey Script):
      - **Bước 1 (Admin):** Đăng nhập Admin (`admin1` / `11111111`) -> Tạo tài khoản nhân viên mới hoặc quản lý danh sách -> Thử khóa/mở khóa/xóa tài khoản.
      - **Bước 2 (Manager):** Đăng nhập Manager (`manager1` / `11111111`) -> Tạo danh mục & sản phẩm mới (test chống trùng mã SP `product_code`) -> Tạo chiến dịch tiếp thị mới & gán sản phẩm -> Thiết lập chỉ tiêu kế hoạch 12 tháng (`/forecast/setup`).

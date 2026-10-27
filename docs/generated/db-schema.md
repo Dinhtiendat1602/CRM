@@ -223,6 +223,19 @@ CREATE TABLE sale_forecasts (
     updated_at    TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (fiscal_year, month)                                   -- Mỗi tháng-năm chỉ có 1 kế hoạch
 );
+-- 12. BẢNG SALESMAN_PRODUCTS (Phân quyền sản phẩm cho Nhân viên bán hàng)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS salesman_products (
+    id          SERIAL PRIMARY KEY,
+    user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id  INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    assigned_by INT REFERENCES users(id) ON DELETE SET NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, product_id)
+);
+CREATE INDEX IF NOT EXISTS idx_salesman_products_user ON salesman_products(user_id);
+CREATE INDEX IF NOT EXISTS idx_salesman_products_product ON salesman_products(product_id);
+
 ```
 
 ---
@@ -238,7 +251,7 @@ CREATE TABLE sale_forecasts (
 -- Bảng Roles (3 vai trò chuẩn hệ thống)
 INSERT INTO roles (id, name, description) VALUES
     (1, 'ADMIN',        'Quản trị viên toàn quyền hệ thống'),
-    (2, 'SALE_MANAGER', 'Trưởng phòng kinh doanh / Quản lý bán hàng'),
+    (2, 'SALE_MANAGER', 'Quản lý toàn diện: Khách hàng tiềm năng (Leads), Cơ hội bán hàng (Opportunities), Đơn hàng (Orders), Sản phẩm, Chiến dịch tiếp thị, Dự báo doanh số và Báo cáo thống kê'),
     (3, 'SALESMAN',     'Nhân viên kinh doanh');
 
 -- Tài khoản Admin

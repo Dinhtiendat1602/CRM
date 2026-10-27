@@ -198,7 +198,7 @@ export default function SetupPlanPage() {
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Thiết lập chỉ tiêu định mức doanh thu dự báo (Plan $) cho từng tháng trong năm tài chính
+            Thiết lập chỉ tiêu định mức doanh thu dự báo (Plan VNĐ) cho từng tháng trong năm tài chính
           </p>
         </div>
 
@@ -396,7 +396,7 @@ export default function SetupPlanPage() {
               <tr>
                 <th className="px-5 py-3 w-40">Tháng (Month)</th>
                 <th className="px-5 py-3 w-28">Quý</th>
-                <th className="px-5 py-3">Chỉ tiêu Doanh số Mục tiêu (Plan Value $)</th>
+                <th className="px-5 py-3">Chỉ tiêu Doanh số Mục tiêu (Plan Value VNĐ)</th>
                 <th className="px-5 py-3 text-right w-36">% Tỷ trọng năm</th>
                 <th className="px-5 py-3 w-48">Phân bổ trực quan</th>
               </tr>

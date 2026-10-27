@@ -56,8 +56,15 @@ describe('End-to-End Login Flow & RBAC Integration Tests', () => {
     let res = await fetch(`${BACKEND_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: 'sale1', password: '11111111' }),
+      body: JSON.stringify({ username: 'sale', password: '11111111' }),
     });
+    if (res.status !== 200) {
+      res = await fetch(`${BACKEND_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'sale1', password: '11111111' }),
+      });
+    }
     if (res.status !== 200) {
       res = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',

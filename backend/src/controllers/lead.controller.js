@@ -23,6 +23,9 @@ exports.getLeads = async (req, res, next) => {
       search,
       from_date,
       to_date,
+      startDate,
+      endDate,
+      all_time,
       campaign_id,
       assigned_to,
       sortBy = 'entered_date',
@@ -41,17 +44,25 @@ exports.getLeads = async (req, res, next) => {
       );
     }
 
+    const effectiveFromDate = from_date || startDate;
+    const effectiveToDate = to_date || endDate;
+
     // Lọc theo ngày nhập: từ ngày (BR-05, SRS 3.2.3 REQ-3)
-    if (from_date) {
-      values.push(from_date);
+    if (effectiveFromDate) {
+      values.push(effectiveFromDate);
       conditions.push(`l.entered_date >= $${values.length}::timestamp`);
     }
 
     // Lọc theo ngày nhập: đến ngày (BR-05)
-    if (to_date) {
-      values.push(to_date);
+    if (effectiveToDate) {
+      values.push(effectiveToDate);
       // Nếu to_date chỉ là YYYY-MM-DD, chuyển thành hết ngày 23:59:59
       conditions.push(`l.entered_date <= ($${values.length}::date + INTERVAL '1 day' - INTERVAL '1 second')`);
+    }
+
+    // Tối ưu query khi mở ứng dụng: Mặc định trong vòng 1 năm gần nhất nếu không chọn ngày
+    if (!effectiveFromDate && !effectiveToDate && all_time !== 'true') {
+      conditions.push(`l.entered_date >= (CURRENT_TIMESTAMP - INTERVAL '1 year')`);
     }
 
     // Lọc theo chiến dịch

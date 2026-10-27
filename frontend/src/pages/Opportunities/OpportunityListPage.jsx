@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import oppApi from '../../api/oppApi';
 import Pagination from '../../components/Common/Pagination';
 import SearchInput from '../../components/Common/SearchInput';
@@ -58,6 +58,22 @@ export default function OpportunityListPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isOppModalOpen, setIsOppModalOpen] = useState(false);
   const [selectedOpp, setSelectedOpp] = useState(null);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        const [y, m, d] = dateStr.slice(0, 10).split('-');
+        return `${d}/${m}/${y}`;
+      }
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch {
+      return dateStr;
+    }
+  };
   const [initialLeadId, setInitialLeadId] = useState(null);
   const [initialProductId, setInitialProductId] = useState(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
@@ -99,13 +115,17 @@ export default function OpportunityListPage() {
       };
 
       const res = await oppApi.getOpportunities(params);
-      const data = res.data?.data || [];
-      const meta = res.data?.pagination || {};
+      const data = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : res.data?.data || [];
+      const meta = res.pagination || res.data?.pagination || {};
 
       setOpportunities(data);
       setPagination((prev) => ({
         ...prev,
-        totalRecords: meta.total ?? 0,
+        totalRecords: meta.total ?? meta.totalRecords ?? data.length,
         totalPages: meta.totalPages ?? 1,
       }));
     } catch (err) {
@@ -309,6 +329,16 @@ export default function OpportunityListPage() {
             </button>
           </div>
         </div>
+
+        {/* Thông báo tối ưu tải dữ liệu 1 năm */}
+        {!fromDate && !toDate && (
+          <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-2 rounded-xl">
+            <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <span>
+              Hệ thống mặc định tối ưu tải cơ hội bán hàng trong <strong>1 năm gần nhất</strong>. Vui lòng chọn <strong>Từ ngày / Đến ngày</strong> bên trên nếu muốn tải dữ liệu các năm trước đó.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Thông báo lỗi nếu có */}
@@ -363,16 +393,29 @@ export default function OpportunityListPage() {
                       {/* Khách hàng */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-start gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
+                          <Link
+                            to={`/opportunities/${opp.id}`}
+                            className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5 transition-colors"
+                            title="Xem chi tiết cơ hội"
+                          >
                             #{opp.id}
-                          </div>
+                          </Link>
                           <div>
-                            <button
-                              onClick={() => navigate(`/opportunities/${opp.id}`)}
-                              className="font-semibold text-gray-900 hover:text-blue-600 text-left transition-colors"
-                            >
-                              {opp.lead_name || `Khách hàng #${opp.lead_id}`}
-                            </button>
+                            {opp.lead_id ? (
+                              <Link
+                                to={`/leads/${opp.lead_id}`}
+                                className="font-semibold text-gray-900 hover:text-blue-600 text-left transition-colors hover:underline block"
+                              >
+                                {opp.lead_name || `Khách hàng #${opp.lead_id}`}
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={() => navigate(`/opportunities/${opp.id}`)}
+                                className="font-semibold text-gray-900 hover:text-blue-600 text-left transition-colors"
+                              >
+                                {opp.lead_name || `Cơ hội #${opp.id}`}
+                              </button>
+                            )}
                             <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
                               <span>{opp.lead_phone}</span>
                               {opp.lead_email && (
@@ -391,7 +434,16 @@ export default function OpportunityListPage() {
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <div>
-                            <span className="font-medium text-gray-800">{opp.product_name}</span>
+                            {opp.product_id ? (
+                              <Link
+                                to={`/products/${opp.product_id}`}
+                                className="font-medium text-gray-800 hover:text-blue-600 hover:underline block"
+                              >
+                                {opp.product_name}
+                              </Link>
+                            ) : (
+                              <span className="font-medium text-gray-800">{opp.product_name}</span>
+                            )}
                             <div className="text-xs text-gray-500">
                               Mã: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{opp.product_code}</code>
                             </div>
@@ -442,7 +494,7 @@ export default function OpportunityListPage() {
                         {opp.expected_close_date ? (
                           <div className="flex items-center gap-1.5 text-gray-700">
                             <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                            <span>{new Date(opp.expected_close_date).toLocaleDateString('vi-VN')}</span>
+                            <span>{formatDate(opp.expected_close_date)}</span>
                           </div>
                         ) : (
                           <span className="text-gray-400 italic">Chưa xác định</span>

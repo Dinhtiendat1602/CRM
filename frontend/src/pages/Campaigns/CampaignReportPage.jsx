@@ -38,6 +38,22 @@ export default function CampaignReportPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'leads'
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        const [y, m, d] = dateStr.slice(0, 10).split('-');
+        return `${d}/${m}/${y}`;
+      }
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
   const fetchReport = useCallback(async () => {
     setLoading(true);
     setErrorMsg('');
@@ -164,9 +180,9 @@ export default function CampaignReportPage() {
           <span className="text-xs text-slate-400 font-medium">Thời gian triển khai</span>
           <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-800 mt-1">
             <Calendar className="w-4 h-4 text-slate-400" />
-            <span>{campaign.start_date ? new Date(campaign.start_date).toLocaleDateString('vi-VN') : '—'}</span>
+            <span>{formatDate(campaign.start_date)}</span>
             <span className="text-slate-400">→</span>
-            <span>{campaign.end_date ? new Date(campaign.end_date).toLocaleDateString('vi-VN') : '—'}</span>
+            <span>{formatDate(campaign.end_date)}</span>
           </div>
         </div>
 
@@ -214,9 +230,8 @@ export default function CampaignReportPage() {
         </div>
 
         {/* 3. Chỉ số ROI */}
-        <div className={`p-4 rounded-xl bg-white border shadow-xs print:border-slate-300 ${
-          isRoiPositive ? 'border-emerald-200 bg-emerald-50/20' : 'border-rose-200 bg-rose-50/20'
-        }`}>
+        <div className={`p-4 rounded-xl bg-white border shadow-xs print:border-slate-300 ${isRoiPositive ? 'border-emerald-200 bg-emerald-50/20' : 'border-rose-200 bg-rose-50/20'
+          }`}>
           <div className="flex items-center justify-between text-slate-400 mb-1">
             <span className="text-xs font-bold text-slate-700">Chỉ số ROI</span>
             {isRoiPositive ? (
@@ -252,7 +267,7 @@ export default function CampaignReportPage() {
           <div className="text-xl font-bold text-slate-900">
             {metrics.total_opportunities || 0}
           </div>
-          <span className="text-[11px] text-slate-400">Opportunities tạo ra</span>
+          <span className="text-[11px] text-slate-400">Từ {metrics.total_leads || 0} Leads chiến dịch</span>
         </div>
 
         {/* 6. Tỷ lệ chuyển đổi */}
@@ -264,7 +279,9 @@ export default function CampaignReportPage() {
           <div className="text-xl font-bold text-cyan-700">
             {metrics.conversion_rate || 0}%
           </div>
-          <span className="text-[11px] text-slate-400">Leads → Đơn hàng</span>
+          <span className="text-[11px] text-cyan-700 font-medium">
+            {metrics.converted_leads ?? leads.filter((l) => (parseInt(l.orders_count, 10) || 0) > 0).length}/{metrics.total_leads || 0} Leads chốt đơn
+          </span>
         </div>
       </div>
 
@@ -275,11 +292,10 @@ export default function CampaignReportPage() {
           <button
             type="button"
             onClick={() => setActiveTab('products')}
-            className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-              activeTab === 'products'
-                ? 'border-blue-600 text-blue-600 bg-white rounded-t-lg'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
+            className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${activeTab === 'products'
+              ? 'border-blue-600 text-blue-600 bg-white rounded-t-lg'
+              : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
+              }`}
           >
             <Package className="w-4 h-4" />
             <span>Sản phẩm Quảng bá ({products.length})</span>
@@ -288,11 +304,10 @@ export default function CampaignReportPage() {
           <button
             type="button"
             onClick={() => setActiveTab('leads')}
-            className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
-              activeTab === 'leads'
-                ? 'border-blue-600 text-blue-600 bg-white rounded-t-lg'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
+            className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${activeTab === 'leads'
+              ? 'border-blue-600 text-blue-600 bg-white rounded-t-lg'
+              : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
+              }`}
           >
             <Users className="w-4 h-4" />
             <span>Khách hàng Tiềm năng ({leads.length})</span>
@@ -344,7 +359,13 @@ export default function CampaignReportPage() {
                         {p.product_code}
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-900">
-                        {p.name}
+                        <Link
+                          to={`/products/${p.id}`}
+                          className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                        >
+                          <span>{p.name}</span>
+                          <ExternalLink className="w-3 h-3 text-slate-400 print:hidden" />
+                        </Link>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600">
                         {p.category_name || 'Mặc định'}
@@ -378,6 +399,28 @@ export default function CampaignReportPage() {
                   ))
                 )}
               </tbody>
+              {products.length > 0 && (
+                <tfoot className="bg-slate-50 border-t-2 border-slate-300 font-bold text-xs text-slate-800">
+                  <tr>
+                    <td colSpan={4} className="px-4 py-3 text-slate-700 uppercase">
+                      Tổng cộng ({products.length} sản phẩm)
+                    </td>
+                    <td className="px-4 py-3 text-center text-slate-800">
+                      {products.reduce((acc, p) => acc + (parseInt(p.stock_qty, 10) || 0), 0)}
+                    </td>
+                    <td className="px-4 py-3 text-center text-blue-600">
+                      {products.reduce((acc, p) => acc + (parseInt(p.orders_count, 10) || 0), 0)}
+                    </td>
+                    <td className="px-4 py-3 text-center text-emerald-600">
+                      {products.reduce((acc, p) => acc + (parseInt(p.units_sold, 10) || 0), 0)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-emerald-700">
+                      {Number(products.reduce((acc, p) => acc + (parseFloat(p.product_revenue) || 0), 0)).toLocaleString('vi-VN')} đ
+                    </td>
+                    <td className="px-4 py-3 print:hidden"></td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         )}
@@ -435,7 +478,7 @@ export default function CampaignReportPage() {
                         {l.career || '—'}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600">
-                        {l.entered_date ? new Date(l.entered_date).toLocaleDateString('vi-VN') : '—'}
+                        {formatDate(l.entered_date)}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-700">
                         {l.assigned_to_name || 'Chưa phân công'}
@@ -453,6 +496,24 @@ export default function CampaignReportPage() {
                   ))
                 )}
               </tbody>
+              {leads.length > 0 && (
+                <tfoot className="bg-slate-50 border-t-2 border-slate-300 font-bold text-xs text-slate-800">
+                  <tr>
+                    <td colSpan={6} className="px-4 py-3 text-slate-700 uppercase">
+                      Tổng cộng ({leads.length} khách hàng tiềm năng)
+                    </td>
+                    <td className="px-4 py-3 text-center text-blue-600">
+                      {leads.reduce((acc, l) => acc + (parseInt(l.opportunities_count, 10) || 0), 0)}
+                    </td>
+                    <td className="px-4 py-3 text-center text-emerald-600">
+                      {leads.reduce((acc, l) => acc + (parseInt(l.orders_count, 10) || 0), 0)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-900">
+                      {Number(leads.reduce((acc, l) => acc + (parseFloat(l.total_spent) || 0), 0)).toLocaleString('vi-VN')} đ
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         )}

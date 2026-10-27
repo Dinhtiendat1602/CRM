@@ -57,22 +57,30 @@ export default function LeadListPage() {
       const res = await leadApi.getLeads({
         page: pagination.page,
         limit: pagination.limit,
-        search,
+        search: search.trim() || undefined,
         sortBy,
         sortOrder,
+        from_date: startDate || undefined,
+        to_date: endDate || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
       });
 
-      const data = res.data || res;
-      setLeads(data.leads || []);
-      if (data.pagination) {
+      const leadList = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : res.leads || res.data?.leads || [];
+      setLeads(leadList);
+
+      const meta = res.pagination || res.data?.pagination;
+      if (meta) {
         setPagination((prev) => ({
           ...prev,
-          page: data.pagination.currentPage || data.pagination.page,
-          limit: data.pagination.limit,
-          totalRecords: data.pagination.totalRecords,
-          totalPages: data.pagination.totalPages,
+          page: meta.page || meta.currentPage || prev.page,
+          limit: meta.limit || prev.limit,
+          totalRecords: meta.total ?? meta.totalRecords ?? leadList.length,
+          totalPages: meta.totalPages || 1,
         }));
       }
     } catch (err) {
@@ -144,13 +152,9 @@ export default function LeadListPage() {
     if (!isoString) return '—';
     try {
       const d = new Date(isoString);
-      return d.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      if (isNaN(d.getTime())) return isoString;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     } catch {
       return isoString;
     }
@@ -259,6 +263,16 @@ export default function LeadListPage() {
             </button>
           </div>
         </div>
+
+        {/* Thông báo tối ưu tải dữ liệu 1 năm */}
+        {!startDate && !endDate && (
+          <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-2 rounded-xl">
+            <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <span>
+              Hệ thống mặc định tối ưu tải khách hàng tiềm năng trong <strong>1 năm gần nhất</strong>. Vui lòng chọn <strong>Từ ngày / Đến ngày</strong> bên trên nếu muốn tải dữ liệu các năm trước đó.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Error Banner */}

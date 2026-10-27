@@ -52,6 +52,18 @@ export default function UserManagement() {
   const [userToToggleStatus, setUserToToggleStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
   // State xác nhận xóa user (SRS 2.1)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -590,8 +602,8 @@ export default function UserManagement() {
                       </td>
 
                       {/* Created date */}
-                      <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap">
-                        {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—'}
+                      <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap" title={formatDateTime(u.created_at)}>
+                        {formatDateTime(u.created_at)}
                       </td>
 
                       {/* Actions: Reset Password & Delete User */}

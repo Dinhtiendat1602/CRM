@@ -152,15 +152,20 @@ test('POST /api/opportunities - Cho phép tạo cơ hội trùng lặp khi có c
 });
 
 test('GET /api/opportunities - Tìm kiếm theo tên Lead hoặc Sản phẩm (SRS 3.8)', async () => {
+  const detail = await request(app)
+    .get(`/api/opportunities/${testOppId}`)
+    .set('Authorization', `Bearer ${salesmanToken}`);
+  const keyword = detail.body.data?.product_name?.split(' ')[0] || 'Canon';
+
   const res = await request(app)
-    .get('/api/opportunities?search=iPhone')
+    .get(`/api/opportunities?search=${encodeURIComponent(keyword)}`)
     .set('Authorization', `Bearer ${salesmanToken}`);
 
   assert.strictEqual(res.status, 200);
   assert.strictEqual(res.body.success, true);
   assert.ok(res.body.data.length >= 1);
-  const found = res.body.data.some((opp) => opp.product_name.includes('iPhone'));
-  assert.ok(found, 'Phải tìm thấy cơ hội chứa sản phẩm iPhone');
+  const found = res.body.data.some((opp) => opp.product_name.includes(keyword));
+  assert.ok(found, `Phải tìm thấy cơ hội chứa sản phẩm ${keyword}`);
 });
 
 test('GET /api/opportunities/:id - Xem chi tiết Cơ hội kèm lịch sử Follow-up (SRS 3.7.3 REQ-4)', async () => {
@@ -260,4 +265,27 @@ test('DELETE /api/opportunities/:id - Xóa cơ hội bán hàng thành công (SR
 
   // Đánh dấu đã xóa để hook after không xóa lại
   testOppId = null;
+});
+
+test('POST /api/opportunities - Chặn Salesman tạo cơ hội cho sản phẩm chưa được phân quyền (HTTP 403 Forbidden)', async () => {
+  // Lấy 1 sản phẩm mà salesman không được gán (hoặc tạm gỡ 1 sản phẩm)
+  const unassignedRes = await pool.query(
+    'SELECT id FROM products WHERE id NOT IN (SELECT product_id FROM salesman_products WHERE user_id = 3) LIMIT 1'
+  );
+  if (unassignedRes.rows.length > 0) {
+    const unassignedProductId = unassignedRes.rows[0].id;
+    const res = await request(app)
+      .post('/api/opportunities')
+      .set('Authorization', `Bearer ${salesmanToken}`)
+      .send({
+        lead_id: 2,
+        product_id: unassignedProductId,
+        quantity: 1,
+        notes: 'TEST_OPPORTUNITY Sản phẩm chưa được cấp phép',
+      });
+
+    assert.strictEqual(res.status, 403);
+    assert.strictEqual(res.body.success, false);
+    assert.ok(res.body.message.includes('phân quyền bán sản phẩm này'));
+  }
 });

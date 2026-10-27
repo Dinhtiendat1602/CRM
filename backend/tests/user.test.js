@@ -11,6 +11,12 @@ let salesmanToken;
 test.before(async () => {
   adminToken = await getAdminToken(app);
   salesmanToken = await getSalesmanToken(app);
+  // Đảm bảo có tài khoản mặc định 'admin' cho test case kiểm tra bảo vệ tài khoản gốc
+  await pool.query(
+    `INSERT INTO users (username, email, password_hash, full_name, role_id, is_active)
+     VALUES ('admin', 'admin_default_test@test.com', '$2a$10$abcdefghijklmnopqrstuu', 'System Admin Root', 1, true)
+     ON CONFLICT (username) DO NOTHING;`
+  );
 });
 
 test.after(async () => {

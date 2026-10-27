@@ -39,13 +39,28 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
   const fetchOrderDetail = useCallback(async () => {
     setLoading(true);
     setErrorMsg('');
     try {
       const res = await orderApi.getOrderById(id);
-      // axiosClient unbox response.data -> res.data chứa order object
-      const orderData = res.data || res;
+      // axiosClient unbox response.data -> res có thể là { success: true, data } hoặc order object trực tiếp
+      const orderData = res.data?.data || res.data || (res?.id ? res : null);
+      if (!orderData || !orderData.id) {
+        throw new Error('Không tìm thấy thông tin đơn hàng.');
+      }
       setOrder(orderData);
 
       // Nếu có query param ?print=true, tự động mở dialog in
@@ -57,7 +72,7 @@ export default function OrderDetailPage() {
     } catch (err) {
       console.error('Lỗi tải chi tiết đơn hàng:', err);
       setErrorMsg(
-        err.response?.data?.message || 'Không tìm thấy hóa đơn hoặc đơn hàng này.'
+        err.response?.data?.message || err.message || 'Không tìm thấy hóa đơn hoặc đơn hàng này.'
       );
     } finally {
       setLoading(false);
@@ -174,7 +189,7 @@ export default function OrderDetailPage() {
             <div className="text-xl font-mono font-black text-blue-700">{order.order_code}</div>
             <div className="text-xs text-gray-500 mt-0.5 flex items-center sm:justify-end gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-gray-400" />
-              <span>Ngày chốt: {new Date(order.order_date).toLocaleString('vi-VN')}</span>
+              <span>Ngày chốt: {formatDateTime(order.order_date)}</span>
             </div>
           </div>
         </div>
@@ -238,13 +253,24 @@ export default function OrderDetailPage() {
                 Nhân viên lập đơn: <strong>{order.created_by_name || 'Hệ thống'}</strong>
               </p>
               <p>
-                Cơ hội liên kết: <strong>Cơ hội #{order.opportunity_id}</strong>
+                Cơ hội liên kết:{' '}
+                {order.opportunity_id ? (
+                  <Link
+                    to={`/opportunities/${order.opportunity_id}`}
+                    className="font-semibold text-blue-600 hover:underline print:text-gray-700 inline-flex items-center gap-1"
+                  >
+                    <span>Cơ hội #{order.opportunity_id}</span>
+                    <ExternalLink className="w-3 h-3 print:hidden" />
+                  </Link>
+                ) : (
+                  <strong>Không có</strong>
+                )}
               </p>
               <p>
                 Trạng thái thanh toán: <strong className="text-emerald-700">Đã xác nhận chốt</strong>
               </p>
               <p className="text-gray-400 text-xxs">
-                Ghi nhận vào CSDL: {new Date(order.created_at).toLocaleString('vi-VN')}
+                Ghi nhận vào CSDL: {formatDateTime(order.created_at)}
               </p>
             </div>
           </div>

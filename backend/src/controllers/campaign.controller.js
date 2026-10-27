@@ -506,7 +506,8 @@ exports.getCampaignReport = async (req, res, next) => {
     const campaign = cRes.rows[0];
     const budget = parseFloat(campaign.budget || 0);
 
-    // 2. Thống kê số lượng Leads thu được từ chiến dịch
+    // 2. Thống kê chi tiết danh sách Leads thu được từ chiến dịch (SRS 3.19)
+    // Dùng subquery độc lập để tránh nhân chéo dòng (Cartesian product)
     const leadsRes = await db.query(
       `SELECT
         l.id,
@@ -516,23 +517,24 @@ exports.getCampaignReport = async (req, res, next) => {
         l.entered_date,
         l.career,
         u.full_name AS assigned_to_name,
-        COUNT(DISTINCT opp.id) AS opportunities_count,
-        COUNT(DISTINCT ord.id) AS orders_count,
-        COALESCE(SUM(ord.total_amount), 0) AS total_spent
+        (SELECT COUNT(*)::int FROM opportunities opp WHERE opp.lead_id = l.id) AS opportunities_count,
+        (SELECT COUNT(*)::int FROM orders ord WHERE ord.lead_id = l.id) AS orders_count,
+        COALESCE((SELECT SUM(ord.total_amount) FROM orders ord WHERE ord.lead_id = l.id), 0) AS total_spent
        FROM leads l
        LEFT JOIN users u ON l.assigned_to = u.id
-       LEFT JOIN opportunities opp ON opp.lead_id = l.id
-       LEFT JOIN orders ord ON ord.lead_id = l.id
        WHERE l.campaign_id = $1
-       GROUP BY l.id, u.full_name
        ORDER BY l.entered_date DESC, l.id DESC`,
       [id]
     );
 
     const leads = leadsRes.rows;
     const totalLeads = leads.length;
+    const totalOpportunities = leads.reduce((sum, l) => sum + parseInt(l.opportunities_count || 0, 10), 0);
+    const convertedLeadsCount = leads.filter(l => parseInt(l.orders_count || 0, 10) > 0).length;
+    const leadRevenue = leads.reduce((sum, l) => sum + parseFloat(l.total_spent || 0), 0);
+    const leadOrders = leads.reduce((sum, l) => sum + parseInt(l.orders_count || 0, 10), 0);
 
-    // 3. Thống kê sản phẩm đang quảng bá trong chiến dịch
+    // 3. Thống kê danh sách sản phẩm đang quảng bá trong chiến dịch (SRS 3.18.1)
     const productsRes = await db.query(
       `SELECT
         p.id,
@@ -541,50 +543,33 @@ exports.getCampaignReport = async (req, res, next) => {
         p.unit_price,
         p.stock_qty,
         pc.name AS category_name,
-        COUNT(DISTINCT ord.id) AS orders_count,
-        COALESCE(SUM(ord.quantity), 0) AS units_sold,
-        COALESCE(SUM(ord.total_amount), 0) AS product_revenue
+        (SELECT COUNT(*)::int FROM orders ord WHERE ord.product_id = p.id) AS orders_count,
+        COALESCE((SELECT SUM(ord.quantity)::int FROM orders ord WHERE ord.product_id = p.id), 0) AS units_sold,
+        COALESCE((SELECT SUM(ord.total_amount) FROM orders ord WHERE ord.product_id = p.id), 0) AS product_revenue
        FROM products p
        LEFT JOIN product_categories pc ON p.category_id = pc.id
-       LEFT JOIN orders ord ON ord.product_id = p.id
        WHERE p.campaign_id = $1
-       GROUP BY p.id, pc.name
        ORDER BY p.name ASC`,
       [id]
     );
 
     const products = productsRes.rows;
+    const productRevenue = products.reduce((sum, p) => sum + parseFloat(p.product_revenue || 0), 0);
+    const productOrders = products.reduce((sum, p) => sum + parseInt(p.orders_count || 0, 10), 0);
 
-    // 4. Tổng hợp các Cơ hội và Đơn hàng phát sinh từ Leads của chiến dịch HOẶC Sản phẩm của chiến dịch
-    const conversionRes = await db.query(
-      `SELECT
-        COUNT(DISTINCT opp.id) AS total_opportunities,
-        COUNT(DISTINCT ord.id) AS total_orders,
-        COALESCE(SUM(ord.total_amount), 0) AS total_revenue
-       FROM campaigns c
-       LEFT JOIN leads l ON l.campaign_id = c.id
-       LEFT JOIN opportunities opp ON opp.lead_id = l.id OR opp.product_id IN (SELECT id FROM products WHERE campaign_id = c.id)
-       LEFT JOIN orders ord ON ord.lead_id = l.id OR ord.product_id IN (SELECT id FROM products WHERE campaign_id = c.id)
-       WHERE c.id = $1
-       GROUP BY c.id`,
-      [id]
-    );
+    // 4. Xác định Doanh thu & Đơn hàng tổng hợp (SRS 3.19):
+    // - Nếu chiến dịch có gán Sản phẩm quảng bá (Product Campaign) -> tính theo các Sản phẩm được gán
+    // - Nếu chiến dịch thuần thu thập Lead (Lead Gen Campaign) -> tính theo Đơn hàng từ các Leads thu được
+    const totalRevenue = products.length > 0 ? productRevenue : leadRevenue;
+    const totalOrders = products.length > 0 ? productOrders : leadOrders;
 
-    const conversion = conversionRes.rows[0] || {
-      total_opportunities: 0,
-      total_orders: 0,
-      total_revenue: 0,
-    };
-
-    const totalOpportunities = parseInt(conversion.total_opportunities, 10) || 0;
-    const totalOrders = parseInt(conversion.total_orders, 10) || 0;
-    const totalRevenue = parseFloat(conversion.total_revenue) || 0;
-
-    // 5. Tính toán các chỉ số ROI & Tỷ lệ chuyển đổi (SRS 3.19)
+    // 5. Tính toán các chỉ số ROI & Tỷ lệ chuyển đổi chuẩn CRM (SRS 3.19)
     // ROI = (Doanh thu - Chi phí) / Chi phí * 100%
     const roi = budget > 0 ? Number((((totalRevenue - budget) / budget) * 100).toFixed(2)) : 0;
-    // Tỷ lệ chuyển đổi Leads -> Orders
-    const conversionRate = totalLeads > 0 ? Number(((totalOrders / totalLeads) * 100).toFixed(2)) : 0;
+
+    // Tỷ lệ chuyển đổi chuẩn: (Số Leads đã chốt đơn thành công / Tổng số Leads thu được) * 100%
+    // Đảm bảo luôn nằm trong khoảng 0% - 100%, không bị lỗi phi thực tế (như 400%)
+    const conversionRate = totalLeads > 0 ? Number(((convertedLeadsCount / totalLeads) * 100).toFixed(1)) : 0;
 
     return res.status(200).json({
       success: true,
@@ -606,6 +591,11 @@ exports.getCampaignReport = async (req, res, next) => {
           total_opportunities: totalOpportunities,
           total_orders: totalOrders,
           total_revenue: totalRevenue,
+          converted_leads: convertedLeadsCount,
+          product_revenue: productRevenue,
+          product_orders: productOrders,
+          lead_revenue: leadRevenue,
+          lead_orders: leadOrders,
           roi,
           conversion_rate: conversionRate,
         },

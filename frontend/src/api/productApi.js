@@ -53,6 +53,22 @@ const productApi = {
   getProductOrders: (id) => {
     return axiosClient.get(`/products/${id}/orders`);
   },
+
+  // === SALESMAN PRODUCT ASSIGNMENTS APIs ===
+  // GET /api/products/salesmen: Lấy danh sách salesman kèm số lượng sản phẩm được gán
+  getSalesmenList: () => {
+    return axiosClient.get('/products/salesmen');
+  },
+
+  // GET /api/products/assignments/:userId: Lấy danh sách ID sản phẩm được gán cho salesman
+  getSalesmanAssignments: (userId) => {
+    return axiosClient.get(`/products/assignments/${userId}`);
+  },
+
+  // PUT /api/products/assignments/:userId: Cập nhật danh sách ID sản phẩm được gán cho salesman
+  updateSalesmanAssignments: (userId, productIds) => {
+    return axiosClient.put(`/products/assignments/${userId}`, { product_ids: productIds });
+  },
 };
 
 export default productApi;

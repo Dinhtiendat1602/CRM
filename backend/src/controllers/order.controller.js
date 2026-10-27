@@ -182,7 +182,19 @@ exports.makeOrder = async (req, res, next) => {
       }
     }
 
-    const finalOrderDate = order_date ? new Date(order_date) : new Date();
+    let finalOrderDate = null;
+    if (order_date) {
+      if (typeof order_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(order_date.trim())) {
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        if (order_date.trim() === todayStr) {
+          finalOrderDate = null; // defaults to CURRENT_TIMESTAMP
+        } else {
+          finalOrderDate = `${order_date.trim()} 00:00:00`;
+        }
+      } else {
+        finalOrderDate = order_date;
+      }
+    }
 
     // 7. Tạo bản ghi đơn hàng mới trong bảng orders (SRS 3.12)
     const insertOrderQuery = `
@@ -199,7 +211,17 @@ exports.makeOrder = async (req, res, next) => {
         shipping_address,
         status,
         created_by
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'COMPLETED', $11)
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7,
+        COALESCE(
+          CASE
+            WHEN $8 ~ 'Z$' OR $8 ~ '[+-]\\d{2}:?\\d{2}$' THEN ($8::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')
+            ELSE $8::timestamp
+          END,
+          CURRENT_TIMESTAMP
+        ),
+        $9, $10, 'COMPLETED', $11
+      )
       RETURNING *;
     `;
     const orderInsertRes = await client.query(insertOrderQuery, [
@@ -236,7 +258,7 @@ exports.makeOrder = async (req, res, next) => {
     await client.query(
       `INSERT INTO follow_ups (
         opportunity_id, follow_date, contact_method, content, customer_response, next_plan, created_by
-      ) VALUES ($1, CURRENT_DATE, 'MEETING', $2, $3, $4, $5)`,
+      ) VALUES ($1, CURRENT_TIMESTAMP, 'MEETING', $2, $3, $4, $5)`,
       [
         oppId,
         followUpContent,
@@ -355,6 +377,11 @@ exports.getOrders = async (req, res, next) => {
     if (to_date) {
       values.push(`${to_date} 23:59:59.999`);
       conditions.push(`ord.order_date <= $${values.length}::timestamp`);
+    }
+
+    // Tối ưu query khi mở ứng dụng: Mặc định trong vòng 1 năm gần nhất nếu không chọn ngày
+    if (!from_date && !to_date && req.query.all_time !== 'true') {
+      conditions.push(`ord.order_date >= (CURRENT_TIMESTAMP - INTERVAL '1 year')`);
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

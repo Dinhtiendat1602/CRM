@@ -14,17 +14,22 @@ let testLeadId;
 let initialStock;
 
 before(async () => {
-  // Lấy token đăng nhập của Salesman (hỗ trợ tài khoản thật sale1 hoặc salesman)
+  // Lấy token đăng nhập của Salesman (hỗ trợ tài khoản thật sale, sale1 hoặc salesman)
   let salesRes = await request(app)
     .post('/api/auth/login')
-    .send({ username: 'sale1', password: '11111111' });
+    .send({ username: 'sale', password: '11111111' });
+  if (!salesRes.body.data?.token) {
+    salesRes = await request(app)
+      .post('/api/auth/login')
+      .send({ username: 'sale1', password: '11111111' });
+  }
   if (!salesRes.body.data?.token) {
     salesRes = await request(app)
       .post('/api/auth/login')
       .send({ username: 'salesman', password: '11111111' });
   }
   salesmanToken = salesRes.body.data?.token;
-  assert.ok(salesmanToken, 'Cần JWT Token của salesman (sale1 hoặc salesman)');
+  assert.ok(salesmanToken, 'Cần JWT Token của salesman (sale, sale1 hoặc salesman)');
 
   // Lấy token đăng nhập của Sale Manager (hỗ trợ tài khoản thật manager1: 11111111 / 22222222 hoặc manager: 11111111)
   let mgrRes = await request(app)

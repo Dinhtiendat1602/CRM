@@ -21,10 +21,13 @@ before(async () => {
   assert.ok(adminToken && managerToken && salesmanToken, 'Phải có đủ JWT token của cả 3 roles');
 
   // Lấy một sản phẩm mẫu có sẵn trong DB để test gán sản phẩm vào chiến dịch
-  const prodRes = await pool.query('SELECT id FROM products ORDER BY id ASC LIMIT 1');
+  const prodRes = await pool.query('SELECT id, campaign_id FROM products ORDER BY id ASC LIMIT 1');
   assert.ok(prodRes.rows.length > 0, 'Cần ít nhất 1 sản phẩm mẫu trong DB');
   testProductId = prodRes.rows[0].id;
+  originalCampaignId = prodRes.rows[0].campaign_id;
 });
+
+let originalCampaignId = null;
 
 after(async () => {
   // Dọn dẹp chiến dịch test phát sinh
@@ -32,6 +35,10 @@ after(async () => {
     await pool.query('UPDATE products SET campaign_id = NULL WHERE campaign_id = ANY($1::int[])', [createdCampaignIds]);
     await pool.query('UPDATE leads SET campaign_id = NULL WHERE campaign_id = ANY($1::int[])', [createdCampaignIds]);
     await pool.query('DELETE FROM campaigns WHERE id = ANY($1::int[])', [createdCampaignIds]);
+  }
+  // Khôi phục lại campaign_id ban đầu của sản phẩm test
+  if (testProductId) {
+    await pool.query('UPDATE products SET campaign_id = $1 WHERE id = $2', [originalCampaignId, testProductId]);
   }
 });
 

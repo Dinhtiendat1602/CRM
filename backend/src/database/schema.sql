@@ -164,3 +164,15 @@ CREATE TABLE sale_forecasts (
     updated_at    TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (fiscal_year, month)
 );
+
+-- 12. SALESMAN_PRODUCTS TABLE (Phân quyền sản phẩm cho Nhân viên bán hàng)
+CREATE TABLE salesman_products (
+    id          SERIAL PRIMARY KEY,
+    user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id  INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    assigned_by INT REFERENCES users(id) ON DELETE SET NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, product_id)
+);
+CREATE INDEX idx_salesman_products_user ON salesman_products(user_id);
+CREATE INDEX idx_salesman_products_product ON salesman_products(product_id);

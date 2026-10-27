@@ -276,13 +276,39 @@ CREATE INDEX IF NOT EXISTS idx_salesman_products_user ON salesman_products(user_
 CREATE INDEX IF NOT EXISTS idx_salesman_products_product ON salesman_products(product_id);
 
 INSERT INTO salesman_products (user_id, product_id, assigned_by) VALUES
+  -- 1. Tran Thi Salesman (ID 3): Thiết bị điện tử + Laptop + Máy ảnh tiêu biểu (12 SP)
   (3, 1, 2), (3, 2, 2), (3, 3, 2), (3, 4, 2), (3, 5, 2),
   (3, 6, 2), (3, 7, 2), (3, 8, 2), (3, 9, 2), (3, 10, 2),
-  (3, 11, 2), (3, 12, 2), (3, 15, 2),
-  (6, 1, 2), (6, 2, 2), (6, 6, 2), (6, 9, 2),
-  (8, 1, 2), (8, 7, 2), (8, 10, 2), (8, 16, 2),
-  (9, 1, 2), (9, 4, 2), (9, 12, 2), (9, 18, 2),
-  (10, 1, 2), (10, 3, 2), (10, 13, 2)
+  (3, 13, 2), (3, 15, 2),
+  -- 2. Nguyen Van An (ID 6): Thiết bị điện tử & Phụ kiện công nghệ (8 SP)
+  (6, 1, 2), (6, 2, 2), (6, 3, 2), (6, 4, 2), (6, 5, 2),
+  (6, 6, 2), (6, 7, 2), (6, 8, 2),
+  -- 3. Tran Thi Bich (ID 8): Máy ảnh kỹ thuật số & Ống kính quang học (6 SP)
+  (8, 13, 2), (8, 14, 2), (8, 15, 2), (8, 16, 2), (8, 17, 2), (8, 18, 2),
+  -- 4. Le Van Thai (ID 9): Phần mềm bản quyền, Cloud & Bảo mật (6 SP)
+  (9, 9, 2), (9, 10, 2), (9, 11, 2), (9, 12, 2), (9, 1, 2), (9, 2, 2),
+  -- 5. Do Manh Cuong (ID 10): Thiết bị doanh nghiệp cao cấp & Laptop (7 SP)
+  (10, 1, 2), (10, 3, 2), (10, 6, 2), (10, 9, 2), (10, 10, 2), (10, 13, 2), (10, 14, 2),
+  -- 6. Vu Thi Ngoc (ID 11): Điện thoại thông minh & Máy tính bảng (5 SP)
+  (11, 2, 2), (11, 3, 2), (11, 4, 2), (11, 7, 2), (11, 8, 2),
+  -- 7. Ngo Quoc Bao (ID 12): Máy ảnh & Phụ kiện studio (6 SP)
+  (12, 13, 2), (12, 14, 2), (12, 15, 2), (12, 16, 2), (12, 17, 2), (12, 18, 2),
+  -- 8. Dang Thu Thao (ID 13): Bán hàng đa ngành (8 SP)
+  (13, 1, 2), (13, 2, 2), (13, 4, 2), (13, 6, 2), (13, 9, 2), (13, 11, 2), (13, 13, 2), (13, 15, 2),
+  -- 9. Trinh Tan Phat (ID 14): Thiết bị văn phòng & Phần mềm (6 SP)
+  (14, 1, 2), (14, 5, 2), (14, 6, 2), (14, 8, 2), (14, 9, 2), (14, 10, 2),
+  -- 10. Ly Hoai Nam (ID 15): Công nghệ di động (5 SP)
+  (15, 2, 2), (15, 3, 2), (15, 4, 2), (15, 7, 2), (15, 8, 2),
+  -- 11. Pham Thanh Long (ID 16): Nhiếp ảnh gia & Thiết bị quay (6 SP)
+  (16, 13, 2), (16, 14, 2), (16, 15, 2), (16, 16, 2), (16, 17, 2), (16, 18, 2),
+  -- 12. Vuong Quoc Tuan (ID 17): Giải pháp phần mềm & Laptop (6 SP)
+  (17, 1, 2), (17, 9, 2), (17, 10, 2), (17, 11, 2), (17, 12, 2), (17, 6, 2),
+  -- 13. Nguyen Ha Phuong (ID 18): Sản phẩm Apple & Phụ kiện (5 SP)
+  (18, 2, 2), (18, 3, 2), (18, 4, 2), (18, 7, 2), (18, 8, 2),
+  -- 14. Tran Dinh Trong (ID 19): Thiết bị & Giải pháp tổng hợp (7 SP)
+  (19, 1, 2), (19, 2, 2), (19, 5, 2), (19, 9, 2), (19, 13, 2), (19, 15, 2), (19, 17, 2),
+  -- 15. Phan Van Hung (ID 20): Bán lẻ & Dự án nhỏ (6 SP)
+  (20, 1, 2), (20, 2, 2), (20, 3, 2), (20, 6, 2), (20, 9, 2), (20, 14, 2)
 ON CONFLICT (user_id, product_id) DO NOTHING;
 
 -- Cập nhật lại giá trị Sequence trong Postgres

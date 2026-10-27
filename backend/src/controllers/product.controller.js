@@ -580,6 +580,7 @@ const getSalesmenList = async (req, res) => {
     const result = await db.query(query);
     return res.status(200).json({
       success: true,
+      data: result.rows,
       salesmen: result.rows,
     });
   } catch (error) {

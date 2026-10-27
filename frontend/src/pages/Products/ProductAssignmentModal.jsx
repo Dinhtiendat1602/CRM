@@ -47,14 +47,18 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
       productApi.getCategories()
     ])
       .then(([salesmenRes, productsRes, categoriesRes]) => {
-        const smList = salesmenRes.data || salesmenRes || [];
+        const smList = Array.isArray(salesmenRes)
+          ? salesmenRes
+          : (Array.isArray(salesmenRes?.salesmen)
+              ? salesmenRes.salesmen
+              : (Array.isArray(salesmenRes?.data) ? salesmenRes.data : []));
         setSalesmen(smList);
 
-        const prodList = productsRes.data?.products || productsRes.products || [];
-        setAllProducts(prodList);
+        const rawProds = productsRes?.products || productsRes?.data?.products || (Array.isArray(productsRes?.data) ? productsRes.data : productsRes);
+        setAllProducts(Array.isArray(rawProds) ? rawProds : []);
 
-        const catList = categoriesRes.data?.categories || categoriesRes.categories || [];
-        setCategories(catList);
+        const rawCats = categoriesRes?.categories || categoriesRes?.data?.categories || (Array.isArray(categoriesRes?.data) ? categoriesRes.data : categoriesRes);
+        setCategories(Array.isArray(rawCats) ? rawCats : []);
 
         // Mặc định chọn salesman đầu tiên nếu chưa chọn
         if (smList.length > 0 && !selectedSalesmanId) {
@@ -80,7 +84,8 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
     setSuccessMsg('');
     try {
       const res = await productApi.getSalesmanAssignments(userId);
-      const assigned = res.data?.assigned_product_ids || res.assigned_product_ids || [];
+      const rawAssigned = res?.assigned_product_ids || res?.data?.assigned_product_ids || (Array.isArray(res?.data) ? res.data : []);
+      const assigned = Array.isArray(rawAssigned) ? rawAssigned : [];
       setSelectedProductIds(new Set(assigned.map((id) => Number(id))));
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Không thể tải sản phẩm phân quyền của nhân viên.');
@@ -179,7 +184,8 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
-  const selectedSalesman = salesmen.find((sm) => String(sm.id) === String(selectedSalesmanId));
+  const safeSalesmen = Array.isArray(salesmen) ? salesmen : [];
+  const selectedSalesman = safeSalesmen.find((sm) => String(sm.id) === String(selectedSalesmanId));
 
   return (
     <Modal
@@ -228,10 +234,10 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
                 disabled={loadingInitial || saving}
                 className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none dark:text-gray-100"
               >
-                {salesmen.length === 0 ? (
+                {safeSalesmen.length === 0 ? (
                   <option value="">Không có nhân viên bán hàng nào</option>
                 ) : (
-                  salesmen.map((sm) => (
+                  safeSalesmen.map((sm) => (
                     <option key={sm.id} value={sm.id}>
                       {sm.full_name} ({sm.username}) — Đang bán: {sm.assigned_products_count || 0} sản phẩm
                     </option>

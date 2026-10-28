@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-10-27 19:50
-- **Active Task:** Hoàn tất tính năng Phân quyền sản phẩm cho Nhân viên bán hàng & Tối ưu hóa truy vấn mặc định 1 năm (`feat-022`).
-- **Current Status:** HOÀN THÀNH 100% (256/256 tests PASS: 146 backend + 110 frontend, Vite client production build 814ms, 0 lint/build errors).
+- **Last Updated:** 2026-10-28 09:28
+- **Active Task:** Tinh chỉnh Dashboard mặc định không hiện dữ liệu, chỉ khi nhấn nút xem dữ liệu thì mới hiển thị dữ liệu 1 năm gần nhất (`feat-022`).
+- **Current Status:** HOÀN THÀNH 100% (259/259 tests PASS: 146 backend + 113 frontend, Vite client production build 313ms, 0 lint/build errors).
 - **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
 
 ---
@@ -388,7 +388,7 @@
 | Lệnh kiểm thử | Kết quả | Chi tiết kiểm chứng |
 |---|---|---|
 | `npm test` (trong `backend/`) | **PASS (146/146 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (6) + `forgot-password.test.js` (6) + `user.test.js` (16) + `lead.test.js` (15) + `product.test.js` (20) + `opportunity.test.js` (18) + `order.test.js` (15) + `campaign.test.js` (19) + `forecast.test.js` (15) + `dashboard.test.js` (4) |
-| `npm test` (trong `frontend/`) | **PASS (110/110 passed, 0 failures)** | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `opportunities-ui.test.js` (10) + `orders-ui.test.js` (12) + `products-ui.test.js` (14) + `session-timeout.test.js` (6) + `user-management.test.js` (10) + `campaigns-ui.test.js` (14) + `forecast-ui.test.js` (10) + `dashboard-ui.test.js` (6) |
-| `npm run lint` (trong `frontend/`) | **PASS (0 errors, 52 warnings - React purity/effect)** | Oxlint kiểm tra 72 files frontend, 0 syntax hay type error |
-| `npm run build` (trong `frontend/`) | **PASS (built in 814ms)** | Vite production client build hoàn tất, bundle `dist/` sẵn sàng triển khai |
-| `npm test` (toàn hệ thống) | **PASS (256/256 tests passed 100%)** | 146 backend integration tests + 110 frontend unit & flow tests vượt qua tuyệt đối |
+| `npm test` (trong `frontend/`) | **PASS (113/113 passed, 0 failures)** | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `opportunities-ui.test.js` (10) + `orders-ui.test.js` (12) + `products-ui.test.js` (14) + `session-timeout.test.js` (6) + `user-management.test.js` (10) + `campaigns-ui.test.js` (14) + `forecast-ui.test.js` (10) + `dashboard-ui.test.js` (9: thêm 3 test kiểm tra chế độ mặc định ẩn và xem/ẩn dữ liệu) |
+| `npm run lint` (trong `frontend/`) | **PASS (0 errors, 46 warnings - React purity/effect)** | Oxlint kiểm tra 72 files frontend, 0 syntax hay type error, Dashboard.jsx 0 warning |
+| `npm run build` (trong `frontend/`) | **PASS (built in 313ms)** | Vite production client build hoàn tất, bundle `dist/` sẵn sàng triển khai |
+| `npm test` (toàn hệ thống) | **PASS (259/259 tests passed 100%)** | 146 backend integration tests + 113 frontend unit & flow tests vượt qua tuyệt đối |

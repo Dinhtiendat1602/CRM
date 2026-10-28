@@ -124,7 +124,7 @@ exports.getDashboardStats = async (req, res, next) => {
       };
     }
 
-    // 3. Trích xuất danh sách 5 đơn hàng mới nhất
+    // 3. Trích xuất danh sách 5 đơn hàng mới nhất trong 1 năm gần nhất
     const recentOrdersRes = await db.query(`
       SELECT 
         o.id,
@@ -143,11 +143,12 @@ exports.getDashboardStats = async (req, res, next) => {
       JOIN leads l ON o.lead_id = l.id
       JOIN products p ON o.product_id = p.id
       LEFT JOIN users u ON o.created_by = u.id
+      WHERE o.order_date >= CURRENT_TIMESTAMP - INTERVAL '1 year'
       ORDER BY o.order_date DESC, o.id DESC
       LIMIT 5;
     `);
 
-    // 4. Trích xuất danh sách 5 cơ hội mới nhất
+    // 4. Trích xuất danh sách 5 cơ hội mới nhất trong 1 năm gần nhất
     const recentOppsRes = await db.query(`
       SELECT 
         opp.id,
@@ -165,11 +166,12 @@ exports.getDashboardStats = async (req, res, next) => {
       JOIN leads l ON opp.lead_id = l.id
       JOIN products p ON opp.product_id = p.id
       LEFT JOIN users u ON opp.created_by = u.id
+      WHERE opp.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year'
       ORDER BY opp.id DESC
       LIMIT 5;
     `);
 
-    // 5. Trích xuất danh sách 5 khách hàng tiềm năng mới nhất
+    // 5. Trích xuất danh sách 5 khách hàng tiềm năng mới nhất trong 1 năm gần nhất
     const recentLeadsRes = await db.query(`
       SELECT 
         l.id,
@@ -184,6 +186,7 @@ exports.getDashboardStats = async (req, res, next) => {
       FROM leads l
       LEFT JOIN campaigns c ON l.campaign_id = c.id
       LEFT JOIN users u ON l.assigned_to = u.id
+      WHERE l.entered_date >= CURRENT_TIMESTAMP - INTERVAL '1 year'
       ORDER BY l.entered_date DESC, l.id DESC
       LIMIT 5;
     `);

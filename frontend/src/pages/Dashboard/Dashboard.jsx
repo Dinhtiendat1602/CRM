@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -16,10 +16,11 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-  FileText,
   AlertCircle,
   RefreshCw,
   Eye,
+  EyeOff,
+  Database,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
 import dashboardApi from '../../api/dashboardApi';
@@ -84,7 +85,9 @@ export default function Dashboard() {
   const { user, role } = useAuth();
   const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
 
-  const [loading, setLoading] = useState(true);
+  // Mặc định ẩn dữ liệu khi vừa vào Dashboard, chỉ tải khi người dùng nhấn "Xem dữ liệu 1 năm gần nhất"
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [dashboardData, setDashboardData] = useState({
@@ -127,6 +130,7 @@ export default function Dashboard() {
       const res = await dashboardApi.getStats();
       if (res.data) {
         setDashboardData(res.data);
+        setHasLoaded(true);
       }
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Không thể trích xuất dữ liệu tổng quan từ Database.');
@@ -136,9 +140,9 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchDashboardStats();
-  }, []);
+  const handleHideData = () => {
+    setHasLoaded(false);
+  };
 
   const summary = dashboardData.summary;
 
@@ -315,20 +319,61 @@ export default function Dashboard() {
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-xs font-semibold backdrop-blur-xs border border-emerald-400/30">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Dữ liệu Thời Gian Thực từ Database PostgreSQL
-            </span>
+            {hasLoaded ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-xs font-semibold backdrop-blur-xs border border-emerald-400/30">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                Đang hiển thị dữ liệu 1 năm gần nhất từ Database PostgreSQL
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 text-xs font-semibold backdrop-blur-xs border border-amber-400/30">
+                <Clock className="h-3 w-3 text-amber-400" />
+                Mặc định ẩn dữ liệu • Nhấn &quot;Xem dữ liệu&quot; để tải 1 năm gần nhất
+              </span>
+            )}
 
-            <button
-              onClick={() => fetchDashboardStats(true)}
-              disabled={refreshing}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-200 transition-colors border border-white/10"
-              title="Làm mới dữ liệu từ Database"
-            >
-              <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin text-blue-400' : ''}`} />
-              {refreshing ? 'Đang tải...' : 'Làm mới số liệu'}
-            </button>
+            {!hasLoaded ? (
+              <button
+                id="btn-banner-load-data"
+                onClick={() => fetchDashboardStats(false)}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                title="Tải và xem dữ liệu 1 năm gần nhất"
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    <span>Đang tải...</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>Xem dữ liệu 1 năm gần nhất</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  id="btn-banner-refresh-data"
+                  onClick={() => fetchDashboardStats(true)}
+                  disabled={refreshing}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-200 transition-colors border border-white/10 cursor-pointer"
+                  title="Làm mới dữ liệu từ Database"
+                >
+                  <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin text-blue-400' : ''}`} />
+                  {refreshing ? 'Đang tải...' : 'Làm mới số liệu'}
+                </button>
+                <button
+                  id="btn-banner-hide-data"
+                  onClick={handleHideData}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-rose-500/30 text-xs font-medium text-slate-200 hover:text-white transition-colors border border-white/10 cursor-pointer"
+                  title="Ẩn dữ liệu bảng điều khiển"
+                >
+                  <EyeOff className="h-3 w-3" />
+                  <span>Ẩn dữ liệu</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
@@ -365,8 +410,91 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* KPI Cards (Được tính toán động từ DB) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* Khung Trạng Thái Mặc Định: Chưa Tải Dữ Liệu */}
+      {!hasLoaded && !loading && (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-12 text-center shadow-xs space-y-5">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shadow-xs">
+            <Database className="h-8 w-8 text-blue-600" />
+          </div>
+
+          <div className="max-w-xl mx-auto space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200/60">
+              <Calendar className="h-3.5 w-3.5 text-blue-600" />
+              Chế độ tối ưu hóa: Mặc định không hiện dữ liệu
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Dữ Liệu Bảng Điều Khiển Đang Ở Chế Độ Chờ
+            </h2>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              Theo quy tắc tối ưu hóa hiệu năng, Bảng điều khiển (Dashboard) mặc định không tải trước dữ liệu. Nhấn vào nút bên dưới để trích xuất và hiển thị toàn bộ chỉ số KPI, đơn hàng, cơ hội bán hàng và khách hàng tiềm năng trong <strong>1 năm gần nhất</strong> từ cơ sở dữ liệu PostgreSQL.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              id="btn-view-dashboard-data"
+              onClick={() => fetchDashboardStats(false)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all transform active:scale-98 cursor-pointer"
+            >
+              <Eye className="h-4 w-4" />
+              <span>Xem dữ liệu 1 năm gần nhất</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Trạng Thái Đang Tải Dữ Liệu */}
+      {loading && !hasLoaded && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs space-y-4">
+          <div className="mx-auto w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="font-bold text-slate-900 text-base">Đang tải dữ liệu 1 năm gần nhất...</h3>
+            <p className="text-xs text-slate-500">
+              Hệ thống đang truy vấn số liệu KPI, đơn hàng và cơ hội kinh doanh từ cơ sở dữ liệu PostgreSQL.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Khi đã kích hoạt xem dữ liệu: Hiển thị đầy đủ KPI Cards & Bảng số liệu 1 năm gần nhất */}
+      {hasLoaded && (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+              <span className="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                Dữ liệu 1 năm gần nhất
+              </span>
+              <span className="text-slate-500">
+                Số liệu thực tế được tính toán trong phạm vi 1 năm gần nhất từ Database PostgreSQL
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                id="btn-refresh-dashboard"
+                onClick={() => fetchDashboardStats(true)}
+                disabled={refreshing}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
+                {refreshing ? 'Đang cập nhật...' : 'Làm mới'}
+              </button>
+              <button
+                id="btn-hide-dashboard-data"
+                onClick={handleHideData}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-xs font-semibold text-slate-600 shadow-2xs transition-colors cursor-pointer"
+              >
+                <EyeOff className="h-3.5 w-3.5" />
+                <span>Ẩn dữ liệu</span>
+              </button>
+            </div>
+          </div>
+
+          {/* KPI Cards (Được tính toán động từ DB) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
@@ -779,6 +907,8 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      </>
+      )}
 
       {/* Role-Based Quick Actions */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">

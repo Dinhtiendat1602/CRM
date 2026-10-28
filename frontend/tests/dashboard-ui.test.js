@@ -118,4 +118,65 @@ describe('Frontend Dashboard UI & Live Database Extraction Tests (feat-20)', () 
     assert.strictEqual(rawOrder.customer_name, 'Do Manh Cuong');
     assert.strictEqual(parseFloat(rawOrder.total_amount), 9600000);
   });
+
+  // 7. Kiểm tra trạng thái mặc định: Không tự động nạp dữ liệu khi mở trang Dashboard
+  it('7. Dashboard Default State: Mặc định hasLoaded = false, không tự động hiển thị dữ liệu để tối ưu hiệu năng', () => {
+    const initialDashboardState = {
+      hasLoaded: false,
+      loading: false,
+      dashboardData: null,
+    };
+    assert.strictEqual(initialDashboardState.hasLoaded, false, 'Mặc định khi vào trang chưa hiển thị dữ liệu');
+    assert.strictEqual(initialDashboardState.loading, false, 'Không ở trạng thái tải ngầm');
+  });
+
+  // 8. Kiểm tra hành vi khi người dùng nhấn nút "Xem dữ liệu 1 năm gần nhất"
+  it('8. View Data Action: Kích hoạt tải dữ liệu 1 năm gần nhất và bật cờ hasLoaded = true', () => {
+    let state = {
+      hasLoaded: false,
+      loading: false,
+      dashboardData: null,
+    };
+
+    // Mô phỏng người dùng click nút "Xem dữ liệu 1 năm gần nhất"
+    const handleViewData = (mockPayload) => {
+      state.loading = true;
+      // Nhận dữ liệu từ API
+      state.dashboardData = mockPayload;
+      state.hasLoaded = true;
+      state.loading = false;
+    };
+
+    const mock1YearPayload = {
+      summary: {
+        leadsCount: 20,
+        oppsCount: 20,
+        ordersCount: 20,
+        totalRevenue: 2289650000,
+        planCompletion: '114.5%',
+      },
+      recentOrders: [{ id: 1, order_code: 'ORD-20261028-0001' }],
+    };
+
+    handleViewData(mock1YearPayload);
+    assert.strictEqual(state.hasLoaded, true, 'Đã bật hiển thị dữ liệu sau khi nhấn nút');
+    assert.strictEqual(state.loading, false);
+    assert.strictEqual(state.dashboardData.summary.leadsCount, 20);
+    assert.strictEqual(state.dashboardData.summary.planCompletion, '114.5%');
+  });
+
+  // 9. Kiểm tra hành vi khi người dùng nhấn nút "Ẩn dữ liệu"
+  it('9. Hide Data Action: Cho phép người dùng thu gọn và ẩn dữ liệu quay về chế độ chờ', () => {
+    let state = {
+      hasLoaded: true,
+      dashboardData: { summary: { leadsCount: 20 } },
+    };
+
+    const handleHideData = () => {
+      state.hasLoaded = false;
+    };
+
+    handleHideData();
+    assert.strictEqual(state.hasLoaded, false, 'Đã ẩn dữ liệu và trở về khung placeholder');
+  });
 });

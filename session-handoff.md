@@ -6,8 +6,9 @@
 
 - Goal: 
   1. Thay đổi phân quyền sản phẩm bán hàng: Quản lý bán hàng (`SALE_MANAGER`) & Admin phân chia những sản phẩm nào thì Nhân viên (`SALESMAN`) được phép bán. Nhân viên chỉ xem và tạo cơ hội (`Opportunity`) cho các sản phẩm mình được phân quyền (chặn HTTP 403 Forbidden nếu vi phạm).
-  2. Tối ưu truy vấn khi mở ứng dụng: Mặc định query giới hạn trong 1 năm gần nhất (từ 365 ngày trước đến hiện tại) trên các module Đơn hàng, Cơ hội, Khách tiềm năng & Dashboard. Khi người dùng chọn khoảng ngày trên bộ lọc thì dữ liệu mới tải tiếp theo thời gian đã chọn.
-- Current status: HOÀN THÀNH 100% (`feat-022`). Toàn bộ 256/256 tests PASS (146 backend + 110 frontend), Vite client production build 814ms không có lỗi. Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
+  2. Tối ưu truy vấn khi mở ứng dụng: Mặc định query giới hạn trong 1 năm gần nhất (từ 365 ngày trước đến hiện tại) trên các module Đơn hàng, Cơ hội, Khách tiềm năng.
+  3. Tinh chỉnh Dashboard: Mặc định không hiện dữ liệu khi mở trang Dashboard để tối ưu hiệu năng; chỉ khi người dùng nhấn nút "Xem dữ liệu 1 năm gần nhất" thì mới trích xuất và hiển thị dữ liệu; hỗ trợ nút "Làm mới" và "Ẩn dữ liệu".
+- Current status: HOÀN THÀNH 100% (`feat-022`). Toàn bộ 259/259 tests PASS (146 backend + 113 frontend), Vite client production build 313ms không có lỗi. Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
 - Branch / commit: `main`
 
 - [x] **Phân Quyền Sản Phẩm Bán Hàng Cho Nhân Viên & Tối Ưu Truy Vấn 1 Năm Mặc Định (`feat-022`):**

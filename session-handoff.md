@@ -3,10 +3,11 @@
 # Session Handoff
 
 ## Current Objective
-  1. Loại bỏ toàn bộ các chuỗi văn bản kỹ thuật "Tuân thủ chuẩn SRS v1.1" và các nhãn mã đặc tả "(SRS ...)" trên toàn bộ giao diện người dùng (Footer, Modal, Tooltips, Subtitles, Badges).
-  2. Duy trì giao diện sạch sẽ, thanh lịch, chuẩn mực phần mềm thương mại Enterprise.
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 274ms không lỗi, giao diện sạch hoàn toàn các nhãn kỹ thuật).
-- Branch / commit: `main`
+  1. Loại bỏ dòng breadcrumb nhỏ ở Header, chỉ giữ lại duy nhất 1 dòng tiêu đề to thuần Tiếng Việt (không kèm tiếng Anh trong ngoặc đơn như `(Leads)`, `(Orders)`).
+  2. Thay thế mục "API Health Check" trong dropdown tài khoản người dùng thành bộ chuyển đổi ngôn ngữ song ngữ Tiếng Việt 🇻🇳 và Tiếng Anh 🇬🇧.
+  3. Đồng bộ trạng thái ngôn ngữ sang toàn bộ Sidebar và Header thời gian thực.
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 289ms không lỗi).
+- Branch / commit: `main` (commit `8b79687`)
 
 - [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**
   - **1. Hệ thống Style Tokens & Layout Core:**

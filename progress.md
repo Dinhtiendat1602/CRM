@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-10-30 10:35
-- **Active Task:** Tinh gọn tiêu đề Header thành duy nhất 1 dòng to thuần Tiếng Việt (loại bỏ breadcrumb nhỏ và các từ tiếng Anh trong ngoặc `(Leads)`, `(Orders)`), thay thế liên kết API Health Check trong dropdown tài khoản thành bộ chuyển đổi ngôn ngữ song ngữ Tiếng Việt 🇻🇳 / English 🇬🇧 (`feat-025`).
-- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 289ms, 0 lint/build errors).
+- **Last Updated:** 2026-10-30 10:45
+- **Active Task:** Hoàn thiện hệ thống quốc tế hóa song ngữ i18n toàn diện (`LanguageContext`, `translations.js`): Đồng bộ hóa ngôn ngữ từ Header, Sidebar, Footer đến toàn bộ nội dung trang (Forecast Setup, Forecast Performance, thẻ KPI, bảng biểu, bộ công cụ phân bổ và các nút bấm) (`feat-025`).
+- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 279ms, 0 lint/build errors).
 - **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
 
 ---

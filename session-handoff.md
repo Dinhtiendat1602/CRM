@@ -3,11 +3,11 @@
 # Session Handoff
 
 ## Current Objective
-  1. Loại bỏ dòng breadcrumb nhỏ ở Header, chỉ giữ lại duy nhất 1 dòng tiêu đề to thuần Tiếng Việt (không kèm tiếng Anh trong ngoặc đơn như `(Leads)`, `(Orders)`).
+  1. Loại bỏ dòng breadcrumb nhỏ ở Header, chỉ giữ lại duy nhất 1 dòng tiêu đề to thuần Tiếng Việt khi ở chế độ VI.
   2. Thay thế mục "API Health Check" trong dropdown tài khoản người dùng thành bộ chuyển đổi ngôn ngữ song ngữ Tiếng Việt 🇻🇳 và Tiếng Anh 🇬🇧.
-  3. Đồng bộ trạng thái ngôn ngữ sang toàn bộ Sidebar và Header thời gian thực.
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 289ms không lỗi).
-- Branch / commit: `main` (commit `8b79687`)
+  3. Xây dựng hệ thống i18n toàn diện (`LanguageContext`, `translations.js`): Đồng bộ hóa ngôn ngữ sang toàn bộ nội dung bên trong các phân hệ nghiệp vụ (Kế hoạch doanh số 12 tháng, Đối soát, Header, Sidebar, Footer, thẻ KPI, bảng biểu, bộ công cụ phân bổ và các nút bấm).
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 279ms không lỗi).
+- Branch / commit: `main` (commit `54c76ec`)
 
 - [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**
   - **1. Hệ thống Style Tokens & Layout Core:**

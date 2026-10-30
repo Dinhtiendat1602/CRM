@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Modal from '../../components/Common/Modal';
 import leadApi from '../../api/leadApi';
+import productApi from '../../api/productApi';
+import oppApi from '../../api/oppApi';
 import { 
   User, 
   Mail, 
@@ -10,7 +12,9 @@ import {
   MapPin, 
   Calendar, 
   AlertCircle, 
-  Loader2 
+  Loader2,
+  Target,
+  Package
 } from 'lucide-react';
 
 const INITIAL_FORM = {
@@ -37,7 +41,43 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
   const [fieldErrors, setFieldErrors] = useState({});
   const [duplicateWarning, setDuplicateWarning] = useState({ email: null, phone: null });
 
+  // State Nút Flick: Tự động thêm vào cơ hội bán hàng
+  const [autoCreateOpp, setAutoCreateOpp] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [autoOpp, setAutoOpp] = useState({
+    product_id: '',
+    quantity: 1,
+    expected_close_date: '',
+    notes: '',
+  });
+
   const isEdit = Boolean(lead?.id);
+
+  // Nạp danh sách sản phẩm khi mở modal thêm mới
+  useEffect(() => {
+    if (isOpen && !isEdit) {
+      setLoadingProducts(true);
+      productApi.getProducts({ limit: 100, sortBy: 'name', sortOrder: 'ASC' })
+        .then((res) => {
+          const raw = res?.products || res?.data?.products || (Array.isArray(res?.data) ? res.data : []);
+          const list = Array.isArray(raw) ? raw : [];
+          setProducts(list);
+          if (list.length > 0) {
+            setAutoOpp((prev) => ({
+              ...prev,
+              product_id: prev.product_id || String(list[0].id),
+            }));
+          }
+        })
+        .catch((err) => {
+          console.error('Không thể nạp danh sách sản phẩm:', err);
+        })
+        .finally(() => {
+          setLoadingProducts(false);
+        });
+    }
+  }, [isOpen, isEdit]);
 
   useEffect(() => {
     if (lead) {
@@ -57,13 +97,26 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
         country: lead.country || 'Việt Nam',
         notes: lead.notes || '',
       });
+      setAutoCreateOpp(false);
     } else {
       setFormData(INITIAL_FORM);
+      setAutoCreateOpp(false);
+      setAutoOpp({
+        product_id: products.length > 0 ? String(products[0].id) : '',
+        quantity: 1,
+        expected_close_date: '',
+        notes: '',
+      });
     }
     setErrorMsg('');
     setFieldErrors({});
     setDuplicateWarning({ email: null, phone: null });
-  }, [lead, isOpen]);
+  }, [lead, isOpen, products]);
+
+  // Sản phẩm đang chọn trong cơ hội tự động
+  const selectedProduct = useMemo(() => {
+    return products.find((p) => String(p.id) === String(autoOpp.product_id));
+  }, [products, autoOpp.product_id]);
 
   // Kiểm tra trùng lặp realtime khi người dùng rời khỏi ô input (onBlur)
   const handleCheckDuplicate = async (field, value) => {
@@ -110,6 +163,17 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
       errors.phone = 'Số điện thoại không hợp lệ (từ 7 - 20 ký tự số)';
     }
 
+    // Validate thông tin cơ hội nếu bật Nút Flick
+    if (!isEdit && autoCreateOpp) {
+      if (!autoOpp.product_id) {
+        errors.product_id = 'Vui lòng chọn sản phẩm quan tâm để tạo cơ hội.';
+      }
+      const qty = parseInt(autoOpp.quantity, 10);
+      if (isNaN(qty) || qty <= 0) {
+        errors.quantity = 'Số lượng sản phẩm phải lớn hơn 0.';
+      }
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -138,10 +202,30 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
     try {
       if (isEdit) {
         await leadApi.updateLead(lead.id, payload);
+        onSuccess?.({ isEdit: true });
       } else {
-        await leadApi.createLead(payload);
+        const leadRes = await leadApi.createLead(payload);
+        const createdLead = leadRes.data || leadRes;
+        const newLeadId = createdLead?.id;
+
+        let oppCreated = false;
+        if (autoCreateOpp && newLeadId) {
+          try {
+            await oppApi.createOpportunity({
+              lead_id: newLeadId,
+              product_id: parseInt(autoOpp.product_id, 10),
+              quantity: parseInt(autoOpp.quantity, 10) || 1,
+              expected_close_date: autoOpp.expected_close_date || null,
+              status: 'NEW',
+              notes: autoOpp.notes?.trim() || `Tự động tạo cơ hội khi thêm khách hàng ${payload.last_name} ${payload.first_name}`,
+            });
+            oppCreated = true;
+          } catch (oppErr) {
+            console.warn('Lỗi khi tự động tạo cơ hội bán hàng:', oppErr);
+          }
+        }
+        onSuccess?.({ isEdit: false, autoCreatedOpp: oppCreated, leadId: newLeadId });
       }
-      onSuccess?.();
       onClose();
     } catch (err) {
       const message =
@@ -190,7 +274,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 className={`w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.last_name
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -214,7 +298,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 className={`w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.first_name
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -242,7 +326,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 className={`w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.email || duplicateWarning.email
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -273,7 +357,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 className={`w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.phone || duplicateWarning.phone
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -303,7 +387,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="Giám đốc kinh doanh / Bác sĩ / Kỹ sư..."
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               />
               <Briefcase className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
@@ -320,7 +404,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 value={formData.company}
                 onChange={handleChange}
                 placeholder="Công ty TNHH Giải Pháp Toàn Cầu"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               />
               <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
@@ -337,7 +421,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
               name="source"
               value={formData.source}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
             >
               <option value="Website">Website Công ty</option>
               <option value="Facebook Ads">Quảng cáo Facebook</option>
@@ -360,7 +444,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 name="date_of_birth"
                 value={formData.date_of_birth}
                 onChange={handleChange}
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               />
               <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
@@ -380,7 +464,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="123 Nguyễn Trãi, P. Bến Thành"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               />
               <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
@@ -396,7 +480,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
               value={formData.city}
               onChange={handleChange}
               placeholder="TP. Hồ Chí Minh"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
             />
           </div>
 
@@ -410,7 +494,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
               value={formData.country}
               onChange={handleChange}
               placeholder="Việt Nam"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
             />
           </div>
         </div>
@@ -426,24 +510,179 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
             onChange={handleChange}
             rows={3}
             placeholder="Khách hàng quan tâm đến phần mềm ERP/CRM, cần tư vấn gói Enterprise..."
-            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all resize-none"
           />
         </div>
 
+        {/* Nút Flick Toggle: Tự động thêm vào cơ hội bán hàng (Opportunity) */}
+        {!isEdit && (
+          <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 transition-all space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                    autoCreateOpp
+                      ? 'bg-[#3CB371] text-white shadow-xs'
+                      : 'bg-slate-200/80 text-slate-500'
+                  }`}
+                >
+                  <Target className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-800">
+                      Tự động thêm vào cơ hội bán hàng
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
+                      Flick chọn
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Bật nút gạt này để tự động tạo ngay cơ hội kinh doanh ngay khi lưu thông tin khách hàng.
+                  </p>
+                </div>
+              </div>
+
+              {/* Nút Flick (Toggle Switch) */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={autoCreateOpp}
+                onClick={() => setAutoCreateOpp((prev) => !prev)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 ${
+                  autoCreateOpp ? 'bg-[#3CB371]' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    autoCreateOpp ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Khi Flick Switch bật ON -> Mở rộng form chọn sản phẩm */}
+            {autoCreateOpp && (
+              <div className="pt-3 border-t border-[#DDF0E2] space-y-3.5">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                  <div className="md:col-span-6">
+                    <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider mb-1.5">
+                      Sản phẩm quan tâm <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Package className="w-4 h-4 text-[#6B7280] absolute left-3.5 top-3 pointer-events-none" />
+                      <select
+                        value={autoOpp.product_id}
+                        onChange={(e) => {
+                          setAutoOpp((prev) => ({ ...prev, product_id: e.target.value }));
+                          if (fieldErrors.product_id) {
+                            setFieldErrors((prev) => ({ ...prev, product_id: '' }));
+                          }
+                        }}
+                        disabled={loadingProducts}
+                        className={`w-full pl-10 pr-3.5 py-2.5 bg-white border rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 transition-all cursor-pointer ${
+                          fieldErrors.product_id
+                            ? 'border-rose-400 focus:ring-rose-200 text-slate-800'
+                            : 'border-[#DDF0E2] focus:border-[#3CB371] focus:ring-[#3CB371]/20 text-[#1F2937]'
+                        }`}
+                      >
+                        <option value="">-- Chọn sản phẩm khách quan tâm --</option>
+                        {products.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name} ({p.product_code}) — {Number(p.unit_price || 0).toLocaleString('vi-VN')} đ
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {fieldErrors.product_id && (
+                      <p className="text-xs text-rose-500 mt-1">{fieldErrors.product_id}</p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider mb-1.5">
+                      Số lượng <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={autoOpp.quantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setAutoOpp((prev) => ({ ...prev, quantity: isNaN(val) ? '' : val }));
+                        if (fieldErrors.quantity) {
+                          setFieldErrors((prev) => ({ ...prev, quantity: '' }));
+                        }
+                      }}
+                      className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm font-semibold text-center focus:outline-none focus:ring-2 transition-all ${
+                        fieldErrors.quantity
+                          ? 'border-rose-400 focus:ring-rose-200'
+                          : 'border-[#DDF0E2] focus:border-[#3CB371] focus:ring-[#3CB371]/20 text-[#1F2937]'
+                      }`}
+                    />
+                    {fieldErrors.quantity && (
+                      <p className="text-xs text-rose-500 mt-1">{fieldErrors.quantity}</p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider mb-1.5">
+                      Dự kiến chốt
+                    </label>
+                    <input
+                      type="date"
+                      value={autoOpp.expected_close_date}
+                      onChange={(e) =>
+                        setAutoOpp((prev) => ({ ...prev, expected_close_date: e.target.value }))
+                      }
+                      className="w-full px-3.5 py-2.5 bg-white border border-[#DDF0E2] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all text-[#1F2937]"
+                    />
+                  </div>
+                </div>
+
+                {/* Tính toán giá trị dự kiến tức thời */}
+                {selectedProduct && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-[#EAF5EC] border border-[#DDF0E2] rounded-xl text-xs">
+                    <div className="text-[#6B7280]">
+                      <span>Đơn giá: </span>
+                      <strong className="text-[#1F2937]">
+                        {Number(selectedProduct.unit_price || 0).toLocaleString('vi-VN')} đ
+                      </strong>
+                      <span className="mx-2">•</span>
+                      <span>Tồn kho hiện tại: </span>
+                      <strong className="text-[#1F2937]">{selectedProduct.stock_qty || 0} sản phẩm</strong>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[#2E7D32] font-medium">Giá trị cơ hội dự kiến: </span>
+                      <strong className="text-sm font-bold text-[#2E7D32]">
+                        {(
+                          Number(selectedProduct.unit_price || 0) * (parseInt(autoOpp.quantity, 10) || 1)
+                        ).toLocaleString('vi-VN')}{' '}
+                        đ
+                      </strong>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Modal Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#DDF0E2]">
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-[#6B7280] hover:text-[#1F2937] bg-[#F3F4F6] hover:bg-[#EAF5EC] rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
           >
             Hủy Bỏ
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-[#3CB371] hover:bg-[#38A169] rounded-xl transition-colors shadow-xs hover:shadow-md disabled:opacity-50 cursor-pointer"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {isEdit ? 'Cập Nhật Khách Hàng' : 'Lưu Khách Hàng Mới'}

@@ -25,7 +25,7 @@ import {
 
 const STATUS_BADGES = {
   ACTIVE: { label: 'Đang hoạt động', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  UPCOMING: { label: 'Sắp diễn ra', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+  UPCOMING: { label: 'Sắp diễn ra', color: 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]' },
   ENDED: { label: 'Đã kết thúc', color: 'bg-slate-100 text-slate-700 border-slate-300' },
 };
 
@@ -170,7 +170,7 @@ export default function CampaignListPage() {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
               Chiến dịch Tiếp thị & Quảng bá
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
               SRS 3.18
             </span>
           </div>
@@ -182,7 +182,7 @@ export default function CampaignListPage() {
         <button
           type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Tạo Chiến dịch Mới</span>
@@ -191,8 +191,8 @@ export default function CampaignListPage() {
 
       {/* Thẻ Thống kê KPIs Nhanh */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+        <div className="p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-[#EAF5EC] flex items-center justify-center text-[#3CB371]">
             <Megaphone className="w-6 h-6" />
           </div>
           <div>
@@ -211,12 +211,12 @@ export default function CampaignListPage() {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+        <div className="p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-[#EAF5EC] flex items-center justify-center text-[#3CB371]">
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-900">{stats.upcoming}</div>
+            <div className="text-2xl font-bold text-[#1F2937]">{stats.upcoming}</div>
             <div className="text-xs text-slate-500 font-medium">Sắp diễn ra (UPCOMING)</div>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function CampaignListPage() {
                 setStatus(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all cursor-pointer"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
             >
               <option value="">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hoạt động</option>
@@ -276,7 +276,7 @@ export default function CampaignListPage() {
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
               title="Từ ngày"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
           </div>
 
@@ -289,7 +289,7 @@ export default function CampaignListPage() {
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
               title="Đến ngày"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
           </div>
 
@@ -303,7 +303,7 @@ export default function CampaignListPage() {
                 setSortOrder(so);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-2.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all cursor-pointer"
+              className="w-full px-2.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
             >
               <option value="created_at:DESC">Mới nhất</option>
               <option value="created_at:ASC">Cũ nhất</option>
@@ -355,7 +355,7 @@ export default function CampaignListPage() {
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
                     <div className="inline-flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#3CB371] border-t-transparent rounded-full animate-spin" />
                       <span>Đang tải dữ liệu chiến dịch...</span>
                     </div>
                   </td>
@@ -382,7 +382,7 @@ export default function CampaignListPage() {
                         <div className="font-semibold text-slate-900 flex items-center gap-1.5">
                           <Link
                             to={`/campaigns/${c.id}/report`}
-                            className="hover:text-blue-600 transition-colors hover:underline"
+                            className="hover:text-[#3CB371] transition-colors hover:underline"
                           >
                             {c.name}
                           </Link>
@@ -436,8 +436,8 @@ export default function CampaignListPage() {
 
                       {/* Số Leads */}
                       <td className="px-4 py-3.5 text-center">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold text-xs">
-                          <Users className="w-3 h-3 text-blue-500" />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#EAF5EC] text-[#2E7D32] font-semibold text-xs border border-[#DDF0E2]">
+                          <Users className="w-3 h-3 text-[#3CB371]" />
                           {c.leads_count || 0}
                         </span>
                       </td>
@@ -465,7 +465,7 @@ export default function CampaignListPage() {
                             type="button"
                             title="Gán sản phẩm mục tiêu (SRS 3.18.1)"
                             onClick={() => setAssigningCampaign(c)}
-                            className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-[#3CB371] hover:text-[#2E7D32] hover:bg-[#EAF5EC] rounded-lg transition-colors cursor-pointer"
                           >
                             <Layers className="w-4 h-4" />
                           </button>

@@ -119,7 +119,7 @@ export default function LeadDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400">
-        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
+        <div className="w-8 h-8 border-3 border-[#3CB371] border-t-transparent rounded-full animate-spin mb-3" />
         <p className="text-sm">Đang tải hồ sơ khách hàng tiềm năng...</p>
       </div>
     );
@@ -133,7 +133,7 @@ export default function LeadDetailPage() {
         <p className="text-sm text-slate-500 mt-1 mb-6">{errorMsg || 'Khách hàng không tồn tại hoặc đã bị xóa.'}</p>
         <button
           onClick={() => navigate('/leads')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] text-white rounded-xl text-sm font-semibold hover:bg-[#38A169] transition-colors shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Quay lại danh sách</span>
@@ -159,7 +159,7 @@ export default function LeadDetailPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-slate-900">{fullName}</h1>
-              <span className="text-xs px-2.5 py-0.5 bg-indigo-50 text-indigo-700 font-semibold rounded-full border border-indigo-200">
+              <span className="text-xs px-2.5 py-0.5 bg-[#EAF5EC] text-[#2E7D32] font-semibold rounded-full border border-[#DDF0E2]">
                 Lead #{lead.id}
               </span>
             </div>
@@ -188,7 +188,7 @@ export default function LeadDetailPage() {
 
           <Link
             to={`/opportunities?createForLead=${lead.id}`}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm shadow-indigo-200"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-sm font-semibold transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Tạo Cơ Hội Mới</span>
@@ -202,7 +202,7 @@ export default function LeadDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-              <User className="w-4 h-4 text-indigo-600" />
+              <User className="w-4 h-4 text-[#3CB371]" />
               <span>Thông Tin Chi Tiết Khách Hàng (SRS 3.2.3 REQ-4)</span>
             </h2>
 
@@ -230,7 +230,7 @@ export default function LeadDetailPage() {
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Mail className="w-4 h-4 text-slate-400" />
-                  <a href={`mailto:${lead.email}`} className="text-indigo-600 hover:underline">
+                  <a href={`mailto:${lead.email}`} className="text-[#3CB371] hover:underline">
                     {lead.email}
                   </a>
                 </span>
@@ -242,7 +242,7 @@ export default function LeadDetailPage() {
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Phone className="w-4 h-4 text-slate-400" />
-                  <a href={`tel:${lead.phone}`} className="text-indigo-600 hover:underline">
+                  <a href={`tel:${lead.phone}`} className="text-[#3CB371] hover:underline">
                     {lead.phone}
                   </a>
                 </span>
@@ -266,7 +266,7 @@ export default function LeadDetailPage() {
                   {lead.campaign_id ? (
                     <Link
                       to={`/campaigns/${lead.campaign_id}/report`}
-                      className="px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md font-semibold inline-flex items-center gap-1 border border-indigo-200"
+                      className="px-2.5 py-1 bg-[#EAF5EC] text-[#2E7D32] hover:bg-[#DDF0E2] rounded-md font-semibold inline-flex items-center gap-1 border border-[#DDF0E2]"
                     >
                       <Target className="w-3.5 h-3.5" />
                       <span>{lead.campaign_name || `Chiến dịch #${lead.campaign_id}`}</span>
@@ -327,18 +327,18 @@ export default function LeadDetailPage() {
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-indigo-600" />
+                <Target className="w-4 h-4 text-[#3CB371]" />
                 <h2 className="text-base font-bold text-slate-900">
                   Cơ Hội Bán Hàng Liên Quan (Opportunities)
                 </h2>
-                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold">
+                <span className="px-2 py-0.5 bg-[#EAF5EC] text-[#2E7D32] rounded-full text-xs font-semibold">
                   {opportunities.length}
                 </span>
               </div>
 
               <Link
                 to={`/opportunities?createForLead=${lead.id}`}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                className="text-xs font-semibold text-[#3CB371] hover:text-[#2E7D32] flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Thêm cơ hội</span>
@@ -354,7 +354,7 @@ export default function LeadDetailPage() {
                 </p>
                 <Link
                   to={`/opportunities?createForLead=${lead.id}`}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold transition-colors shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Tạo Cơ Hội Đầu Tiên</span>
@@ -382,7 +382,7 @@ export default function LeadDetailPage() {
                         <td className="py-3 px-3 font-semibold text-slate-800">
                           <Link
                             to={`/opportunities/${opp.id}`}
-                            className="hover:underline text-indigo-600 block"
+                            className="hover:underline text-[#3CB371] block"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {opp.product_name || `Sản phẩm #${opp.product_id}`}
@@ -426,26 +426,26 @@ export default function LeadDetailPage() {
 
         {/* Cột phải 1/3: Thẻ tóm tắt nhanh & Hoạt động */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-2">
+          <div className="bg-gradient-to-br from-[#7CA5F5] to-[#5D3EBC] text-white rounded-2xl p-6 shadow-sm">
+            <h3 className="text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">
               Tóm Tắt Trạng Thái Lead
             </h3>
             <div className="text-2xl font-bold tracking-tight mb-4">
               {opportunities.length > 0 ? `${opportunities.length} Cơ Hội Mở` : 'Lead Mới Tiếp Nhận'}
             </div>
-            <div className="space-y-3 text-xs text-indigo-200">
-              <div className="flex items-center justify-between border-b border-indigo-800/60 pb-2">
+            <div className="space-y-3 text-xs text-white/90">
+              <div className="flex items-center justify-between border-b border-white/20 pb-2">
                 <span>Nguồn tiếp nhận:</span>
                 <span className="font-semibold text-white">{lead.source || 'Website'}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-indigo-800/60 pb-2">
+              <div className="flex items-center justify-between border-b border-white/20 pb-2">
                 <span>Ngày tạo Lead:</span>
                 <span className="font-semibold text-white">{formatDate(lead.entered_date)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Trạng thái kiểm tra:</span>
-                <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-1 text-white font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                   Hợp lệ & Không trùng
                 </span>
               </div>

@@ -190,27 +190,27 @@ export default function SetupPlanPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">
               Lập Kế hoạch Doanh số 12 Tháng
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] font-semibold">
               SRS 3.20
             </span>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-[#6B7280] mt-1">
             Thiết lập chỉ tiêu định mức doanh thu dự báo (Plan VNĐ) cho từng tháng trong năm tài chính
           </p>
         </div>
 
         {/* Chọn năm tài chính & Chuyển sang Đối soát */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-xs">
-            <Calendar className="w-4 h-4 text-blue-600" />
+          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-[#DDF0E2] shadow-xs">
+            <Calendar className="w-4 h-4 text-[#3CB371]" />
             <span className="text-xs font-semibold text-slate-700">Năm tài chính:</span>
             <select
               value={fiscalYear}
               onChange={(e) => setFiscalYear(parseInt(e.target.value, 10))}
-              className="bg-transparent text-sm font-bold text-blue-700 focus:outline-none cursor-pointer"
+              className="bg-transparent text-sm font-bold text-[#2E7D32] focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
                 <option key={yr} value={yr}>
@@ -223,7 +223,7 @@ export default function SetupPlanPage() {
           <button
             type="button"
             onClick={() => navigate(`/forecast/performance?fiscal_year=${fiscalYear}`)}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] border border-[#DDF0E2] rounded-lg transition-colors cursor-pointer"
           >
             <BarChart2 className="w-4 h-4" />
             <span>Xem Đối Soát (SRS 3.21)</span>
@@ -233,8 +233,8 @@ export default function SetupPlanPage() {
 
       {/* Thông báo Thành công / Lỗi */}
       {successMsg && (
-        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm animate-fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#2E7D32] text-sm animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-[#3CB371] shrink-0" />
           <span className="font-medium">{successMsg}</span>
         </div>
       )}
@@ -248,30 +248,30 @@ export default function SetupPlanPage() {
 
       {/* 3 Thẻ Thống kê Tổng quan Kế hoạch */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Tổng chỉ tiêu năm */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xs">
+        {/* Tổng chỉ tiêu năm - Styled with Accent Gradient #7CA5F5 -> #5D3EBC */}
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] text-white shadow-md">
           <div className="flex items-center justify-between opacity-80 mb-1">
             <span className="text-xs font-semibold uppercase tracking-wider">Tổng Chỉ Tiêu Năm {fiscalYear}</span>
             <DollarSign className="w-5 h-5" />
           </div>
           <div className="text-2xl lg:text-3xl font-extrabold mt-1">
-            {totalYearPlan.toLocaleString('vi-VN')} <span className="text-sm font-normal text-blue-200">VNĐ</span>
+            {totalYearPlan.toLocaleString('vi-VN')} <span className="text-sm font-normal text-indigo-100">VNĐ</span>
           </div>
-          <p className="text-xs text-blue-100 mt-2">
+          <p className="text-xs text-indigo-100 mt-2">
             Mẫu số chuẩn dùng để đối soát tỷ lệ hoàn thành % trên Dashboard và Performance Report (SRS 3.21).
           </p>
         </div>
 
         {/* Trung bình mỗi tháng */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Mục Tiêu Trung Bình / Tháng</span>
-            <TrendingUp className="w-5 h-5 text-indigo-600" />
+        <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
+          <div className="flex items-center justify-between text-[#6B7280] mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">Mục Tiêu Trung Bình / Tháng</span>
+            <TrendingUp className="w-5 h-5 text-[#3CB371]" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">
-            {Math.round(monthlyAverage).toLocaleString('vi-VN')} <span className="text-xs font-normal text-slate-500">VNĐ</span>
+          <div className="text-2xl font-bold text-[#1F2937] mt-1">
+            {Math.round(monthlyAverage).toLocaleString('vi-VN')} <span className="text-xs font-normal text-[#6B7280]">VNĐ</span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-500 mt-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-3 text-xs text-[#6B7280] mt-3 pt-2 border-t border-[#DDF0E2]/60">
             <span>12 kỳ đánh giá doanh số</span>
             <span>•</span>
             <span>Quy chuẩn SRS 3.20</span>
@@ -279,36 +279,36 @@ export default function SetupPlanPage() {
         </div>
 
         {/* Phân bổ theo Quý */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Kế Hoạch 4 Quý (Quarterly)</span>
+        <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
+          <div className="flex items-center justify-between text-[#6B7280] mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#6B7280]">Kế Hoạch 4 Quý (Quarterly)</span>
             <Layers className="w-5 h-5 text-amber-500" />
           </div>
           <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-            <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Quý 1 (T1-T3)</span>
-              <strong className="text-slate-800 font-bold">{quarterlyTotals.Q1.toLocaleString('vi-VN')} đ</strong>
+            <div className="p-2 rounded-lg bg-[#F3F4F6] border border-slate-200">
+              <span className="text-[#6B7280] block text-[11px]">Quý 1 (T1-T3)</span>
+              <strong className="text-[#1F2937] font-bold">{quarterlyTotals.Q1.toLocaleString('vi-VN')} đ</strong>
             </div>
-            <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Quý 2 (T4-T6)</span>
-              <strong className="text-slate-800 font-bold">{quarterlyTotals.Q2.toLocaleString('vi-VN')} đ</strong>
+            <div className="p-2 rounded-lg bg-[#F3F4F6] border border-slate-200">
+              <span className="text-[#6B7280] block text-[11px]">Quý 2 (T4-T6)</span>
+              <strong className="text-[#1F2937] font-bold">{quarterlyTotals.Q2.toLocaleString('vi-VN')} đ</strong>
             </div>
-            <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Quý 3 (T7-T9)</span>
-              <strong className="text-slate-800 font-bold">{quarterlyTotals.Q3.toLocaleString('vi-VN')} đ</strong>
+            <div className="p-2 rounded-lg bg-[#F3F4F6] border border-slate-200">
+              <span className="text-[#6B7280] block text-[11px]">Quý 3 (T7-T9)</span>
+              <strong className="text-[#1F2937] font-bold">{quarterlyTotals.Q3.toLocaleString('vi-VN')} đ</strong>
             </div>
-            <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Quý 4 (T10-T12)</span>
-              <strong className="text-slate-800 font-bold">{quarterlyTotals.Q4.toLocaleString('vi-VN')} đ</strong>
+            <div className="p-2 rounded-lg bg-[#F3F4F6] border border-slate-200">
+              <span className="text-[#6B7280] block text-[11px]">Quý 4 (T10-T12)</span>
+              <strong className="text-[#1F2937] font-bold">{quarterlyTotals.Q4.toLocaleString('vi-VN')} đ</strong>
             </div>
           </div>
         </div>
       </div>
 
       {/* Hộp Công Cụ Phân Bổ Nhanh (Smart Allocation Tools) */}
-      <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+          <span className="text-xs font-semibold text-[#1F2937] flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-amber-500" />
             <span>Công cụ tính nhanh:</span>
           </span>
@@ -320,12 +320,12 @@ export default function SetupPlanPage() {
               placeholder="Nhập tổng năm..."
               value={quickTotal}
               onChange={(e) => setQuickTotal(e.target.value)}
-              className="w-36 px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+              className="w-36 px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             />
             <button
               type="button"
               onClick={handleApplyEvenSplit}
-              className="px-2.5 py-1 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              className="px-2.5 py-1 text-xs font-medium text-[#1F2937] bg-[#F3F4F6] hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
             >
               Chia đều 12 tháng
             </button>
@@ -336,14 +336,14 @@ export default function SetupPlanPage() {
             <button
               type="button"
               onClick={() => handleApplyGrowth(10)}
-              className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer"
+              className="px-2 py-1 text-xs font-medium text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] rounded-lg transition-colors cursor-pointer"
             >
               +10%
             </button>
             <button
               type="button"
               onClick={() => handleApplyGrowth(20)}
-              className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer"
+              className="px-2 py-1 text-xs font-medium text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] rounded-lg transition-colors cursor-pointer"
             >
               +20%
             </button>
@@ -353,20 +353,20 @@ export default function SetupPlanPage() {
         <button
           type="button"
           onClick={handleResetToZero}
-          className="text-xs text-slate-400 hover:text-rose-600 transition-colors cursor-pointer font-medium"
+          className="text-xs text-[#6B7280] hover:text-rose-600 transition-colors cursor-pointer font-medium"
         >
           Đặt lại về 0
         </button>
       </div>
 
       {/* Bảng Biểu Mẫu Nhập Chỉ Tiêu 12 Tháng chuẩn SRS 3.20 (Month 1 -> 12 | Value($)) */}
-      <form onSubmit={handleSave} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+      <form onSubmit={handleSave} className="bg-white rounded-2xl border border-[#DDF0E2] shadow-xs overflow-hidden">
+        <div className="p-4 bg-[#F3F4F6]/50 border-b border-[#DDF0E2] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1F2937]">
               Bảng Nhập Định Mức Doanh Thu 12 Tháng (SRS 3.20)
             </span>
-            <span className="text-xs text-slate-400 font-normal">
+            <span className="text-xs text-[#6B7280] font-normal">
               (Đơn vị tiền tệ: VNĐ)
             </span>
           </div>
@@ -374,7 +374,7 @@ export default function SetupPlanPage() {
           <button
             type="submit"
             disabled={saving || loading}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
           >
             {saving ? (
               <>
@@ -391,8 +391,8 @@ export default function SetupPlanPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
+          <table className="w-full text-left text-sm text-[#1F2937]">
+            <thead className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-xs font-semibold text-[#6B7280] uppercase">
               <tr>
                 <th className="px-5 py-3 w-40">Tháng (Month)</th>
                 <th className="px-5 py-3 w-28">Quý</th>
@@ -405,9 +405,9 @@ export default function SetupPlanPage() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
+                  <td colSpan={5} className="py-12 text-center text-[#6B7280]">
                     <div className="inline-flex items-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                      <Loader2 className="w-5 h-5 animate-spin text-[#3CB371]" />
                       <span>Đang tải kế hoạch năm {fiscalYear}...</span>
                     </div>
                   </td>
@@ -418,15 +418,15 @@ export default function SetupPlanPage() {
                   const share = totalYearPlan > 0 ? Number(((val / totalYearPlan) * 100).toFixed(1)) : 0;
 
                   return (
-                    <tr key={month} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={month} className="hover:bg-[#EAF5EC]/40 transition-colors">
                       {/* Tên Tháng */}
-                      <td className="px-5 py-3.5 font-bold text-slate-900">
+                      <td className="px-5 py-3.5 font-bold text-[#1F2937]">
                         {label}
                       </td>
 
                       {/* Quý */}
                       <td className="px-5 py-3.5">
-                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600">
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-[#F3F4F6] text-[#6B7280]">
                           {quarter}
                         </span>
                       </td>
@@ -442,21 +442,21 @@ export default function SetupPlanPage() {
                             value={targets[month] === 0 ? '' : targets[month]}
                             onChange={(e) => handleTargetChange(month, e.target.value)}
                             placeholder="0 (VNĐ)"
-                            className="w-full pl-9 pr-4 py-2 text-sm font-semibold rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
+                            className="w-full pl-9 pr-4 py-2 text-sm font-semibold rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
                           />
                         </div>
                       </td>
 
                       {/* Tỷ trọng % */}
-                      <td className="px-5 py-3.5 text-right font-semibold text-slate-800">
+                      <td className="px-5 py-3.5 text-right font-semibold text-[#1F2937]">
                         {share}%
                       </td>
 
                       {/* Thanh phân bổ */}
                       <td className="px-5 py-3.5">
-                        <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="w-full h-2.5 rounded-full bg-[#F3F4F6] overflow-hidden">
                           <div
-                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                            className="h-full bg-[#3CB371] rounded-full transition-all duration-300"
                             style={{ width: `${Math.min(100, share)}%` }}
                           />
                         </div>
@@ -468,15 +468,15 @@ export default function SetupPlanPage() {
             </tbody>
 
             {/* Dòng Tổng cộng */}
-            <tfoot className="bg-slate-50 border-t-2 border-slate-200 text-sm font-bold text-slate-900">
+            <tfoot className="bg-[#F3F4F6] border-t-2 border-[#DDF0E2] text-sm font-bold text-[#1F2937]">
               <tr>
                 <td className="px-5 py-3.5 uppercase" colSpan={2}>
                   Tổng Kế Hoạch Năm {fiscalYear}:
                 </td>
-                <td className="px-5 py-3.5 text-blue-700 text-base font-extrabold">
+                <td className="px-5 py-3.5 text-[#2E7D32] text-base font-extrabold">
                   {totalYearPlan.toLocaleString('vi-VN')} VNĐ
                 </td>
-                <td className="px-5 py-3.5 text-right font-extrabold text-blue-700">
+                <td className="px-5 py-3.5 text-right font-extrabold text-[#2E7D32]">
                   {totalYearPlan > 0 ? '100%' : '0%'}
                 </td>
                 <td className="px-5 py-3.5"></td>
@@ -486,15 +486,15 @@ export default function SetupPlanPage() {
         </div>
 
         {/* Nút lưu cuối form */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-xs text-slate-500">
+        <div className="p-4 bg-[#F3F4F6]/50 border-t border-[#DDF0E2] flex items-center justify-between">
+          <span className="text-xs text-[#6B7280]">
             Dữ liệu được lưu với giao dịch CSDL PostgreSQL an toàn (ACID Transaction).
           </span>
 
           <button
             type="submit"
             disabled={saving || loading}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
           >
             {saving ? (
               <>

@@ -55,27 +55,27 @@ export default function Login() {
 
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] via-[#EAF5EC] to-[#DDF0E2] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Brand Logo */}
         <div className="flex justify-center">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-xl shadow-indigo-500/25 font-bold text-2xl">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-[#3CB371] via-[#2E7D32] to-[#7CA5F5] flex items-center justify-center text-white shadow-xl shadow-[#3CB371]/25 font-bold text-2xl">
             Z
           </div>
         </div>
-        <h2 className="mt-4 text-center text-3xl font-extrabold text-white tracking-tight">
+        <h2 className="mt-4 text-center text-3xl font-extrabold text-[#1F2937] tracking-tight">
           Zen CRM Platform
         </h2>
-        <p className="mt-1 text-center text-xs text-slate-400">
+        <p className="mt-1 text-center text-xs text-[#6B7280]">
           Hệ thống Quản trị Quan hệ Khách hàng Doanh nghiệp
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-800/10 space-y-6">
-          <div className="border-b border-slate-100 pb-4">
-            <h3 className="text-lg font-bold text-slate-900">Đăng nhập tài khoản</h3>
-            <p className="text-xs text-slate-500">Nhập thông tin nhân viên để bắt đầu phiên làm việc</p>
+        <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-[#DDF0E2] space-y-6">
+          <div className="border-b border-[#DDF0E2] pb-4">
+            <h3 className="text-lg font-bold text-[#1F2937]">Đăng nhập tài khoản</h3>
+            <p className="text-xs text-[#6B7280]">Nhập thông tin nhân viên để bắt đầu phiên làm việc</p>
           </div>
 
           {error && (
@@ -87,11 +87,11 @@ export default function Login() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider mb-1">
                 Tài khoản hoặc Email
               </label>
               <div className="relative rounded-xl shadow-2xs">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6B7280]">
                   <User className="h-4 w-4" />
                 </div>
                 <input
@@ -101,25 +101,25 @@ export default function Login() {
                   onChange={handleChange}
                   required
                   placeholder="Email hoặc tên đăng nhập"
-                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900"
+                  className="block w-full pl-10 pr-3 py-2.5 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/30 focus:border-[#3CB371] focus:bg-white transition-all text-[#1F2937]"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider">
                   Mật khẩu
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-xs text-[#2E7D32] hover:text-[#38A169] font-medium"
                 >
                   Quên mật khẩu?
                 </Link>
               </div>
               <div className="relative rounded-xl shadow-2xs">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6B7280]">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -129,7 +129,7 @@ export default function Login() {
                   onChange={handleChange}
                   required
                   placeholder="Mật khẩu"
-                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900"
+                  className="block w-full pl-10 pr-3 py-2.5 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/30 focus:border-[#3CB371] focus:bg-white transition-all text-[#1F2937]"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] shadow-md shadow-[#3CB371]/20 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-[#3CB371] transition-all cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <span>Đang xác thực...</span>
@@ -153,8 +153,8 @@ export default function Login() {
 
         </div>
 
-        <div className="mt-6 text-center text-xs text-slate-500 flex items-center justify-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+        <div className="mt-6 text-center text-xs text-[#6B7280] flex items-center justify-center gap-1.5">
+          <ShieldCheck className="h-4 w-4 text-[#3CB371]" />
           <span>Phiên làm việc bảo mật tự động hết hạn sau 30 phút (SRS 5.3)</span>
         </div>
       </div>

@@ -21,7 +21,7 @@ import {
 
 const STATUS_BADGES = {
   COMPLETED: { label: 'Đã hoàn tất', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  PROCESSING: { label: 'Đang xử lý', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+  PROCESSING: { label: 'Đang xử lý', color: 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]' },
   PENDING: { label: 'Chờ thanh toán', color: 'bg-amber-100 text-amber-800 border-amber-300' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-rose-100 text-rose-800 border-rose-300' },
 };
@@ -90,7 +90,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-gray-500">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <div className="w-10 h-10 border-4 border-[#3CB371] border-t-transparent rounded-full animate-spin mb-3"></div>
         <p className="text-sm font-medium">Đang tải hóa đơn đơn hàng #{id}...</p>
       </div>
     );
@@ -106,7 +106,7 @@ export default function OrderDetailPage() {
         </p>
         <button
           onClick={() => navigate('/orders')}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3CB371] text-white rounded-xl text-sm font-semibold hover:bg-[#38A169] transition-colors shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Quay Lại Danh Sách Đơn Hàng</span>
@@ -161,7 +161,7 @@ export default function OrderDetailPage() {
           {order.opportunity_id && (
             <Link
               to={`/opportunities/${order.opportunity_id}`}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-sm font-semibold rounded-xl shadow-sm transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#EAF5EC] border border-[#DDF0E2] text-[#2E7D32] hover:bg-[#DDF0E2] text-sm font-semibold rounded-xl shadow-xs transition-colors"
             >
               <TrendingUp className="w-4 h-4" />
               <span>Xem Cơ Hội Bán Hàng #{order.opportunity_id}</span>
@@ -171,11 +171,11 @@ export default function OrderDetailPage() {
       </div>
 
       {/* KHUNG HÓA ĐƠN CHÍNH (Được tối ưu để hiển thị và in ấn) */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0">
+      <div className="bg-white border border-[#DDF0E2] rounded-2xl shadow-sm p-6 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0">
         {/* Banner Hóa Đơn Thương Mại */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-gray-200">
           <div>
-            <div className="flex items-center gap-2 text-blue-600 font-extrabold text-xl">
+            <div className="flex items-center gap-2 text-[#3CB371] font-extrabold text-xl">
               <ShoppingCart className="w-6 h-6" />
               <span>ZEN CRM • HÓA ĐƠN BÁN HÀNG</span>
             </div>
@@ -186,7 +186,7 @@ export default function OrderDetailPage() {
 
           <div className="text-left sm:text-right">
             <div className="text-xs text-gray-400 font-mono">MÃ HÓA ĐƠN:</div>
-            <div className="text-xl font-mono font-black text-blue-700">{order.order_code}</div>
+            <div className="text-xl font-mono font-black text-[#2E7D32]">{order.order_code}</div>
             <div className="text-xs text-gray-500 mt-0.5 flex items-center sm:justify-end gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-gray-400" />
               <span>Ngày chốt: {formatDateTime(order.order_date)}</span>
@@ -200,13 +200,13 @@ export default function OrderDetailPage() {
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                <User className="w-4 h-4 text-emerald-600" />
+                <User className="w-4 h-4 text-[#3CB371]" />
                 <span>Khách Hàng Mua Hàng</span>
               </span>
               {order.lead_id && (
                 <Link
                   to={`/leads/${order.lead_id}`}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 print:hidden flex items-center gap-1"
+                  className="text-xs font-semibold text-[#3CB371] hover:text-[#2E7D32] print:hidden flex items-center gap-1"
                 >
                   <span>Hồ sơ</span>
                   <ExternalLink className="w-3 h-3" />
@@ -233,7 +233,7 @@ export default function OrderDetailPage() {
               {order.shipping_address || 'Theo địa chỉ khách hàng'}
             </p>
             <div className="pt-1 text-xs text-gray-600">
-              <div className="flex items-center gap-1.5 text-blue-700 font-semibold mt-1">
+              <div className="flex items-center gap-1.5 text-[#2E7D32] font-semibold mt-1">
                 <CreditCard className="w-3.5 h-3.5" />
                 <span>{order.payment_info}</span>
               </div>
@@ -257,7 +257,7 @@ export default function OrderDetailPage() {
                 {order.opportunity_id ? (
                   <Link
                     to={`/opportunities/${order.opportunity_id}`}
-                    className="font-semibold text-blue-600 hover:underline print:text-gray-700 inline-flex items-center gap-1"
+                    className="font-semibold text-[#2E7D32] hover:underline print:text-gray-700 inline-flex items-center gap-1"
                   >
                     <span>Cơ hội #{order.opportunity_id}</span>
                     <ExternalLink className="w-3 h-3 print:hidden" />
@@ -279,7 +279,7 @@ export default function OrderDetailPage() {
         {/* Bảng Chi Tiết Sản Phẩm Xuất Kho */}
         <div className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
-            <Package className="w-4 h-4 text-indigo-600" />
+            <Package className="w-4 h-4 text-[#3CB371]" />
             <span>Chi Tiết Sản Phẩm & Giá Bán Bảo Tồn (SRS 3.12)</span>
           </h2>
 
@@ -307,7 +307,7 @@ export default function OrderDetailPage() {
                       {order.product_id && (
                         <Link
                           to={`/products/${order.product_id}`}
-                          className="text-xs text-blue-600 hover:underline print:hidden flex items-center gap-1"
+                          className="text-xs text-[#3CB371] hover:underline print:hidden flex items-center gap-1"
                         >
                           <span>Xem sản phẩm</span>
                           <ExternalLink className="w-3 h-3" />
@@ -322,7 +322,7 @@ export default function OrderDetailPage() {
                   <td className="py-4 px-4 text-center font-bold text-gray-900 text-base">
                     {quantity}
                   </td>
-                  <td className="py-4 px-4 text-right font-extrabold text-blue-700 text-base">
+                  <td className="py-4 px-4 text-right font-extrabold text-[#2E7D32] text-base">
                     {totalAmount.toLocaleString('vi-VN')} ₫
                   </td>
                 </tr>
@@ -339,7 +339,7 @@ export default function OrderDetailPage() {
             <p>• Hàng hóa được kiểm tra và xuất kho theo đúng quy chuẩn kiểm kê tồn kho Zen CRM.</p>
           </div>
 
-          <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-5 min-w-[280px] space-y-2">
+          <div className="bg-[#EAF5EC] border border-[#DDF0E2] rounded-xl p-5 min-w-[280px] space-y-2">
             <div className="flex items-center justify-between text-xs text-gray-600">
               <span>Cộng tiền hàng:</span>
               <span className="font-semibold">{totalAmount.toLocaleString('vi-VN')} ₫</span>
@@ -348,9 +348,9 @@ export default function OrderDetailPage() {
               <span>Thuế GTGT (VAT 0%):</span>
               <span className="font-semibold">0 ₫</span>
             </div>
-            <div className="pt-2 border-t border-blue-200 flex items-center justify-between">
+            <div className="pt-2 border-t border-[#DDF0E2] flex items-center justify-between">
               <span className="text-sm font-bold text-gray-900">TỔNG CỘNG THANH TOÁN:</span>
-              <span className="text-xl font-black text-blue-800">
+              <span className="text-xl font-black text-[#2E7D32]">
                 {totalAmount.toLocaleString('vi-VN')} ₫
               </span>
             </div>

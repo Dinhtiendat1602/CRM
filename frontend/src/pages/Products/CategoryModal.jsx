@@ -136,7 +136,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
         <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <FolderTree className="w-4 h-4 text-indigo-600" />
+              <FolderTree className="w-4 h-4 text-[#3CB371]" />
               <span>{editingId ? 'Chỉnh Sửa Danh Mục' : 'Thêm Mới Danh Mục'}</span>
             </span>
             {editingId && (
@@ -161,7 +161,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="VD: Phần mềm Quản trị"
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-100"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]/20"
               />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="VD: Nhóm giải pháp phần mềm doanh nghiệp"
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-100"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]/20"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-lg text-xs font-semibold transition-colors shadow-sm disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -205,7 +205,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
           <div className="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100 max-h-64 overflow-y-auto">
             {loading ? (
               <div className="py-8 text-center text-slate-400 text-xs">
-                <Loader2 className="w-4 h-4 animate-spin mx-auto mb-1 text-indigo-600" />
+                <Loader2 className="w-4 h-4 animate-spin mx-auto mb-1 text-[#3CB371]" />
                 <span>Đang tải danh mục...</span>
               </div>
             ) : categories.length === 0 ? (
@@ -221,7 +221,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-slate-800">{cat.name}</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-[11px] font-medium border border-indigo-100">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#EAF5EC] text-[#2E7D32] rounded-full text-[11px] font-medium border border-[#DDF0E2]">
                         <Package className="w-3 h-3" />
                         <span>{cat.products_count || 0} sản phẩm</span>
                       </span>
@@ -235,7 +235,7 @@ export default function CategoryModal({ isOpen, onClose, onCategoriesUpdated }) 
                     <button
                       type="button"
                       onClick={() => handleEditClick(cat)}
-                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-[#3CB371] hover:bg-[#EAF5EC] rounded-lg transition-colors"
                       title="Sửa danh mục"
                     >
                       <Edit2 className="w-3.5 h-3.5" />

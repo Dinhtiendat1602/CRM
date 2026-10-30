@@ -136,7 +136,7 @@ export default function OpportunityDetailPage() {
         <p className="text-sm text-gray-500 mb-6">{errorMsg || 'Cơ hội bán hàng không tồn tại hoặc đã bị xóa.'}</p>
         <button
           onClick={() => navigate('/opportunities')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] text-white rounded-lg text-sm font-semibold hover:bg-[#38A169] transition-colors shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Quay Lại Danh Sách Cơ Hội</span>
@@ -189,7 +189,7 @@ export default function OpportunityDetailPage() {
           {opportunity.status !== 'ORDERED' && (
             <button
               onClick={() => setIsMakeOrderModalOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Chốt Đơn Hàng (Make Order)</span>
@@ -449,7 +449,7 @@ export default function OpportunityDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-gray-200">
           <div>
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-600" />
+              <Clock className="w-5 h-5 text-[#3CB371]" />
               <span>Dòng Thời Gian Chăm Sóc Khách Hàng (Follow-up Activity Timeline)</span>
             </h2>
             <p className="text-xs text-gray-500 mt-1">
@@ -459,7 +459,7 @@ export default function OpportunityDetailPage() {
 
           <button
             onClick={() => setIsFollowUpModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors self-start sm:self-auto"
+            className="flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-xs font-semibold rounded-lg shadow-sm transition-colors self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Thêm Nhật Ký Chăm Sóc</span>
@@ -475,7 +475,7 @@ export default function OpportunityDetailPage() {
             </p>
           </div>
         ) : (
-          <div className="relative pl-6 space-y-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-blue-200">
+          <div className="relative pl-6 space-y-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#DDF0E2]">
             {followUps.map((fu, idx) => {
               const method = METHOD_ICONS[fu.contact_method] || METHOD_ICONS.PHONE;
               const IconComp = method.icon;

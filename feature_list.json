@@ -248,6 +248,28 @@
       ],
       "status": "completed",
       "evidence": "1. CSDL PostgreSQL: Đã tạo bảng salesman_products (user_id, product_id, assigned_by, assigned_at) kèm ràng buộc UNIQUE và FOREIGN KEY, đánh 2 indexes hiệu năng. Đã cập nhật schema.sql và seed.sql. 2. Backend APIs: GET /api/products/salesmen (danh sách salesman kèm số lượng sản phẩm được gán), GET /api/products/assignments/:userId, PUT /api/products/assignments/:userId (cập nhật phân quyền bằng PostgreSQL Transaction ACID). Tự động cô lập danh sách sản phẩm theo quyền cho SALESMAN trong GET /api/products. Chặn HTTP 403 Forbidden trong POST /api/opportunities nếu salesman tạo cơ hội cho sản phẩm chưa được phân quyền. 3. Tối ưu Query 1 năm & Dashboard mặc định ẩn dữ liệu: Mặc định lọc >= CURRENT_TIMESTAMP - INTERVAL '1 year' trong getOrders, getOpportunities, getLeads và Dashboard khi không truyền khoảng ngày. Dashboard.jsx mặc định không tự động nạp dữ liệu khi mở trang để tối ưu hiệu năng; hiển thị khung placeholder trang trọng kèm nút 'Xem dữ liệu 1 năm gần nhất'; chỉ khi người dùng click xem dữ liệu mới gọi getStats() tải KPI và 4 bảng dữ liệu gần nhất; hỗ trợ nút 'Ẩn dữ liệu' để quay lại chế độ chờ. 4. Frontend UI: Component ProductAssignmentModal.jsx cho phép Quản lý chọn nhân viên, tìm kiếm và tick chọn sản phẩm được phép bán với checkbox, bộ lọc danh mục và lưu phân quyền thời gian thực; tích hợp nút 'Phân Quyền Bán Hàng' tại ProductListPage; gắn badge thông báo tối ưu 1 năm tại OrderListPage, OpportunityListPage, LeadListPage. 5. Kiểm thử: 146/146 tests backend + 113/113 tests frontend (bổ sung 3 bài test tại dashboard-ui.test.js kiểm tra trạng thái mặc định ẩn và kích hoạt xem/ẩn dữ liệu) PASS 100% (Tổng 259/259 tests); Vite client build thành công trong 313ms, 0 lỗi linter."
+    },
+    {
+      "id": "feat-023",
+      "name": "Nút Flick Tự Động Thêm Vào Cơ Hội Bán Hàng Khi Tạo Khách Hàng Tiềm Năng",
+      "description": "Khi thêm mới khách hàng tiềm năng tại LeadModal.jsx, bổ sung nút Flick (toggle switch). Khi bật nút Flick, tự động mở rộng vùng chọn sản phẩm quan tâm, nhập số lượng, ngày dự kiến chốt và tính toán giá trị ước tính trực tiếp. Bấm lưu sẽ tự động tạo đồng thời cả Lead và Opportunity liên kết với Lead đó.",
+      "dependencies": [
+        "feat-007",
+        "feat-009"
+      ],
+      "status": "completed",
+      "evidence": "1. LeadModal.jsx: Thêm công tắc Flick switch với animation mượt mà. Khi bật ON, nạp danh sách sản phẩm từ productApi, mở các trường chọn sản phẩm, số lượng, ngày dự kiến và thẻ tóm tắt giá trị ước tính realtime. Khi submit, gọi leadApi.createLead() sau đó tự động gọi oppApi.createOpportunity() với lead_id vừa tạo. 2. LeadListPage.jsx: Bổ sung banner thông báo thành công và nút chuyển hướng nhanh 'Xem Danh Sách Cơ Hội' sang /opportunities. 3. ProductAssignmentModal.jsx: Cải tiến giao diện modal phân quyền sản phẩm, loại bỏ xung đột nền tối và sửa nút lưu nổi bật. 4. Kiểm thử: 117/117 frontend tests PASS (4 tests mới tại leads-ui.test.js kiểm tra Flick switch toggle và validation), Vite client build thành công trong 282ms."
+    },
+    {
+      "id": "feat-024",
+      "name": "Đồng Bộ Giao Diện Theo Bảng Màu Thương Hiệu",
+      "description": "Đồng bộ giao diện ứng dụng theo đúng bảng màu thiết kế: 1. Màu chủ đạo (Primary): Xanh lá thương hiệu / Nút nhấn (#3CB371, #38A169, #2E7D32), Trắng nền thẻ (#FFFFFF). 2. Màu phụ & Nền: Nền ứng dụng Mint Pastel (#EAF5EC - #DDF0E2), Tiêu đề/Chữ chính (#1F2937), Chữ phụ (#6B7280), Nền ô xám nhạt (#F3F4F6). 3. Màu điểm nhấn (Accent Gradient): Xanh dương / Tím (#7CA5F5 -> #5D3EBC) cho Banner chào mừng & thẻ điểm nhấn.",
+      "dependencies": [
+        "feat-006",
+        "feat-020"
+      ],
+      "status": "completed",
+      "evidence": "1. Cấu hình Tailwind @theme tại frontend/src/index.css định nghĩa các biến màu chuẩn: --color-brand (#3cb371), --color-brand-mint (#eaf5ec - #ddf0e2), --color-dark-gray (#1f2937), --color-muted-gray (#6b7280), --color-light-gray (#f3f4f6), --color-accent-blue (#7ca5f5), --color-accent-purple (#5d3ebc). 2. Cập nhật MainLayout, Sidebar (active menu #3CB371), Header (viền #DDF0E2, badge #EAF5EC, nút gia hạn #3CB371), Modal (nền header #EAF5EC/70, viền #DDF0E2), Pagination (trang active #3CB371), SearchInput (nền #F3F4F6, focus #3CB371), ConfirmDialog. 3. Cập nhật Dashboard (Banner Accent Gradient #7CA5F5 -> #5D3EBC, nút xem dữ liệu #3CB371, thẻ KPI và bảng #DDF0E2), LeadListPage, LeadModal, OpportunityListPage, OpportunityModal, OrderListPage, ProductListPage và Login. 4. Kiểm thử: npm run build thành công trong 258ms, 0 lỗi; 117/117 frontend tests PASS 100%."
     }
   ]
 }

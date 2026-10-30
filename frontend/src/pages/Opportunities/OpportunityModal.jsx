@@ -242,7 +242,7 @@ export default function OpportunityModal({
     >
       {loadingInitial ? (
         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#3CB371] mb-2" />
           <p className="text-sm">Đang tải danh sách khách hàng và sản phẩm...</p>
         </div>
       ) : (
@@ -267,7 +267,7 @@ export default function OpportunityModal({
                     name="confirm_duplicate"
                     checked={formData.confirm_duplicate}
                     onChange={handleChange}
-                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="w-4 h-4 rounded text-[#3CB371] accent-[#3CB371] focus:ring-[#3CB371] border-gray-300"
                   />
                   <span>Tôi xác nhận vẫn muốn tạo thêm cơ hội này cho khách hàng</span>
                 </label>
@@ -293,7 +293,7 @@ export default function OpportunityModal({
                   className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 bg-white ${
                     fieldErrors.lead_id 
                       ? 'border-red-400 focus:ring-red-300' 
-                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                      : 'border-gray-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
                 >
                   <option value="">-- Chọn khách hàng --</option>
@@ -331,7 +331,7 @@ export default function OpportunityModal({
                   className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 bg-white ${
                     fieldErrors.product_id 
                       ? 'border-red-400 focus:ring-red-300' 
-                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                      : 'border-gray-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
                 >
                   <option value="">-- Chọn sản phẩm quan tâm --</option>
@@ -347,7 +347,7 @@ export default function OpportunityModal({
               )}
               {selectedProduct && (
                 <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
-                  <span>Đơn giá: <strong className="text-blue-600">{Number(selectedProduct.unit_price).toLocaleString('vi-VN')} ₫</strong></span>
+                  <span>Đơn giá: <strong className="text-[#2E7D32]">{Number(selectedProduct.unit_price).toLocaleString('vi-VN')} ₫</strong></span>
                   <span>•</span>
                   <span>Tồn kho: <strong className={selectedProduct.stock_qty <= 5 ? 'text-amber-600' : 'text-emerald-600'}>{selectedProduct.stock_qty}</strong></span>
                 </div>
@@ -373,7 +373,7 @@ export default function OpportunityModal({
                   className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 ${
                     fieldErrors.quantity 
                       ? 'border-red-400 focus:ring-red-300' 
-                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                      : 'border-gray-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
                   placeholder="1"
                 />
@@ -393,7 +393,7 @@ export default function OpportunityModal({
                 value={formData.status}
                 onChange={handleChange}
                 disabled={isEdit && opportunity.status === 'ORDERED'}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
               >
                 {statuses.length > 0 ? (
                   statuses.map((s) => (
@@ -428,7 +428,7 @@ export default function OpportunityModal({
                   name="expected_close_date"
                   value={formData.expected_close_date}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
                 />
               </div>
             </div>
@@ -443,48 +443,48 @@ export default function OpportunityModal({
                 rows={3}
                 value={formData.notes}
                 onChange={handleChange}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
                 placeholder="Ví dụ: Khách quan tâm cấu hình Core i7, yêu cầu xuất hóa đơn VAT, giao hàng tại chi nhánh Quận 1..."
               />
             </div>
           </div>
 
           {/* Thẻ tóm tắt giá trị dự kiến (Estimated Opportunity Value) */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-[#EAF5EC] border border-[#DDF0E2] rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-[#3CB371] text-white flex items-center justify-center shadow-xs">
                 <Coins className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider font-semibold text-blue-900">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#1F2937]">
                   Giá Trị Dự Kiến Ước Tính (Estimated Value)
                 </p>
-                <p className="text-xs text-blue-600">
+                <p className="text-xs text-[#6B7280]">
                   {formData.quantity || 0} sản phẩm × {selectedProduct ? Number(selectedProduct.unit_price).toLocaleString('vi-VN') : '0'} ₫
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xl font-bold text-blue-700">
+              <span className="text-xl font-bold text-[#2E7D32]">
                 {Number(estimatedTotal).toLocaleString('vi-VN')} ₫
               </span>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#DDF0E2]">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-[#6B7280] hover:text-[#1F2937] bg-[#F3F4F6] hover:bg-[#EAF5EC] rounded-xl transition-colors cursor-pointer"
             >
               Hủy Bỏ
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-[#3CB371] rounded-xl hover:bg-[#38A169] transition-colors shadow-xs hover:shadow-md disabled:opacity-50 cursor-pointer"
             >
               {submitting ? (
                 <>

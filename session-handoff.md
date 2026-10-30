@@ -3,13 +3,52 @@
 # Session Handoff
 
 ## Current Objective
-
-- Goal: 
-  1. Thay đổi phân quyền sản phẩm bán hàng: Quản lý bán hàng (`SALE_MANAGER`) & Admin phân chia những sản phẩm nào thì Nhân viên (`SALESMAN`) được phép bán. Nhân viên chỉ xem và tạo cơ hội (`Opportunity`) cho các sản phẩm mình được phân quyền (chặn HTTP 403 Forbidden nếu vi phạm).
-  2. Tối ưu truy vấn khi mở ứng dụng: Mặc định query giới hạn trong 1 năm gần nhất (từ 365 ngày trước đến hiện tại) trên các module Đơn hàng, Cơ hội, Khách tiềm năng.
-  3. Tinh chỉnh Dashboard: Mặc định không hiện dữ liệu khi mở trang Dashboard để tối ưu hiệu năng; chỉ khi người dùng nhấn nút "Xem dữ liệu 1 năm gần nhất" thì mới trích xuất và hiển thị dữ liệu; hỗ trợ nút "Làm mới" và "Ẩn dữ liệu".
-- Current status: HOÀN THÀNH 100% (`feat-022`). Toàn bộ 259/259 tests PASS (146 backend + 113 frontend), Vite client production build 313ms không có lỗi. Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
+  1. Đồng bộ toàn diện giao diện theo đúng bảng màu thiết kế trong ảnh (`feat-024`):
+     - Màu chủ đạo: Brand Green (`#3CB371`, `#38A169`, `#2E7D32`), Nền trắng (`#FFFFFF`).
+     - Màu phụ & Nền: Nền ứng dụng Mint Pastel (`#EAF5EC` — `#DDF0E2`), Tiêu đề/Chữ chính (`#1F2937`), Chữ phụ (`#6B7280`), Nền ô/xám nhạt (`#F3F4F6`).
+     - Màu điểm nhấn (Accent Gradient): Banner & thẻ điểm nhấn (`#7CA5F5` -> `#5D3EBC`).
+  2. Nút Flick Tự Động Thêm Vào Cơ Hội Bán Hàng: Khi thêm Khách hàng tiềm năng (`LeadModal.jsx`), bổ sung nút gạt Flick switch cho phép tự động tạo ngay Cơ hội bán hàng (`Opportunity`).
+  3. Phân quyền sản phẩm bán hàng & Tối ưu truy vấn 1 năm gần nhất (`feat-022`).
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 263ms không lỗi). Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
 - Branch / commit: `main`
+
+- [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**
+  - **1. Hệ thống Style Tokens & Layout Core:**
+    - [index.css](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/index.css): Định nghĩa Tailwind `@theme` với các biến màu chuẩn: `--color-brand: #3cb371`, `--color-brand-hover: #38a169`, `--color-brand-dark: #2e7d32`, `--color-brand-mint: #eaf5ec`, `--color-brand-mint-subtle: #ddf0e2`, `--color-dark-gray: #1f2937`, `--color-muted-gray: #6b7280`, `--color-light-gray: #f3f4f6`, `--color-accent-blue: #7ca5f5`, `--color-accent-purple: #5d3ebc`.
+    - [MainLayout.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/MainLayout.jsx): Nền ứng dụng chuyển sang dải Mint Pastel `bg-gradient-to-br from-[#EAF5EC] via-[#EAF5EC] to-[#DDF0E2] text-[#1F2937]`.
+    - [Sidebar.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/Sidebar.jsx): Menu active sử dụng `bg-[#3CB371] text-white shadow-md shadow-[#3CB371]/30`, logo icon gradient `from-[#3CB371] via-[#2E7D32] to-[#7CA5F5]`.
+    - [Header.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/Header.jsx): Header bar viền `border-[#DDF0E2]`, đồng hồ và badge phiên bảo mật nền `bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]`, nút gia hạn phiên `bg-[#3CB371] hover:bg-[#38A169]`.
+  - **2. Core Components:**
+    - [Modal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Common/Modal.jsx): Hộp thoại bo góc viền `#DDF0E2`, header dialog nền `bg-[#EAF5EC]/70`, tiêu đề `#1F2937`, nút đóng hover `#DDF0E2`.
+    - [Pagination.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Common/Pagination.jsx): Nút trang active `bg-[#3CB371] text-white font-bold`, nút phân trang viền `#DDF0E2` hover `#EAF5EC`.
+    - [SearchInput.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Common/SearchInput.jsx): Nền ô tìm kiếm Light Gray `#F3F4F6`, viền `#DDF0E2`, focus ring `#3CB371`.
+    - [ConfirmDialog.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Common/ConfirmDialog.jsx): Nút xác nhận `bg-[#3CB371] hover:bg-[#38A169]`.
+  - **3. Phân Hệ Nghiệp Vụ & Bảng Điều Khiển:**
+    - [Dashboard.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Dashboard/Dashboard.jsx): Banner chào mừng áp dụng Accent Gradient `bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC]`, nút Xem dữ liệu 1 năm & Thao tác nhanh chuyển sang Brand Green `#3CB371` / `#38A169`, toàn bộ viền thẻ `#DDF0E2`.
+    - [LeadListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx) & [LeadModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadModal.jsx): Nút "Thêm Khách Tiềm Năng", Flick switch và nút Lưu dùng `#3CB371`.
+    - [OpportunityListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityListPage.jsx) & [OpportunityModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityModal.jsx): Nút thêm cơ hội và thẻ ước tính giá trị dùng `#3CB371` & nền Mint `#EAF5EC`.
+    - [OrderListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Orders/OrderListPage.jsx): Nút chốt đơn và KPI cards đồng bộ viền `#DDF0E2` và icon `#3CB371`.
+    - [ProductListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Products/ProductListPage.jsx): Nút thêm sản phẩm `#3CB371`, nút phân quyền hover `#EAF5EC`.
+    - [Login.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Auth/Login.jsx): Trang đăng nhập nền Mint Gradient `#EAF5EC` -> `#DDF0E2`, logo thương hiệu và nút Đăng nhập `#3CB371`.
+  - **4. Bằng chứng kiểm thử:**
+    - `npm run build` trong `frontend/`: Hoàn thành xuất sắc trong 258ms, 0 lỗi.
+    - `npm test` trong `frontend/`: 117/117 tests PASS 100%.lưu.
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 282ms không lỗi). Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
+- Branch / commit: `main`
+
+- [x] **Nút Flick Tự Động Thêm Vào Cơ Hội Bán Hàng Khi Tạo Khách Hàng Tiềm Năng:**
+  - **1. Frontend Client ([LeadModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadModal.jsx)):**
+    - Tích hợp công tắc gạt Flick switch hiện đại ("Tự động thêm vào cơ hội bán hàng").
+    - Khi bật nút Flick: Tự động mở rộng vùng chọn sản phẩm quan tâm (nạp danh sách từ `productApi.getProducts()`), nhập số lượng chốt kỳ vọng, thời hạn dự kiến chốt và tính toán trực tiếp giá trị cơ hội (`quantity * unit_price`).
+    - Khi bấm lưu: Hệ thống tạo khách hàng tiềm năng trước (`leadApi.createLead()`), sau đó tự động gọi `oppApi.createOpportunity()` gắn kết với Lead ID vừa sinh trong cùng một lượt lưu.
+  - **2. Thông báo & Điều hướng ([LeadListPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx)):**
+    - Hiển thị banner thành công với nút bấm nhanh "Xem Danh Sách Cơ Hội" chuyển hướng tức thì sang `/opportunities`.
+  - **3. Cải tiến Modal Phân Quyền Bán Hàng ([ProductAssignmentModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Products/ProductAssignmentModal.jsx)):**
+    - Khắc phục xung đột dark-mode hệ thống và sửa nút Lưu Phân Quyền (`bg-indigo-600 hover:bg-indigo-700 text-white`).
+  - **4. Bằng chứng kiểm thử:**
+    - Frontend: 117/117 tests PASS (thêm 4 unit tests cho Flick toggle và form validation tại [leads-ui.test.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/tests/leads-ui.test.js)).
+    - Backend: 146/146 tests PASS 100%.
+    - Production build: `vite build` 282ms, 0 lỗi, 0 warnings mới.
 
 - [x] **Phân Quyền Sản Phẩm Bán Hàng Cho Nhân Viên & Tối Ưu Truy Vấn 1 Năm Mặc Định (`feat-022`):**
   - **1. CSDL PostgreSQL (`salesman_products`):**

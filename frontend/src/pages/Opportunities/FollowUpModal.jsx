@@ -146,11 +146,11 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             </div>
             <div>
               <span className="text-gray-500">Sản phẩm: </span>
-              <strong className="text-blue-700">{opportunity.product_name}</strong>
+              <strong className="text-[#2E7D32]">{opportunity.product_name}</strong>
             </div>
             <div>
               <span className="text-gray-500">Trạng thái hiện tại: </span>
-              <span className="px-2 py-0.5 rounded font-semibold bg-blue-100 text-blue-800">
+              <span className="px-2 py-0.5 rounded font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
                 {opportunity.status}
               </span>
             </div>
@@ -172,7 +172,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
                 name="follow_date"
                 value={formData.follow_date}
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               />
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
               name="contact_method"
               value={formData.contact_method}
               onChange={handleChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
             >
               {CONTACT_METHODS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -228,7 +228,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             rows={2}
             value={formData.customer_response}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             placeholder="Ví dụ: Khách quan tâm mức chiết khấu khi mua từ 2 máy trở lên, muốn gửi hợp đồng mẫu qua email..."
           />
         </div>
@@ -243,7 +243,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             rows={2}
             value={formData.next_plan}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             placeholder="Ví dụ: Chuẩn bị bảng báo giá gửi trước 17h chiều nay, hẹn gặp khách tại showroom sáng thứ Năm..."
           />
         </div>
@@ -251,14 +251,14 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
         {/* Cập nhật trạng thái cơ hội */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
-            <ArrowRightCircle className="w-4 h-4 text-blue-600" />
+            <ArrowRightCircle className="w-4 h-4 text-[#3CB371]" />
             <span>Chuyển Đổi Trạng Thái Cơ Hội (Tùy chọn)</span>
           </label>
           <select
             name="new_status"
             value={formData.new_status}
             onChange={handleChange}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
           >
             <option value="">-- Giữ nguyên trạng thái hiện tại --</option>
             {statuses.map((s) => (
@@ -285,7 +285,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-[#3CB371] rounded-lg hover:bg-[#38A169] active:bg-[#2E7D32] focus:outline-none focus:ring-2 focus:ring-[#3CB371]/30 transition-colors disabled:opacity-50"
           >
             {submitting ? (
               <>

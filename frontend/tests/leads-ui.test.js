@@ -66,6 +66,25 @@ function calculateTotalExpectedRevenue(opportunities = []) {
   }, 0);
 }
 
+// 5. Logic kiểm tra và chuẩn bị dữ liệu khi bật Nút Flick Tự động tạo cơ hội (SRS 3.1 & 3.6)
+function validateAutoOpportunity(autoCreateOpp, oppData) {
+  const errors = {};
+  if (!autoCreateOpp) {
+    return { isValid: true, errors };
+  }
+  if (!oppData.product_id) {
+    errors.product_id = 'Vui lòng chọn sản phẩm quan tâm để tạo cơ hội.';
+  }
+  const qty = parseInt(oppData.quantity, 10);
+  if (isNaN(qty) || qty <= 0) {
+    errors.quantity = 'Số lượng sản phẩm phải lớn hơn 0.';
+  }
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+}
+
 describe('Frontend Leads UI & Business Logic Tests (feat-009)', () => {
   describe('Lead Form Validation (SRS 3.1.2 REQ-2, REQ-3)', () => {
     it('chấp nhận biểu mẫu khi nhập đầy đủ các trường bắt buộc hợp lệ', () => {
@@ -170,6 +189,32 @@ describe('Frontend Leads UI & Business Logic Tests (feat-009)', () => {
     it('xử lý an toàn khi danh sách cơ hội rỗng (0 cơ hội)', () => {
       const total = calculateTotalExpectedRevenue([]);
       assert.strictEqual(total, 0);
+    });
+  });
+
+  describe('Auto-Create Opportunity Flick Toggle (SRS 3.1 & 3.6)', () => {
+    it('bỏ qua validate cơ hội khi nút Flick tắt (autoCreateOpp = false)', () => {
+      const result = validateAutoOpportunity(false, {});
+      assert.strictEqual(result.isValid, true);
+      assert.strictEqual(Object.keys(result.errors).length, 0);
+    });
+
+    it('từ chối khi nút Flick bật nhưng chưa chọn sản phẩm quan tâm', () => {
+      const result = validateAutoOpportunity(true, { product_id: '', quantity: 1 });
+      assert.strictEqual(result.isValid, false);
+      assert.ok(result.errors.product_id);
+    });
+
+    it('từ chối khi nút Flick bật nhưng số lượng <= 0', () => {
+      const result = validateAutoOpportunity(true, { product_id: '5', quantity: 0 });
+      assert.strictEqual(result.isValid, false);
+      assert.ok(result.errors.quantity);
+    });
+
+    it('chấp nhận khi nút Flick bật và đã chọn sản phẩm cùng số lượng hợp lệ', () => {
+      const result = validateAutoOpportunity(true, { product_id: '8', quantity: 2 });
+      assert.strictEqual(result.isValid, true);
+      assert.strictEqual(Object.keys(result.errors).length, 0);
     });
   });
 });

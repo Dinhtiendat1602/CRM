@@ -100,7 +100,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         {/* Brand Logo & Header */}
         <div className="shrink-0 h-16 flex items-center justify-between px-4 border-b border-slate-800">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 font-bold text-xl">
+            <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-tr from-[#3CB371] via-[#2E7D32] to-[#7CA5F5] flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-bold text-xl">
               Z
             </div>
             {!collapsed && (
@@ -108,7 +108,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                 <span className="text-base font-bold text-white tracking-tight leading-tight">
                   Zen CRM
                 </span>
-                <span className="text-[10px] uppercase font-semibold text-cyan-400 tracking-wider">
+                <span className="text-[10px] uppercase font-semibold text-[#3CB371] tracking-wider">
                   Enterprise v1.1
                 </span>
               </div>
@@ -128,7 +128,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         {/* Navigation Items */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5">
           {!collapsed && (
-            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#6B7280]">
               Phân hệ làm việc
             </div>
           )}
@@ -142,7 +142,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
                   `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
+                    ? 'bg-[#3CB371] text-white shadow-md shadow-[#3CB371]/30 font-semibold'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`
                 }
@@ -155,7 +155,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                 {/* Active indicator bar */}
                 {({ isActive }) =>
                   isActive && !collapsed && (
-                    <span className="ml-auto w-1.5 h-4 rounded-full bg-cyan-300" />
+                    <span className="ml-auto w-1.5 h-4 rounded-full bg-[#DDF0E2]" />
                   )
                 }
               </NavLink>

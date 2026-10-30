@@ -8,7 +8,7 @@ export default function MainLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] via-[#EAF5EC] to-[#DDF0E2] flex font-sans text-[#1F2937]">
       {/* Sidebar Navigation */}
       <Sidebar
         collapsed={collapsed}
@@ -30,7 +30,7 @@ export default function MainLayout() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-slate-200 py-3 px-6 text-center text-xs text-slate-500">
+        <footer className="bg-white/80 backdrop-blur-xs border-t border-[#DDF0E2] py-3 px-6 text-center text-xs text-[#6B7280]">
           Zen CRM Enterprise Platform &bull; Tuân thủ tuyệt đối SRS v1.1 &bull; 2026
         </footer>
       </div>

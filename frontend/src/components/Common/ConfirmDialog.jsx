@@ -28,15 +28,15 @@ export default function ConfirmDialog({
           >
             <AlertTriangle className="h-6 w-6" />
           </div>
-          <p className="text-sm text-slate-600 leading-relaxed pt-1">{message}</p>
+          <p className="text-sm text-[#1F2937] leading-relaxed pt-1">{message}</p>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#DDF0E2]">
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-[#DDF0E2] text-[#6B7280] text-xs font-semibold hover:bg-[#EAF5EC] hover:text-[#1F2937] transition-colors cursor-pointer"
           >
             {cancelText}
           </button>
@@ -46,8 +46,8 @@ export default function ConfirmDialog({
             disabled={loading}
             className={`px-4 py-2 rounded-xl text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 ${
               isDangerous
-                ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20'
-                : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+                ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'
+                : 'bg-[#3CB371] hover:bg-[#38A169] shadow-[#3CB371]/20'
             }`}
           >
             {loading ? 'Đang xử lý...' : confirmText}

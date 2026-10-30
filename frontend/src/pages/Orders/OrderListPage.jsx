@@ -33,7 +33,7 @@ const formatDateTime = (dateStr) => {
 
 const STATUS_BADGES = {
   COMPLETED: { label: 'Đã hoàn tất', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  PROCESSING: { label: 'Đang xử lý', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+  PROCESSING: { label: 'Đang xử lý', color: 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]' },
   PENDING: { label: 'Chờ thanh toán', color: 'bg-amber-100 text-amber-800 border-amber-300' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-rose-100 text-rose-800 border-rose-300' },
 };
@@ -148,18 +148,18 @@ export default function OrderListPage() {
       {/* Header & Tiêu đề trang */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2.5">
-            <ShoppingCart className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-[#1F2937] flex items-center gap-2.5">
+            <ShoppingCart className="w-7 h-7 text-[#3CB371]" />
             <span>Quản Lý Đơn Hàng (Orders)</span>
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-[#6B7280] mt-1">
             Theo dõi hóa đơn đã chốt, bảo toàn giá bán niêm yết tại thời điểm xuất kho (SRS 3.12)
           </p>
         </div>
 
         <button
           onClick={() => navigate('/opportunities')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all self-start sm:self-auto hover:shadow-md"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#3CB371] hover:bg-[#38A169] text-white text-sm font-semibold rounded-xl shadow-xs transition-all self-start sm:self-auto hover:shadow-md cursor-pointer"
         >
           <ShoppingCart className="w-4 h-4" />
           <span>+ Chốt Đơn Từ Cơ Hội</span>
@@ -169,25 +169,25 @@ export default function OrderListPage() {
       {/* Thẻ Thống kê KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Card 1: Tổng số đơn hàng */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
             <ShoppingCart className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-gray-500">Tổng Đơn Hàng</p>
-            <p className="text-2xl font-extrabold text-gray-900 mt-0.5">
-              {summary.totalOrders} <span className="text-xs font-normal text-gray-500">đơn</span>
+            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">Tổng Đơn Hàng</p>
+            <p className="text-2xl font-extrabold text-[#1F2937] mt-0.5">
+              {summary.totalOrders} <span className="text-xs font-normal text-[#6B7280]">đơn</span>
             </p>
           </div>
         </div>
 
         {/* Card 2: Tổng doanh thu đã chốt */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
+        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-5 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-gray-500">Tổng Doanh Thu</p>
+            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">Tổng Doanh Thu</p>
             <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
               {Number(summary.totalRevenue || 0).toLocaleString('vi-VN')} ₫
             </p>
@@ -195,21 +195,21 @@ export default function OrderListPage() {
         </div>
 
         {/* Card 3: Tổng sản phẩm xuất kho */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#2E7D32] flex items-center justify-center flex-shrink-0">
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-gray-500">Sản Phẩm Xuất Kho</p>
-            <p className="text-2xl font-extrabold text-purple-700 mt-0.5">
-              {summary.totalItems} <span className="text-xs font-normal text-gray-500">sản phẩm</span>
+            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">Sản Phẩm Xuất Kho</p>
+            <p className="text-2xl font-extrabold text-[#2E7D32] mt-0.5">
+              {summary.totalItems} <span className="text-xs font-normal text-[#6B7280]">sản phẩm</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* Bộ Lọc & Tìm Kiếm */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-4">
+      <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Tìm kiếm đa năng */}
           <div className="md:col-span-4">
@@ -231,7 +231,7 @@ export default function OrderListPage() {
                 setStatus(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
             >
               <option value="">-- Tất cả trạng thái --</option>
               <option value="COMPLETED">Đã hoàn tất (COMPLETED)</option>
@@ -251,7 +251,7 @@ export default function OrderListPage() {
                   setFromDate(e.target.value);
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
                 title="Lọc từ ngày chốt đơn"
               />
             </div>
@@ -267,7 +267,7 @@ export default function OrderListPage() {
                   setToDate(e.target.value);
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
                 title="Lọc đến ngày chốt đơn"
               />
             </div>
@@ -306,26 +306,26 @@ export default function OrderListPage() {
               onClick={() => handleToggleSort('order_date')}
               className={`px-2 py-1 rounded-lg border font-medium flex items-center gap-1 ${
                 sortBy === 'order_date'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold'
+                  ? 'border-[#3CB371] bg-[#EAF5EC] text-[#2E7D32] font-bold'
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
             >
               <span>Ngày chốt</span>
               {sortBy === 'order_date' && (
-                <ArrowUpDown className="w-3 h-3 text-blue-600" />
+                <ArrowUpDown className="w-3 h-3 text-[#3CB371]" />
               )}
             </button>
             <button
               onClick={() => handleToggleSort('total_amount')}
               className={`px-2 py-1 rounded-lg border font-medium flex items-center gap-1 ${
                 sortBy === 'total_amount'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold'
+                  ? 'border-[#3CB371] bg-[#EAF5EC] text-[#2E7D32] font-bold'
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
             >
               <span>Tổng tiền</span>
               {sortBy === 'total_amount' && (
-                <ArrowUpDown className="w-3 h-3 text-blue-600" />
+                <ArrowUpDown className="w-3 h-3 text-[#3CB371]" />
               )}
             </button>
           </div>
@@ -341,10 +341,10 @@ export default function OrderListPage() {
       )}
 
       {/* Bảng Dữ Liệu Đơn Hàng */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-[#DDF0E2] rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 border-b border-gray-200 text-xs uppercase font-bold text-gray-600 tracking-wider">
+            <thead className="bg-[#EAF5EC]/60 border-b border-[#DDF0E2] text-xs uppercase font-bold text-[#6B7280] tracking-wider">
               <tr>
                 <th className="py-3.5 px-4">Mã Đơn Hàng</th>
                 <th className="py-3.5 px-4">Khách Hàng (Lead)</th>
@@ -357,12 +357,12 @@ export default function OrderListPage() {
                 <th className="py-3.5 px-4 text-center">Thao Tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[#DDF0E2]/60">
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="py-12 text-center text-gray-500">
+                  <td colSpan="9" className="py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-8 h-8 border-4 border-[#3CB371] border-t-transparent rounded-full animate-spin"></div>
                       <span className="text-sm">Đang tải danh sách đơn hàng...</span>
                     </div>
                   </td>
@@ -377,7 +377,7 @@ export default function OrderListPage() {
                     </p>
                     <button
                       onClick={() => navigate('/opportunities')}
-                      className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                      className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#3CB371] text-white text-xs font-semibold rounded-lg hover:bg-[#38A169] transition-colors shadow-sm"
                     >
                       <span>Xem Danh Sách Cơ Hội</span>
                     </button>
@@ -386,15 +386,15 @@ export default function OrderListPage() {
               ) : (
                 orders.map((ord) => {
                   return (
-                    <tr key={ord.id} className="hover:bg-blue-50/40 transition-colors">
+                    <tr key={ord.id} className="hover:bg-[#EAF5EC]/40 transition-colors">
                       {/* Mã Đơn Hàng */}
                       <td className="py-3.5 px-4">
                         <button
                           onClick={() => navigate(`/orders/${ord.id}`)}
-                          className="font-mono font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-lg border border-blue-200 transition-colors inline-flex items-center gap-1"
+                          className="font-mono font-bold text-[#2E7D32] hover:text-[#1F2937] bg-[#EAF5EC] hover:bg-[#DDF0E2] px-2 py-1 rounded-lg border border-[#DDF0E2] transition-colors inline-flex items-center gap-1"
                         >
                           <span>{ord.order_code}</span>
-                          <ExternalLink className="w-3 h-3 text-blue-500" />
+                          <ExternalLink className="w-3 h-3 text-[#3CB371]" />
                         </button>
                       </td>
 
@@ -404,7 +404,7 @@ export default function OrderListPage() {
                           {ord.lead_id ? (
                             <Link
                               to={`/leads/${ord.lead_id}`}
-                              className="font-semibold text-gray-900 hover:text-blue-600 hover:underline"
+                              className="font-semibold text-gray-900 hover:text-[#3CB371] hover:underline"
                             >
                               {ord.lead_name || `Khách hàng #${ord.lead_id}`}
                             </Link>
@@ -431,7 +431,7 @@ export default function OrderListPage() {
                           {ord.product_id ? (
                             <Link
                               to={`/products/${ord.product_id}`}
-                              className="font-medium text-gray-800 hover:text-blue-600 hover:underline line-clamp-1"
+                              className="font-medium text-gray-800 hover:text-[#3CB371] hover:underline line-clamp-1"
                             >
                               {ord.product_name}
                             </Link>
@@ -483,7 +483,7 @@ export default function OrderListPage() {
                           <button
                             onClick={() => navigate(`/orders/${ord.id}`)}
                             title="Xem chi tiết hóa đơn & xuất hàng"
-                            className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-600 hover:text-[#3CB371] hover:bg-[#EAF5EC] rounded-lg transition-colors"
                           >
                             <Eye className="w-4 h-4" />
                           </button>

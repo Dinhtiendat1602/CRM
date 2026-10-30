@@ -153,7 +153,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
               className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                 fieldErrors.name
                   ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
-                  : 'border-slate-300 focus:ring-blue-500/20 focus:border-blue-600'
+                  : 'border-slate-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
               }`}
             />
           </div>
@@ -178,7 +178,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
                 className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.start_date
                     ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
-                    : 'border-slate-300 focus:ring-blue-500/20 focus:border-blue-600'
+                    : 'border-slate-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                 }`}
               />
             </div>
@@ -201,7 +201,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
                 className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.end_date
                     ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
-                    : 'border-slate-300 focus:ring-blue-500/20 focus:border-blue-600'
+                    : 'border-slate-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                 }`}
               />
             </div>
@@ -229,7 +229,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
               className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                 fieldErrors.budget
                   ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
-                  : 'border-slate-300 focus:ring-blue-500/20 focus:border-blue-600'
+                  : 'border-slate-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
               }`}
             />
           </div>
@@ -254,7 +254,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
               value={formData.description}
               onChange={handleChange}
               placeholder="Chi tiết đối tượng khách hàng mục tiêu, kênh truyền thông, chương trình chiết khấu..."
-              className="w-full p-3 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all resize-none"
+              className="w-full p-3 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all resize-none"
             />
           </div>
         </div>
@@ -272,7 +272,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
           >
             {loading ? (
               <>

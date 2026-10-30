@@ -151,14 +151,14 @@ export default function ProductListPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">
-            <Package className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#2E7D32] uppercase tracking-wider mb-1">
+            <Package className="w-4 h-4 text-[#3CB371]" />
             <span>Phân hệ Kho & Sản phẩm (SRS 3.15 - 3.17)</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">
             Quản Lý Danh Mục & Sản Phẩm Kho
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-[#6B7280] mt-0.5">
             Quản trị mã sản phẩm, tồn kho kho hàng, xem cơ hội liên quan và lịch sử đơn hàng.
           </p>
         </div>
@@ -167,24 +167,24 @@ export default function ProductListPage() {
           <div className="flex items-center gap-2.5 flex-shrink-0">
             <button
               onClick={() => setIsAssignmentModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-sm font-medium transition-colors shadow-2xs cursor-pointer"
               title="Phân quyền những sản phẩm mà từng nhân viên được phép bán"
             >
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <ShieldCheck className="w-4 h-4 text-[#3CB371]" />
               <span>Phân Quyền Bán Hàng</span>
             </button>
 
             <button
               onClick={() => setIsCategoryModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-sm font-medium transition-colors shadow-2xs cursor-pointer"
             >
-              <FolderTree className="w-4 h-4 text-indigo-600" />
+              <FolderTree className="w-4 h-4 text-[#2E7D32]" />
               <span>Quản Lý Danh Mục</span>
             </button>
 
             <button
               onClick={handleCreateProduct}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium shadow-sm transition-all shadow-indigo-200"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-sm font-medium shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Thêm Sản Phẩm</span>
@@ -194,7 +194,7 @@ export default function ProductListPage() {
       </div>
 
       {/* Control Bar: Tìm kiếm, Lọc danh mục, Sắp xếp */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+      <div className="bg-white p-4 rounded-2xl border border-[#DDF0E2] shadow-xs">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           {/* Ô tìm kiếm theo Tên hoặc Mã SP */}
           <div className="md:col-span-6">
@@ -216,7 +216,7 @@ export default function ProductListPage() {
                 setCategoryId(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-600"
+              className="w-full px-3 py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
             >
               <option value="">-- Tất cả danh mục --</option>
               {categories.map((c) => (
@@ -259,10 +259,10 @@ export default function ProductListPage() {
       )}
 
       {/* Product Table (BR-03: 20 bản ghi/trang) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#DDF0E2] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50/80 text-slate-500 uppercase text-xs font-semibold border-b border-slate-200/80">
+            <thead className="bg-[#EAF5EC]/60 text-[#6B7280] uppercase text-xs font-semibold border-b border-[#DDF0E2]">
               <tr>
                 <th className="py-3.5 px-4">Mã & Tên Sản Phẩm</th>
                 <th className="py-3.5 px-4">Danh Mục</th>
@@ -272,12 +272,12 @@ export default function ProductListPage() {
                 <th className="py-3.5 px-4 text-right">Thao Tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#DDF0E2]/60">
               {loading ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
                     <div className="inline-flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#3CB371] border-t-transparent rounded-full animate-spin" />
                       <span>Đang tải danh mục sản phẩm kho...</span>
                     </div>
                   </td>
@@ -300,20 +300,20 @@ export default function ProductListPage() {
                 products.map((prod) => (
                   <tr
                     key={prod.id}
-                    className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
+                    className="hover:bg-[#EAF5EC]/40 transition-colors group cursor-pointer"
                     onClick={() => navigate(`/products/${prod.id}`)}
                   >
                     {/* Mã & Tên sản phẩm */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <div className="w-9 h-9 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#3CB371] flex items-center justify-center flex-shrink-0 group-hover:bg-[#3CB371] group-hover:text-white transition-colors">
                           <Package className="w-4 h-4" />
                         </div>
                         <div>
-                          <span className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors block">
+                          <span className="font-semibold text-[#1F2937] group-hover:text-[#2E7D32] transition-colors block">
                             {prod.name}
                           </span>
-                          <span className="text-xs font-mono font-medium text-slate-400 inline-flex items-center gap-1">
+                          <span className="text-xs font-mono font-medium text-[#6B7280] inline-flex items-center gap-1">
                             <Tag className="w-3 h-3" />
                             {prod.product_code}
                           </span>

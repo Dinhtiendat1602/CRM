@@ -189,18 +189,18 @@ export default function OpportunityListPage() {
       {/* Header & Hành động */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2.5">
-            <Briefcase className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-[#1F2937] flex items-center gap-2.5">
+            <Briefcase className="w-7 h-7 text-[#3CB371]" />
             <span>Quản Lý Cơ Hội Bán Hàng (Opportunities)</span>
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-[#6B7280] mt-1">
             Theo dõi tiến trình bán hàng, giá trị dự kiến và lịch sử tương tác tư vấn khách hàng (SRS 3.6 → 3.11)
           </p>
         </div>
 
         <button
           onClick={handleOpenCreateModal}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#3CB371] hover:bg-[#38A169] text-white text-sm font-semibold rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Thêm Cơ Hội Mới</span>
@@ -209,41 +209,41 @@ export default function OpportunityListPage() {
 
       {/* Cards thống kê nhanh */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
             <Briefcase className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-gray-500">Tổng Số Cơ Hội</p>
-            <p className="text-2xl font-bold text-gray-900">{pagination.totalRecords}</p>
+            <p className="text-xs uppercase font-semibold text-[#6B7280]">Tổng Số Cơ Hội</p>
+            <p className="text-2xl font-bold text-[#1F2937]">{pagination.totalRecords}</p>
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
             <Coins className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-gray-500">Doanh Thu Dự Kiến (Trang này)</p>
+            <p className="text-xs uppercase font-semibold text-[#6B7280]">Doanh Thu Dự Kiến (Trang này)</p>
             <p className="text-2xl font-bold text-emerald-700">
               {Number(currentTotalValue).toLocaleString('vi-VN')} ₫
             </p>
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#2E7D32] flex items-center justify-center flex-shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-gray-500">Quy Chuẩn Hiển Thị</p>
-            <p className="text-sm font-semibold text-gray-700 mt-1">20 dòng/trang (BR-03)</p>
+            <p className="text-xs uppercase font-semibold text-[#6B7280]">Quy Chuẩn Hiển Thị</p>
+            <p className="text-sm font-semibold text-[#1F2937] mt-1">20 dòng/trang (BR-03)</p>
           </div>
         </div>
       </div>
 
       {/* Bộ lọc & Tìm kiếm */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+      <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Ô tìm kiếm đa năng: Tên Lead hoặc Sản phẩm (SRS 3.8) */}
           <div className="md:col-span-3">
@@ -265,7 +265,7 @@ export default function OpportunityListPage() {
                 setStatus(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
             >
               <option value="">-- Tất cả trạng thái --</option>
               <option value="NEW">Mới tạo (NEW)</option>
@@ -286,7 +286,7 @@ export default function OpportunityListPage() {
                 setFromDate(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               title="Lọc từ ngày tạo"
             />
           </div>
@@ -300,7 +300,7 @@ export default function OpportunityListPage() {
                 setToDate(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               title="Lọc đến ngày tạo"
             />
           </div>
@@ -313,7 +313,7 @@ export default function OpportunityListPage() {
                 setSortBy(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-2.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
               title="Tiêu chí sắp xếp"
             >
               <option value="created_at">Ngày tạo</option>
@@ -350,11 +350,11 @@ export default function OpportunityListPage() {
       )}
 
       {/* Bảng Danh sách Cơ hội bán hàng (20 bản ghi theo BR-03) */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-[#DDF0E2] rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <tr className="bg-[#EAF5EC]/60 border-b border-[#DDF0E2] text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                 <th className="py-3.5 px-4">Mã / Khách Hàng</th>
                 <th className="py-3.5 px-4">Sản Phẩm Quan Tâm</th>
                 <th className="py-3.5 px-4 text-center">Số Lượng</th>
@@ -365,12 +365,12 @@ export default function OpportunityListPage() {
                 <th className="py-3.5 px-4 text-center">Thao Tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 text-sm">
+            <tbody className="divide-y divide-[#DDF0E2]/60 text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="py-12 text-center text-gray-500">
+                  <td colSpan="8" className="py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-8 h-8 border-4 border-[#3CB371] border-t-transparent rounded-full animate-spin"></div>
                       <span className="text-sm">Đang tải danh sách cơ hội...</span>
                     </div>
                   </td>

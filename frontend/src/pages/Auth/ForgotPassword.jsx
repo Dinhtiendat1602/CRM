@@ -26,26 +26,26 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] to-[#DDF0E2] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-800/10 space-y-6">
+        <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-[#DDF0E2] space-y-6">
           <div>
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-3"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B7280] hover:text-[#1F2937] mb-3"
             >
               <ArrowLeft className="h-4 w-4" /> Quay lại Đăng nhập
             </Link>
-            <h3 className="text-xl font-bold text-slate-900">Quên mật khẩu?</h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <h3 className="text-xl font-bold text-[#1F2937]">Quên mật khẩu?</h3>
+            <p className="text-xs text-[#6B7280] mt-1">
               Nhập email đã đăng ký tài khoản nhân viên để nhận liên kết đặt lại mật khẩu (SRS 3.14).
             </p>
           </div>
 
           {success ? (
-            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-2">
-              <div className="flex items-center gap-2 font-bold text-sm text-emerald-900">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            <div className="p-4 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#2E7D32] text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-sm text-[#2E7D32]">
+                <CheckCircle2 className="h-5 w-5 text-[#3CB371]" />
                 <span>Đã gửi email khôi phục</span>
               </div>
               <p>
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
               <div className="pt-2">
                 <Link
                   to="/login"
-                  className="font-semibold text-emerald-700 underline"
+                  className="font-semibold text-[#2E7D32] underline"
                 >
                   Quay lại đăng nhập ngay
                 </Link>
@@ -83,7 +83,7 @@ export default function ForgotPassword() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@company.com"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                   />
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] shadow-md focus:outline-hidden focus:ring-2 focus:ring-[#3CB371] cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <span>Đang xử lý...</span>

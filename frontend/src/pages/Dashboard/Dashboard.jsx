@@ -315,18 +315,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      {/* Welcome Banner - Accent Gradient (#7CA5F5 to #5D3EBC) */}
+      <div className="bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             {hasLoaded ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-xs font-semibold backdrop-blur-xs border border-emerald-400/30">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-xs border border-white/30">
+                <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
                 Đang hiển thị dữ liệu 1 năm gần nhất từ Database PostgreSQL
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 text-xs font-semibold backdrop-blur-xs border border-amber-400/30">
-                <Clock className="h-3 w-3 text-amber-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-xs border border-white/30">
+                <Clock className="h-3 w-3 text-white" />
                 Mặc định ẩn dữ liệu • Nhấn &quot;Xem dữ liệu&quot; để tải 1 năm gần nhất
               </span>
             )}
@@ -336,7 +336,7 @@ export default function Dashboard() {
                 id="btn-banner-load-data"
                 onClick={() => fetchDashboardStats(false)}
                 disabled={loading}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-xs font-semibold text-white transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
                 title="Tải và xem dữ liệu 1 năm gần nhất"
               >
                 {loading ? (
@@ -357,16 +357,16 @@ export default function Dashboard() {
                   id="btn-banner-refresh-data"
                   onClick={() => fetchDashboardStats(true)}
                   disabled={refreshing}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-200 transition-colors border border-white/10 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-medium text-white transition-colors border border-white/20 cursor-pointer"
                   title="Làm mới dữ liệu từ Database"
                 >
-                  <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin text-blue-400' : ''}`} />
+                  <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin text-white' : ''}`} />
                   {refreshing ? 'Đang tải...' : 'Làm mới số liệu'}
                 </button>
                 <button
                   id="btn-banner-hide-data"
                   onClick={handleHideData}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-rose-500/30 text-xs font-medium text-slate-200 hover:text-white transition-colors border border-white/10 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 hover:bg-rose-500/40 text-xs font-medium text-white transition-colors border border-white/20 cursor-pointer"
                   title="Ẩn dữ liệu bảng điều khiển"
                 >
                   <EyeOff className="h-3 w-3" />
@@ -380,14 +380,14 @@ export default function Dashboard() {
             Xin chào, {user?.full_name || user?.username || 'Thành viên Zen CRM'}!
           </h1>
 
-          <p className="text-slate-300 text-sm leading-relaxed">
+          <p className="text-white/90 text-sm leading-relaxed">
             Hệ thống đang hoạt động với vai trò{' '}
-            <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md">
+            <span className="font-bold text-white bg-white/20 px-2 py-0.5 rounded-md">
               {currentRole === 'ADMIN'
                 ? 'Quản trị viên (ADMIN)'
                 : currentRole === 'SALE_MANAGER'
-                ? 'Quản lý bán hàng (SALE_MANAGER)'
-                : 'Nhân viên bán hàng (SALESMAN)'}
+                  ? 'Quản lý bán hàng (SALE_MANAGER)'
+                  : 'Nhân viên bán hàng (SALESMAN)'}
             </span>
             .{' '}
             {currentRole === 'ADMIN' &&
@@ -400,7 +400,7 @@ export default function Dashboard() {
         </div>
 
         {/* Decorative background glow */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-blue-500/20 to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-white/20 to-transparent pointer-events-none" />
       </div>
 
       {errorMsg && (
@@ -412,20 +412,20 @@ export default function Dashboard() {
 
       {/* Khung Trạng Thái Mặc Định: Chưa Tải Dữ Liệu */}
       {!hasLoaded && !loading && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-12 text-center shadow-xs space-y-5">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shadow-xs">
-            <Database className="h-8 w-8 text-blue-600" />
+        <div className="bg-white rounded-2xl border border-[#DDF0E2] p-8 sm:p-12 text-center shadow-xs space-y-5">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-[#EAF5EC] border border-[#DDF0E2] flex items-center justify-center text-[#3CB371] shadow-xs">
+            <Database className="h-8 w-8 text-[#3CB371]" />
           </div>
 
           <div className="max-w-xl mx-auto space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200/60">
-              <Calendar className="h-3.5 w-3.5 text-blue-600" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF5EC] text-[#2E7D32] text-xs font-semibold border border-[#DDF0E2]">
+              <Calendar className="h-3.5 w-3.5 text-[#3CB371]" />
               Chế độ tối ưu hóa: Mặc định không hiện dữ liệu
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#1F2937] tracking-tight">
               Dữ Liệu Bảng Điều Khiển Đang Ở Chế Độ Chờ
             </h2>
-            <p className="text-slate-500 text-sm leading-relaxed">
+            <p className="text-[#6B7280] text-sm leading-relaxed">
               Theo quy tắc tối ưu hóa hiệu năng, Bảng điều khiển (Dashboard) mặc định không tải trước dữ liệu. Nhấn vào nút bên dưới để trích xuất và hiển thị toàn bộ chỉ số KPI, đơn hàng, cơ hội bán hàng và khách hàng tiềm năng trong <strong>1 năm gần nhất</strong> từ cơ sở dữ liệu PostgreSQL.
             </p>
           </div>
@@ -434,7 +434,7 @@ export default function Dashboard() {
             <button
               id="btn-view-dashboard-data"
               onClick={() => fetchDashboardStats(false)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all transform active:scale-98 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white font-semibold text-sm shadow-md shadow-[#3CB371]/25 hover:shadow-lg hover:shadow-[#3CB371]/35 transition-all transform active:scale-98 cursor-pointer"
             >
               <Eye className="h-4 w-4" />
               <span>Xem dữ liệu 1 năm gần nhất</span>
@@ -445,13 +445,13 @@ export default function Dashboard() {
 
       {/* Trạng Thái Đang Tải Dữ Liệu */}
       {loading && !hasLoaded && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-            <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
+        <div className="bg-white rounded-2xl border border-[#DDF0E2] p-12 text-center shadow-xs space-y-4">
+          <div className="mx-auto w-12 h-12 rounded-xl bg-[#EAF5EC] flex items-center justify-center text-[#3CB371]">
+            <RefreshCw className="h-6 w-6 animate-spin text-[#3CB371]" />
           </div>
           <div className="space-y-1">
-            <h3 className="font-bold text-slate-900 text-base">Đang tải dữ liệu 1 năm gần nhất...</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-bold text-[#1F2937] text-base">Đang tải dữ liệu 1 năm gần nhất...</h3>
+            <p className="text-xs text-[#6B7280]">
               Hệ thống đang truy vấn số liệu KPI, đơn hàng và cơ hội kinh doanh từ cơ sở dữ liệu PostgreSQL.
             </p>
           </div>
@@ -462,12 +462,12 @@ export default function Dashboard() {
       {hasLoaded && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-            <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-              <span className="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+            <div className="flex items-center gap-2 text-xs text-[#6B7280] font-medium">
+              <span className="inline-flex items-center gap-1 text-[#2E7D32] font-bold bg-[#EAF5EC] px-2.5 py-1 rounded-full border border-[#DDF0E2]">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#3CB371]" />
                 Dữ liệu 1 năm gần nhất
               </span>
-              <span className="text-slate-500">
+              <span className="text-[#6B7280]">
                 Số liệu thực tế được tính toán trong phạm vi 1 năm gần nhất từ Database PostgreSQL
               </span>
             </div>
@@ -477,15 +477,15 @@ export default function Dashboard() {
                 id="btn-refresh-dashboard"
                 onClick={() => fetchDashboardStats(true)}
                 disabled={refreshing}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDF0E2] bg-white hover:bg-[#EAF5EC] text-xs font-semibold text-[#1F2937] shadow-2xs transition-colors cursor-pointer"
               >
-                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin text-blue-600' : ''}`} />
+                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin text-[#3CB371]' : ''}`} />
                 {refreshing ? 'Đang cập nhật...' : 'Làm mới'}
               </button>
               <button
                 id="btn-hide-dashboard-data"
                 onClick={handleHideData}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-xs font-semibold text-slate-600 shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDF0E2] bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-xs font-semibold text-[#6B7280] shadow-2xs transition-colors cursor-pointer"
               >
                 <EyeOff className="h-3.5 w-3.5" />
                 <span>Ẩn dữ liệu</span>
@@ -495,437 +495,433 @@ export default function Dashboard() {
 
           {/* KPI Cards (Được tính toán động từ DB) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {kpis.map((kpi, idx) => {
-          const Icon = kpi.icon;
-          return (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-500">{kpi.label}</span>
+            {kpis.map((kpi, idx) => {
+              const Icon = kpi.icon;
+              return (
                 <div
-                  className={`h-9 w-9 rounded-xl bg-gradient-to-tr ${kpi.color} flex items-center justify-center text-white shadow-xs`}
+                  key={idx}
+                  className="bg-white rounded-2xl border border-[#DDF0E2] p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden"
                 >
-                  <Icon className="h-4 w-4" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-[#6B7280]">{kpi.label}</span>
+                    <div
+                      className={`h-9 w-9 rounded-xl bg-gradient-to-tr ${kpi.color} flex items-center justify-center text-white shadow-xs`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    {loading ? (
+                      <div className="h-8 w-24 bg-slate-100 rounded animate-pulse" />
+                    ) : (
+                      <div className="text-2xl font-bold text-[#1F2937] tracking-tight">{kpi.value}</div>
+                    )}
+                    <div className="mt-1 flex items-center gap-1 text-xs text-[#6B7280]">
+                      <ArrowUpRight className="h-3.5 w-3.5 text-[#3CB371]" />
+                      <span>{kpi.change}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              );
+            })}
+          </div>
 
-              <div className="mt-3">
-                {loading ? (
-                  <div className="h-8 w-24 bg-slate-100 rounded animate-pulse" />
-                ) : (
-                  <div className="text-2xl font-bold text-slate-900 tracking-tight">{kpi.value}</div>
-                )}
-                <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
-                  <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>{kpi.change}</span>
+          {/* Grid 2 Cột: Bảng Đơn Hàng Mới Nhất & Cơ Hội Bán Hàng Gần Đây từ Database */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Khối 1: Đơn Hàng Mới Nhất từ Database */}
+            <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5 text-[#3CB371]" />
+                  <h3 className="font-bold text-[#1F2937] text-base">Đơn Hàng Mới Nhất</h3>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
+                    {dashboardData.recentOrders.length} đơn
+                  </span>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Grid 2 Cột: Bảng Đơn Hàng Mới Nhất & Cơ Hội Bán Hàng Gần Đây từ Database */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Khối 1: Đơn Hàng Mới Nhất từ Database */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-emerald-600" />
-              <h3 className="font-bold text-slate-900 text-base">Đơn Hàng Mới Nhất</h3>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                {dashboardData.recentOrders.length} đơn
-              </span>
-            </div>
-
-            {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
-              <Link
-                to="/orders"
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
-              >
-                Xem tất cả
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            )}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-medium">
-                  <th className="pb-2.5 font-medium">Mã đơn</th>
-                  <th className="pb-2.5 font-medium">Khách hàng</th>
-                  <th className="pb-2.5 font-medium">Sản phẩm</th>
-                  <th className="pb-2.5 font-medium text-right">Tổng tiền</th>
-                  <th className="pb-2.5 font-medium text-right">Ngày chốt</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {dashboardData.recentOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-slate-400">
-                      Chưa có đơn hàng nào trong cơ sở dữ liệu.
-                    </td>
-                  </tr>
-                ) : (
-                  dashboardData.recentOrders.map((ord) => (
-                    <tr key={ord.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-2.5 font-semibold text-blue-600 font-mono">
-                        <Link to={`/orders/${ord.id}`} className="hover:underline">
-                          {ord.order_code}
-                        </Link>
-                      </td>
-                      <td className="py-2.5 text-slate-800 font-medium max-w-[120px] truncate">
-                        {ord.lead_id ? (
-                          <Link to={`/leads/${ord.lead_id}`} className="hover:text-blue-600 hover:underline">
-                            {ord.customer_name || 'Khách hàng'}
-                          </Link>
-                        ) : (
-                          ord.customer_name || 'Khách hàng'
-                        )}
-                      </td>
-                      <td className="py-2.5 text-slate-600 max-w-[140px] truncate" title={ord.product_name}>
-                        {ord.product_id ? (
-                          <Link to={`/products/${ord.product_id}`} className="hover:text-blue-600 hover:underline">
-                            {ord.product_name}
-                          </Link>
-                        ) : (
-                          ord.product_name
-                        )}
-                      </td>
-                      <td className="py-2.5 text-right font-bold text-slate-900">
-                        {formatVND(ord.total_amount)}
-                      </td>
-                      <td className="py-2.5 text-right text-slate-500 whitespace-nowrap" title={formatDateTime(ord.order_date)}>
-                        {formatDate(ord.order_date)}
-                      </td>
-                    </tr>
-                  ))
+                {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
+                  <Link
+                    to="/orders"
+                    className="text-xs text-[#2E7D32] hover:text-[#38A169] font-medium flex items-center gap-1 group"
+                  >
+                    Xem tất cả
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Khối 2: Cơ Hội Bán Hàng Tiềm Năng Mới từ Database */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-amber-600" />
-              <h3 className="font-bold text-slate-900 text-base">Cơ Hội Bán Hàng Đang Xử Lý</h3>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
-                {dashboardData.recentOpportunities.length} deal
-              </span>
-            </div>
-
-            {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
-              <Link
-                to="/opportunities"
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
-              >
-                Xem tất cả
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            )}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-medium">
-                  <th className="pb-2.5 font-medium">Khách hàng</th>
-                  <th className="pb-2.5 font-medium">Sản phẩm</th>
-                  <th className="pb-2.5 font-medium text-right">SL</th>
-                  <th className="pb-2.5 font-medium text-right">Dự kiến (VNĐ)</th>
-                  <th className="pb-2.5 font-medium text-center">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {dashboardData.recentOpportunities.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-slate-400">
-                      Chưa có cơ hội bán hàng nào trong cơ sở dữ liệu.
-                    </td>
-                  </tr>
-                ) : (
-                  dashboardData.recentOpportunities.map((opp) => (
-                    <tr key={opp.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-2.5 text-slate-800 font-semibold max-w-[120px] truncate">
-                        <Link to={`/opportunities/${opp.id}`} className="hover:text-blue-600 hover:underline">
-                          {opp.lead_name}
-                        </Link>
-                      </td>
-                      <td className="py-2.5 text-slate-600 max-w-[130px] truncate" title={opp.product_name}>
-                        {opp.product_id ? (
-                          <Link to={`/products/${opp.product_id}`} className="hover:text-blue-600 hover:underline">
-                            {opp.product_name}
-                          </Link>
-                        ) : (
-                          opp.product_name
-                        )}
-                      </td>
-                      <td className="py-2.5 text-right font-medium text-slate-700">
-                        x{opp.quantity}
-                      </td>
-                      <td className="py-2.5 text-right font-bold text-slate-900">
-                        {formatVND(opp.estimated_value)}
-                      </td>
-                      <td className="py-2.5 text-center">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
-                            OPP_STATUS_COLORS[opp.status] || 'bg-slate-100 text-slate-700 border-slate-200'
-                          }`}
-                        >
-                          {OPP_STATUS_LABELS[opp.status] || opp.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid 2: Khách Hàng Tiềm Năng Mới & (Nếu là Admin: Nhân Sự Mới) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Khối 3: Khách hàng tiềm năng mới tiếp cận (Leads) */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <h3 className="font-bold text-slate-900 text-base">Khách Tiềm Năng Mới Nhập</h3>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
-                {dashboardData.recentLeads.length} khách hàng
-              </span>
-            </div>
-
-            {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
-              <Link
-                to="/leads"
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
-              >
-                Xem danh sách Lead
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            )}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-medium">
-                  <th className="pb-2.5 font-medium">Họ và tên</th>
-                  <th className="pb-2.5 font-medium">Số điện thoại</th>
-                  <th className="pb-2.5 font-medium">Email</th>
-                  <th className="pb-2.5 font-medium">Nguồn chiến dịch</th>
-                  <th className="pb-2.5 font-medium text-right">Ngày nhập</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {dashboardData.recentLeads.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-slate-400">
-                      Chưa có khách hàng tiềm năng nào.
-                    </td>
-                  </tr>
-                ) : (
-                  dashboardData.recentLeads.map((l) => (
-                    <tr key={l.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-2.5 font-semibold text-slate-800">
-                        <Link to={`/leads/${l.id}`} className="hover:text-blue-600 hover:underline">
-                          {l.name}
-                        </Link>
-                      </td>
-                      <td className="py-2.5 text-slate-600 font-mono">
-                        {l.phone}
-                      </td>
-                      <td className="py-2.5 text-slate-500 max-w-[130px] truncate" title={l.email}>
-                        {l.email}
-                      </td>
-                      <td className="py-2.5 text-slate-600 max-w-[120px] truncate">
-                        {l.campaign_id ? (
-                          <Link to={`/campaigns/${l.campaign_id}/report`} className="hover:text-blue-600 hover:underline">
-                            {l.campaign_name}
-                          </Link>
-                        ) : (
-                          l.campaign_name || 'Tiếp cận trực tiếp'
-                        )}
-                      </td>
-                      <td className="py-2.5 text-right text-slate-500 whitespace-nowrap" title={formatDateTime(l.entered_date)}>
-                        {formatDate(l.entered_date)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Khối 4: Nếu là Admin -> Hiển thị danh sách Nhân sự hệ thống; Nếu là Manager/Salesman -> Hiển thị Thống Kê Nhanh Kho & Tiếp Thị */}
-        {currentRole === 'ADMIN' ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-purple-600" />
-                <h3 className="font-bold text-slate-900 text-base">Tài Khoản Nhân Sự Gần Đây</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-200">
-                  {dashboardData.recentUsers.length} tài khoản
-                </span>
               </div>
 
-              <Link
-                to="/admin/users"
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group"
-              >
-                Quản lý User
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 font-medium">
-                    <th className="pb-2.5 font-medium">Username</th>
-                    <th className="pb-2.5 font-medium">Họ và tên</th>
-                    <th className="pb-2.5 font-medium">Vai trò</th>
-                    <th className="pb-2.5 font-medium text-center">Trạng thái</th>
-                    <th className="pb-2.5 font-medium text-right">Ngày tạo</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {dashboardData.recentUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-6 text-center text-slate-400">
-                        Chưa có tài khoản nào.
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                      <th className="pb-2.5 font-medium">Mã đơn</th>
+                      <th className="pb-2.5 font-medium">Khách hàng</th>
+                      <th className="pb-2.5 font-medium">Sản phẩm</th>
+                      <th className="pb-2.5 font-medium text-right">Tổng tiền</th>
+                      <th className="pb-2.5 font-medium text-right">Ngày chốt</th>
                     </tr>
-                  ) : (
-                    dashboardData.recentUsers.map((u) => (
-                      <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-2.5 font-semibold text-slate-800 font-mono">
-                          {u.username}
-                        </td>
-                        <td className="py-2.5 text-slate-600 font-medium">
-                          {u.full_name}
-                        </td>
-                        <td className="py-2.5">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              u.role_name === 'ADMIN'
-                                ? 'bg-purple-100 text-purple-800 border-purple-200'
-                                : u.role_name === 'SALE_MANAGER'
-                                ? 'bg-blue-100 text-blue-800 border-blue-200'
-                                : 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                            }`}
-                          >
-                            {u.role_name}
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-center">
-                          <span
-                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                              u.is_active
-                                ? 'bg-emerald-50 text-emerald-700'
-                                : 'bg-rose-50 text-rose-700'
-                            }`}
-                          >
-                            <span
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                u.is_active ? 'bg-emerald-500' : 'bg-rose-500'
-                              }`}
-                            />
-                            {u.is_active ? 'Active' : 'Khóa'}
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-right text-slate-500 whitespace-nowrap">
-                          {formatDate(u.created_at)}
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {dashboardData.recentOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-6 text-center text-slate-400">
+                          Chưa có đơn hàng nào trong cơ sở dữ liệu.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      dashboardData.recentOrders.map((ord) => (
+                        <tr key={ord.id} className="hover:bg-[#EAF5EC]/40 transition-colors">
+                          <td className="py-2.5 font-semibold text-[#2E7D32] font-mono">
+                            <Link to={`/orders/${ord.id}`} className="hover:underline">
+                              {ord.order_code}
+                            </Link>
+                          </td>
+                          <td className="py-2.5 text-[#1F2937] font-medium max-w-[120px] truncate">
+                            {ord.lead_id ? (
+                              <Link to={`/leads/${ord.lead_id}`} className="hover:text-[#3CB371] hover:underline">
+                                {ord.customer_name || 'Khách hàng'}
+                              </Link>
+                            ) : (
+                              ord.customer_name || 'Khách hàng'
+                            )}
+                          </td>
+                          <td className="py-2.5 text-[#6B7280] max-w-[140px] truncate" title={ord.product_name}>
+                            {ord.product_id ? (
+                              <Link to={`/products/${ord.product_id}`} className="hover:text-[#3CB371] hover:underline">
+                                {ord.product_name}
+                              </Link>
+                            ) : (
+                              ord.product_name
+                            )}
+                          </td>
+                          <td className="py-2.5 text-right font-bold text-slate-900">
+                            {formatVND(ord.total_amount)}
+                          </td>
+                          <td className="py-2.5 text-right text-slate-500 whitespace-nowrap" title={formatDateTime(ord.order_date)}>
+                            {formatDate(ord.order_date)}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Khối 2: Cơ Hội Bán Hàng Tiềm Năng Mới từ Database */}
+            <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-amber-600" />
+                  <h3 className="font-bold text-[#1F2937] text-base">Cơ Hội Bán Hàng Đang Xử Lý</h3>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
+                    {dashboardData.recentOpportunities.length} deal
+                  </span>
+                </div>
+
+                {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
+                  <Link
+                    to="/opportunities"
+                    className="text-xs text-[#2E7D32] hover:text-[#38A169] font-medium flex items-center gap-1 group"
+                  >
+                    Xem tất cả
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                )}
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                      <th className="pb-2.5 font-medium">Khách hàng</th>
+                      <th className="pb-2.5 font-medium">Sản phẩm</th>
+                      <th className="pb-2.5 font-medium text-right">SL</th>
+                      <th className="pb-2.5 font-medium text-right">Dự kiến (VNĐ)</th>
+                      <th className="pb-2.5 font-medium text-center">Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {dashboardData.recentOpportunities.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-6 text-center text-slate-400">
+                          Chưa có cơ hội bán hàng nào trong cơ sở dữ liệu.
+                        </td>
+                      </tr>
+                    ) : (
+                      dashboardData.recentOpportunities.map((opp) => (
+                        <tr key={opp.id} className="hover:bg-[#EAF5EC]/40 transition-colors">
+                          <td className="py-2.5 text-[#1F2937] font-semibold max-w-[120px] truncate">
+                            <Link to={`/opportunities/${opp.id}`} className="hover:text-[#3CB371] hover:underline">
+                              {opp.lead_name}
+                            </Link>
+                          </td>
+                          <td className="py-2.5 text-[#6B7280] max-w-[130px] truncate" title={opp.product_name}>
+                            {opp.product_id ? (
+                              <Link to={`/products/${opp.product_id}`} className="hover:text-[#3CB371] hover:underline">
+                                {opp.product_name}
+                              </Link>
+                            ) : (
+                              opp.product_name
+                            )}
+                          </td>
+                          <td className="py-2.5 text-right font-medium text-slate-700">
+                            x{opp.quantity}
+                          </td>
+                          <td className="py-2.5 text-right font-bold text-slate-900">
+                            {formatVND(opp.estimated_value)}
+                          </td>
+                          <td className="py-2.5 text-center">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${OPP_STATUS_COLORS[opp.status] || 'bg-slate-100 text-slate-700 border-slate-200'
+                                }`}
+                            >
+                              {OPP_STATUS_LABELS[opp.status] || opp.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <Layers className="h-5 w-5 text-indigo-600" />
-                <h3 className="font-bold text-slate-900 text-base">Tổng Quan Vận Hành Bán Hàng</h3>
+
+          {/* Grid 2: Khách Hàng Tiềm Năng Mới & (Nếu là Admin: Nhân Sự Mới) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Khối 3: Khách hàng tiềm năng mới tiếp cận (Leads) */}
+            <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-[#3CB371]" />
+                  <h3 className="font-bold text-[#1F2937] text-base">Khách Tiềm Năng Mới Nhập</h3>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
+                    {dashboardData.recentLeads.length} khách hàng
+                  </span>
+                </div>
+
+                {(currentRole === 'SALE_MANAGER' || currentRole === 'SALESMAN') && (
+                  <Link
+                    to="/leads"
+                    className="text-xs text-[#2E7D32] hover:text-[#38A169] font-medium flex items-center gap-1 group"
+                  >
+                    Xem danh sách Lead
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                )}
               </div>
-              <span className="text-xs text-slate-400 font-medium">Dữ liệu PostgreSQL</span>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                      <th className="pb-2.5 font-medium">Họ và tên</th>
+                      <th className="pb-2.5 font-medium">Số điện thoại</th>
+                      <th className="pb-2.5 font-medium">Email</th>
+                      <th className="pb-2.5 font-medium">Nguồn chiến dịch</th>
+                      <th className="pb-2.5 font-medium text-right">Ngày nhập</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {dashboardData.recentLeads.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-6 text-center text-slate-400">
+                          Chưa có khách hàng tiềm năng nào.
+                        </td>
+                      </tr>
+                    ) : (
+                      dashboardData.recentLeads.map((l) => (
+                        <tr key={l.id} className="hover:bg-[#EAF5EC]/40 transition-colors">
+                          <td className="py-2.5 font-semibold text-[#1F2937]">
+                            <Link to={`/leads/${l.id}`} className="hover:text-[#3CB371] hover:underline">
+                              {l.name}
+                            </Link>
+                          </td>
+                          <td className="py-2.5 text-[#6B7280] font-mono">
+                            {l.phone}
+                          </td>
+                          <td className="py-2.5 text-[#6B7280] max-w-[130px] truncate" title={l.email}>
+                            {l.email}
+                          </td>
+                          <td className="py-2.5 text-[#6B7280] max-w-[120px] truncate">
+                            {l.campaign_id ? (
+                              <Link to={`/campaigns/${l.campaign_id}/report`} className="hover:text-[#3CB371] hover:underline">
+                                {l.campaign_name}
+                              </Link>
+                            ) : (
+                              l.campaign_name || 'Tiếp cận trực tiếp'
+                            )}
+                          </td>
+                          <td className="py-2.5 text-right text-slate-500 whitespace-nowrap" title={formatDateTime(l.entered_date)}>
+                            {formatDate(l.entered_date)}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3.5 pt-1">
-              <div className="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
-                <span className="text-xs text-indigo-600 font-medium block">Danh Mục Sản Phẩm</span>
-                <span className="text-xl font-bold text-slate-900 mt-1 block">
-                  {summary.categoriesCount} nhóm hàng
-                </span>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">
-                  {summary.productsCount} mặt hàng đang bán
-                </span>
-              </div>
+            {/* Khối 4: Nếu là Admin -> Hiển thị danh sách Nhân sự hệ thống; Nếu là Manager/Salesman -> Hiển thị Thống Kê Nhanh Kho & Tiếp Thị */}
+            {currentRole === 'ADMIN' ? (
+              <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-purple-600" />
+                    <h3 className="font-bold text-[#1F2937] text-base">Tài Khoản Nhân Sự Gần Đây</h3>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-200">
+                      {dashboardData.recentUsers.length} tài khoản
+                    </span>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-pink-50/60 border border-pink-100">
-                <span className="text-xs text-pink-600 font-medium block">Chiến Dịch Tiếp Thị</span>
-                <span className="text-xl font-bold text-slate-900 mt-1 block">
-                  {summary.activeCampaignsCount} đang chạy
-                </span>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">
-                  Ngân sách: {formatVND(summary.totalBudget)}
-                </span>
-              </div>
+                  <Link
+                    to="/admin/users"
+                    className="text-xs text-[#2E7D32] hover:text-[#38A169] font-medium flex items-center gap-1 group"
+                  >
+                    Quản lý User
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                </div>
 
-              <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                <span className="text-xs text-emerald-600 font-medium block">Tồn Kho Sản Phẩm</span>
-                <span className="text-xl font-bold text-slate-900 mt-1 block">
-                  {summary.totalStock.toLocaleString()} đơn vị
-                </span>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">
-                  Sẵn sàng xuất đơn (SRS 3.12)
-                </span>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                        <th className="pb-2.5 font-medium">Username</th>
+                        <th className="pb-2.5 font-medium">Họ và tên</th>
+                        <th className="pb-2.5 font-medium">Vai trò</th>
+                        <th className="pb-2.5 font-medium text-center">Trạng thái</th>
+                        <th className="pb-2.5 font-medium text-right">Ngày tạo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {dashboardData.recentUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-6 text-center text-slate-400">
+                            Chưa có tài khoản nào.
+                          </td>
+                        </tr>
+                      ) : (
+                        dashboardData.recentUsers.map((u) => (
+                          <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-2.5 font-semibold text-slate-800 font-mono">
+                              {u.username}
+                            </td>
+                            <td className="py-2.5 text-slate-600 font-medium">
+                              {u.full_name}
+                            </td>
+                            <td className="py-2.5">
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${u.role_name === 'ADMIN'
+                                    ? 'bg-purple-100 text-purple-800 border-purple-200'
+                                    : u.role_name === 'SALE_MANAGER'
+                                      ? 'bg-blue-100 text-blue-800 border-blue-200'
+                                      : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                  }`}
+                              >
+                                {u.role_name}
+                              </span>
+                            </td>
+                            <td className="py-2.5 text-center">
+                              <span
+                                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${u.is_active
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'bg-rose-50 text-rose-700'
+                                  }`}
+                              >
+                                <span
+                                  className={`h-1.5 w-1.5 rounded-full ${u.is_active ? 'bg-emerald-500' : 'bg-rose-500'
+                                    }`}
+                                />
+                                {u.is_active ? 'Active' : 'Khóa'}
+                              </span>
+                            </td>
+                            <td className="py-2.5 text-right text-slate-500 whitespace-nowrap">
+                              {formatDate(u.created_at)}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-[#3CB371]" />
+                    <h3 className="font-bold text-[#1F2937] text-base">Tổng Quan Vận Hành Bán Hàng</h3>
+                  </div>
+                  <span className="text-xs text-[#6B7280] font-medium">Dữ liệu PostgreSQL</span>
+                </div>
 
-              <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100">
-                <span className="text-xs text-purple-600 font-medium block">Chỉ Tiêu Năm 2026</span>
-                <span className="text-xl font-bold text-slate-900 mt-1 block">
-                  {summary.planCompletion}
-                </span>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">
-                  Mục tiêu: {formatVND(summary.yearTarget)}
-                </span>
+                <div className="grid grid-cols-2 gap-3.5 pt-1">
+                  <div className="p-3.5 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2]">
+                    <span className="text-xs text-[#2E7D32] font-semibold block">Danh Mục Sản Phẩm</span>
+                    <span className="text-xl font-bold text-[#1F2937] mt-1 block">
+                      {summary.categoriesCount} nhóm hàng
+                    </span>
+                    <span className="text-[11px] text-[#6B7280] mt-0.5 block">
+                      {summary.productsCount} mặt hàng đang bán
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-pink-50/60 border border-pink-100">
+                    <span className="text-xs text-pink-600 font-medium block">Chiến Dịch Tiếp Thị</span>
+                    <span className="text-xl font-bold text-slate-900 mt-1 block">
+                      {summary.activeCampaignsCount} đang chạy
+                    </span>
+                    <span className="text-[11px] text-slate-500 mt-0.5 block">
+                      Ngân sách: {formatVND(summary.totalBudget)}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
+                    <span className="text-xs text-emerald-600 font-medium block">Tồn Kho Sản Phẩm</span>
+                    <span className="text-xl font-bold text-slate-900 mt-1 block">
+                      {summary.totalStock.toLocaleString()} đơn vị
+                    </span>
+                    <span className="text-[11px] text-slate-500 mt-0.5 block">
+                      Sẵn sàng xuất đơn (SRS 3.12)
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100">
+                    <span className="text-xs text-purple-600 font-medium block">Chỉ Tiêu Năm 2026</span>
+                    <span className="text-xl font-bold text-slate-900 mt-1 block">
+                      {summary.planCompletion}
+                    </span>
+                    <span className="text-[11px] text-slate-500 mt-0.5 block">
+                      Mục tiêu: {formatVND(summary.yearTarget)}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
-      </div>
-      </>
+        </>
       )}
 
       {/* Role-Based Quick Actions */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+      <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#DDF0E2]">
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amber-500" />
-              <h3 className="font-bold text-slate-900 text-base">
+              <h3 className="font-bold text-[#1F2937] text-base">
                 Chức Năng Nghiệp Vụ Được Phép Quản Lý
               </h3>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[#6B7280] mt-0.5">
               Phân quyền thông minh cho vai trò{' '}
-              <strong className="text-indigo-600 font-semibold">{currentRole}</strong> (Chức năng không thuộc quyền hạn được ẩn theo chuẩn RBAC).
+              <strong className="text-[#2E7D32] font-semibold">{currentRole}</strong> (Chức năng không thuộc quyền hạn được ẩn theo chuẩn RBAC).
             </p>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 self-start sm:self-auto">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#EAF5EC] text-[#2E7D32] self-start sm:self-auto border border-[#DDF0E2]">
             {allowedActions.length} phân hệ khả dụng
           </span>
         </div>
@@ -935,29 +931,29 @@ export default function Dashboard() {
             <Link
               key={idx}
               to={action.path}
-              className="group p-4 rounded-xl border border-slate-200/80 hover:border-blue-400 hover:shadow-md transition-all flex flex-col justify-between bg-slate-50/50 hover:bg-white"
+              className="group p-4 rounded-xl border border-[#DDF0E2] hover:border-[#3CB371] hover:shadow-md transition-all flex flex-col justify-between bg-white hover:bg-[#EAF5EC]/40"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors text-sm">
+                  <span className="font-bold text-[#1F2937] group-hover:text-[#2E7D32] transition-colors text-sm">
                     {action.title}
                   </span>
-                  <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="h-4 w-4 text-[#6B7280] group-hover:text-[#2E7D32] group-hover:translate-x-1 transition-all" />
                 </div>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                <p className="text-xs text-[#6B7280] mt-1 line-clamp-2">
                   {action.desc}
                 </p>
               </div>
-              <div className="mt-3 pt-2 border-t border-slate-100/80 flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+              <div className="mt-3 pt-2 border-t border-[#DDF0E2] flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider">
                   Truy cập ngay
                 </span>
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${action.color}`}>
                   {action.roles.includes('ADMIN')
                     ? 'Chỉ Admin'
                     : action.roles.includes('SALE_MANAGER')
-                    ? 'Chỉ Manager'
-                    : 'Chỉ Salesman'}
+                      ? 'Chỉ Manager'
+                      : 'Chỉ Salesman'}
                 </span>
               </div>
             </Link>

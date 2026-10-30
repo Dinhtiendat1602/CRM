@@ -11,8 +11,7 @@ import {
   Square,
   Loader2,
   AlertCircle,
-  CheckCircle2,
-  Tag
+  CheckCircle2
 } from 'lucide-react';
 
 export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
@@ -61,8 +60,8 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
         setCategories(Array.isArray(rawCats) ? rawCats : []);
 
         // Mặc định chọn salesman đầu tiên nếu chưa chọn
-        if (smList.length > 0 && !selectedSalesmanId) {
-          setSelectedSalesmanId(String(smList[0].id));
+        if (smList.length > 0) {
+          setSelectedSalesmanId((prev) => prev || String(smList[0].id));
         }
       })
       .catch((err) => {
@@ -192,47 +191,49 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2 text-primary-700 dark:text-primary-400">
-          <ShieldCheck className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-          <span>Phân Quyền Bán Hàng Cho Nhân Viên</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2] flex items-center justify-center text-[#3CB371]">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="block font-bold text-slate-900 text-base sm:text-lg">
+              Phân Quyền Bán Hàng Cho Nhân Viên
+            </span>
+          </div>
         </div>
       }
+      subtitle="Chỉ định các sản phẩm mà nhân viên được phép bán khi tạo cơ hội bán hàng."
       maxWidth="max-w-4xl"
     >
-      <div className="space-y-5">
-        {/* Hướng dẫn */}
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Chỉ định các sản phẩm mà nhân viên được phép bán. Khi tạo cơ hội bán hàng, nhân viên chỉ xem và lựa chọn được những sản phẩm đã được phân quyền này.
-        </p>
-
+      <div className="space-y-4">
         {/* Thông báo lỗi & thành công */}
         {errorMsg && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs sm:text-sm text-rose-700 flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-700 flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-600" />
             <span>{successMsg}</span>
           </div>
         )}
 
         {/* Chọn nhân viên bán hàng */}
-        <div className="bg-gray-50 dark:bg-gray-800/60 p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/90 space-y-2">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
             Chọn Nhân viên Bán hàng:
           </label>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-col sm:row sm:items-center gap-3">
             <div className="relative flex-1">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <select
                 value={selectedSalesmanId}
                 onChange={(e) => setSelectedSalesmanId(e.target.value)}
                 disabled={loadingInitial || saving}
-                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none dark:text-gray-100"
+                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-800 font-medium shadow-2xs focus:outline-none focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]/20 transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer"
               >
                 {safeSalesmen.length === 0 ? (
                   <option value="">Không có nhân viên bán hàng nào</option>
@@ -247,10 +248,12 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             {selectedSalesman && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg text-xs font-medium border border-primary-200 dark:border-primary-800 self-start sm:self-auto">
+              <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#EAF5EC] text-[#2E7D32] rounded-lg text-xs font-semibold border border-[#DDF0E2] shadow-2xs self-start sm:self-auto flex-shrink-0">
                 <span>Hiện được gán:</span>
-                <span className="font-bold text-sm">{selectedProductIds.size}</span>
-                <span>/ {allProducts.length} sản phẩm</span>
+                <span className="font-bold text-sm px-1.5 py-0.5 bg-white rounded-md text-[#2E7D32] border border-[#DDF0E2] shadow-2xs">
+                  {selectedProductIds.size}
+                </span>
+                <span className="text-[#3CB371] font-normal">/ {allProducts.length} sản phẩm</span>
               </div>
             )}
           </div>
@@ -258,24 +261,24 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
 
         {/* Bộ lọc sản phẩm & thao tác nhanh */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          <div className="flex flex-1 items-center gap-2">
+          <div className="flex flex-1 items-center gap-2.5">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Tìm mã hoặc tên sản phẩm..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none dark:text-gray-100"
+                className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-800 placeholder-slate-400 shadow-2xs focus:outline-none focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]/20 transition-colors"
               />
             </div>
 
-            <div className="relative w-44">
-              <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <div className="relative w-44 flex-shrink-0">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none dark:text-gray-100"
+                className="w-full pl-8 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm font-medium text-slate-700 shadow-2xs focus:outline-none focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]/20 transition-colors cursor-pointer"
               >
                 <option value="">Tất cả danh mục</option>
                 {categories.map((c) => (
@@ -291,37 +294,38 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
             <button
               type="button"
               onClick={handleSelectAllFiltered}
-              className="px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 rounded-lg transition-colors flex items-center gap-1.5"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] border border-[#DDF0E2] rounded-lg transition-colors cursor-pointer shadow-2xs"
             >
-              <CheckSquare className="w-3.5 h-3.5" />
+              <CheckSquare className="w-3.5 h-3.5 text-[#3CB371]" />
               <span>Chọn danh sách lọc</span>
             </button>
             <button
               type="button"
               onClick={handleDeselectAllFiltered}
-              className="px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-1.5"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg transition-colors cursor-pointer shadow-2xs"
             >
-              <Square className="w-3.5 h-3.5" />
+              <Square className="w-3.5 h-3.5 text-slate-500" />
               <span>Bỏ chọn</span>
             </button>
           </div>
         </div>
 
-        {/* Danh sách sản phẩm dạng bảng có checkbox */}
-        <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-          <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
+        {/* Danh sách sản phẩm dạng bảng */}
+        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
+          <div className="max-h-80 overflow-y-auto">
             {loadingInitial || loadingAssignments ? (
-              <div className="py-12 flex flex-col items-center justify-center text-gray-400">
-                <Loader2 className="w-8 h-8 animate-spin text-primary-600 mb-2" />
-                <span className="text-sm">Đang tải danh sách sản phẩm...</span>
+              <div className="py-12 flex flex-col items-center justify-center text-slate-400">
+                <Loader2 className="w-8 h-8 animate-spin text-[#3CB371] mb-2" />
+                <span className="text-sm font-medium">Đang tải danh sách sản phẩm...</span>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="py-10 text-center text-gray-400 text-sm">
-                Không tìm thấy sản phẩm nào phù hợp với bộ lọc.
+              <div className="py-12 flex flex-col items-center justify-center text-slate-400 text-sm">
+                <Package className="w-8 h-8 stroke-1 text-slate-300 mb-2" />
+                <p>Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
               </div>
             ) : (
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-800/80 sticky top-0 z-10 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="bg-slate-50 sticky top-0 z-10 text-xs font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-2.5 px-3 w-10 text-center">
                       <input
@@ -337,7 +341,7 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
                             handleDeselectAllFiltered();
                           }
                         }}
-                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                        className="rounded border-slate-300 text-[#3CB371] focus:ring-[#3CB371] w-4 h-4 cursor-pointer accent-[#3CB371]"
                       />
                     </th>
                     <th className="py-2.5 px-3">Mã sản phẩm</th>
@@ -347,7 +351,7 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
                     <th className="py-2.5 px-3 text-center">Tồn kho</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {filteredProducts.map((prod) => {
                     const isChecked = selectedProductIds.has(Number(prod.id));
                     return (
@@ -356,8 +360,8 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
                         onClick={() => toggleProduct(prod.id)}
                         className={`cursor-pointer transition-colors ${
                           isChecked
-                            ? 'bg-primary-50/50 dark:bg-primary-950/20'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                            ? 'bg-[#EAF5EC]/60 hover:bg-[#EAF5EC]'
+                            : 'hover:bg-slate-50/80'
                         }`}
                       >
                         <td className="py-2.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
@@ -365,27 +369,29 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleProduct(prod.id)}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                            className="rounded border-slate-300 text-[#3CB371] focus:ring-[#3CB371] w-4 h-4 cursor-pointer accent-[#3CB371]"
                           />
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-xs font-semibold text-gray-700 dark:text-gray-300">
-                          {prod.product_code}
+                        <td className="py-2.5 px-3">
+                          <span className="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                            {prod.product_code}
+                          </span>
                         </td>
-                        <td className="py-2.5 px-3 font-medium text-gray-900 dark:text-gray-100">
+                        <td className="py-2.5 px-3 font-medium text-slate-800">
                           <div className="flex items-center gap-1.5">
-                            <Package className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                            <Package className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                             <span>{prod.name}</span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 text-xs text-gray-500 dark:text-gray-400">
+                        <td className="py-2.5 px-3 text-xs text-slate-500">
                           {prod.category_name || (
-                            <span className="text-gray-400 italic">Chưa phân loại</span>
+                            <span className="text-slate-400 italic">Chưa phân loại</span>
                           )}
                         </td>
-                        <td className="py-2.5 px-3 text-right text-xs font-semibold text-gray-800 dark:text-gray-200">
+                        <td className="py-2.5 px-3 text-right text-xs font-semibold text-slate-800">
                           {Number(prod.unit_price || 0).toLocaleString('vi-VN')} đ
                         </td>
-                        <td className="py-2.5 px-3 text-center text-xs text-gray-600 dark:text-gray-400">
+                        <td className="py-2.5 px-3 text-center text-xs text-slate-600 font-medium">
                           {prod.stock_qty || 0}
                         </td>
                       </tr>
@@ -398,16 +404,16 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         {/* Footer actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Đã chọn <strong className="text-primary-600 dark:text-primary-400">{selectedProductIds.size}</strong> trên tổng số {allProducts.length} sản phẩm
+        <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+          <div className="text-xs text-slate-500">
+            Đã chọn <strong className="text-[#3CB371] font-semibold">{selectedProductIds.size}</strong> trên tổng số {allProducts.length} sản phẩm
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
             >
               Đóng
             </button>
@@ -415,7 +421,7 @@ export default function ProductAssignmentModal({ isOpen, onClose, onSuccess }) {
               type="button"
               onClick={handleSave}
               disabled={saving || loadingInitial || loadingAssignments || !selectedSalesmanId}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors flex items-center gap-2"
+              className="inline-flex items-center gap-1.5 px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-sm hover:shadow transition-all cursor-pointer"
             >
               {saving ? (
                 <>

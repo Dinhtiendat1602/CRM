@@ -49,11 +49,11 @@ export default function Pagination({
   const pages = getPageNumbers();
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border-t border-slate-200 text-xs text-slate-600 rounded-b-2xl">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border-t border-[#DDF0E2] text-xs text-[#6B7280] rounded-b-2xl">
       <div>
-        Hiển thị <span className="font-semibold text-slate-900">{startItem}</span> -{' '}
-        <span className="font-semibold text-slate-900">{endItem}</span> trong tổng số{' '}
-        <span className="font-semibold text-slate-900">{totalItems}</span> bản ghi (20 bản ghi/trang)
+        Hiển thị <span className="font-semibold text-[#1F2937]">{startItem}</span> -{' '}
+        <span className="font-semibold text-[#1F2937]">{endItem}</span> trong tổng số{' '}
+        <span className="font-semibold text-[#1F2937]">{totalItems}</span> bản ghi (20 bản ghi/trang)
       </div>
 
       <div className="flex items-center gap-1.5">
@@ -62,7 +62,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg border border-[#DDF0E2] text-[#6B7280] hover:bg-[#EAF5EC] hover:text-[#1F2937] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           aria-label="Trang trước"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -76,8 +76,8 @@ export default function Pagination({
             onClick={() => onPageChange(p)}
             className={`min-w-[32px] h-8 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               p === currentPage
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-[#3CB371] text-white shadow-xs font-bold'
+                : 'border border-[#DDF0E2] text-[#6B7280] hover:bg-[#EAF5EC] hover:text-[#1F2937]'
             }`}
           >
             {p}
@@ -89,7 +89,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg border border-[#DDF0E2] text-[#6B7280] hover:bg-[#EAF5EC] hover:text-[#1F2937] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           aria-label="Trang sau"
         >
           <ChevronRight className="h-4 w-4" />

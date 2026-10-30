@@ -165,7 +165,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-xs uppercase font-mono tracking-wider focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.product_code
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -189,7 +189,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-xs focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.name
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <Package className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -211,7 +211,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 name="category_id"
                 value={formData.category_id}
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               >
                 <option value="">-- Chưa chọn danh mục --</option>
                 {categories.map((c) => (
@@ -233,7 +233,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 name="campaign_id"
                 value={formData.campaign_id}
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all"
+                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               >
                 <option value="">-- Không gắn chiến dịch --</option>
                 {campaigns.map((cmp) => (
@@ -265,7 +265,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.unit_price
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <DollarSign className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -290,7 +290,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.stock_qty
                     ? 'border-rose-400 focus:ring-rose-200'
-                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
+                    : 'border-slate-300 focus:border-[#3CB371] focus:ring-[#3CB371]/20'
                 }`}
               />
               <Layers className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -312,7 +312,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
             value={formData.description}
             onChange={handleChange}
             placeholder="Mô tả thông số kỹ thuật, phiên bản, bảo hành..."
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all resize-none"
           />
         </div>
 
@@ -329,7 +329,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] rounded-xl transition-colors shadow-sm disabled:opacity-50"
           >
             {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             <span>{isEdit ? 'Cập Nhật Sản Phẩm' : 'Lưu Sản Phẩm'}</span>

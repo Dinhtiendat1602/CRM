@@ -135,7 +135,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
               placeholder="Tìm theo mã, tên hoặc danh mục sản phẩm..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
             disabled={filteredProducts.length === 0 || fetching}
             className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
           >
-            <CheckSquare className="w-3.5 h-3.5 text-blue-600" />
+            <CheckSquare className="w-3.5 h-3.5 text-[#3CB371]" />
             <span>Chọn / Bỏ chọn lọc</span>
           </button>
         </div>
@@ -153,7 +153,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
         {/* Thống kê đã chọn */}
         <div className="flex items-center justify-between text-xs text-slate-500 px-1">
           <span>
-            Đã chọn <strong className="text-blue-600 font-semibold">{selectedIds.length}</strong> sản phẩm mục tiêu
+            Đã chọn <strong className="text-[#3CB371] font-semibold">{selectedIds.length}</strong> sản phẩm mục tiêu
           </span>
           <span>Tổng số trong kho: {products.length}</span>
         </div>
@@ -162,7 +162,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
         <div className="border border-slate-200 rounded-xl overflow-hidden max-h-80 overflow-y-auto divide-y divide-slate-100 bg-slate-50/50">
           {fetching ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-              <Loader2 className="w-6 h-6 animate-spin mb-2 text-blue-600" />
+              <Loader2 className="w-6 h-6 animate-spin mb-2 text-[#3CB371]" />
               <span className="text-sm">Đang tải danh sách sản phẩm...</span>
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -180,16 +180,16 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
                   key={p.id}
                   onClick={() => handleToggleProduct(p.id)}
                   className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
-                    isSelected ? 'bg-blue-50/70 hover:bg-blue-50' : 'bg-white hover:bg-slate-50'
+                    isSelected ? 'bg-[#EAF5EC]/70 hover:bg-[#EAF5EC]' : 'bg-white hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
-                      className="text-slate-400 hover:text-blue-600 focus:outline-none"
+                      className="text-slate-400 hover:text-[#3CB371] focus:outline-none"
                     >
                       {isSelected ? (
-                        <CheckSquare className="w-5 h-5 text-blue-600 fill-blue-50" />
+                        <CheckSquare className="w-5 h-5 text-[#3CB371] fill-[#EAF5EC]" />
                       ) : (
                         <Square className="w-5 h-5 text-slate-300" />
                       )}
@@ -234,7 +234,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
           <button
             type="submit"
             disabled={loading || selectedIds.length === 0}
-            className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
           >
             {loading ? (
               <>

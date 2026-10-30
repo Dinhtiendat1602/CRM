@@ -147,47 +147,47 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Page Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-indigo-500/20 shrink-0">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-[#7CA5F5] to-[#5D3EBC] flex items-center justify-center text-white text-2xl font-bold shadow-md shrink-0">
             {initial}
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
                 SRS 3.13 &bull; User Profile
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] flex items-center gap-1">
                 <Shield className="h-3 w-3" />
                 {profileForm.role_name || 'Member'}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-[#1F2937]">
               {profileForm.full_name || profileForm.username}
             </h1>
-            <p className="text-xs text-slate-400 font-mono">@{profileForm.username}</p>
+            <p className="text-xs text-[#6B7280] font-mono">@{profileForm.username}</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Form 1: Thông tin cá nhân */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
-            <User className="h-5 w-5 text-blue-600" />
-            <h2 className="text-base font-bold text-slate-900">Thông tin cá nhân</h2>
+        <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+          <div className="border-b border-[#DDF0E2] pb-3 flex items-center gap-2">
+            <User className="h-5 w-5 text-[#3CB371]" />
+            <h2 className="text-base font-bold text-[#1F2937]">Thông tin cá nhân</h2>
           </div>
 
           {profileMsg && (
             <div
               className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
                 profileMsg.type === 'success'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  ? 'bg-[#EAF5EC] border-[#DDF0E2] text-[#2E7D32]'
                   : 'bg-red-50 border-red-200 text-red-800'
               }`}
             >
               {profileMsg.type === 'success' ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-[#3CB371] shrink-0" />
               ) : (
                 <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
               )}
@@ -234,7 +234,7 @@ export default function ProfilePage() {
                 required
                 value={profileForm.full_name}
                 onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
 
@@ -251,7 +251,7 @@ export default function ProfilePage() {
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                   placeholder="0912345678"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                 />
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
               >
                 <Save className="h-4 w-4" />
                 <span>{loading ? 'Đang lưu...' : 'Lưu thông tin cá nhân'}</span>
@@ -270,22 +270,22 @@ export default function ProfilePage() {
         </div>
 
         {/* Form 2: Đổi mật khẩu cá nhân */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+        <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
+          <div className="border-b border-[#DDF0E2] pb-3 flex items-center gap-2">
             <KeyRound className="h-5 w-5 text-amber-600" />
-            <h2 className="text-base font-bold text-slate-900">Đổi mật khẩu tài khoản</h2>
+            <h2 className="text-base font-bold text-[#1F2937]">Đổi mật khẩu tài khoản</h2>
           </div>
 
           {passwordMsg && (
             <div
               className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
                 passwordMsg.type === 'success'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  ? 'bg-[#EAF5EC] border-[#DDF0E2] text-[#2E7D32]'
                   : 'bg-red-50 border-red-200 text-red-800'
               }`}
             >
               {passwordMsg.type === 'success' ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-[#3CB371] shrink-0" />
               ) : (
                 <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
               )}
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                     setPasswordForm({ ...passwordForm, old_password: e.target.value })
                   }
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                 />
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function ProfilePage() {
                     setPasswordForm({ ...passwordForm, new_password: e.target.value })
                   }
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                 />
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function ProfilePage() {
                     setPasswordForm({ ...passwordForm, confirm_password: e.target.value })
                   }
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                 />
               </div>
             </div>

@@ -331,7 +331,7 @@ export default function UserManagement() {
       case 'ADMIN':
         return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'SALE_MANAGER':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]';
       case 'SALESMAN':
         return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       default:
@@ -419,7 +419,7 @@ export default function UserManagement() {
           <button
             type="button"
             onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
           >
             <UserPlus className="h-4 w-4" />
             <span>Thêm nhân viên mới</span>
@@ -428,7 +428,7 @@ export default function UserManagement() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl border border-[#DDF0E2] p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Search */}
         <SearchInput
           defaultValue={searchTerm}
@@ -448,7 +448,7 @@ export default function UserManagement() {
               setSelectedRole(e.target.value);
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[170px]"
+            className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] cursor-pointer min-w-[170px]"
           >
             <option value="">Tất cả vai trò</option>
             {roles.map((r) => (
@@ -465,7 +465,7 @@ export default function UserManagement() {
               setSelectedStatus(e.target.value);
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] cursor-pointer"
           >
             <option value="">Tất cả trạng thái</option>
             <option value="true">Đang kích hoạt</option>
@@ -475,11 +475,11 @@ export default function UserManagement() {
       </div>
 
       {/* Users Data Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#DDF0E2] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase text-[11px] font-semibold tracking-wider">
+              <tr className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-[#6B7280] uppercase text-[11px] font-semibold tracking-wider">
                 <th className="py-3.5 px-4 sm:px-6">Nhân viên</th>
                 <th className="py-3.5 px-4">Liên hệ</th>
                 <th className="py-3.5 px-4">Vai trò (Role)</th>
@@ -492,13 +492,13 @@ export default function UserManagement() {
               {loading && users.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="text-center py-12 text-slate-400">
-                    <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-600" />
+                    <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-[#3CB371]" />
                     <span>Đang tải danh sách nhân viên...</span>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-12 text-slate-500">
+                  <td colSpan="6" className="text-center py-12 text-[#6B7280]">
                     Không tìm thấy tài khoản nhân viên nào phù hợp với bộ lọc.
                   </td>
                 </tr>
@@ -510,24 +510,24 @@ export default function UserManagement() {
                   return (
                     <tr
                       key={u.id}
-                      className="hover:bg-slate-50/70 transition-colors text-slate-700"
+                      className="hover:bg-[#EAF5EC]/40 transition-colors text-slate-700"
                     >
                       {/* Name & Username */}
                       <td className="py-3.5 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-2xs">
+                          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#7CA5F5] to-[#5D3EBC] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-2xs">
                             {initial}
                           </div>
                           <div>
-                            <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                            <div className="font-bold text-[#1F2937] flex items-center gap-1.5">
                               <span>{u.full_name}</span>
                               {isCurrent && (
-                                <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 border border-blue-200">
+                                <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
                                   Bạn
                                 </span>
                               )}
                             </div>
-                            <span className="text-xs text-slate-400 font-mono">
+                            <span className="text-xs text-[#6B7280] font-mono">
                               @{u.username}
                             </span>
                           </div>
@@ -617,7 +617,7 @@ export default function UserManagement() {
                               setResetPwError(null);
                               setResetPwForm({ newPassword: '' });
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-100 hover:text-blue-600 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-[#EAF5EC] hover:text-[#2E7D32] transition-colors cursor-pointer"
                             title="Đặt lại mật khẩu trực tiếp"
                           >
                             <KeyRound className="h-3.5 w-3.5 text-amber-600" />
@@ -674,10 +674,10 @@ export default function UserManagement() {
             </div>
           )}
 
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800 flex items-start gap-2">
-            <Shield className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+          <div className="p-3 bg-[#EAF5EC] border border-[#DDF0E2] rounded-xl text-xs text-[#2E7D32] flex items-start gap-2">
+            <Shield className="h-4 w-4 text-[#3CB371] shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold">Mật khẩu khởi tạo tự động:</span> Mọi tài khoản mới được gán mật khẩu mặc định là <code className="bg-white px-1.5 py-0.5 rounded border border-blue-300 font-mono font-bold">11111111</code>. Nhân viên có thể tự đổi sau khi đăng nhập.
+              <span className="font-bold">Mật khẩu khởi tạo tự động:</span> Mọi tài khoản mới được gán mật khẩu mặc định là <code className="bg-white px-1.5 py-0.5 rounded border border-[#DDF0E2] font-mono font-bold">11111111</code>. Nhân viên có thể tự đổi sau khi đăng nhập.
             </div>
           </div>
 
@@ -692,7 +692,7 @@ export default function UserManagement() {
                 value={createUserForm.username}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, username: e.target.value })}
                 placeholder="vd: sales01"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
 
@@ -706,7 +706,7 @@ export default function UserManagement() {
                 value={createUserForm.full_name}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, full_name: e.target.value })}
                 placeholder="vd: Nguyễn Văn A"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
           </div>
@@ -722,7 +722,7 @@ export default function UserManagement() {
                 value={createUserForm.email}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, email: e.target.value })}
                 placeholder="name@company.com"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
 
@@ -735,7 +735,7 @@ export default function UserManagement() {
                 value={createUserForm.phone}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, phone: e.target.value })}
                 placeholder="vd: 0912345678"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
           </div>
@@ -747,7 +747,7 @@ export default function UserManagement() {
             <select
               value={createUserForm.role_id}
               onChange={(e) => setCreateUserForm({ ...createUserForm, role_id: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900 cursor-pointer"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900 cursor-pointer"
             >
               {roles.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -768,7 +768,7 @@ export default function UserManagement() {
             <button
               type="submit"
               disabled={createLoading}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white text-xs font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {createLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
             </button>
@@ -801,7 +801,7 @@ export default function UserManagement() {
               value={resetPwForm.newPassword}
               onChange={(e) => setResetPwForm({ newPassword: e.target.value })}
               placeholder="Nhập mật khẩu mới..."
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
             />
           </div>
 

@@ -135,7 +135,7 @@ export default function ProductDetailPage() {
   const getOppStatusBadge = (status) => {
     switch (status) {
       case 'OPEN':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]';
       case 'FOLLOWING':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'ORDERED':
@@ -150,7 +150,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400">
-        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
+        <div className="w-8 h-8 border-3 border-[#3CB371] border-t-transparent rounded-full animate-spin mb-3" />
         <p className="text-sm">Đang tải hồ sơ sản phẩm...</p>
       </div>
     );
@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
         <p className="text-sm text-slate-500 mt-1 mb-6">{errorMsg || 'Sản phẩm không tồn tại hoặc đã bị xóa.'}</p>
         <button
           onClick={() => navigate('/products')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] text-white rounded-xl text-sm font-semibold hover:bg-[#38A169] transition-colors shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Quay lại kho sản phẩm</span>
@@ -192,7 +192,7 @@ export default function ProductDetailPage() {
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-bold text-slate-900">{product.name}</h1>
-              <span className="text-xs px-2.5 py-0.5 bg-indigo-50 text-indigo-700 font-mono font-semibold rounded-full border border-indigo-200">
+              <span className="text-xs px-2.5 py-0.5 bg-[#EAF5EC] text-[#2E7D32] font-mono font-semibold rounded-full border border-[#DDF0E2]">
                 {product.product_code}
               </span>
             </div>
@@ -226,7 +226,7 @@ export default function ProductDetailPage() {
       {/* Grid: 3 Thẻ thống kê nhanh */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
@@ -276,7 +276,7 @@ export default function ProductDetailPage() {
       {/* Thông tin chi tiết sản phẩm */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
         <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-          <Package className="w-4 h-4 text-indigo-600" />
+          <Package className="w-4 h-4 text-[#3CB371]" />
           <span>Thông Tin Chi Tiết Sản Phẩm (SRS 3.15)</span>
         </h2>
 
@@ -317,13 +317,13 @@ export default function ProductDetailPage() {
             onClick={() => setActiveTab('opportunities')}
             className={`flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
               activeTab === 'opportunities'
-                ? 'border-indigo-600 text-indigo-700 bg-white rounded-t-xl shadow-sm'
+                ? 'border-[#3CB371] text-[#2E7D32] bg-white rounded-t-xl shadow-sm'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Target className="w-4 h-4" />
             <span>Cơ Hội Bán Hàng (View Opportunity - SRS 3.16)</span>
-            <span className="ml-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-[11px] font-semibold border border-indigo-200">
+            <span className="ml-1 px-2 py-0.5 bg-[#EAF5EC] text-[#2E7D32] rounded-full text-[11px] font-semibold border border-[#DDF0E2]">
               {opportunities.length}
             </span>
           </button>
@@ -332,7 +332,7 @@ export default function ProductDetailPage() {
             onClick={() => setActiveTab('orders')}
             className={`flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
               activeTab === 'orders'
-                ? 'border-indigo-600 text-indigo-700 bg-white rounded-t-xl shadow-sm'
+                ? 'border-[#3CB371] text-[#2E7D32] bg-white rounded-t-xl shadow-sm'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -348,7 +348,7 @@ export default function ProductDetailPage() {
         <div className="p-5">
           {tabLoading ? (
             <div className="py-12 text-center text-slate-400 text-xs">
-              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <div className="w-5 h-5 border-2 border-[#3CB371] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
               <span>Đang tải dữ liệu liên kết...</span>
             </div>
           ) : activeTab === 'opportunities' ? (
@@ -455,7 +455,7 @@ export default function ProductDetailPage() {
                           className="hover:bg-slate-50 transition-colors cursor-pointer"
                           onClick={() => navigate(`/orders/${ord.id}`)}
                         >
-                          <td className="py-3 px-3 font-mono font-bold text-indigo-600">
+                          <td className="py-3 px-3 font-mono font-bold text-[#3CB371]">
                             {ord.order_code}
                           </td>
                           <td className="py-3 px-3 text-slate-500">

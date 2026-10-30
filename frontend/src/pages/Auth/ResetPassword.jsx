@@ -39,27 +39,27 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] to-[#DDF0E2] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-800/10 space-y-6">
-          <div className="border-b border-slate-100 pb-4">
-            <h3 className="text-xl font-bold text-slate-900">Thiết lập mật khẩu mới</h3>
-            <p className="text-xs text-slate-500 mt-1">
+        <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-[#DDF0E2] space-y-6">
+          <div className="border-b border-[#DDF0E2] pb-4">
+            <h3 className="text-xl font-bold text-[#1F2937]">Thiết lập mật khẩu mới</h3>
+            <p className="text-xs text-[#6B7280] mt-1">
               Nhập mật khẩu mới an toàn cho tài khoản của bạn (SRS 3.14).
             </p>
           </div>
 
           {success ? (
-            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-3 text-center">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto" />
-              <p className="font-bold text-sm text-emerald-900">
+            <div className="p-4 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#2E7D32] text-xs space-y-3 text-center">
+              <CheckCircle2 className="h-10 w-10 text-[#3CB371] mx-auto" />
+              <p className="font-bold text-sm text-[#2E7D32]">
                 Đặt lại mật khẩu thành công!
               </p>
               <p>Mật khẩu của bạn đã được cập nhật an toàn trong cơ sở dữ liệu.</p>
               <div className="pt-2">
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] transition-colors"
                 >
                   Đăng nhập ngay <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
@@ -88,7 +88,7 @@ export default function ResetPassword() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                   />
                 </div>
               </div>
@@ -107,7 +107,7 @@ export default function ResetPassword() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-900"
+                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
                   />
                 </div>
               </div>
@@ -115,7 +115,7 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] shadow-md focus:outline-hidden focus:ring-2 focus:ring-[#3CB371] cursor-pointer disabled:opacity-50"
               >
                 {loading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
               </button>

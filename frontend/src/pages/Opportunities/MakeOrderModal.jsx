@@ -147,14 +147,14 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-2xl w-full overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
         {/* Header Modal */}
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
               <ShoppingBag className="w-5 h-5 text-white" />
             </div>
             <div>
               <h2 className="text-lg font-bold leading-tight">Chốt Đơn Hàng (Make an Order)</h2>
-              <p className="text-xs text-blue-100 mt-0.5">
+              <p className="text-xs text-white/80 mt-0.5">
                 Chuyển Cơ Hội #{opportunity.id} thành Hóa đơn xuất kho chính thức (SRS 3.12)
               </p>
             </div>
@@ -239,7 +239,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                   className={`w-full px-3.5 py-2.5 text-sm font-semibold rounded-xl border ${
                     isStockInsufficient
                       ? 'border-red-400 bg-red-50 text-red-900 focus:ring-red-500 focus:border-red-500'
-                      : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      : 'border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
                   placeholder="Nhập số lượng..."
                   required
@@ -273,7 +273,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                   type="date"
                   value={orderDate}
                   onChange={(e) => setOrderDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
                   required
                 />
                 <Calendar className="w-4 h-4 text-gray-400 absolute right-3.5 top-3 pointer-events-none" />
@@ -297,11 +297,11 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                   onClick={() => setPaymentPreset(preset)}
                   className={`p-2.5 text-left text-xs rounded-xl border transition-all flex items-center gap-2 ${
                     paymentPreset === preset
-                      ? 'border-blue-600 bg-blue-50/70 text-blue-800 font-bold shadow-sm'
+                      ? 'border-[#3CB371] bg-[#EAF5EC] text-[#2E7D32] font-bold shadow-xs'
                       : 'border-gray-200 hover:border-gray-300 text-gray-700'
                   }`}
                 >
-                  <CreditCard className={`w-3.5 h-3.5 ${paymentPreset === preset ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <CreditCard className={`w-3.5 h-3.5 ${paymentPreset === preset ? 'text-[#3CB371]' : 'text-gray-400'}`} />
                   <span className="line-clamp-1">{preset}</span>
                 </button>
               ))}
@@ -311,7 +311,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               value={paymentDetail}
               onChange={(e) => setPaymentDetail(e.target.value)}
               placeholder="Chi tiết thanh toán bổ sung (ví dụ: Đã nhận cọc 50%, số còn lại thu COD...)"
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             />
           </div>
 
@@ -326,7 +326,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               value={shippingAddress}
               onChange={(e) => setShippingAddress(e.target.value)}
               placeholder="Nhập địa chỉ nhận hàng chi tiết của khách hàng..."
-              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               required
             />
           </div>
@@ -342,21 +342,21 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ghi chú thêm: Yêu cầu giao giờ hành chính, đóng gói kèm quà tặng..."
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             />
           </div>
 
           {/* Card Tổng Tiền Realtime */}
-          <div className="p-4 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl border border-blue-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="p-4 bg-[#EAF5EC] rounded-xl border border-[#DDF0E2] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-xs uppercase font-semibold text-blue-700">Giá Trị Đơn Hàng Bảo Tồn (SRS 3.12)</p>
+              <p className="text-xs uppercase font-semibold text-[#2E7D32]">Giá Trị Đơn Hàng Bảo Tồn (SRS 3.12)</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 {numQuantity} cái × {unitPrice.toLocaleString('vi-VN')} ₫/cái
               </p>
             </div>
             <div className="text-right">
               <span className="text-xs text-gray-500 block">Tổng Tiền Thanh Toán:</span>
-              <span className="text-2xl font-black text-indigo-700">
+              <span className="text-2xl font-black text-[#2E7D32]">
                 {totalAmount.toLocaleString('vi-VN')} ₫
               </span>
             </div>
@@ -388,7 +388,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               className={`flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-md transition-all ${
                 loading || isStockInsufficient || numQuantity <= 0
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:scale-95'
+                  : 'bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] hover:shadow-lg active:scale-95'
               }`}
             >
               {loading ? (

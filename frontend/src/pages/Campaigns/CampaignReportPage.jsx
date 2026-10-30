@@ -21,7 +21,7 @@ import {
 
 const STATUS_BADGES = {
   ACTIVE: { label: 'Đang hoạt động', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  UPCOMING: { label: 'Sắp diễn ra', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+  UPCOMING: { label: 'Sắp diễn ra', color: 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]' },
   ENDED: { label: 'Đã kết thúc', color: 'bg-slate-100 text-slate-700 border-slate-300' },
 };
 
@@ -91,7 +91,7 @@ export default function CampaignReportPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-slate-500">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-3" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#3CB371] mb-3" />
         <span className="text-sm font-medium">Đang tính toán chỉ số hiệu quả chiến dịch...</span>
       </div>
     );
@@ -106,7 +106,7 @@ export default function CampaignReportPage() {
         <button
           type="button"
           onClick={() => navigate('/campaigns')}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] rounded-lg cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Quay lại danh sách</span>
@@ -164,7 +164,7 @@ export default function CampaignReportPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-xl font-bold text-slate-900">BÁO CÁO HIỆU QUẢ CHIẾN DỊCH TIẾP THỊ</h1>
-            <p className="text-sm font-semibold text-blue-700 mt-1">{campaign.name}</p>
+            <p className="text-sm font-semibold text-[#2E7D32] mt-1">{campaign.name}</p>
             <p className="text-xs text-slate-500">Mã chiến dịch: #{campaign.id}</p>
           </div>
           <div className="text-right text-xs text-slate-600">
@@ -207,7 +207,7 @@ export default function CampaignReportPage() {
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
             <span className="text-xs font-medium">Ngân sách (Budget)</span>
-            <DollarSign className="w-4 h-4 text-blue-500" />
+            <DollarSign className="w-4 h-4 text-[#3CB371]" />
           </div>
           <div className="text-lg font-bold text-slate-900">
             {Number(metrics.budget || 0).toLocaleString('vi-VN')}
@@ -250,7 +250,7 @@ export default function CampaignReportPage() {
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
             <span className="text-xs font-medium">Leads thu được</span>
-            <Users className="w-4 h-4 text-indigo-500" />
+            <Users className="w-4 h-4 text-[#3CB371]" />
           </div>
           <div className="text-xl font-bold text-slate-900">
             {metrics.total_leads || 0}
@@ -293,7 +293,7 @@ export default function CampaignReportPage() {
             type="button"
             onClick={() => setActiveTab('products')}
             className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${activeTab === 'products'
-              ? 'border-blue-600 text-blue-600 bg-white rounded-t-lg'
+              ? 'border-[#3CB371] text-[#2E7D32] bg-white rounded-t-lg'
               : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
               }`}
           >
@@ -305,7 +305,7 @@ export default function CampaignReportPage() {
             type="button"
             onClick={() => setActiveTab('leads')}
             className={`inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${activeTab === 'leads'
-              ? 'border-blue-600 text-blue-600 bg-white rounded-t-lg'
+              ? 'border-[#3CB371] text-[#2E7D32] bg-white rounded-t-lg'
               : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
               }`}
           >
@@ -346,7 +346,7 @@ export default function CampaignReportPage() {
                       <button
                         type="button"
                         onClick={() => navigate('/campaigns')}
-                        className="text-xs text-blue-600 hover:underline mt-1 font-medium cursor-pointer"
+                        className="text-xs text-[#3CB371] hover:underline mt-1 font-medium cursor-pointer"
                       >
                         Quay lại danh sách để gán sản phẩm
                       </button>
@@ -361,7 +361,7 @@ export default function CampaignReportPage() {
                       <td className="px-4 py-3 font-semibold text-slate-900">
                         <Link
                           to={`/products/${p.id}`}
-                          className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                          className="text-[#3CB371] hover:underline inline-flex items-center gap-1"
                         >
                           <span>{p.name}</span>
                           <ExternalLink className="w-3 h-3 text-slate-400 print:hidden" />
@@ -376,7 +376,7 @@ export default function CampaignReportPage() {
                       <td className="px-4 py-3 text-center">
                         <span className="font-semibold text-slate-700">{p.stock_qty || 0}</span>
                       </td>
-                      <td className="px-4 py-3 text-center font-semibold text-blue-600">
+                      <td className="px-4 py-3 text-center font-semibold text-[#3CB371]">
                         {p.orders_count || 0}
                       </td>
                       <td className="px-4 py-3 text-center font-semibold text-emerald-600">
@@ -408,7 +408,7 @@ export default function CampaignReportPage() {
                     <td className="px-4 py-3 text-center text-slate-800">
                       {products.reduce((acc, p) => acc + (parseInt(p.stock_qty, 10) || 0), 0)}
                     </td>
-                    <td className="px-4 py-3 text-center text-blue-600">
+                    <td className="px-4 py-3 text-center text-[#2E7D32]">
                       {products.reduce((acc, p) => acc + (parseInt(p.orders_count, 10) || 0), 0)}
                     </td>
                     <td className="px-4 py-3 text-center text-emerald-600">
@@ -459,7 +459,7 @@ export default function CampaignReportPage() {
                 ) : (
                   leads.map((l) => (
                     <tr key={l.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-blue-600">
+                      <td className="px-4 py-3 font-semibold text-[#3CB371]">
                         <Link
                           to={`/leads/${l.id}`}
                           className="hover:underline inline-flex items-center gap-1"
@@ -483,7 +483,7 @@ export default function CampaignReportPage() {
                       <td className="px-4 py-3 text-xs text-slate-700">
                         {l.assigned_to_name || 'Chưa phân công'}
                       </td>
-                      <td className="px-4 py-3 text-center font-semibold text-blue-600">
+                      <td className="px-4 py-3 text-center font-semibold text-[#3CB371]">
                         {l.opportunities_count || 0}
                       </td>
                       <td className="px-4 py-3 text-center font-semibold text-emerald-600">
@@ -502,7 +502,7 @@ export default function CampaignReportPage() {
                     <td colSpan={6} className="px-4 py-3 text-slate-700 uppercase">
                       Tổng cộng ({leads.length} khách hàng tiềm năng)
                     </td>
-                    <td className="px-4 py-3 text-center text-blue-600">
+                    <td className="px-4 py-3 text-center text-[#3CB371]">
                       {leads.reduce((acc, l) => acc + (parseInt(l.opportunities_count, 10) || 0), 0)}
                     </td>
                     <td className="px-4 py-3 text-center text-emerald-600">

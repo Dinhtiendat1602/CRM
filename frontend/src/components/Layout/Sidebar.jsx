@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,54 +18,72 @@ import { useAuth } from '../../context/authContextDef';
 
 const MENU_ITEMS = [
   {
+    labelVi: 'Tổng quan',
+    labelEn: 'Dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
     path: '/dashboard',
     roles: ['SALESMAN', 'SALE_MANAGER', 'ADMIN'],
   },
   {
+    labelVi: 'Khách hàng',
+    labelEn: 'Leads',
     label: 'Leads',
     icon: Users,
     path: '/leads',
     roles: ['SALESMAN', 'SALE_MANAGER'],
   },
   {
+    labelVi: 'Cơ hội bán hàng',
+    labelEn: 'Opportunities',
     label: 'Opportunities',
     icon: TrendingUp,
     path: '/opportunities',
     roles: ['SALESMAN', 'SALE_MANAGER'],
   },
   {
+    labelVi: 'Đơn hàng',
+    labelEn: 'Orders',
     label: 'Orders',
     icon: ShoppingCart,
     path: '/orders',
     roles: ['SALESMAN', 'SALE_MANAGER'],
   },
   {
+    labelVi: 'Sản phẩm',
+    labelEn: 'Products',
     label: 'Products',
     icon: Package,
     path: '/products',
     roles: ['SALE_MANAGER'],
   },
   {
+    labelVi: 'Chiến dịch',
+    labelEn: 'Campaigns',
     label: 'Campaigns',
     icon: Megaphone,
     path: '/campaigns',
     roles: ['SALE_MANAGER'],
   },
   {
+    labelVi: 'Kế hoạch DS',
+    labelEn: 'Forecast',
     label: 'Forecast',
     icon: BarChart2,
     path: '/forecast/setup',
     roles: ['SALE_MANAGER'],
   },
   {
+    labelVi: 'Báo cáo',
+    labelEn: 'Reports',
     label: 'Reports',
     icon: FileText,
     path: '/reports',
     roles: ['SALE_MANAGER'],
   },
   {
+    labelVi: 'Quản trị User',
+    labelEn: 'User Mgmt',
     label: 'User Mgmt',
     icon: UserCog,
     path: '/admin/users',
@@ -75,6 +94,19 @@ const MENU_ITEMS = [
 export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
   const { user, role } = useAuth();
   const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
+
+  // Đồng bộ ngôn ngữ với Header và localStorage
+  const [language, setLanguage] = useState(() => localStorage.getItem('app_language') || 'vi');
+
+  useEffect(() => {
+    const handleLangSync = (e) => {
+      if (e.detail && (e.detail === 'vi' || e.detail === 'en')) {
+        setLanguage(e.detail);
+      }
+    };
+    window.addEventListener('app_language_changed', handleLangSync);
+    return () => window.removeEventListener('app_language_changed', handleLangSync);
+  }, []);
 
   // Lọc danh sách menu theo quyền hạn vai trò (RBAC)
   const accessibleItems = MENU_ITEMS.filter((item) =>
@@ -157,12 +189,13 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
           <nav className="space-y-1.5">
             {!collapsed && (
               <div className="px-3 pb-1 text-[11px] font-semibold text-[#9CA3AF] tracking-wide">
-                My Panel
+                {language === 'en' ? 'Main Menu' : 'Danh mục'}
               </div>
             )}
 
             {accessibleItems.map((item) => {
               const Icon = item.icon;
+              const itemLabel = language === 'en' ? item.labelEn : item.labelVi;
               return (
                 <NavLink
                   key={item.path}
@@ -175,7 +208,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                         : 'text-[#6B7280] hover:text-[#1F2937] hover:bg-white/50 font-medium'
                     }`
                   }
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed ? itemLabel : undefined}
                 >
                   {({ isActive }) => (
                     <>
@@ -184,7 +217,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                           isActive ? 'text-[#3CB371]' : 'text-[#6B7280] group-hover:text-[#1F2937]'
                         }`}
                       />
-                      {!collapsed && <span className="truncate">{item.label}</span>}
+                      {!collapsed && <span className="truncate">{itemLabel}</span>}
                     </>
                   )}
                 </NavLink>
@@ -207,7 +240,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
               {!collapsed && (
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-bold text-[#1F2937] truncate">
-                    {user?.full_name || user?.username || 'Thành viên'}
+                    {user?.full_name || user?.username || (language === 'en' ? 'Member' : 'Thành viên')}
                   </span>
                   <span className="text-[10px] text-[#9CA3AF] truncate font-medium">
                     {currentRole}
@@ -229,7 +262,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
               ) : (
                 <>
                   <ChevronLeft className="h-4 w-4" />
-                  <span>Thu gọn</span>
+                  <span>{language === 'en' ? 'Collapse' : 'Thu gọn'}</span>
                 </>
               )}
             </button>

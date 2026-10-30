@@ -9,17 +9,17 @@ import {
   ChevronDown,
   Clock,
   Calendar,
-  ExternalLink,
+  Globe,
   RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
 
-// Ánh xạ breadcrumb / tiêu đề theo đường dẫn
-const ROUTE_TITLES = {
-  '/dashboard': 'Dashboard Tổng quan',
-  '/leads': 'Quản lý Khách hàng Tiềm năng (Leads)',
+// Tiêu đề thuần Tiếng Việt cho từng phân hệ (Không kèm tiếng Anh trong ngoặc)
+const ROUTE_TITLES_VI = {
+  '/dashboard': 'Bảng điều khiển Tổng quan',
+  '/leads': 'Quản lý Khách hàng Tiềm năng',
   '/opportunities': 'Quản lý Cơ hội & Nhật ký Chăm sóc',
-  '/orders': 'Quản lý Đơn hàng (Orders)',
+  '/orders': 'Quản lý Đơn hàng',
   '/products': 'Quản lý Sản phẩm & Tồn kho',
   '/campaigns': 'Chiến dịch Tiếp thị & Báo cáo',
   '/forecast/setup': 'Lập Kế hoạch Doanh số 12 Tháng',
@@ -27,6 +27,21 @@ const ROUTE_TITLES = {
   '/reports': 'Báo cáo Thống kê Tổng hợp',
   '/admin/users': 'Quản trị Người dùng & Phân quyền',
   '/profile': 'Thông tin Tài khoản Cá nhân',
+};
+
+// Tiêu đề chuẩn Tiếng Anh khi chuyển đổi ngôn ngữ
+const ROUTE_TITLES_EN = {
+  '/dashboard': 'Dashboard Overview',
+  '/leads': 'Leads Management',
+  '/opportunities': 'Opportunities & Follow-up Log',
+  '/orders': 'Orders Management',
+  '/products': 'Products & Inventory',
+  '/campaigns': 'Marketing Campaigns & Reports',
+  '/forecast/setup': '12-Month Sales Forecasting',
+  '/forecast/performance': 'Forecast vs Actual Performance',
+  '/reports': 'Consolidated Analytics Reports',
+  '/admin/users': 'User Management & Permissions',
+  '/profile': 'Personal Account Profile',
 };
 
 export default function Header({ onToggleMobileSidebar }) {
@@ -48,17 +63,39 @@ export default function Header({ onToggleMobileSidebar }) {
 
   const [currentDateTime, setCurrentDateTime] = useState('');
 
-  // Đồng hồ thời gian thực cập nhật từng giây cho toàn bộ trang
+  // Trạng thái ngôn ngữ (Mặc định Tiếng Việt 'vi', hỗ trợ 'en')
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('app_language') || 'vi';
+  });
+
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
+    localStorage.setItem('app_language', lang);
+    window.dispatchEvent(new CustomEvent('app_language_changed', { detail: lang }));
+  };
+
+  useEffect(() => {
+    const handleLangSync = (e) => {
+      if (e.detail && (e.detail === 'vi' || e.detail === 'en')) {
+        setLanguage(e.detail);
+      }
+    };
+    window.addEventListener('app_language_changed', handleLangSync);
+    return () => window.removeEventListener('app_language_changed', handleLangSync);
+  }, []);
+
+  // Đồng hồ thời gian thực cập nhật từng giây theo locale ngôn ngữ được chọn
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
-      const dateStr = now.toLocaleDateString('vi-VN', {
+      const locale = language === 'en' ? 'en-US' : 'vi-VN';
+      const dateStr = now.toLocaleDateString(locale, {
         weekday: 'short',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       });
-      const timeStr = now.toLocaleTimeString('vi-VN', {
+      const timeStr = now.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
@@ -68,10 +105,11 @@ export default function Header({ onToggleMobileSidebar }) {
     updateDateTime();
     const interval = setInterval(updateDateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [language]);
 
   const currentRole = role || user?.role_name || user?.role || 'User';
-  const pageTitle = ROUTE_TITLES[location.pathname] || 'Phân hệ Làm việc';
+  const routeTitles = language === 'en' ? ROUTE_TITLES_EN : ROUTE_TITLES_VI;
+  const pageTitle = routeTitles[location.pathname] || (language === 'en' ? 'Workspace' : 'Phân hệ Làm việc');
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -107,27 +145,20 @@ export default function Header({ onToggleMobileSidebar }) {
 
   return (
     <header className="h-16 bg-white border-b border-gray-100 sticky top-0 z-30 flex items-center justify-between px-6 sm:px-8">
-      {/* Left: Mobile Toggle & Page Title / Breadcrumbs */}
+      {/* Left: Mobile Toggle & Page Title (Duy nhất 1 dòng to thuần Tiếng Việt) */}
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onToggleMobileSidebar}
           className="lg:hidden p-2 rounded-xl text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F3F4F6] cursor-pointer"
-          aria-label="Mở Menu"
+          aria-label={language === 'en' ? 'Open Menu' : 'Mở Menu'}
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF]">
-            <span>Zen CRM</span>
-            <span>/</span>
-            <span className="text-[#6B7280] font-medium">{pageTitle}</span>
-          </div>
-          <h2 className="text-base sm:text-lg font-bold text-[#1F2937] leading-tight">
-            {pageTitle}
-          </h2>
-        </div>
+        <h2 className="text-base sm:text-lg font-bold text-[#1F2937] leading-tight">
+          {pageTitle}
+        </h2>
       </div>
 
       {/* Right: Security Indicator & Live Clock & User Profile Dropdown */}
@@ -145,7 +176,11 @@ export default function Header({ onToggleMobileSidebar }) {
           <button
             type="button"
             onClick={() => setSessionOpen(!sessionOpen)}
-            title="Phiên làm việc tự động đếm ngược 30 phút bất hoạt. Bấm để xem chi tiết hoặc gia hạn."
+            title={
+              language === 'en'
+                ? 'Session automatically counts down 30 minutes of inactivity. Click to view or renew.'
+                : 'Phiên làm việc tự động đếm ngược 30 phút bất hoạt. Bấm để xem chi tiết hoặc gia hạn.'
+            }
             className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-medium border transition-all cursor-pointer ${
               sessionRemainingSeconds && sessionRemainingSeconds <= 120
                 ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse font-bold'
@@ -162,7 +197,7 @@ export default function Header({ onToggleMobileSidebar }) {
                 : 'text-[#3CB371]'
             }`} />
             <span className="font-mono">
-              Phiên: {formattedSessionTime || '30:00'}
+              {language === 'en' ? 'Session' : 'Phiên'}: {formattedSessionTime || '30:00'}
             </span>
           </button>
 
@@ -171,12 +206,14 @@ export default function Header({ onToggleMobileSidebar }) {
             <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-[#DDF0E2] p-4 z-50 animate-fade-in text-xs space-y-3">
               <div className="flex items-center gap-2 pb-2 border-b border-[#DDF0E2]">
                 <ShieldCheck className="w-4 h-4 text-[#3CB371]" />
-                <span className="font-bold text-[#1F2937]">Bảo Mật Phiên Làm Việc</span>
+                <span className="font-bold text-[#1F2937]">
+                  {language === 'en' ? 'Session Security' : 'Bảo Mật Phiên Làm Việc'}
+                </span>
               </div>
 
               <div className="bg-[#F3F4F6] p-2.5 rounded-xl border border-[#DDF0E2] space-y-1">
                 <div className="flex justify-between items-center text-[#6B7280]">
-                  <span>Thời gian còn lại:</span>
+                  <span>{language === 'en' ? 'Remaining time:' : 'Thời gian còn lại:'}</span>
                   <strong className={`font-mono text-sm ${
                     sessionRemainingSeconds && sessionRemainingSeconds <= 120
                       ? 'text-rose-600 font-bold'
@@ -186,13 +223,15 @@ export default function Header({ onToggleMobileSidebar }) {
                   </strong>
                 </div>
                 <div className="flex justify-between text-[#6B7280] text-[11px]">
-                  <span>Hạn định phiên:</span>
-                  <span>30 phút bất hoạt</span>
+                  <span>{language === 'en' ? 'Session duration:' : 'Hạn định phiên:'}</span>
+                  <span>{language === 'en' ? '30m inactivity' : '30 phút bất hoạt'}</span>
                 </div>
               </div>
 
               <p className="text-[11px] text-[#6B7280] leading-relaxed">
-                Hệ thống tự động gia hạn khi bạn di chuột hoặc gõ phím. Nếu không thao tác trong 30 phút, hệ thống sẽ tự động đăng xuất để bảo đảm an toàn dữ liệu.
+                {language === 'en'
+                  ? 'System automatically extends session on mouse move or keypress. If inactive for 30 minutes, it logs out to secure data.'
+                  : 'Hệ thống tự động gia hạn khi bạn di chuột hoặc gõ phím. Nếu không thao tác trong 30 phút, hệ thống sẽ tự động đăng xuất để bảo đảm an toàn dữ liệu.'}
               </p>
 
               <div className="space-y-1.5 pt-1">
@@ -204,7 +243,7 @@ export default function Header({ onToggleMobileSidebar }) {
                   }}
                   className="w-full py-2 px-3 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Gia hạn phiên (30:00)
+                  <RefreshCw className="w-3.5 h-3.5" /> {language === 'en' ? 'Extend session (30:00)' : 'Gia hạn phiên (30:00)'}
                 </button>
 
                 <button
@@ -214,9 +253,9 @@ export default function Header({ onToggleMobileSidebar }) {
                     setSessionOpen(false);
                   }}
                   className="w-full py-1.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-[11px]"
-                  title="Thử nghiệm auto-logout sau 10 giây (Kịch bản bảo vệ đồ án)"
+                  title={language === 'en' ? 'Test auto-logout after 10s' : 'Thử nghiệm auto-logout sau 10 giây'}
                 >
-                  <Clock className="w-3.5 h-3.5 text-amber-600" /> Thử nghiệm Auto-Logout (10s)
+                  <Clock className="w-3.5 h-3.5 text-amber-600" /> {language === 'en' ? 'Test Auto-Logout (10s)' : 'Thử nghiệm Auto-Logout (10s)'}
                 </button>
               </div>
             </div>
@@ -236,7 +275,7 @@ export default function Header({ onToggleMobileSidebar }) {
 
             <div className="hidden sm:flex flex-col text-left">
               <span className="text-xs font-bold text-[#1F2937] truncate max-w-[120px]">
-                {user?.full_name || user?.username || 'Người dùng'}
+                {user?.full_name || user?.username || (language === 'en' ? 'User' : 'Người dùng')}
               </span>
               <span
                 className={`inline-block px-1.5 py-0.2 text-[10px] font-semibold rounded border ${getRoleBadge(
@@ -252,9 +291,12 @@ export default function Header({ onToggleMobileSidebar }) {
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#DDF0E2] py-2 z-50 animate-fade-in">
+            <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-[#DDF0E2] py-2 z-50 animate-fade-in">
+              {/* Header thông tin tài khoản */}
               <div className="px-4 py-2.5 border-b border-[#DDF0E2]">
-                <p className="text-xs text-[#6B7280]">Tài khoản đăng nhập</p>
+                <p className="text-xs text-[#6B7280]">
+                  {language === 'en' ? 'Signed in account' : 'Tài khoản đăng nhập'}
+                </p>
                 <p className="text-sm font-bold text-[#1F2937] truncate">
                   {user?.full_name || user?.username}
                 </p>
@@ -271,6 +313,7 @@ export default function Header({ onToggleMobileSidebar }) {
                 </div>
               </div>
 
+              {/* Các thao tác chính */}
               <div className="py-1">
                 <Link
                   to="/profile"
@@ -278,23 +321,51 @@ export default function Header({ onToggleMobileSidebar }) {
                   className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-[#1F2937] hover:bg-[#EAF5EC] hover:text-[#2E7D32] transition-colors"
                 >
                   <User className="h-4 w-4" />
-                  <span>Hồ sơ & Đổi mật khẩu</span>
+                  <span>{language === 'en' ? 'Profile & Security' : 'Hồ sơ & Đổi mật khẩu'}</span>
                 </Link>
 
-                <a
-                  href="/api/health"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between px-4 py-2 text-xs font-medium text-[#1F2937] hover:bg-[#EAF5EC] hover:text-[#2E7D32] transition-colors"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <Shield className="h-4 w-4" />
-                    <span>API Health Check</span>
-                  </span>
-                  <ExternalLink className="h-3.5 w-3.5 text-[#6B7280]" />
-                </a>
+                {/* Thay thế API Health Check bằng Chuyển đổi ngôn ngữ Tiếng Anh / Tiếng Việt */}
+                <div className="px-4 py-2 border-t border-gray-100/80">
+                  <div className="flex items-center justify-between mb-1.5 text-xs text-[#4B5563]">
+                    <span className="flex items-center gap-2 font-medium">
+                      <Globe className="h-4 w-4 text-[#3CB371]" />
+                      <span>{language === 'en' ? 'Language' : 'Ngôn ngữ'}</span>
+                    </span>
+                    <span className="text-[10px] font-bold text-[#2E7D32] bg-[#EAF5EC] px-1.5 py-0.5 rounded border border-[#DDF0E2]">
+                      {language === 'en' ? 'English' : 'Tiếng Việt'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F9FAFB] rounded-xl border border-gray-200/80">
+                    <button
+                      type="button"
+                      onClick={() => handleLanguageChange('vi')}
+                      className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                        language === 'vi'
+                          ? 'bg-white text-[#2E7D32] shadow-2xs border border-[#DDF0E2]'
+                          : 'text-[#6B7280] hover:text-[#1F2937]'
+                      }`}
+                    >
+                      <span className="text-xs">🇻🇳</span>
+                      <span>Tiếng Việt</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleLanguageChange('en')}
+                      className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                        language === 'en'
+                          ? 'bg-white text-[#2E7D32] shadow-2xs border border-[#DDF0E2]'
+                          : 'text-[#6B7280] hover:text-[#1F2937]'
+                      }`}
+                    >
+                      <span className="text-xs">🇬🇧</span>
+                      <span>English</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
+              {/* Đăng xuất */}
               <div className="pt-1 border-t border-[#DDF0E2]">
                 <button
                   type="button"
@@ -305,7 +376,7 @@ export default function Header({ onToggleMobileSidebar }) {
                   className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>Đăng xuất</span>
+                  <span>{language === 'en' ? 'Sign out' : 'Đăng xuất'}</span>
                 </button>
               </div>
             </div>

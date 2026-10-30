@@ -197,24 +197,26 @@ export default function LeadListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#2E7D32] uppercase tracking-wider mb-1">
-            <Users className="w-4 h-4 text-[#3CB371]" />
-            <span>Phân hệ Khách hàng tiềm năng (SRS 3.1 - 3.5)</span>
-          </div>
-          <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">
-            Quản Lý Khách Hàng Tiềm Năng (Leads)
-          </h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">
-            Thu thập thông tin, chống trùng SĐT/Email và phân trang 20 bản ghi theo chuẩn BR-03.
-          </p>
+      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          {!startDate && !endDate && (
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] shadow-2xs"
+              title="Hệ thống mặc định tối ưu tải khách hàng tiềm năng trong 1 năm gần nhất. Vui lòng chọn Từ ngày / Đến ngày nếu muốn tải dữ liệu các năm trước đó."
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
+              <span>Dữ liệu 1 năm</span>
+            </span>
+          )}
+          <span className="text-xs text-[#6B7280]">
+            Tổng cộng: <strong className="text-[#1F2937]">{pagination.totalRecords}</strong> khách hàng
+          </span>
         </div>
 
         <button
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-sm font-medium shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md hover:shadow-[#3CB371]/30 flex-shrink-0 cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer ml-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Thêm Khách Tiềm Năng</span>
@@ -315,15 +317,7 @@ export default function LeadListPage() {
           </div>
         </div>
 
-        {/* Thông báo tối ưu tải dữ liệu 1 năm */}
-        {!startDate && !endDate && (
-          <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-2 rounded-xl">
-            <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span>
-              Hệ thống mặc định tối ưu tải khách hàng tiềm năng trong <strong>1 năm gần nhất</strong>. Vui lòng chọn <strong>Từ ngày / Đến ngày</strong> bên trên nếu muốn tải dữ liệu các năm trước đó.
-            </span>
-          </div>
-        )}
+
       </div>
 
       {/* Error Banner */}

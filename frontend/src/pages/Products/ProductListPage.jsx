@@ -148,45 +148,36 @@ export default function ProductListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#2E7D32] uppercase tracking-wider mb-1">
-            <Package className="w-4 h-4 text-[#3CB371]" />
-            <span>Phân hệ Kho & Sản phẩm (SRS 3.15 - 3.17)</span>
-          </div>
-          <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">
-            Quản Lý Danh Mục & Sản Phẩm Kho
-          </h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">
-            Quản trị mã sản phẩm, tồn kho kho hàng, xem cơ hội liên quan và lịch sử đơn hàng.
-          </p>
+      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-xs text-[#6B7280]">
+          Tổng số: <strong className="text-[#1F2937]">{pagination.totalRecords}</strong> mặt hàng trong kho
         </div>
 
         {isManagerOrAdmin && (
-          <div className="flex items-center gap-2.5 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 ml-auto">
             <button
               onClick={() => setIsAssignmentModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-sm font-medium transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
               title="Phân quyền những sản phẩm mà từng nhân viên được phép bán"
             >
-              <ShieldCheck className="w-4 h-4 text-[#3CB371]" />
+              <ShieldCheck className="w-3.5 h-3.5 text-[#3CB371]" />
               <span>Phân Quyền Bán Hàng</span>
             </button>
 
             <button
               onClick={() => setIsCategoryModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-sm font-medium transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
             >
-              <FolderTree className="w-4 h-4 text-[#2E7D32]" />
+              <FolderTree className="w-3.5 h-3.5 text-[#2E7D32]" />
               <span>Quản Lý Danh Mục</span>
             </button>
 
             <button
               onClick={handleCreateProduct}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-sm font-medium shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Thêm Sản Phẩm</span>
             </button>
           </div>

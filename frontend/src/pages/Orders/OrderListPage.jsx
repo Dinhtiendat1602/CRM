@@ -145,21 +145,26 @@ export default function OrderListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header & Tiêu đề trang */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1F2937] flex items-center gap-2.5">
-            <ShoppingCart className="w-7 h-7 text-[#3CB371]" />
-            <span>Quản Lý Đơn Hàng (Orders)</span>
-          </h1>
-          <p className="text-sm text-[#6B7280] mt-1">
-            Theo dõi hóa đơn đã chốt, bảo toàn giá bán niêm yết tại thời điểm xuất kho (SRS 3.12)
-          </p>
+      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          {!fromDate && !toDate && (
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] shadow-2xs"
+              title="Hệ thống mặc định tối ưu tải dữ liệu trong 1 năm gần nhất. Vui lòng chọn Từ ngày / Đến ngày nếu muốn tải dữ liệu các năm trước đó."
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
+              <span>Dữ liệu 1 năm</span>
+            </span>
+          )}
+          <span className="text-xs text-[#6B7280]">
+            Tổng cộng: <strong className="text-[#1F2937]">{summary.totalOrders}</strong> đơn hàng
+          </span>
         </div>
 
         <button
           onClick={() => navigate('/opportunities')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#3CB371] hover:bg-[#38A169] text-white text-sm font-semibold rounded-xl shadow-xs transition-all self-start sm:self-auto hover:shadow-md cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-xs font-semibold rounded-xl shadow-xs transition-all hover:shadow-md cursor-pointer ml-auto"
         >
           <ShoppingCart className="w-4 h-4" />
           <span>+ Chốt Đơn Từ Cơ Hội</span>
@@ -285,15 +290,7 @@ export default function OrderListPage() {
           </div>
         </div>
 
-        {/* Thông báo tối ưu tải dữ liệu 1 năm */}
-        {!fromDate && !toDate && (
-          <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-2 rounded-xl">
-            <Calendar className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span>
-              Hệ thống mặc định tối ưu tải dữ liệu trong <strong>1 năm gần nhất</strong>. Vui lòng chọn <strong>Từ ngày / Đến ngày</strong> bên trên nếu muốn tải dữ liệu các năm trước đó.
-            </span>
-          </div>
-        )}
+
 
         {/* Thông tin quy chuẩn & Sắp xếp */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100 text-xs text-gray-500">

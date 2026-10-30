@@ -186,31 +186,21 @@ export default function SetupPlanPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Trang */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">
-              Lập Kế hoạch Doanh số 12 Tháng
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] font-semibold">
-              SRS 3.20
-            </span>
-          </div>
-          <p className="text-sm text-[#6B7280] mt-1">
-            Thiết lập chỉ tiêu định mức doanh thu dự báo (Plan VNĐ) cho từng tháng trong năm tài chính
-          </p>
-        </div>
+      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="text-xs text-[#6B7280]">
+          Chỉ tiêu định mức doanh thu dự báo (Plan VNĐ) cho 12 tháng
+        </span>
 
         {/* Chọn năm tài chính & Chuyển sang Đối soát */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-[#DDF0E2] shadow-xs">
-            <Calendar className="w-4 h-4 text-[#3CB371]" />
-            <span className="text-xs font-semibold text-slate-700">Năm tài chính:</span>
+        <div className="flex items-center gap-2.5 ml-auto">
+          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-200 text-xs">
+            <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
+            <span className="text-xs font-semibold text-[#6B7280]">Năm tài chính:</span>
             <select
               value={fiscalYear}
               onChange={(e) => setFiscalYear(parseInt(e.target.value, 10))}
-              className="bg-transparent text-sm font-bold text-[#2E7D32] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-bold text-[#2E7D32] focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
                 <option key={yr} value={yr}>
@@ -223,9 +213,9 @@ export default function SetupPlanPage() {
           <button
             type="button"
             onClick={() => navigate(`/forecast/performance?fiscal_year=${fiscalYear}`)}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] border border-[#DDF0E2] rounded-lg transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] border border-[#DDF0E2] rounded-xl transition-colors cursor-pointer"
           >
-            <BarChart2 className="w-4 h-4" />
+            <BarChart2 className="w-3.5 h-3.5" />
             <span>Xem Đối Soát (SRS 3.21)</span>
           </button>
         </div>

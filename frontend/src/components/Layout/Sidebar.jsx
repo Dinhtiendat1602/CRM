@@ -101,7 +101,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col justify-between py-5 px-3 transition-all duration-300 ease-in-out lg:static lg:h-auto lg:shrink-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col justify-between py-4 px-3 transition-all duration-300 ease-in-out lg:static lg:h-full lg:shrink-0 overflow-y-auto ${
           collapsed ? 'w-20' : 'w-60 xl:w-64'
         } ${mobileOpen ? 'translate-x-0 bg-[#EBF5ED] shadow-xl' : '-translate-x-full lg:translate-x-0'}`}
       >

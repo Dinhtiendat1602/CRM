@@ -163,29 +163,19 @@ export default function CampaignListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Trang */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Chiến dịch Tiếp thị & Quảng bá
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
-              SRS 3.18
-            </span>
-          </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Lập kế hoạch chiến dịch, phân bổ ngân sách, gắn sản phẩm mục tiêu và theo dõi ROI hiệu quả
-          </p>
+      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="text-xs text-[#6B7280]">
+          Tổng số: <strong className="text-[#1F2937]">{stats.total}</strong> chiến dịch tiếp thị
         </div>
 
         <button
           type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-xl shadow-xs transition-all cursor-pointer ml-auto"
         >
-          <Plus className="w-4 h-4" />
-          <span>Tạo Chiến dịch Mới</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>Tạo Chiến Dịch Mới</span>
         </button>
       </div>
 

@@ -86,37 +86,27 @@ export default function GeneralReportsPage() {
 
   return (
     <div className="space-y-6 print:space-y-4 print:p-0">
-      {/* Header Trang */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 print:hidden">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">
-              Báo cáo Kinh doanh & Thống kê Doanh số
-            </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] font-semibold">
-              SRS 2.1
-            </span>
-          </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Hệ thống phân tích chuyên sâu hiệu quả bán hàng, đo lường Leads, Đơn hàng và Doanh thu theo chu kỳ
-          </p>
-        </div>
+      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      <div className="flex items-center justify-between gap-4 print:hidden">
+        <span className="text-xs text-[#6B7280]">
+          Phân tích chuyên sâu hiệu quả bán hàng, đo lường Leads, Đơn hàng và Doanh thu
+        </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <button
             type="button"
             onClick={fetchReportData}
             title="Làm mới số liệu"
-            className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg shadow-xs transition-all cursor-pointer"
+            className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl shadow-2xs transition-all cursor-pointer"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#3CB371]" />
           </button>
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#1F2937] bg-white border border-gray-200 hover:bg-gray-50 rounded-xl shadow-2xs transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-slate-500" />
+            <Printer className="w-3.5 h-3.5 text-[#6B7280]" />
             <span>In Báo Cáo</span>
           </button>
         </div>

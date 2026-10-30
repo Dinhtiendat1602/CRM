@@ -59,8 +59,19 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Brand Logo */}
         <div className="flex justify-center">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-[#3CB371] via-[#2E7D32] to-[#7CA5F5] flex items-center justify-center text-white shadow-xl shadow-[#3CB371]/25 font-bold text-2xl">
-            Z
+          <div className="h-14 w-14 rounded-3xl bg-gradient-to-br from-[#3CB371] to-[#2E7D32] flex items-center justify-center text-white shadow-xl shadow-[#3CB371]/25 ring-4 ring-white/80">
+            <svg
+              className="w-8 h-8"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4.5 6C4.5 5.17 5.17 4.5 6 4.5H18C18.83 4.5 19.5 5.17 19.5 6C19.5 6.55 19.2 7.05 18.73 7.32L9.2 12.8H18C18.83 12.8 19.5 13.47 19.5 14.3C19.5 15.13 18.83 15.8 18 15.8H6C5.17 15.8 4.5 15.13 4.5 14.3C4.5 13.75 4.8 13.25 5.27 12.98L14.8 7.5H6C5.17 7.5 4.5 6.83 4.5 6Z"
+                fill="currentColor"
+              />
+              <circle cx="18" cy="5.5" r="2.2" fill="#A7F3D0" />
+            </svg>
           </div>
         </div>
         <h2 className="mt-4 text-center text-3xl font-extrabold text-[#1F2937] tracking-tight">

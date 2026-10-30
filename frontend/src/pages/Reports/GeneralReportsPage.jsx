@@ -659,16 +659,16 @@ export default function GeneralReportsPage() {
           {/* TAB 4: REVENUE BY PRODUCT & CATEGORY (SRS 2.1) */}
           {activeTab === 'revenue' && revenueData && (
             <div className="space-y-6">
-              {/* Thẻ tổng doanh thu - styled with accent gradient */}
-              <div className="p-6 rounded-2xl bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] text-white shadow-md">
-                <span className="text-xs uppercase tracking-wider text-indigo-100 font-semibold">
+              {/* Thẻ tổng doanh thu - Minimalist Mint & Green Palette */}
+              <div className="p-6 rounded-2xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] shadow-xs">
+                <span className="text-xs uppercase tracking-wider text-[#2E7D32] font-semibold">
                   Tổng Doanh Thu Toàn Kỳ Khảo Sát
                 </span>
-                <div className="text-3xl font-extrabold mt-1">
+                <div className="text-3xl font-extrabold mt-1 text-[#1F2937]">
                   {Number(revenueData.grand_total || 0).toLocaleString('vi-VN')}{' '}
-                  <span className="text-lg font-normal text-indigo-100">VNĐ</span>
+                  <span className="text-lg font-semibold text-[#3CB371]">VNĐ</span>
                 </div>
-                <p className="text-xs text-indigo-100 mt-2">
+                <p className="text-xs text-[#2E7D32] mt-2 font-medium">
                   Dữ liệu được tổng hợp trực tiếp từ các hóa đơn chốt đơn thành công trong hệ thống.
                 </p>
               </div>

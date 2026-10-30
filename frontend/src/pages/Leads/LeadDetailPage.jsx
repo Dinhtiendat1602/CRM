@@ -426,26 +426,26 @@ export default function LeadDetailPage() {
 
         {/* Cột phải 1/3: Thẻ tóm tắt nhanh & Hoạt động */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-[#7CA5F5] to-[#5D3EBC] text-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">
+          <div className="bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-2xl p-6 shadow-xs">
+            <h3 className="text-xs font-semibold text-[#2E7D32] uppercase tracking-wider mb-2">
               Tóm Tắt Trạng Thái Lead
             </h3>
-            <div className="text-2xl font-bold tracking-tight mb-4">
+            <div className="text-2xl font-bold tracking-tight mb-4 text-[#1F2937]">
               {opportunities.length > 0 ? `${opportunities.length} Cơ Hội Mở` : 'Lead Mới Tiếp Nhận'}
             </div>
-            <div className="space-y-3 text-xs text-white/90">
-              <div className="flex items-center justify-between border-b border-white/20 pb-2">
+            <div className="space-y-3 text-xs text-[#6B7280]">
+              <div className="flex items-center justify-between border-b border-[#DDF0E2] pb-2">
                 <span>Nguồn tiếp nhận:</span>
-                <span className="font-semibold text-white">{lead.source || 'Website'}</span>
+                <span className="font-semibold text-[#1F2937]">{lead.source || 'Website'}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-white/20 pb-2">
+              <div className="flex items-center justify-between border-b border-[#DDF0E2] pb-2">
                 <span>Ngày tạo Lead:</span>
-                <span className="font-semibold text-white">{formatDate(lead.entered_date)}</span>
+                <span className="font-semibold text-[#1F2937]">{formatDate(lead.entered_date)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Trạng thái kiểm tra:</span>
-                <span className="inline-flex items-center gap-1 text-white font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                <span className="inline-flex items-center gap-1 text-[#2E7D32] font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#3CB371]" />
                   Hợp lệ & Không trùng
                 </span>
               </div>

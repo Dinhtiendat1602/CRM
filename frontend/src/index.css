@@ -11,8 +11,8 @@
   --color-muted-gray: #6b7280;
   --color-light-gray: #f3f4f6;
 
-  --color-accent-blue: #7ca5f5;
-  --color-accent-purple: #5d3ebc;
+  --color-accent-blue: #3cb371;
+  --color-accent-purple: #2e7d32;
 }
 
 :root {
@@ -25,8 +25,8 @@
   --text-main: #1f2937;
   --text-muted: #6b7280;
   --bg-light: #f3f4f6;
-  --accent-start: #7ca5f5;
-  --accent-end: #5d3ebc;
+  --accent-start: #3cb371;
+  --accent-end: #2e7d32;
 }
 
 body {

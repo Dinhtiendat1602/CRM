@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-10-30 09:51
-- **Active Task:** Cố định Sidebar menu bên trái khi cuộn, loại bỏ tiêu đề lặp lại bên dưới Header, và thu gọn thông báo tối ưu 1 năm thành mini badge `Dữ liệu 1 năm` tinh tế.
-- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 268ms, 0 lint/build errors).
+- **Last Updated:** 2026-10-30 10:05
+- **Active Task:** Thay đổi logo vector Zen CRM hiện đại, khắc phục triệt để lỗi logo bị viền che/cắt góc (tăng gap layout và căn giữa khi thu gọn), xóa bỏ banner chào mừng cồng kềnh trên Dashboard, và đồng bộ chuyển toàn bộ các thẻ/tiêu đề màu tím sang bảng màu xanh lá / mint tối giản thanh lịch (`feat-024`).
+- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 298ms, 0 lint/build errors).
 - **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
 
 ---

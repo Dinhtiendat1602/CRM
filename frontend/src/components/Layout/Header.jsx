@@ -230,7 +230,7 @@ export default function Header({ onToggleMobileSidebar }) {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#EAF5EC] transition-colors cursor-pointer"
           >
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#3CB371] via-[#2E7D32] to-[#7CA5F5] flex items-center justify-center text-white font-bold text-sm shadow-xs">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#3CB371] to-[#2E7D32] flex items-center justify-center text-white font-bold text-sm shadow-xs">
               {userInitial}
             </div>
 

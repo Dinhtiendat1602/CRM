@@ -147,14 +147,14 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-2xl w-full overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
         {/* Header Modal */}
-        <div className="px-6 py-4 bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-[#EAF5EC] border-b border-[#DDF0E2] text-[#1F2937] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
-              <ShoppingBag className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#DDF0E2] flex items-center justify-center text-[#3CB371] shadow-2xs">
+              <ShoppingBag className="w-5 h-5 text-[#3CB371]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold leading-tight">Chốt Đơn Hàng (Make an Order)</h2>
-              <p className="text-xs text-white/80 mt-0.5">
+              <h2 className="text-lg font-bold leading-tight text-[#1F2937]">Chốt Đơn Hàng (Make an Order)</h2>
+              <p className="text-xs text-[#6B7280] mt-0.5">
                 Chuyển Cơ Hội #{opportunity.id} thành Hóa đơn xuất kho chính thức (SRS 3.12)
               </p>
             </div>
@@ -162,7 +162,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           <button
             onClick={onClose}
             disabled={loading}
-            className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/20 transition-colors"
+            className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] hover:bg-white/80 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

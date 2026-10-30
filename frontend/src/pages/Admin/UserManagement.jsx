@@ -502,7 +502,7 @@ export default function UserManagement() {
                       {/* Name & Username */}
                       <td className="py-3.5 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#7CA5F5] to-[#5D3EBC] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-2xs">
+                          <div className="h-9 w-9 rounded-xl bg-[#3CB371] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-2xs">
                             {initial}
                           </div>
                           <div>

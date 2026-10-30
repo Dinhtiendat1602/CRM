@@ -101,35 +101,56 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col justify-between py-4 px-3 transition-all duration-300 ease-in-out lg:static lg:h-full lg:shrink-0 overflow-y-auto ${
-          collapsed ? 'w-20' : 'w-60 xl:w-64'
+        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col justify-between py-4 transition-all duration-300 ease-in-out lg:static lg:h-full lg:shrink-0 overflow-y-auto select-none ${
+          collapsed ? 'w-20 px-2' : 'w-64 px-3'
         } ${mobileOpen ? 'translate-x-0 bg-[#EBF5ED] shadow-xl' : '-translate-x-full lg:translate-x-0'}`}
       >
         <div className="flex flex-col space-y-6">
           {/* Brand Logo & Header */}
-          <div className="flex items-center justify-between px-3">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="h-9 w-9 shrink-0 rounded-xl bg-[#3CB371] flex items-center justify-center text-white shadow-xs font-bold text-lg">
-                Z
+          <div className={`flex items-center ${collapsed ? 'justify-center px-0' : 'justify-between px-2.5'}`}>
+            <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'} min-w-0`}>
+              {/* Modern Vector SVG Logo: Zen CRM Emblem */}
+              <div
+                className="h-10 w-10 shrink-0 rounded-2xl bg-gradient-to-br from-[#3CB371] to-[#2E7D32] flex items-center justify-center text-white shadow-xs ring-2 ring-white/60 transition-transform hover:scale-105"
+                title="Zen CRM Enterprise"
+              >
+                <svg
+                  className="w-5.5 h-5.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4.5 6C4.5 5.17 5.17 4.5 6 4.5H18C18.83 4.5 19.5 5.17 19.5 6C19.5 6.55 19.2 7.05 18.73 7.32L9.2 12.8H18C18.83 12.8 19.5 13.47 19.5 14.3C19.5 15.13 18.83 15.8 18 15.8H6C5.17 15.8 4.5 15.13 4.5 14.3C4.5 13.75 4.8 13.25 5.27 12.98L14.8 7.5H6C5.17 7.5 4.5 6.83 4.5 6Z"
+                    fill="currentColor"
+                  />
+                  <circle cx="18" cy="5.5" r="2" fill="#A7F3D0" />
+                </svg>
               </div>
+
               {!collapsed && (
-                <div className="flex items-baseline gap-0.5">
-                  <span className="text-xl font-extrabold text-[#1F2937] tracking-tight">
-                    zen
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-black text-[#1F2937] tracking-tight">ZEN</span>
+                    <span className="text-xl font-black text-[#3CB371] tracking-tight">CRM</span>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-[#9CA3AF] -mt-1">
+                    Enterprise
                   </span>
-                  <span className="text-xl font-extrabold text-[#3CB371]">crm.</span>
                 </div>
               )}
             </div>
 
             {/* Close button for mobile */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen(false)}
-              className="lg:hidden p-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] hover:bg-white/60 cursor-pointer"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            {!collapsed && (
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                className="lg:hidden p-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] hover:bg-white/60 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
           </div>
 
           {/* Navigation Items */}
@@ -175,9 +196,12 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         {/* Bottom Section: User Info & Collapse Toggle */}
         <div className="pt-4 space-y-3">
           {/* User Profile Mini Card */}
-          <div className="px-2">
-            <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/50 transition-all cursor-pointer">
-              <div className="h-9 w-9 shrink-0 rounded-full bg-[#3CB371] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+          <div className={collapsed ? 'px-0 flex justify-center' : 'px-2'}>
+            <div
+              className={`flex items-center ${collapsed ? 'justify-center p-1.5' : 'gap-3 p-2'} rounded-xl hover:bg-white/50 transition-all cursor-pointer`}
+              title={collapsed ? `${user?.full_name || user?.username} (${currentRole})` : undefined}
+            >
+              <div className="h-9 w-9 shrink-0 rounded-full bg-[#3CB371] text-white flex items-center justify-center font-bold text-xs shadow-2xs ring-2 ring-white/60">
                 {userInitials}
               </div>
               {!collapsed && (

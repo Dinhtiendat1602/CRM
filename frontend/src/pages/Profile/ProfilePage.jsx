@@ -149,7 +149,7 @@ export default function ProfilePage() {
       {/* Page Header */}
       <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-[#7CA5F5] to-[#5D3EBC] flex items-center justify-center text-white text-2xl font-bold shadow-md shrink-0">
+          <div className="h-16 w-16 rounded-2xl bg-[#3CB371] flex items-center justify-center text-white text-2xl font-bold shadow-md shrink-0">
             {initial}
           </div>
           <div>

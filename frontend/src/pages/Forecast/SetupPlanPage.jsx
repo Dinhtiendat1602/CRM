@@ -238,16 +238,18 @@ export default function SetupPlanPage() {
 
       {/* 3 Thẻ Thống kê Tổng quan Kế hoạch */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Tổng chỉ tiêu năm - Styled with Accent Gradient #7CA5F5 -> #5D3EBC */}
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] text-white shadow-md">
-          <div className="flex items-center justify-between opacity-80 mb-1">
+        {/* Tổng chỉ tiêu năm - Minimalist Mint & Brand Green Palette */}
+        <div className="p-5 rounded-2xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] shadow-xs">
+          <div className="flex items-center justify-between text-[#2E7D32] mb-1">
             <span className="text-xs font-semibold uppercase tracking-wider">Tổng Chỉ Tiêu Năm {fiscalYear}</span>
-            <DollarSign className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-[#3CB371] shadow-2xs border border-[#DDF0E2]">
+              <DollarSign className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl lg:text-3xl font-extrabold mt-1">
-            {totalYearPlan.toLocaleString('vi-VN')} <span className="text-sm font-normal text-indigo-100">VNĐ</span>
+          <div className="text-2xl lg:text-3xl font-extrabold text-[#1F2937] mt-1">
+            {totalYearPlan.toLocaleString('vi-VN')} <span className="text-sm font-semibold text-[#3CB371]">VNĐ</span>
           </div>
-          <p className="text-xs text-indigo-100 mt-2">
+          <p className="text-xs text-[#2E7D32] mt-2 font-medium">
             Mẫu số chuẩn dùng để đối soát tỷ lệ hoàn thành % trên Dashboard và Performance Report (SRS 3.21).
           </p>
         </div>

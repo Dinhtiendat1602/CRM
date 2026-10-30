@@ -106,23 +106,23 @@ export default function Header({ onToggleMobileSidebar }) {
     .toUpperCase();
 
   return (
-    <header className="h-16 bg-white/95 backdrop-blur-md border-b border-[#DDF0E2] sticky top-0 z-30 shadow-xs flex items-center justify-between px-4 sm:px-6">
+    <header className="h-16 bg-white border-b border-gray-100 sticky top-0 z-30 flex items-center justify-between px-6 sm:px-8">
       {/* Left: Mobile Toggle & Page Title / Breadcrumbs */}
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onToggleMobileSidebar}
-          className="lg:hidden p-2 rounded-xl text-[#6B7280] hover:text-[#1F2937] hover:bg-[#EAF5EC] cursor-pointer"
+          className="lg:hidden p-2 rounded-xl text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F3F4F6] cursor-pointer"
           aria-label="Mở Menu"
         >
           <Menu className="h-5 w-5" />
         </button>
 
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 text-xs text-[#6B7280]">
+          <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF]">
             <span>Zen CRM</span>
             <span>/</span>
-            <span className="text-[#1F2937] font-medium">{pageTitle}</span>
+            <span className="text-[#6B7280] font-medium">{pageTitle}</span>
           </div>
           <h2 className="text-base sm:text-lg font-bold text-[#1F2937] leading-tight">
             {pageTitle}
@@ -134,7 +134,7 @@ export default function Header({ onToggleMobileSidebar }) {
       <div className="flex items-center gap-3">
         {/* Đồng hồ Ngày Giờ thực tế hiển thị trên toàn bộ các trang */}
         {currentDateTime && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-[#EAF5EC] text-[#1F2937] border border-[#DDF0E2] shadow-2xs">
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#F9FAFB] text-[#4B5563] border border-gray-200/60 shadow-2xs">
             <Calendar className="h-3.5 w-3.5 text-[#3CB371] shrink-0" />
             <span className="font-mono">{currentDateTime}</span>
           </div>

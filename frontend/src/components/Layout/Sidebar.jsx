@@ -81,104 +81,135 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
     item.roles.includes(currentRole)
   );
 
+  const userInitials = (user?.full_name || user?.username || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <>
       {/* Mobile Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col bg-slate-900 text-slate-200 border-r border-slate-800 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:shrink-0 ${
-          collapsed ? 'w-20' : 'w-64'
-        } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        className={`fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col justify-between py-5 px-3 transition-all duration-300 ease-in-out lg:static lg:h-auto lg:shrink-0 ${
+          collapsed ? 'w-20' : 'w-60 xl:w-64'
+        } ${mobileOpen ? 'translate-x-0 bg-[#EBF5ED] shadow-xl' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* Brand Logo & Header */}
-        <div className="shrink-0 h-16 flex items-center justify-between px-4 border-b border-slate-800">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-tr from-[#3CB371] via-[#2E7D32] to-[#7CA5F5] flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-bold text-xl">
-              Z
-            </div>
-            {!collapsed && (
-              <div className="flex flex-col">
-                <span className="text-base font-bold text-white tracking-tight leading-tight">
-                  Zen CRM
-                </span>
-                <span className="text-[10px] uppercase font-semibold text-[#3CB371] tracking-wider">
-                  Enterprise v1.1
-                </span>
+        <div className="flex flex-col space-y-6">
+          {/* Brand Logo & Header */}
+          <div className="flex items-center justify-between px-3">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div className="h-9 w-9 shrink-0 rounded-xl bg-[#3CB371] flex items-center justify-center text-white shadow-xs font-bold text-lg">
+                Z
               </div>
-            )}
+              {!collapsed && (
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-xl font-extrabold text-[#1F2937] tracking-tight">
+                    zen
+                  </span>
+                  <span className="text-xl font-extrabold text-[#3CB371]">crm.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Close button for mobile */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] hover:bg-white/60 cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
-          {/* Close button for mobile */}
-          <button
-            type="button"
-            onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          {/* Navigation Items */}
+          <nav className="space-y-1.5">
+            {!collapsed && (
+              <div className="px-3 pb-1 text-[11px] font-semibold text-[#9CA3AF] tracking-wide">
+                My Panel
+              </div>
+            )}
+
+            {accessibleItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) =>
+                    `group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm transition-all ${
+                      isActive
+                        ? 'bg-white text-[#1F2937] shadow-xs font-semibold border border-white/80'
+                        : 'text-[#6B7280] hover:text-[#1F2937] hover:bg-white/50 font-medium'
+                    }`
+                  }
+                  title={collapsed ? item.label : undefined}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon
+                        className={`h-5 w-5 shrink-0 transition-colors ${
+                          isActive ? 'text-[#3CB371]' : 'text-[#6B7280] group-hover:text-[#1F2937]'
+                        }`}
+                      />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5">
-          {!collapsed && (
-            <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#6B7280]">
-              Phân hệ làm việc
+        {/* Bottom Section: User Info & Collapse Toggle */}
+        <div className="pt-4 space-y-3">
+          {/* User Profile Mini Card */}
+          <div className="px-2">
+            <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/50 transition-all cursor-pointer">
+              <div className="h-9 w-9 shrink-0 rounded-full bg-[#3CB371] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                {userInitials}
+              </div>
+              {!collapsed && (
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-bold text-[#1F2937] truncate">
+                    {user?.full_name || user?.username || 'Thành viên'}
+                  </span>
+                  <span className="text-[10px] text-[#9CA3AF] truncate font-medium">
+                    {currentRole}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          {accessibleItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
-                    ? 'bg-[#3CB371] text-white shadow-md shadow-[#3CB371]/30 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`
-                }
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon className="h-5 w-5 shrink-0 transition-transform group-hover:scale-105" />
-                {!collapsed && (
-                  <span className="truncate">{item.label}</span>
-                )}
-                {/* Active indicator bar */}
-                {({ isActive }) =>
-                  isActive && !collapsed && (
-                    <span className="ml-auto w-1.5 h-4 rounded-full bg-[#DDF0E2]" />
-                  )
-                }
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        {/* Desktop Collapse Toggle Button */}
-        <div className="shrink-0 hidden lg:flex items-center justify-between p-3 border-t border-slate-800 text-slate-400">
-          <button
-            type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors text-xs font-medium cursor-pointer"
-          >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <>
-                <ChevronLeft className="h-4 w-4" />
-                <span>Thu gọn menu</span>
-              </>
-            )}
-          </button>
+          {/* Desktop Collapse Toggle Button */}
+          <div className="hidden lg:flex items-center justify-center px-2">
+            <button
+              type="button"
+              onClick={() => setCollapsed(!collapsed)}
+              className="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-[#9CA3AF] hover:text-[#1F2937] hover:bg-white/40 transition-colors text-xs font-medium cursor-pointer"
+            >
+              {collapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <>
+                  <ChevronLeft className="h-4 w-4" />
+                  <span>Thu gọn</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </aside>
     </>

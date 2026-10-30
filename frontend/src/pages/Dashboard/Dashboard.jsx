@@ -315,18 +315,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner - Accent Gradient (#7CA5F5 to #5D3EBC) */}
-      <div className="bg-gradient-to-r from-[#7CA5F5] to-[#5D3EBC] rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      {/* Welcome Banner - Minimalist Style */}
+      <div className="bg-[#F9FAFB] border border-gray-100 rounded-2xl p-6 sm:p-7 text-[#1F2937] shadow-xs relative overflow-hidden">
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             {hasLoaded ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-xs border border-white/30">
-                <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF5EC] text-[#2E7D32] text-xs font-semibold border border-[#DDF0E2]">
+                <span className="h-2 w-2 rounded-full bg-[#3CB371] animate-pulse" />
                 Đang hiển thị dữ liệu 1 năm gần nhất từ Database PostgreSQL
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-xs border border-white/30">
-                <Clock className="h-3 w-3 text-white" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3F4F6] text-[#6B7280] text-xs font-semibold border border-gray-200/60">
+                <Clock className="h-3 w-3 text-[#6B7280]" />
                 Mặc định ẩn dữ liệu • Nhấn &quot;Xem dữ liệu&quot; để tải 1 năm gần nhất
               </span>
             )}
@@ -336,7 +336,7 @@ export default function Dashboard() {
                 id="btn-banner-load-data"
                 onClick={() => fetchDashboardStats(false)}
                 disabled={loading}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-xs font-semibold text-white transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-xs font-semibold text-white transition-all shadow-xs hover:shadow-sm cursor-pointer disabled:opacity-50"
                 title="Tải và xem dữ liệu 1 năm gần nhất"
               >
                 {loading ? (
@@ -357,16 +357,16 @@ export default function Dashboard() {
                   id="btn-banner-refresh-data"
                   onClick={() => fetchDashboardStats(true)}
                   disabled={refreshing}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-medium text-white transition-colors border border-white/20 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-gray-50 text-xs font-medium text-[#4B5563] transition-colors border border-gray-200 cursor-pointer"
                   title="Làm mới dữ liệu từ Database"
                 >
-                  <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin text-white' : ''}`} />
+                  <RefreshCw className={`h-3 w-3 text-[#3CB371] ${refreshing ? 'animate-spin' : ''}`} />
                   {refreshing ? 'Đang tải...' : 'Làm mới số liệu'}
                 </button>
                 <button
                   id="btn-banner-hide-data"
                   onClick={handleHideData}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 hover:bg-rose-500/40 text-xs font-medium text-white transition-colors border border-white/20 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-rose-50 text-xs font-medium text-[#6B7280] hover:text-rose-600 transition-colors border border-gray-200 cursor-pointer"
                   title="Ẩn dữ liệu bảng điều khiển"
                 >
                   <EyeOff className="h-3 w-3" />
@@ -376,13 +376,13 @@ export default function Dashboard() {
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1F2937]">
             Xin chào, {user?.full_name || user?.username || 'Thành viên Zen CRM'}!
           </h1>
 
-          <p className="text-white/90 text-sm leading-relaxed">
+          <p className="text-[#6B7280] text-sm leading-relaxed">
             Hệ thống đang hoạt động với vai trò{' '}
-            <span className="font-bold text-white bg-white/20 px-2 py-0.5 rounded-md">
+            <span className="font-semibold text-[#2E7D32] bg-[#EAF5EC] px-2 py-0.5 rounded-md border border-[#DDF0E2]">
               {currentRole === 'ADMIN'
                 ? 'Quản trị viên (ADMIN)'
                 : currentRole === 'SALE_MANAGER'
@@ -393,14 +393,11 @@ export default function Dashboard() {
             {currentRole === 'ADMIN' &&
               'Toàn bộ số liệu tài khoản người dùng, phân quyền RBAC và trạng thái kích hoạt được đồng bộ trực tiếp từ Database.'}
             {currentRole === 'SALE_MANAGER' &&
-              'Bạn có thể theo dõi toàn diện số lượng Sản phẩm trong kho, Khách hàng tiềm năng, Cơ hội bán hàng, Đơn hàng chốt và Tiến độ kế hoạch 12 tháng.'}
+              'Theo dõi toàn diện số lượng Sản phẩm trong kho, Khách hàng tiềm năng, Cơ hội bán hàng, Đơn hàng chốt và Tiến độ kế hoạch 12 tháng.'}
             {currentRole === 'SALESMAN' &&
               'Theo dõi khách hàng tiềm năng được giao, cơ hội bán hàng đang mở, tỷ lệ chốt deal và đơn hàng mới nhất trên hệ thống.'}
           </p>
         </div>
-
-        {/* Decorative background glow */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-white/20 to-transparent pointer-events-none" />
       </div>
 
       {errorMsg && (
@@ -500,12 +497,12 @@ export default function Dashboard() {
               return (
                 <div
                   key={idx}
-                  className="bg-white rounded-2xl border border-[#DDF0E2] p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden"
+                  className="bg-white rounded-2xl border border-gray-100 p-5 shadow-xs hover:shadow-sm transition-all relative overflow-hidden"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-[#6B7280]">{kpi.label}</span>
                     <div
-                      className={`h-9 w-9 rounded-xl bg-gradient-to-tr ${kpi.color} flex items-center justify-center text-white shadow-xs`}
+                      className="h-9 w-9 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center shadow-2xs"
                     >
                       <Icon className="h-4 w-4" />
                     </div>
@@ -530,12 +527,12 @@ export default function Dashboard() {
           {/* Grid 2 Cột: Bảng Đơn Hàng Mới Nhất & Cơ Hội Bán Hàng Gần Đây từ Database */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Khối 1: Đơn Hàng Mới Nhất từ Database */}
-            <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5 text-[#3CB371]" />
                   <h3 className="font-bold text-[#1F2937] text-base">Đơn Hàng Mới Nhất</h3>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
                     {dashboardData.recentOrders.length} đơn
                   </span>
                 </div>
@@ -610,12 +607,12 @@ export default function Dashboard() {
             </div>
 
             {/* Khối 2: Cơ Hội Bán Hàng Tiềm Năng Mới từ Database */}
-            <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-amber-600" />
                   <h3 className="font-bold text-[#1F2937] text-base">Cơ Hội Bán Hàng Đang Xử Lý</h3>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
                     {dashboardData.recentOpportunities.length} deal
                   </span>
                 </div>
@@ -692,12 +689,12 @@ export default function Dashboard() {
           {/* Grid 2: Khách Hàng Tiềm Năng Mới & (Nếu là Admin: Nhân Sự Mới) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Khối 3: Khách hàng tiềm năng mới tiếp cận (Leads) */}
-            <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-[#3CB371]" />
                   <h3 className="font-bold text-[#1F2937] text-base">Khách Tiềm Năng Mới Nhập</h3>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EAF5EC] text-[#2E7D32] font-semibold border border-[#DDF0E2]">
                     {dashboardData.recentLeads.length} khách hàng
                   </span>
                 </div>
@@ -767,12 +764,12 @@ export default function Dashboard() {
 
             {/* Khối 4: Nếu là Admin -> Hiển thị danh sách Nhân sự hệ thống; Nếu là Manager/Salesman -> Hiển thị Thống Kê Nhanh Kho & Tiếp Thị */}
             {currentRole === 'ADMIN' ? (
-              <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="h-5 w-5 text-purple-600" />
                     <h3 className="font-bold text-[#1F2937] text-base">Tài Khoản Nhân Sự Gần Đây</h3>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-200">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-200">
                       {dashboardData.recentUsers.length} tài khoản
                     </span>
                   </div>
@@ -850,8 +847,8 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#DDF0E2]">
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <Layers className="h-5 w-5 text-[#3CB371]" />
                     <h3 className="font-bold text-[#1F2937] text-base">Tổng Quan Vận Hành Bán Hàng</h3>
@@ -907,8 +904,8 @@ export default function Dashboard() {
       )}
 
       {/* Role-Based Quick Actions */}
-      <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#DDF0E2]">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100">
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amber-500" />

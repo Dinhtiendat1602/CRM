@@ -5,9 +5,10 @@
 ## Current Objective
   1. Loại bỏ dòng breadcrumb nhỏ ở Header, chỉ giữ lại duy nhất 1 dòng tiêu đề to thuần Tiếng Việt khi ở chế độ VI.
   2. Thay thế mục "API Health Check" trong dropdown tài khoản người dùng thành bộ chuyển đổi ngôn ngữ song ngữ Tiếng Việt 🇻🇳 và Tiếng Anh 🇬🇧.
-  3. Xây dựng hệ thống i18n toàn diện (`LanguageContext`, `translations.js`): Đồng bộ hóa ngôn ngữ sang toàn bộ nội dung bên trong các phân hệ nghiệp vụ (Kế hoạch doanh số 12 tháng, Đối soát, Header, Sidebar, Footer, thẻ KPI, bảng biểu, bộ công cụ phân bổ và các nút bấm).
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 279ms không lỗi).
-- Branch / commit: `main` (commit `54c76ec`)
+  3. Xây dựng hệ thống i18n toàn diện (`LanguageContext`, `translations.js`): Đồng bộ hóa ngôn ngữ sang 100% các phân hệ nghiệp vụ (Dashboard, Forecast, Leads, Opportunities, Orders, Products, Campaigns, Reports, Admin Users, Profile, Auth Login/ForgotPassword/ResetPassword, Layout Header/Sidebar/Footer, Modals, Tables, Dialogs, và Error Pages).
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 309ms không lỗi). Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
+- Branch / commit: `main`
+
 
 - [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**
   - **1. Hệ thống Style Tokens & Layout Core:**

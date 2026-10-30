@@ -13,28 +13,24 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import oppApi from '../../api/oppApi';
+import { useLanguage } from '../../context/LanguageContext';
 
 const PAYMENT_PRESETS = [
-  'Thanh toán tiền mặt khi nhận hàng (COD)',
-  'Chuyển khoản ngân hàng (Đã xác nhận)',
-  'Thanh toán qua Thẻ tín dụng / Thẻ ghi nợ',
-  'Công nợ thanh toán trong vòng 30 ngày',
+  { vi: 'Thanh toán tiền mặt khi nhận hàng (COD)', en: 'Cash On Delivery (COD)' },
+  { vi: 'Chuyển khoản ngân hàng (Đã xác nhận)', en: 'Bank Transfer (Verified)' },
+  { vi: 'Thanh toán qua Thẻ tín dụng / Thẻ ghi nợ', en: 'Credit / Debit Card' },
+  { vi: 'Công nợ thanh toán trong vòng 30 ngày', en: 'Net 30 Days Credit Term' },
 ];
 
 /**
  * MakeOrderModal - Modal Chốt đơn hàng từ Cơ hội bán hàng (Make an Order)
  * Tuân thủ nghiêm ngặt SRS v1.1 Mục 3.12 (Make an Order), BR-03 (Transaction ACID), BR-07
- * 
- * Props:
- * - isOpen: boolean
- * - onClose: () => void
- * - opportunity: Object (lead_name, product_name, unit_price, quantity, stock_qty, lead_address...)
- * - onSuccess: (createdOrder) => void
  */
 export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess }) {
+  const { t, isEn } = useLanguage();
   const [quantity, setQuantity] = useState(1);
   const [orderDate, setOrderDate] = useState('');
-  const [paymentPreset, setPaymentPreset] = useState(PAYMENT_PRESETS[0]);
+  const [paymentPreset, setPaymentPreset] = useState(PAYMENT_PRESETS[0].vi);
   const [paymentDetail, setPaymentDetail] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
   const [notes, setNotes] = useState('');
@@ -47,21 +43,19 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
       const initQty = Number(opportunity.quantity) > 0 ? Number(opportunity.quantity) : 1;
       setQuantity(initQty);
       
-      // Ngày hiện tại định dạng YYYY-MM-DD
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const localDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
       setOrderDate(localDate);
 
-      // Điền địa chỉ khách hàng nếu có
       setShippingAddress(opportunity.lead_address || '');
-      setPaymentPreset(PAYMENT_PRESETS[0]);
+      setPaymentPreset(isEn ? PAYMENT_PRESETS[0].en : PAYMENT_PRESETS[0].vi);
       setPaymentDetail('');
       setNotes('');
       setErrorMessage('');
       setSuccessMessage('');
     }
-  }, [opportunity, isOpen]);
+  }, [opportunity, isOpen, isEn]);
 
   if (!isOpen || !opportunity) return null;
 
@@ -153,9 +147,9 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               <ShoppingBag className="w-5 h-5 text-[#3CB371]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold leading-tight text-[#1F2937]">Chốt Đơn Hàng (Make an Order)</h2>
+              <h2 className="text-lg font-bold leading-tight text-[#1F2937]">{isEn ? 'Make an Order' : 'Chốt Đơn Hàng (Make an Order)'}</h2>
               <p className="text-xs text-[#6B7280] mt-0.5">
-                Chuyển Cơ Hội #{opportunity.id} thành Hóa đơn xuất kho chính thức
+                {isEn ? `Convert Opportunity #${opportunity.id} into official sales invoice` : `Chuyển Cơ Hội #${opportunity.id} thành Hóa đơn xuất kho chính thức`}
               </p>
             </div>
           </div>
@@ -175,7 +169,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
             <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700 text-sm">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" />
               <div className="flex-1">
-                <p className="font-semibold">Không thể chốt đơn</p>
+                <p className="font-semibold">{isEn ? 'Unable to make order' : 'Không thể chốt đơn'}</p>
                 <p className="text-xs mt-0.5">{errorMessage}</p>
               </div>
             </div>
@@ -185,7 +179,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
             <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-emerald-800 text-sm">
               <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-600" />
               <div className="flex-1">
-                <p className="font-semibold">Thành công</p>
+                <p className="font-semibold">{isEn ? 'Success' : 'Thành công'}</p>
                 <p className="text-xs mt-0.5">{successMessage}</p>
               </div>
             </div>
@@ -196,20 +190,20 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-slate-500 font-semibold uppercase tracking-wider">
                 <User className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Khách hàng nhận hàng (Lead)</span>
+                <span>{isEn ? 'Customer (Lead)' : 'Khách hàng nhận hàng (Lead)'}</span>
               </div>
               <p className="font-bold text-slate-900 text-sm">
-                {opportunity.lead_name || `Khách hàng #${opportunity.lead_id}`}
+                {opportunity.lead_name || `${isEn ? 'Customer' : 'Khách hàng'} #${opportunity.lead_id}`}
               </p>
               {opportunity.lead_phone && (
-                <p className="text-slate-600">SĐT: {opportunity.lead_phone}</p>
+                <p className="text-slate-600">{isEn ? 'Phone:' : 'SĐT:'} {opportunity.lead_phone}</p>
               )}
             </div>
 
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-slate-500 font-semibold uppercase tracking-wider">
                 <Package className="w-3.5 h-3.5 text-purple-600" />
-                <span>Sản phẩm xuất kho</span>
+                <span>{isEn ? 'Product to Fulfill' : 'Sản phẩm xuất kho'}</span>
               </div>
               <p className="font-bold text-slate-900 text-sm">{opportunity.product_name}</p>
               <div className="flex items-center gap-2">
@@ -217,7 +211,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                   {opportunity.product_code}
                 </span>
                 <span className="text-slate-600 font-semibold">
-                  Tồn kho: <strong className={stockQty > 0 ? 'text-emerald-700' : 'text-red-600'}>{stockQty}</strong> cái
+                  {isEn ? 'Stock:' : 'Tồn kho:'} <strong className={stockQty > 0 ? 'text-emerald-700' : 'text-red-600'}>{stockQty}</strong> {isEn ? 'units' : 'cái'}
                 </span>
               </div>
             </div>
@@ -227,7 +221,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                Số Lượng Chốt Đơn <span className="text-red-500">*</span>
+                {isEn ? 'Order Quantity' : 'Số Lượng Chốt Đơn'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -241,14 +235,14 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                       ? 'border-red-400 bg-red-50 text-red-900 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
-                  placeholder="Nhập số lượng..."
+                  placeholder={isEn ? 'Enter quantity...' : 'Nhập số lượng...'}
                   required
                 />
-                <span className="absolute right-3.5 top-2.5 text-xs text-gray-400">cái</span>
+                <span className="absolute right-3.5 top-2.5 text-xs text-gray-400">{isEn ? 'units' : 'cái'}</span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
                 <span className="text-gray-500">
-                  Đơn vị tính: <strong>cái</strong>
+                  {isEn ? 'Unit: units' : 'Đơn vị tính: cái'}
                 </span>
                 <span
                   className={`font-medium ${
@@ -259,14 +253,14 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                       : 'text-emerald-600'
                   }`}
                 >
-                  Kho sau chốt: {isStockInsufficient ? 'KHÔNG ĐỦ' : `${remainingStockAfter} cái`}
+                  {isEn ? 'Remaining after order:' : 'Kho sau chốt:'} {isStockInsufficient ? (isEn ? 'INSUFFICIENT' : 'KHÔNG ĐỦ') : `${remainingStockAfter} ${isEn ? 'units' : 'cái'}`}
                 </span>
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                Ngày Chốt Đơn Hàng <span className="text-red-500">*</span>
+                {isEn ? 'Order Date' : 'Ngày Chốt Đơn Hàng'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -279,7 +273,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                 <Calendar className="w-4 h-4 text-gray-400 absolute right-3.5 top-3 pointer-events-none" />
               </div>
               <span className="text-xs text-gray-400 mt-1 block">
-                Ngày ghi nhận doanh thu và trừ tồn kho
+                {isEn ? 'Revenue recognition and inventory deduction date' : 'Ngày ghi nhận doanh thu và trừ tồn kho'}
               </span>
             </div>
           </div>
@@ -287,30 +281,33 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           {/* Hàng 2: Thông tin thanh toán (SRS 3.12.3 REQ-1) */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-              Phương Thức & Thông Tin Thanh Toán <span className="text-red-500">*</span>
+              {isEn ? 'Payment Method & Information' : 'Phương Thức & Thông Tin Thanh Toán'} <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {PAYMENT_PRESETS.map((preset) => (
-                <button
-                  type="button"
-                  key={preset}
-                  onClick={() => setPaymentPreset(preset)}
-                  className={`p-2.5 text-left text-xs rounded-xl border transition-all flex items-center gap-2 ${
-                    paymentPreset === preset
-                      ? 'border-[#3CB371] bg-[#EAF5EC] text-[#2E7D32] font-bold shadow-xs'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                  }`}
-                >
-                  <CreditCard className={`w-3.5 h-3.5 ${paymentPreset === preset ? 'text-[#3CB371]' : 'text-gray-400'}`} />
-                  <span className="line-clamp-1">{preset}</span>
-                </button>
-              ))}
+              {PAYMENT_PRESETS.map((presetObj) => {
+                const text = isEn ? presetObj.en : presetObj.vi;
+                return (
+                  <button
+                    type="button"
+                    key={presetObj.vi}
+                    onClick={() => setPaymentPreset(text)}
+                    className={`p-2.5 text-left text-xs rounded-xl border transition-all flex items-center gap-2 ${
+                      paymentPreset === text
+                        ? 'border-[#3CB371] bg-[#EAF5EC] text-[#2E7D32] font-bold shadow-xs'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                    }`}
+                  >
+                    <CreditCard className={`w-3.5 h-3.5 ${paymentPreset === text ? 'text-[#3CB371]' : 'text-gray-400'}`} />
+                    <span className="line-clamp-1">{text}</span>
+                  </button>
+                );
+              })}
             </div>
             <input
               type="text"
               value={paymentDetail}
               onChange={(e) => setPaymentDetail(e.target.value)}
-              placeholder="Chi tiết thanh toán bổ sung (ví dụ: Đã nhận cọc 50%, số còn lại thu COD...)"
+              placeholder={isEn ? 'Additional payment notes (e.g. 50% deposit received, balance upon COD...)' : 'Chi tiết thanh toán bổ sung (ví dụ: Đã nhận cọc 50%, số còn lại thu COD...)'}
               className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             />
           </div>
@@ -319,13 +316,13 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-red-500" />
-              <span>Địa Chỉ Giao Hàng & Nhận Hàng <span className="text-red-500">*</span></span>
+              <span>{isEn ? 'Delivery & Shipping Address' : 'Địa Chỉ Giao Hàng & Nhận Hàng'} <span className="text-red-500">*</span></span>
             </label>
             <textarea
               rows="2"
               value={shippingAddress}
               onChange={(e) => setShippingAddress(e.target.value)}
-              placeholder="Nhập địa chỉ nhận hàng chi tiết của khách hàng..."
+              placeholder={isEn ? 'Enter detailed shipping address...' : 'Nhập địa chỉ nhận hàng chi tiết của khách hàng...'}
               className="w-full px-3.5 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               required
             />
@@ -335,13 +332,13 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-gray-400" />
-              <span>Ghi Chú Đơn Hàng (Tùy chọn)</span>
+              <span>{isEn ? 'Order Notes (Optional)' : 'Ghi Chú Đơn Hàng (Tùy chọn)'}</span>
             </label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ghi chú thêm: Yêu cầu giao giờ hành chính, đóng gói kèm quà tặng..."
+              placeholder={isEn ? 'Special delivery instructions, gift wrapping...' : 'Ghi chú thêm: Yêu cầu giao giờ hành chính, đóng gói kèm quà tặng...'}
               className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             />
           </div>
@@ -349,13 +346,13 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           {/* Card Tổng Tiền Realtime */}
           <div className="p-4 bg-[#EAF5EC] rounded-xl border border-[#DDF0E2] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-xs uppercase font-semibold text-[#2E7D32]">Giá Trị Đơn Hàng Bảo Tồn</p>
+              <p className="text-xs uppercase font-semibold text-[#2E7D32]">{isEn ? 'Total Order Value' : 'Giá Trị Đơn Hàng Bảo Tồn'}</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                {numQuantity} cái × {unitPrice.toLocaleString('vi-VN')} ₫/cái
+                {numQuantity} {isEn ? 'units' : 'cái'} × {unitPrice.toLocaleString('vi-VN')} ₫/{isEn ? 'unit' : 'cái'}
               </p>
             </div>
             <div className="text-right">
-              <span className="text-xs text-gray-500 block">Tổng Tiền Thanh Toán:</span>
+              <span className="text-xs text-gray-500 block">{isEn ? 'Total Payable:' : 'Tổng Tiền Thanh Toán:'}</span>
               <span className="text-2xl font-black text-[#2E7D32]">
                 {totalAmount.toLocaleString('vi-VN')} ₫
               </span>
@@ -367,7 +364,9 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
               <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
               <span>
-                Cảnh báo: Kho hiện chỉ còn <strong>{stockQty}</strong> sản phẩm. Hệ thống sẽ tự động hủy giao dịch (Rollback) nếu số lượng chốt lớn hơn tồn kho.
+                {isEn
+                  ? `Warning: Only ${stockQty} units remaining in stock. The transaction will automatically abort (Rollback) if quantity exceeds inventory.`
+                  : `Cảnh báo: Kho hiện chỉ còn ${stockQty} sản phẩm. Hệ thống sẽ tự động hủy giao dịch (Rollback) nếu số lượng chốt lớn hơn tồn kho.`}
               </span>
             </div>
           )}
@@ -380,7 +379,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               disabled={loading}
               className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
             >
-              Hủy Bỏ
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -394,12 +393,12 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Đang Chốt Đơn (ACID Tx)...</span>
+                  <span>{isEn ? 'Processing Order...' : 'Đang Chốt Đơn (ACID Tx)...'}</span>
                 </>
               ) : (
                 <>
                   <ShoppingBag className="w-4 h-4" />
-                  <span>Xác Nhận Chốt Đơn Hàng</span>
+                  <span>{isEn ? 'Confirm & Make Order' : 'Xác Nhận Chốt Đơn Hàng'}</span>
                 </>
               )}
             </button>

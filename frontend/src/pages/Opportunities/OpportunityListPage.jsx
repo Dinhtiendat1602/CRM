@@ -7,6 +7,7 @@ import ConfirmDialog from '../../components/Common/ConfirmDialog';
 import OpportunityModal from './OpportunityModal';
 import FollowUpModal from './FollowUpModal';
 import MakeOrderModal from './MakeOrderModal';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Briefcase, 
   Plus, 
@@ -35,6 +36,19 @@ const STATUS_BADGES = {
 export default function OpportunityListPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t, isEn } = useLanguage();
+
+  const getStatusBadge = (statusCode) => {
+    const badges = {
+      NEW: { label: isEn ? 'New' : 'Mới tạo', color: 'bg-slate-100 text-slate-800 border-slate-300' },
+      CONTACTED: { label: isEn ? 'Contacted' : 'Đã liên hệ', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+      QUALIFIED: { label: isEn ? 'Qualified' : 'Đủ điều kiện', color: 'bg-purple-100 text-purple-800 border-purple-300' },
+      PROPOSAL: { label: isEn ? 'Proposal' : 'Gửi báo giá', color: 'bg-amber-100 text-amber-800 border-amber-300' },
+      ORDERED: { label: isEn ? 'Ordered' : 'Đã chốt đơn', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+      LOST: { label: isEn ? 'Lost' : 'Thất bại/Hủy', color: 'bg-rose-100 text-rose-800 border-rose-300' },
+    };
+    return badges[statusCode] || badges.NEW;
+  };
 
   // State dữ liệu & phân trang (BR-03: limit=20)
   const [opportunities, setOpportunities] = useState([]);
@@ -130,11 +144,11 @@ export default function OpportunityListPage() {
       }));
     } catch (err) {
       console.error('Lỗi nạp danh sách cơ hội bán hàng:', err);
-      setErrorMsg('Không thể tải danh sách cơ hội bán hàng. Vui lòng thử lại.');
+      setErrorMsg(isEn ? 'Unable to load opportunities list. Please try again.' : 'Không thể tải danh sách cơ hội bán hàng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, search, status, fromDate, toDate, sortBy, sortOrder]);
+  }, [pagination.page, search, status, fromDate, toDate, sortBy, sortOrder, isEn]);
 
   useEffect(() => {
     fetchOpportunities();
@@ -173,7 +187,7 @@ export default function OpportunityListPage() {
       fetchOpportunities();
     } catch (err) {
       console.error('Lỗi xóa cơ hội bán hàng:', err);
-      alert(err.response?.data?.message || 'Không thể xóa cơ hội bán hàng này.');
+      alert(err.response?.data?.message || (isEn ? 'Unable to delete this sales opportunity.' : 'Không thể xóa cơ hội bán hàng này.'));
       setDeleteConfirm((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -186,20 +200,20 @@ export default function OpportunityListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      {/* Top Action Bar */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           {!fromDate && !toDate && (
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] shadow-2xs"
-              title="Hệ thống mặc định tối ưu tải cơ hội bán hàng trong 1 năm gần nhất. Vui lòng chọn Từ ngày / Đến ngày nếu muốn tải dữ liệu các năm trước đó."
+              title={isEn ? 'System optimizes data loading for the last 1 year by default.' : 'Hệ thống mặc định tối ưu tải cơ hội bán hàng trong 1 năm gần nhất.'}
             >
               <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
-              <span>Dữ liệu 1 năm</span>
+              <span>{t('oneYearData')}</span>
             </span>
           )}
           <span className="text-xs text-[#6B7280]">
-            Tổng cộng: <strong className="text-[#1F2937]">{pagination.totalRecords}</strong> cơ hội
+            {isEn ? 'Total:' : 'Tổng cộng:'} <strong className="text-[#1F2937]">{pagination.totalRecords}</strong> {isEn ? 'opportunities' : 'cơ hội'}
           </span>
         </div>
 
@@ -208,7 +222,7 @@ export default function OpportunityListPage() {
           className="flex items-center justify-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer ml-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>Thêm Cơ Hội Mới</span>
+          <span>{t('oppAddNew')}</span>
         </button>
       </div>
 
@@ -219,7 +233,7 @@ export default function OpportunityListPage() {
             <Briefcase className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#6B7280]">Tổng Số Cơ Hội</p>
+            <p className="text-xs uppercase font-semibold text-[#6B7280]">{isEn ? 'TOTAL OPPORTUNITIES' : 'Tổng Số Cơ Hội'}</p>
             <p className="text-2xl font-bold text-[#1F2937]">{pagination.totalRecords}</p>
           </div>
         </div>
@@ -229,7 +243,7 @@ export default function OpportunityListPage() {
             <Coins className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#6B7280]">Doanh Thu Dự Kiến (Trang này)</p>
+            <p className="text-xs uppercase font-semibold text-[#6B7280]">{isEn ? 'ESTIMATED VALUE (THIS PAGE)' : 'Doanh Thu Dự Kiến (Trang này)'}</p>
             <p className="text-2xl font-bold text-emerald-700">
               {Number(currentTotalValue).toLocaleString('vi-VN')} ₫
             </p>
@@ -241,8 +255,8 @@ export default function OpportunityListPage() {
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-semibold text-[#6B7280]">Quy Chuẩn Hiển Thị</p>
-            <p className="text-sm font-semibold text-[#1F2937] mt-1">20 dòng/trang (BR-03)</p>
+            <p className="text-xs uppercase font-semibold text-[#6B7280]">{isEn ? 'DISPLAY SPEC' : 'Quy Chuẩn Hiển Thị'}</p>
+            <p className="text-sm font-semibold text-[#1F2937] mt-1">{isEn ? '20 rows/page (BR-03)' : '20 dòng/trang (BR-03)'}</p>
           </div>
         </div>
       </div>
@@ -258,7 +272,7 @@ export default function OpportunityListPage() {
                 setSearch(val);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder="Tìm theo tên khách, mã SP..."
+              placeholder={t('oppSearchPlaceholder')}
             />
           </div>
 
@@ -272,13 +286,13 @@ export default function OpportunityListPage() {
               }}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
             >
-              <option value="">-- Tất cả trạng thái --</option>
-              <option value="NEW">Mới tạo (NEW)</option>
-              <option value="CONTACTED">Đã liên hệ (CONTACTED)</option>
-              <option value="QUALIFIED">Đủ điều kiện (QUALIFIED)</option>
-              <option value="PROPOSAL">Gửi báo giá (PROPOSAL)</option>
-              <option value="ORDERED">Đã chốt đơn (ORDERED)</option>
-              <option value="LOST">Thất bại/Hủy (LOST)</option>
+              <option value="">{isEn ? '-- All stages --' : '-- Tất cả trạng thái --'}</option>
+              <option value="NEW">{isEn ? 'New (NEW)' : 'Mới tạo (NEW)'}</option>
+              <option value="CONTACTED">{isEn ? 'Contacted (CONTACTED)' : 'Đã liên hệ (CONTACTED)'}</option>
+              <option value="QUALIFIED">{isEn ? 'Qualified (QUALIFIED)' : 'Đủ điều kiện (QUALIFIED)'}</option>
+              <option value="PROPOSAL">{isEn ? 'Proposal (PROPOSAL)' : 'Gửi báo giá (PROPOSAL)'}</option>
+              <option value="ORDERED">{isEn ? 'Ordered (ORDERED)' : 'Đã chốt đơn (ORDERED)'}</option>
+              <option value="LOST">{isEn ? 'Lost (LOST)' : 'Thất bại/Hủy (LOST)'}</option>
             </select>
           </div>
 
@@ -292,7 +306,7 @@ export default function OpportunityListPage() {
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
-              title="Lọc từ ngày tạo"
+              title={isEn ? 'Filter from date' : 'Lọc từ ngày tạo'}
             />
           </div>
 
@@ -306,7 +320,7 @@ export default function OpportunityListPage() {
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
-              title="Lọc đến ngày tạo"
+              title={isEn ? 'Filter to date' : 'Lọc đến ngày tạo'}
             />
           </div>
 
@@ -319,23 +333,21 @@ export default function OpportunityListPage() {
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
               className="w-full px-2.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
-              title="Tiêu chí sắp xếp"
+              title={isEn ? 'Sort by' : 'Tiêu chí sắp xếp'}
             >
-              <option value="created_at">Ngày tạo</option>
-              <option value="expected_close_date">Ngày chốt</option>
-              <option value="quantity">Số lượng</option>
+              <option value="created_at">{isEn ? 'Created Date' : 'Ngày tạo'}</option>
+              <option value="expected_close_date">{isEn ? 'Expected Close' : 'Ngày chốt'}</option>
+              <option value="quantity">{isEn ? 'Quantity' : 'Số lượng'}</option>
             </select>
             <button
               onClick={toggleSortOrder}
               className="p-2 text-sm border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors flex-shrink-0"
-              title={`Sắp xếp: ${sortOrder === 'ASC' ? 'Tăng dần' : 'Giảm dần'}`}
+              title={isEn ? `Sort: ${sortOrder === 'ASC' ? 'Ascending' : 'Descending'}` : `Sắp xếp: ${sortOrder === 'ASC' ? 'Tăng dần' : 'Giảm dần'}`}
             >
               <ArrowUpDown className="w-4 h-4" />
             </button>
           </div>
         </div>
-
-
       </div>
 
       {/* Thông báo lỗi nếu có */}
@@ -352,14 +364,14 @@ export default function OpportunityListPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#EAF5EC]/60 border-b border-[#DDF0E2] text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                <th className="py-3.5 px-4">Mã / Khách Hàng</th>
-                <th className="py-3.5 px-4">Sản Phẩm Quan Tâm</th>
-                <th className="py-3.5 px-4 text-center">Số Lượng</th>
-                <th className="py-3.5 px-4 text-right">Giá Trị Dự Kiến</th>
-                <th className="py-3.5 px-4 text-center">Trạng Thái</th>
-                <th className="py-3.5 px-4 text-center">Chăm Sóc</th>
-                <th className="py-3.5 px-4">Ngày Dự Kiến Chốt</th>
-                <th className="py-3.5 px-4 text-center">Thao Tác</th>
+                <th className="py-3.5 px-4">{isEn ? 'ID / Customer' : 'Mã / Khách Hàng'}</th>
+                <th className="py-3.5 px-4">{t('oppColProduct')}</th>
+                <th className="py-3.5 px-4 text-center">{isEn ? 'Quantity' : 'Số Lượng'}</th>
+                <th className="py-3.5 px-4 text-right">{t('oppColValue')}</th>
+                <th className="py-3.5 px-4 text-center">{t('oppColStage')}</th>
+                <th className="py-3.5 px-4 text-center">{isEn ? 'Follow-up' : 'Chăm Sóc'}</th>
+                <th className="py-3.5 px-4">{t('oppColCloseDate')}</th>
+                <th className="py-3.5 px-4 text-center">{t('oppColActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DDF0E2]/60 text-sm">
@@ -368,7 +380,7 @@ export default function OpportunityListPage() {
                   <td colSpan="8" className="py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-8 h-8 border-4 border-[#3CB371] border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm">Đang tải danh sách cơ hội...</span>
+                      <span className="text-sm">{isEn ? 'Loading opportunities...' : 'Đang tải danh sách cơ hội...'}</span>
                     </div>
                   </td>
                 </tr>
@@ -376,15 +388,15 @@ export default function OpportunityListPage() {
                 <tr>
                   <td colSpan="8" className="py-12 text-center text-gray-500">
                     <Briefcase className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-                    <p className="font-medium text-gray-600">Không tìm thấy cơ hội bán hàng nào phù hợp</p>
+                    <p className="font-medium text-gray-600">{isEn ? 'No matching sales opportunities found' : 'Không tìm thấy cơ hội bán hàng nào phù hợp'}</p>
                     <p className="text-xs text-gray-400 mt-1">
-                      Thử điều chỉnh bộ lọc hoặc bấm "Thêm Cơ Hội Mới" để tạo cơ hội đầu tiên
+                      {isEn ? 'Try adjusting filters or click "Create Opportunity" to add one' : 'Thử điều chỉnh bộ lọc hoặc bấm "Thêm Cơ Hội Mới" để tạo cơ hội đầu tiên'}
                     </p>
                   </td>
                 </tr>
               ) : (
                 opportunities.map((opp) => {
-                  const badge = STATUS_BADGES[opp.status] || STATUS_BADGES.NEW;
+                  const badge = getStatusBadge(opp.status);
                   return (
                     <tr key={opp.id} className="hover:bg-blue-50/40 transition-colors">
                       {/* Khách hàng */}
@@ -393,7 +405,7 @@ export default function OpportunityListPage() {
                           <Link
                             to={`/opportunities/${opp.id}`}
                             className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5 transition-colors"
-                            title="Xem chi tiết cơ hội"
+                            title={isEn ? 'View opportunity details' : 'Xem chi tiết cơ hội'}
                           >
                             #{opp.id}
                           </Link>
@@ -403,14 +415,14 @@ export default function OpportunityListPage() {
                                 to={`/leads/${opp.lead_id}`}
                                 className="font-semibold text-gray-900 hover:text-blue-600 text-left transition-colors hover:underline block"
                               >
-                                {opp.lead_name || `Khách hàng #${opp.lead_id}`}
+                                {opp.lead_name || `${isEn ? 'Customer' : 'Khách hàng'} #${opp.lead_id}`}
                               </Link>
                             ) : (
                               <button
                                 onClick={() => navigate(`/opportunities/${opp.id}`)}
                                 className="font-semibold text-gray-900 hover:text-blue-600 text-left transition-colors"
                               >
-                                {opp.lead_name || `Cơ hội #${opp.id}`}
+                                {opp.lead_name || `${isEn ? 'Opportunity' : 'Cơ hội'} #${opp.id}`}
                               </button>
                             )}
                             <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
@@ -442,7 +454,7 @@ export default function OpportunityListPage() {
                               <span className="font-medium text-gray-800">{opp.product_name}</span>
                             )}
                             <div className="text-xs text-gray-500">
-                              Mã: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{opp.product_code}</code>
+                              {isEn ? 'Code:' : 'Mã:'} <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{opp.product_code}</code>
                             </div>
                           </div>
                         </div>
@@ -459,7 +471,7 @@ export default function OpportunityListPage() {
                           {Number(opp.estimated_value || 0).toLocaleString('vi-VN')} ₫
                         </span>
                         <div className="text-xs text-gray-400">
-                          Đơn giá: {Number(opp.unit_price || 0).toLocaleString('vi-VN')} ₫
+                          {isEn ? 'Unit price:' : 'Đơn giá:'} {Number(opp.unit_price || 0).toLocaleString('vi-VN')} ₫
                         </div>
                       </td>
 
@@ -478,7 +490,7 @@ export default function OpportunityListPage() {
                           </span>
                           <button
                             onClick={() => handleOpenFollowUpModal(opp)}
-                            title="Ghi nhanh nhật ký chăm sóc"
+                            title={isEn ? 'Quick log follow-up' : 'Ghi nhanh nhật ký chăm sóc'}
                             className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           >
                             <MessageSquarePlus className="w-4 h-4" />
@@ -494,7 +506,7 @@ export default function OpportunityListPage() {
                             <span>{formatDate(opp.expected_close_date)}</span>
                           </div>
                         ) : (
-                          <span className="text-gray-400 italic">Chưa xác định</span>
+                          <span className="text-gray-400 italic">{isEn ? 'Undetermined' : 'Chưa xác định'}</span>
                         )}
                       </td>
 
@@ -503,7 +515,7 @@ export default function OpportunityListPage() {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => navigate(`/opportunities/${opp.id}`)}
-                            title="Xem chi tiết cơ hội & timeline chăm sóc"
+                            title={isEn ? 'View opportunity details & timeline' : 'Xem chi tiết cơ hội & timeline chăm sóc'}
                             className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           >
                             <Eye className="w-4 h-4" />
@@ -511,7 +523,7 @@ export default function OpportunityListPage() {
                           {opp.status !== 'ORDERED' && (
                             <button
                               onClick={() => setMakeOrderState({ isOpen: true, opportunity: opp })}
-                              title="Chốt đơn hàng (Xuất hóa đơn)"
+                              title={isEn ? 'Make an order (Fulfill invoice)' : 'Chốt đơn hàng (Xuất hóa đơn)'}
                               className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                             >
                               <ShoppingBag className="w-4 h-4" />
@@ -519,14 +531,14 @@ export default function OpportunityListPage() {
                           )}
                           <button
                             onClick={() => handleOpenEditModal(opp)}
-                            title="Chỉnh sửa cơ hội"
+                            title={isEn ? 'Edit opportunity' : 'Chỉnh sửa cơ hội'}
                             className="p-1.5 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm({ isOpen: true, opportunity: opp, loading: false })}
-                            title="Xóa cơ hội"
+                            title={isEn ? 'Delete opportunity' : 'Xóa cơ hội'}
                             disabled={opp.status === 'ORDERED'}
                             className={`p-1.5 rounded-lg transition-colors ${
                               opp.status === 'ORDERED'
@@ -599,10 +611,14 @@ export default function OpportunityListPage() {
         isOpen={deleteConfirm.isOpen}
         onClose={() => setDeleteConfirm({ isOpen: false, opportunity: null, loading: false })}
         onConfirm={handleConfirmDelete}
-        title="Xác Nhận Xóa Cơ Hội Bán Hàng"
-        message={`Bạn có chắc chắn muốn xóa cơ hội bán hàng #${deleteConfirm.opportunity?.id} của khách hàng '${deleteConfirm.opportunity?.lead_name}'? Hành động này sẽ đồng thời xóa toàn bộ nhật ký chăm sóc liên quan và không thể khôi phục.`}
-        confirmText="Xác Nhận Xóa"
-        cancelText="Hủy"
+        title={isEn ? 'Confirm Delete Opportunity' : 'Xác Nhận Xóa Cơ Hội Bán Hàng'}
+        message={
+          isEn
+            ? `Are you sure you want to delete sales opportunity #${deleteConfirm.opportunity?.id} for customer '${deleteConfirm.opportunity?.lead_name}'? This action will also delete all related follow-up logs and cannot be undone.`
+            : `Bạn có chắc chắn muốn xóa cơ hội bán hàng #${deleteConfirm.opportunity?.id} của khách hàng '${deleteConfirm.opportunity?.lead_name}'? Hành động này sẽ đồng thời xóa toàn bộ nhật ký chăm sóc liên quan và không thể khôi phục.`
+        }
+        confirmText={isEn ? 'Confirm Delete' : 'Xác Nhận Xóa'}
+        cancelText={t('cancel')}
         loading={deleteConfirm.loading}
       />
     </div>

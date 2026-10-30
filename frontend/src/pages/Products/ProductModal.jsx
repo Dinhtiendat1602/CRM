@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from '../../components/Common/Modal';
 import productApi from '../../api/productApi';
 import axiosClient from '../../api/axiosClient';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   Package, 
   Tag, 
@@ -24,6 +25,7 @@ const INITIAL_FORM = {
 };
 
 export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
+  const { t, isEn } = useLanguage();
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [categories, setCategories] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
@@ -79,13 +81,13 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
 
   const validate = () => {
     const errors = {};
-    if (!formData.product_code.trim()) errors.product_code = 'Mã sản phẩm là bắt buộc';
-    if (!formData.name.trim()) errors.name = 'Tên sản phẩm là bắt buộc';
+    if (!formData.product_code.trim()) errors.product_code = isEn ? 'Product code is required' : 'Mã sản phẩm là bắt buộc';
+    if (!formData.name.trim()) errors.name = isEn ? 'Product name is required' : 'Tên sản phẩm là bắt buộc';
     if (formData.unit_price === '' || isNaN(formData.unit_price) || Number(formData.unit_price) < 0) {
-      errors.unit_price = 'Đơn giá phải là số không âm';
+      errors.unit_price = isEn ? 'Unit price must be a non-negative number' : 'Đơn giá phải là số không âm';
     }
     if (formData.stock_qty === '' || isNaN(formData.stock_qty) || Number(formData.stock_qty) < 0) {
-      errors.stock_qty = 'Số lượng tồn kho phải là số nguyên không âm';
+      errors.stock_qty = isEn ? 'Stock quantity must be a non-negative integer' : 'Số lượng tồn kho phải là số nguyên không âm';
     }
 
     setFieldErrors(errors);
@@ -121,9 +123,9 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
       const status = err.response?.status;
       const data = err.response?.data;
       if (status === 409) {
-        setErrorMsg(data?.message || 'Mã sản phẩm đã tồn tại trên hệ thống.');
+        setErrorMsg(data?.message || (isEn ? 'Product code already exists in the system.' : 'Mã sản phẩm đã tồn tại trên hệ thống.'));
       } else {
-        setErrorMsg(data?.message || 'Có lỗi xảy ra khi lưu sản phẩm. Vui lòng kiểm tra lại.');
+        setErrorMsg(data?.message || (isEn ? 'An error occurred while saving product. Please check again.' : 'Có lỗi xảy ra khi lưu sản phẩm. Vui lòng kiểm tra lại.'));
       }
     } finally {
       setLoading(false);
@@ -134,7 +136,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? 'Chỉnh Sửa Sản Phẩm Kho' : 'Thêm Mới Sản Phẩm Kho'}
+      title={isEdit ? (isEn ? 'Edit Warehouse Product' : 'Chỉnh Sửa Sản Phẩm Kho') : (isEn ? 'Add New Product' : 'Thêm Mới Sản Phẩm Kho')}
       maxWidth="max-w-xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -143,7 +145,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
           <div className="flex items-start gap-3 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs animate-shake">
             <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600 mt-0.5" />
             <div className="flex-1">
-              <strong className="font-semibold block">Thông báo lỗi:</strong>
+              <strong className="font-semibold block">{isEn ? 'Error Notice:' : 'Thông báo lỗi:'}</strong>
               <span>{errorMsg}</span>
             </div>
           </div>
@@ -153,7 +155,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Mã Sản Phẩm <span className="text-rose-500">*</span>
+              {isEn ? 'Product Code' : 'Mã Sản Phẩm'} <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -161,7 +163,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 name="product_code"
                 value={formData.product_code}
                 onChange={handleChange}
-                placeholder="VD: PROD_CRM_01"
+                placeholder={isEn ? 'E.g. PROD_CRM_01' : 'VD: PROD_CRM_01'}
                 className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-xs uppercase font-mono tracking-wider focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.product_code
                     ? 'border-rose-400 focus:ring-rose-200'
@@ -177,7 +179,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Tên Sản Phẩm <span className="text-rose-500">*</span>
+              {isEn ? 'Product Name' : 'Tên Sản Phẩm'} <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -185,7 +187,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="VD: Zen CRM Enterprise"
+                placeholder={isEn ? 'E.g. Zen CRM Enterprise' : 'VD: Zen CRM Enterprise'}
                 className={`w-full pl-9 pr-3 py-2 bg-slate-50 border rounded-xl text-xs focus:outline-none focus:ring-2 transition-all ${
                   fieldErrors.name
                     ? 'border-rose-400 focus:ring-rose-200'
@@ -204,7 +206,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Danh Mục Sản Phẩm
+              {isEn ? 'Product Category' : 'Danh Mục Sản Phẩm'}
             </label>
             <div className="relative">
               <select
@@ -213,7 +215,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 onChange={handleChange}
                 className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               >
-                <option value="">-- Chưa chọn danh mục --</option>
+                <option value="">{isEn ? '-- Select category --' : '-- Chưa chọn danh mục --'}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -226,7 +228,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Chiến Dịch Quảng Bá
+              {isEn ? 'Marketing Campaign' : 'Chiến Dịch Quảng Bá'}
             </label>
             <div className="relative">
               <select
@@ -235,7 +237,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
                 onChange={handleChange}
                 className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
               >
-                <option value="">-- Không gắn chiến dịch --</option>
+                <option value="">{isEn ? '-- No campaign linked --' : '-- Không gắn chiến dịch --'}</option>
                 {campaigns.map((cmp) => (
                   <option key={cmp.id} value={cmp.id}>
                     {cmp.name}
@@ -251,7 +253,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Đơn Giá Bán ($) <span className="text-rose-500">*</span>
+              {isEn ? 'Unit Price ($)' : 'Đơn Giá Bán ($)'} <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -277,7 +279,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Số Lượng Tồn Kho (Stock Qty)
+              {isEn ? 'Stock Quantity' : 'Số Lượng Tồn Kho (Stock Qty)'}
             </label>
             <div className="relative">
               <input
@@ -304,14 +306,14 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
         {/* Mô tả sản phẩm */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Mô Tả Sản Phẩm / Tính Năng Nổi Bật
+            {isEn ? 'Product Description / Key Features' : 'Mô Tả Sản Phẩm / Tính Năng Nổi Bật'}
           </label>
           <textarea
             name="description"
             rows={3}
             value={formData.description}
             onChange={handleChange}
-            placeholder="Mô tả thông số kỹ thuật, phiên bản, bảo hành..."
+            placeholder={isEn ? 'Technical specs, version, warranty terms...' : 'Mô tả thông số kỹ thuật, phiên bản, bảo hành...'}
             className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all resize-none"
           />
         </div>
@@ -324,7 +326,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
             disabled={loading}
             className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50"
           >
-            Hủy Bỏ
+            {isEn ? 'Cancel' : 'Hủy Bỏ'}
           </button>
           <button
             type="submit"
@@ -332,7 +334,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] rounded-xl transition-colors shadow-sm disabled:opacity-50"
           >
             {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            <span>{isEdit ? 'Cập Nhật Sản Phẩm' : 'Lưu Sản Phẩm'}</span>
+            <span>{isEdit ? (isEn ? 'Update Product' : 'Cập Nhật Sản Phẩm') : (isEn ? 'Save Product' : 'Lưu Sản Phẩm')}</span>
           </button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '../../components/Common/Modal';
 import campaignApi from '../../api/campaignApi';
+import { useLanguage } from '../../context/LanguageContext';
 import { Megaphone, Calendar, DollarSign, FileText, AlertCircle, Loader2 } from 'lucide-react';
 
 const INITIAL_FORM = {
@@ -16,6 +17,7 @@ const INITIAL_FORM = {
  * Tuân thủ SRS v1.1 Mục 3.18.1 (Validate tên, ngày bắt đầu/kết thúc, ngân sách)
  */
 export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) {
+  const { t, isEn } = useLanguage();
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -61,27 +63,27 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
   const validate = () => {
     const errors = {};
     if (!formData.name || !formData.name.trim()) {
-      errors.name = 'Vui lòng nhập tên chiến dịch tiếp thị.';
+      errors.name = isEn ? 'Please enter campaign name.' : 'Vui lòng nhập tên chiến dịch tiếp thị.';
     }
 
     if (!formData.start_date) {
-      errors.start_date = 'Vui lòng chọn ngày bắt đầu chiến dịch.';
+      errors.start_date = isEn ? 'Please select campaign start date.' : 'Vui lòng chọn ngày bắt đầu chiến dịch.';
     }
 
     if (!formData.end_date) {
-      errors.end_date = 'Vui lòng chọn ngày kết thúc chiến dịch.';
+      errors.end_date = isEn ? 'Please select campaign end date.' : 'Vui lòng chọn ngày kết thúc chiến dịch.';
     }
 
     if (formData.start_date && formData.end_date) {
       const start = new Date(formData.start_date);
       const end = new Date(formData.end_date);
       if (end < start) {
-        errors.end_date = 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.';
+        errors.end_date = isEn ? 'End date must be greater than or equal to start date.' : 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.';
       }
     }
 
     if (formData.budget !== '' && (isNaN(Number(formData.budget)) || Number(formData.budget) < 0)) {
-      errors.budget = 'Ngân sách phải là số lớn hơn hoặc bằng 0.';
+      errors.budget = isEn ? 'Budget must be a number greater than or equal to 0.' : 'Ngân sách phải là số lớn hơn hoặc bằng 0.';
     }
 
     setFieldErrors(errors);
@@ -113,7 +115,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
       onSuccess?.();
       onClose();
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Có lỗi xảy ra khi lưu chiến dịch.';
+      const msg = err.response?.data?.message || err.message || (isEn ? 'An error occurred while saving campaign.' : 'Có lỗi xảy ra khi lưu chiến dịch.');
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -124,8 +126,8 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? 'Chỉnh sửa Chiến dịch Tiếp thị' : 'Tạo Chiến dịch Tiếp thị Mới'}
-      subtitle="Quản lý kế hoạch chiến dịch, thời hạn triển khai và ngân sách"
+      title={isEdit ? (isEn ? 'Edit Marketing Campaign' : 'Chỉnh sửa Chiến dịch Tiếp thị') : (isEn ? 'Create New Marketing Campaign' : 'Tạo Chiến dịch Tiếp thị Mới')}
+      subtitle={isEn ? 'Manage campaign schedule, duration and budget' : 'Quản lý kế hoạch chiến dịch, thời hạn triển khai và ngân sách'}
       maxWidth="max-w-xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,7 +142,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
         {/* Tên chiến dịch */}
         <div>
           <label className="block text-sm font-semibold text-slate-800 mb-1">
-            Tên chiến dịch <span className="text-rose-500">*</span>
+            {isEn ? 'Campaign Name' : 'Tên chiến dịch'} <span className="text-rose-500">*</span>
           </label>
           <div className="relative">
             <Megaphone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -149,7 +151,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="VD: Khuyến mãi Mùa Thu 2026, Ra mắt Dòng Sản Phẩm Mới..."
+              placeholder={isEn ? 'E.g. Fall Promotion 2026, New Product Launch...' : 'VD: Khuyến mãi Mùa Thu 2026, Ra mắt Dòng Sản Phẩm Mới...'}
               className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                 fieldErrors.name
                   ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
@@ -166,7 +168,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-semibold text-slate-800 mb-1">
-              Ngày bắt đầu <span className="text-rose-500">*</span>
+              {isEn ? 'Start Date' : 'Ngày bắt đầu'} <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -189,7 +191,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
 
           <div>
             <label className="block text-sm font-semibold text-slate-800 mb-1">
-              Ngày kết thúc <span className="text-rose-500">*</span>
+              {isEn ? 'End Date' : 'Ngày kết thúc'} <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -214,7 +216,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
         {/* Ngân sách chiến dịch (Budget) */}
         <div>
           <label className="block text-sm font-semibold text-slate-800 mb-1">
-            Ngân sách dự kiến (VNĐ)
+            {isEn ? 'Planned Budget (VND)' : 'Ngân sách dự kiến (VNĐ)'}
           </label>
           <div className="relative">
             <DollarSign className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -225,7 +227,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
               step="1000"
               value={formData.budget}
               onChange={handleChange}
-              placeholder="VD: 50000000 (Để trống sẽ mặc định là 0)"
+              placeholder={isEn ? 'E.g. 50000000 (Defaults to 0 if empty)' : 'VD: 50000000 (Để trống sẽ mặc định là 0)'}
               className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                 fieldErrors.budget
                   ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
@@ -237,7 +239,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
             <p className="text-xs text-rose-600 mt-1">{fieldErrors.budget}</p>
           ) : (
             <p className="text-xs text-slate-500 mt-1">
-              Ngân sách này được dùng làm mẫu số để tự động tính tỷ suất lợi nhuận ROI.
+              {isEn ? 'This budget is used as denominator to calculate ROI.' : 'Ngân sách này được dùng làm mẫu số để tự động tính tỷ suất lợi nhuận ROI.'}
             </p>
           )}
         </div>
@@ -245,7 +247,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
         {/* Mô tả chiến dịch */}
         <div>
           <label className="block text-sm font-semibold text-slate-800 mb-1">
-            Mô tả & Kế hoạch triển khai
+            {isEn ? 'Description & Execution Plan' : 'Mô tả & Kế hoạch triển khai'}
           </label>
           <div className="relative">
             <textarea
@@ -253,7 +255,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
               rows={3}
               value={formData.description}
               onChange={handleChange}
-              placeholder="Chi tiết đối tượng khách hàng mục tiêu, kênh truyền thông, chương trình chiết khấu..."
+              placeholder={isEn ? 'Target customer segments, channels, discount programs...' : 'Chi tiết đối tượng khách hàng mục tiêu, kênh truyền thông, chương trình chiết khấu...'}
               className="w-full p-3 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all resize-none"
             />
           </div>
@@ -267,7 +269,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
           >
-            Hủy bỏ
+            {isEn ? 'Cancel' : 'Hủy bỏ'}
           </button>
           <button
             type="submit"
@@ -277,10 +279,10 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang xử lý...</span>
+                <span>{isEn ? 'Processing...' : 'Đang xử lý...'}</span>
               </>
             ) : (
-              <span>{isEdit ? 'Lưu thay đổi' : 'Tạo chiến dịch'}</span>
+              <span>{isEdit ? (isEn ? 'Save Changes' : 'Lưu thay đổi') : (isEn ? 'Create Campaign' : 'Tạo chiến dịch')}</span>
             )}
           </button>
         </div>

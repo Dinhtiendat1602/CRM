@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import orderApi from '../../api/orderApi';
 import Pagination from '../../components/Common/Pagination';
 import SearchInput from '../../components/Common/SearchInput';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   ShoppingCart,
   Eye,
@@ -44,6 +45,7 @@ const STATUS_BADGES = {
  */
 export default function OrderListPage() {
   const navigate = useNavigate();
+  const { t, isEn } = useLanguage();
 
   // Danh sách và trạng thái tải
   const [orders, setOrders] = useState([]);
@@ -145,20 +147,20 @@ export default function OrderListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      {/* Top Action Bar */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           {!fromDate && !toDate && (
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] shadow-2xs"
-              title="Hệ thống mặc định tối ưu tải dữ liệu trong 1 năm gần nhất. Vui lòng chọn Từ ngày / Đến ngày nếu muốn tải dữ liệu các năm trước đó."
+              title={isEn ? 'System optimizes data loading for the last 1 year by default.' : 'Hệ thống mặc định tối ưu tải dữ liệu trong 1 năm gần nhất.'}
             >
               <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
-              <span>Dữ liệu 1 năm</span>
+              <span>{t('oneYearData')}</span>
             </span>
           )}
           <span className="text-xs text-[#6B7280]">
-            Tổng cộng: <strong className="text-[#1F2937]">{summary.totalOrders}</strong> đơn hàng
+            {isEn ? 'Total:' : 'Tổng cộng:'} <strong className="text-[#1F2937]">{summary.totalOrders}</strong> {isEn ? 'orders' : 'đơn hàng'}
           </span>
         </div>
 
@@ -167,7 +169,7 @@ export default function OrderListPage() {
           className="flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-xs font-semibold rounded-xl shadow-xs transition-all hover:shadow-md cursor-pointer ml-auto"
         >
           <ShoppingCart className="w-4 h-4" />
-          <span>+ Chốt Đơn Từ Cơ Hội</span>
+          <span>{isEn ? '+ Make Order from Opportunity' : '+ Chốt Đơn Từ Cơ Hội'}</span>
         </button>
       </div>
 
@@ -179,9 +181,9 @@ export default function OrderListPage() {
             <ShoppingCart className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">Tổng Đơn Hàng</p>
+            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">{t('orderTotalCount')}</p>
             <p className="text-2xl font-extrabold text-[#1F2937] mt-0.5">
-              {summary.totalOrders} <span className="text-xs font-normal text-[#6B7280]">đơn</span>
+              {summary.totalOrders} <span className="text-xs font-normal text-[#6B7280]">{isEn ? 'orders' : 'đơn'}</span>
             </p>
           </div>
         </div>
@@ -192,7 +194,7 @@ export default function OrderListPage() {
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">Tổng Doanh Thu</p>
+            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">{t('orderTotalRevenue')}</p>
             <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
               {Number(summary.totalRevenue || 0).toLocaleString('vi-VN')} ₫
             </p>
@@ -205,9 +207,9 @@ export default function OrderListPage() {
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">Sản Phẩm Xuất Kho</p>
+            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">{t('orderTotalProducts')}</p>
             <p className="text-2xl font-extrabold text-[#2E7D32] mt-0.5">
-              {summary.totalItems} <span className="text-xs font-normal text-[#6B7280]">sản phẩm</span>
+              {summary.totalItems} <span className="text-xs font-normal text-[#6B7280]">{isEn ? 'units' : 'sản phẩm'}</span>
             </p>
           </div>
         </div>
@@ -224,7 +226,7 @@ export default function OrderListPage() {
                 setSearch(val);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder="Tìm mã đơn, tên khách, sản phẩm..."
+              placeholder={isEn ? 'Search order code, lead, product...' : 'Tìm mã đơn, tên khách, sản phẩm...'}
             />
           </div>
 
@@ -238,11 +240,11 @@ export default function OrderListPage() {
               }}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
             >
-              <option value="">-- Tất cả trạng thái --</option>
-              <option value="COMPLETED">Đã hoàn tất (COMPLETED)</option>
-              <option value="PROCESSING">Đang xử lý (PROCESSING)</option>
-              <option value="PENDING">Chờ thanh toán (PENDING)</option>
-              <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+              <option value="">{isEn ? '-- All statuses --' : '-- Tất cả trạng thái --'}</option>
+              <option value="COMPLETED">{isEn ? 'Completed (COMPLETED)' : 'Đã hoàn tất (COMPLETED)'}</option>
+              <option value="PROCESSING">{isEn ? 'Processing (PROCESSING)' : 'Đang xử lý (PROCESSING)'}</option>
+              <option value="PENDING">{isEn ? 'Pending Payment (PENDING)' : 'Chờ thanh toán (PENDING)'}</option>
+              <option value="CANCELLED">{isEn ? 'Cancelled (CANCELLED)' : 'Đã hủy (CANCELLED)'}</option>
             </select>
           </div>
 
@@ -257,7 +259,7 @@ export default function OrderListPage() {
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
                 className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
-                title="Lọc từ ngày chốt đơn"
+                title={isEn ? 'Filter from order date' : 'Lọc từ ngày chốt đơn'}
               />
             </div>
           </div>
@@ -273,7 +275,7 @@ export default function OrderListPage() {
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
                 className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
-                title="Lọc đến ngày chốt đơn"
+                title={isEn ? 'Filter to order date' : 'Lọc đến ngày chốt đơn'}
               />
             </div>
           </div>
@@ -285,20 +287,18 @@ export default function OrderListPage() {
               className="w-full flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Đặt Lại</span>
+              <span>{isEn ? 'Reset' : 'Đặt Lại'}</span>
             </button>
           </div>
         </div>
 
-
-
         {/* Thông tin quy chuẩn & Sắp xếp */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-gray-100 text-xs text-gray-500">
           <div>
-            Quy chuẩn: <strong>20 đơn hàng/trang (BR-03)</strong> • Bộ lọc ngày (BR-05)
+            {isEn ? 'Spec: 20 orders/page (BR-03) • Date filter (BR-05)' : 'Quy chuẩn: 20 đơn hàng/trang (BR-03) • Bộ lọc ngày (BR-05)'}
           </div>
           <div className="flex items-center gap-2">
-            <span>Sắp xếp theo:</span>
+            <span>{isEn ? 'Sort by:' : 'Sắp xếp theo:'}</span>
             <button
               onClick={() => handleToggleSort('order_date')}
               className={`px-2 py-1 rounded-lg border font-medium flex items-center gap-1 ${
@@ -307,7 +307,7 @@ export default function OrderListPage() {
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <span>Ngày chốt</span>
+              <span>{isEn ? 'Order Date' : 'Ngày chốt'}</span>
               {sortBy === 'order_date' && (
                 <ArrowUpDown className="w-3 h-3 text-[#3CB371]" />
               )}
@@ -320,7 +320,7 @@ export default function OrderListPage() {
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <span>Tổng tiền</span>
+              <span>{isEn ? 'Total Amount' : 'Tổng tiền'}</span>
               {sortBy === 'total_amount' && (
                 <ArrowUpDown className="w-3 h-3 text-[#3CB371]" />
               )}
@@ -343,15 +343,15 @@ export default function OrderListPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#EAF5EC]/60 border-b border-[#DDF0E2] text-xs uppercase font-bold text-[#6B7280] tracking-wider">
               <tr>
-                <th className="py-3.5 px-4">Mã Đơn Hàng</th>
-                <th className="py-3.5 px-4">Khách Hàng (Lead)</th>
-                <th className="py-3.5 px-4">Sản Phẩm Xuất Kho</th>
-                <th className="py-3.5 px-4 text-center">Số Lượng</th>
-                <th className="py-3.5 px-4 text-right">Đơn Giá Chốt</th>
-                <th className="py-3.5 px-4 text-right">Tổng Tiền</th>
-                <th className="py-3.5 px-4">Thanh Toán</th>
-                <th className="py-3.5 px-4">Ngày Chốt Đơn</th>
-                <th className="py-3.5 px-4 text-center">Thao Tác</th>
+                <th className="py-3.5 px-4">{t('orderColCode')}</th>
+                <th className="py-3.5 px-4">{t('orderColCustomer')}</th>
+                <th className="py-3.5 px-4">{t('orderColProduct')}</th>
+                <th className="py-3.5 px-4 text-center">{isEn ? 'Quantity' : 'Số Lượng'}</th>
+                <th className="py-3.5 px-4 text-right">{isEn ? 'Unit Price' : 'Đơn Giá Chốt'}</th>
+                <th className="py-3.5 px-4 text-right">{t('orderColTotal')}</th>
+                <th className="py-3.5 px-4">{isEn ? 'Payment' : 'Thanh Toán'}</th>
+                <th className="py-3.5 px-4">{t('orderColDate')}</th>
+                <th className="py-3.5 px-4 text-center">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DDF0E2]/60">
@@ -360,7 +360,7 @@ export default function OrderListPage() {
                   <td colSpan="9" className="py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-8 h-8 border-4 border-[#3CB371] border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm">Đang tải danh sách đơn hàng...</span>
+                      <span className="text-sm">{isEn ? 'Loading orders list...' : 'Đang tải danh sách đơn hàng...'}</span>
                     </div>
                   </td>
                 </tr>
@@ -368,15 +368,15 @@ export default function OrderListPage() {
                 <tr>
                   <td colSpan="9" className="py-16 text-center text-gray-500">
                     <ShoppingCart className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-                    <p className="font-semibold text-gray-700 text-base">Không tìm thấy đơn hàng nào</p>
+                    <p className="font-semibold text-gray-700 text-base">{isEn ? 'No orders found' : 'Không tìm thấy đơn hàng nào'}</p>
                     <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-                      Chưa có đơn hàng nào khớp với điều kiện tìm kiếm. Bạn có thể chốt đơn mới trực tiếp từ màn hình Cơ hội bán hàng.
+                      {isEn ? 'No orders matching your search filters. You can create a new order directly from the Opportunities page.' : 'Chưa có đơn hàng nào khớp với điều kiện tìm kiếm. Bạn có thể chốt đơn mới trực tiếp từ màn hình Cơ hội bán hàng.'}
                     </p>
                     <button
                       onClick={() => navigate('/opportunities')}
                       className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#3CB371] text-white text-xs font-semibold rounded-lg hover:bg-[#38A169] transition-colors shadow-sm"
                     >
-                      <span>Xem Danh Sách Cơ Hội</span>
+                      <span>{isEn ? 'View Opportunities' : 'Xem Danh Sách Cơ Hội'}</span>
                     </button>
                   </td>
                 </tr>
@@ -403,11 +403,11 @@ export default function OrderListPage() {
                               to={`/leads/${ord.lead_id}`}
                               className="font-semibold text-gray-900 hover:text-[#3CB371] hover:underline"
                             >
-                              {ord.lead_name || `Khách hàng #${ord.lead_id}`}
+                              {ord.lead_name || `${isEn ? 'Customer' : 'Khách hàng'} #${ord.lead_id}`}
                             </Link>
                           ) : (
                             <p className="font-semibold text-gray-900">
-                              {ord.lead_name || 'Khách hàng'}
+                              {ord.lead_name || (isEn ? 'Customer' : 'Khách hàng')}
                             </p>
                           )}
                           <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
@@ -462,7 +462,7 @@ export default function OrderListPage() {
                       <td className="py-3.5 px-4 text-xs text-gray-600 max-w-xs">
                         <div className="flex items-center gap-1.5" title={ord.payment_info}>
                           <CreditCard className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                          <span className="truncate">{ord.payment_info || 'Chưa cập nhật'}</span>
+                          <span className="truncate">{ord.payment_info || (isEn ? 'Not updated' : 'Chưa cập nhật')}</span>
                         </div>
                       </td>
 
@@ -479,14 +479,14 @@ export default function OrderListPage() {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => navigate(`/orders/${ord.id}`)}
-                            title="Xem chi tiết hóa đơn & xuất hàng"
+                            title={isEn ? 'View invoice & fulfillment details' : 'Xem chi tiết hóa đơn & xuất hàng'}
                             className="p-1.5 text-gray-600 hover:text-[#3CB371] hover:bg-[#EAF5EC] rounded-lg transition-colors"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => navigate(`/orders/${ord.id}?print=true`)}
-                            title="In hóa đơn đơn hàng"
+                            title={isEn ? 'Print order invoice' : 'In hóa đơn đơn hàng'}
                             className="p-1.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                           >
                             <Printer className="w-4 h-4" />
@@ -505,7 +505,9 @@ export default function OrderListPage() {
         {!loading && orders.length > 0 && (
           <div className="p-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <span className="text-xs text-gray-500">
-              Hiển thị tối đa <strong>20 đơn/trang (BR-03)</strong> • Trang {pagination.page} / {pagination.totalPages} (Tổng {pagination.totalRecords} đơn hàng)
+              {isEn
+                ? `Showing max 20 orders/page (BR-03) • Page ${pagination.page} / ${pagination.totalPages} (Total ${pagination.totalRecords} orders)`
+                : `Hiển thị tối đa 20 đơn/trang (BR-03) • Trang ${pagination.page} / ${pagination.totalPages} (Tổng ${pagination.totalRecords} đơn hàng)`}
             </span>
             <Pagination
               currentPage={pagination.page}

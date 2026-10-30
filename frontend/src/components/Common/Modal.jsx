@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Reusable Modal Dialog Component
@@ -20,6 +21,8 @@ export default function Modal({
   children,
   maxWidth = 'max-w-lg',
 }) {
+  const { isEn } = useLanguage();
+
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape') {
@@ -62,7 +65,7 @@ export default function Modal({
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl text-[#6B7280] hover:text-[#1F2937] hover:bg-[#DDF0E2]/60 transition-colors cursor-pointer"
-            aria-label="Đóng"
+            aria-label={isEn ? "Close" : "Đóng"}
           >
             <X className="h-5 w-5" />
           </button>
@@ -74,3 +77,4 @@ export default function Modal({
     </div>
   );
 }
+

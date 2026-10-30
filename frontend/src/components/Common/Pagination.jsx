@@ -1,14 +1,9 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Component Phân trang chuẩn 20 bản ghi/trang theo SRS 3.2.3 REQ-1 & BR-03
- * 
- * @param {Object} props
- * @param {number} props.currentPage - Trang hiện tại (1-indexed)
- * @param {number} props.totalPages - Tổng số trang
- * @param {number} props.totalItems - Tổng số bản ghi
- * @param {number} [props.pageSize=20] - Số bản ghi mỗi trang
- * @param {Function} props.onPageChange - Callback khi chuyển trang (newPage)
+ * Hỗ trợ giao diện song ngữ Tiếng Việt & Tiếng Anh
  */
 export default function Pagination({
   currentPage = 1,
@@ -17,6 +12,8 @@ export default function Pagination({
   pageSize = 20,
   onPageChange,
 }) {
+  const { t, language } = useLanguage();
+
   if (totalItems === 0) return null;
 
   const startItem = Math.min((currentPage - 1) * pageSize + 1, totalItems);
@@ -51,9 +48,19 @@ export default function Pagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border-t border-[#DDF0E2] text-xs text-[#6B7280] rounded-b-2xl">
       <div>
-        Hiển thị <span className="font-semibold text-[#1F2937]">{startItem}</span> -{' '}
-        <span className="font-semibold text-[#1F2937]">{endItem}</span> trong tổng số{' '}
-        <span className="font-semibold text-[#1F2937]">{totalItems}</span> bản ghi (20 bản ghi/trang)
+        {language === 'en' ? (
+          <>
+            Showing <span className="font-semibold text-[#1F2937]">{startItem}</span> -{' '}
+            <span className="font-semibold text-[#1F2937]">{endItem}</span> of{' '}
+            <span className="font-semibold text-[#1F2937]">{totalItems}</span> records (20 records/page)
+          </>
+        ) : (
+          <>
+            Hiển thị <span className="font-semibold text-[#1F2937]">{startItem}</span> -{' '}
+            <span className="font-semibold text-[#1F2937]">{endItem}</span> trong tổng số{' '}
+            <span className="font-semibold text-[#1F2937]">{totalItems}</span> bản ghi (20 bản ghi/trang)
+          </>
+        )}
       </div>
 
       <div className="flex items-center gap-1.5">
@@ -63,7 +70,8 @@ export default function Pagination({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
           className="p-1.5 rounded-lg border border-[#DDF0E2] text-[#6B7280] hover:bg-[#EAF5EC] hover:text-[#1F2937] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-          aria-label="Trang trước"
+          aria-label={t('previousPage', 'Trang trước')}
+          title={t('previousPage', 'Trang trước')}
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -90,7 +98,8 @@ export default function Pagination({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
           className="p-1.5 rounded-lg border border-[#DDF0E2] text-[#6B7280] hover:bg-[#EAF5EC] hover:text-[#1F2937] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-          aria-label="Trang sau"
+          aria-label={t('nextPage', 'Trang sau')}
+          title={t('nextPage', 'Trang sau')}
         >
           <ChevronRight className="h-4 w-4" />
         </button>

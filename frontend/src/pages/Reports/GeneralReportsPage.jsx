@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import reportApi from '../../api/reportApi';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   BarChart3,
   ShoppingCart,
@@ -24,6 +25,7 @@ import {
  * Tuân thủ SRS v1.1 Mục 2.1 (Dành riêng cho Sale Manager & Admin)
  */
 export default function GeneralReportsPage() {
+  const { isEn } = useLanguage();
   const [activeTab, setActiveTab] = useState('summary'); // 'summary' | 'leads' | 'orders' | 'revenue'
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -64,11 +66,11 @@ export default function GeneralReportsPage() {
         setRevenueData(res.data);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Không thể tải dữ liệu báo cáo thống kê.');
+      setErrorMsg(err.response?.data?.message || (isEn ? 'Failed to load report analytics data.' : 'Không thể tải dữ liệu báo cáo thống kê.'));
     } finally {
       setLoading(false);
     }
-  }, [activeTab, fromDate, toDate, period]);
+  }, [activeTab, fromDate, toDate, period, isEn]);
 
   useEffect(() => {
     fetchReportData();
@@ -89,14 +91,14 @@ export default function GeneralReportsPage() {
       {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
       <div className="flex items-center justify-between gap-4 print:hidden">
         <span className="text-xs text-[#6B7280]">
-          Phân tích chuyên sâu hiệu quả bán hàng, đo lường Leads, Đơn hàng và Doanh thu
+          {isEn ? 'In-depth sales performance analysis, measuring Leads, Orders and Revenue' : 'Phân tích chuyên sâu hiệu quả bán hàng, đo lường Leads, Đơn hàng và Doanh thu'}
         </span>
 
         <div className="flex items-center gap-2 ml-auto">
           <button
             type="button"
             onClick={fetchReportData}
-            title="Làm mới số liệu"
+            title={isEn ? 'Refresh metrics' : 'Làm mới số liệu'}
             className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl shadow-2xs transition-all cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5 text-[#3CB371]" />
@@ -107,16 +109,18 @@ export default function GeneralReportsPage() {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#1F2937] bg-white border border-gray-200 hover:bg-gray-50 rounded-xl shadow-2xs transition-all cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5 text-[#6B7280]" />
-            <span>In Báo Cáo</span>
+            <span>{isEn ? 'Print Report' : 'In Báo Cáo'}</span>
           </button>
         </div>
       </div>
 
       {/* Header ẩn chỉ hiện khi Print */}
       <div className="hidden print:block border-b border-slate-300 pb-4 mb-4">
-        <h1 className="text-xl font-bold text-slate-900">BÁO CÁO KINH DOANH & THỐNG KÊ DOANH SỐ TỔNG HỢP</h1>
+        <h1 className="text-xl font-bold text-slate-900">
+          {isEn ? 'COMPREHENSIVE BUSINESS & SALES STATISTICS REPORT' : 'BÁO CÁO KINH DOANH & THỐNG KÊ DOANH SỐ TỔNG HỢP'}
+        </h1>
         <p className="text-xs text-slate-500 mt-1">
-          Ngày xuất báo cáo: {new Date().toLocaleDateString('vi-VN')} {new Date().toLocaleTimeString('vi-VN')}
+          {isEn ? 'Report generated at' : 'Ngày xuất báo cáo'}: {new Date().toLocaleDateString(isEn ? 'en-US' : 'vi-VN')} {new Date().toLocaleTimeString(isEn ? 'en-US' : 'vi-VN')}
         </p>
       </div>
 
@@ -125,7 +129,7 @@ export default function GeneralReportsPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-[#1F2937]">
             <Filter className="w-4 h-4 text-[#3CB371]" />
-            <span>Bộ lọc:</span>
+            <span>{isEn ? 'Filter:' : 'Bộ lọc:'}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -133,7 +137,7 @@ export default function GeneralReportsPage() {
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              title="Từ ngày"
+              title={isEn ? 'From date' : 'Từ ngày'}
               className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
             <span className="text-xs text-[#6B7280]">→</span>
@@ -141,7 +145,7 @@ export default function GeneralReportsPage() {
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              title="Đến ngày"
+              title={isEn ? 'To date' : 'Đến ngày'}
               className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
           </div>
@@ -154,7 +158,7 @@ export default function GeneralReportsPage() {
                 period === 'month' ? 'bg-white text-[#2E7D32] shadow-xs' : 'text-[#6B7280] hover:text-[#1F2937]'
               }`}
             >
-              Theo Tháng
+              {isEn ? 'Monthly' : 'Theo Tháng'}
             </button>
             <button
               type="button"
@@ -163,7 +167,7 @@ export default function GeneralReportsPage() {
                 period === 'day' ? 'bg-white text-[#2E7D32] shadow-xs' : 'text-[#6B7280] hover:text-[#1F2937]'
               }`}
             >
-              Theo Ngày
+              {isEn ? 'Daily' : 'Theo Ngày'}
             </button>
           </div>
         </div>
@@ -173,7 +177,7 @@ export default function GeneralReportsPage() {
           onClick={handleResetFilters}
           className="text-xs text-[#6B7280] hover:text-[#1F2937] font-medium underline cursor-pointer"
         >
-          Đặt lại thời gian
+          {isEn ? 'Reset date filter' : 'Đặt lại thời gian'}
         </button>
       </div>
 
@@ -189,7 +193,7 @@ export default function GeneralReportsPage() {
           }`}
         >
           <BarChart3 className="w-4 h-4" />
-          <span>Tổng Quan Điều Hành (Executive Summary)</span>
+          <span>{isEn ? 'Executive Summary' : 'Tổng Quan Điều Hành (Executive Summary)'}</span>
         </button>
 
         <button
@@ -202,7 +206,7 @@ export default function GeneralReportsPage() {
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>Khách Hàng Tiềm Năng (Leads)</span>
+          <span>{isEn ? 'Potential Leads' : 'Khách Hàng Tiềm Năng (Leads)'}</span>
         </button>
 
         <button
@@ -215,7 +219,7 @@ export default function GeneralReportsPage() {
           }`}
         >
           <ShoppingCart className="w-4 h-4" />
-          <span>Đơn Hàng & Giá Trị Đơn (Orders)</span>
+          <span>{isEn ? 'Orders & AOV' : 'Đơn Hàng & Giá Trị Đơn (Orders)'}</span>
         </button>
 
         <button
@@ -228,7 +232,7 @@ export default function GeneralReportsPage() {
           }`}
         >
           <PieChart className="w-4 h-4" />
-          <span>Doanh Thu Theo Sản Phẩm & Danh Mục</span>
+          <span>{isEn ? 'Revenue by Product & Category' : 'Doanh Thu Theo Sản Phẩm & Danh Mục'}</span>
         </button>
       </div>
 
@@ -244,7 +248,7 @@ export default function GeneralReportsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-500 bg-white rounded-xl border border-[#DDF0E2]">
           <Loader2 className="w-8 h-8 animate-spin text-[#3CB371] mb-2" />
-          <span className="text-sm font-medium">Đang tính toán và tải dữ liệu báo cáo...</span>
+          <span className="text-sm font-medium">{isEn ? 'Calculating and loading report analytics...' : 'Đang tính toán và tải dữ liệu báo cáo...'}</span>
         </div>
       ) : (
         <>
@@ -257,24 +261,24 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <span className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                      Hôm Nay (Today)
+                      {isEn ? 'Today' : 'Hôm Nay (Today)'}
                     </span>
                     <span className="w-2.5 h-2.5 rounded-full bg-[#3CB371] animate-pulse" />
                   </div>
                   <div className="mt-4 space-y-3">
                     <div>
-                      <span className="text-xs text-[#6B7280]">Doanh thu chốt hôm nay</span>
+                      <span className="text-xs text-[#6B7280]">{isEn ? 'Today closed revenue' : 'Doanh thu chốt hôm nay'}</span>
                       <div className="text-2xl font-bold text-[#2E7D32]">
-                        {Number(summaryData.today.revenue || 0).toLocaleString('vi-VN')} đ
+                        {Number(summaryData.today.revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
                       <div>
-                        <span className="text-[#6B7280]">Đơn hàng mới:</span>{' '}
+                        <span className="text-[#6B7280]">{isEn ? 'New orders:' : 'Đơn hàng mới:'}</span>{' '}
                         <strong className="text-[#1F2937]">{summaryData.today.orders}</strong>
                       </div>
                       <div>
-                        <span className="text-[#6B7280]">Leads nhập:</span>{' '}
+                        <span className="text-[#6B7280]">{isEn ? 'Entered leads:' : 'Leads nhập:'}</span>{' '}
                         <strong className="text-[#1F2937]">{summaryData.today.leads}</strong>
                       </div>
                     </div>
@@ -285,24 +289,24 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <span className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                      Tháng Này (This Month)
+                      {isEn ? 'This Month' : 'Tháng Này (This Month)'}
                     </span>
                     <Calendar className="w-4 h-4 text-[#3CB371]" />
                   </div>
                   <div className="mt-4 space-y-3">
                     <div>
-                      <span className="text-xs text-[#6B7280]">Doanh thu lũy kế tháng</span>
+                      <span className="text-xs text-[#6B7280]">{isEn ? 'Month-to-date revenue' : 'Doanh thu lũy kế tháng'}</span>
                       <div className="text-2xl font-bold text-[#2E7D32]">
-                        {Number(summaryData.month.revenue || 0).toLocaleString('vi-VN')} đ
+                        {Number(summaryData.month.revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
                       <div>
-                        <span className="text-[#6B7280]">Tổng đơn chốt:</span>{' '}
+                        <span className="text-[#6B7280]">{isEn ? 'Total closed orders:' : 'Tổng đơn chốt:'}</span>{' '}
                         <strong className="text-[#1F2937]">{summaryData.month.orders}</strong>
                       </div>
                       <div>
-                        <span className="text-[#6B7280]">Tổng Leads:</span>{' '}
+                        <span className="text-[#6B7280]">{isEn ? 'Total leads:' : 'Tổng Leads:'}</span>{' '}
                         <strong className="text-[#1F2937]">{summaryData.month.leads}</strong>
                       </div>
                     </div>
@@ -313,21 +317,21 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <span className="text-xs font-bold uppercase tracking-wider text-[#6B7280]">
-                      Năm Nay (This Year)
+                      {isEn ? 'This Year' : 'Năm Nay (This Year)'}
                     </span>
                     <Award className="w-4 h-4 text-amber-500" />
                   </div>
                   <div className="mt-4 space-y-3">
                     <div>
-                      <span className="text-xs text-[#6B7280]">Doanh thu lũy kế năm</span>
+                      <span className="text-xs text-[#6B7280]">{isEn ? 'Year-to-date revenue' : 'Doanh thu lũy kế năm'}</span>
                       <div className="text-2xl font-bold text-[#1F2937]">
-                        {Number(summaryData.year.revenue || 0).toLocaleString('vi-VN')} đ
+                        {Number(summaryData.year.revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                       </div>
                     </div>
                     {summaryData.year.target > 0 ? (
                       <div className="pt-2 border-t border-slate-100 text-xs space-y-1.5">
                         <div className="flex justify-between text-[#6B7280]">
-                          <span>Chỉ tiêu: {Number(summaryData.year.target).toLocaleString('vi-VN')} đ</span>
+                          <span>{isEn ? 'Target' : 'Chỉ tiêu'}: {Number(summaryData.year.target).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}</span>
                           <span className="font-semibold text-[#2E7D32]">
                             {summaryData.year.achievement_rate}%
                           </span>
@@ -341,7 +345,7 @@ export default function GeneralReportsPage() {
                       </div>
                     ) : (
                       <div className="pt-2 border-t border-slate-100 text-xs text-[#6B7280]">
-                        Chưa thiết lập chỉ tiêu kế hoạch năm tài chính.
+                        {isEn ? 'No annual financial plan targets set yet.' : 'Chưa thiết lập chỉ tiêu kế hoạch năm tài chính.'}
                       </div>
                     )}
                   </div>
@@ -352,40 +356,40 @@ export default function GeneralReportsPage() {
               <div className="p-6 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                 <h3 className="text-base font-bold text-[#1F2937] mb-4 flex items-center gap-2">
                   <Target className="w-5 h-5 text-[#3CB371]" />
-                  <span>Sức Khỏe Phễu Bán Hàng & Chuyển Đổi Toàn Hệ Thống (Sales Pipeline)</span>
+                  <span>{isEn ? 'Sales Pipeline & Overall Conversion Health' : 'Sức Khỏe Phễu Bán Hàng & Chuyển Đổi Toàn Hệ Thống (Sales Pipeline)'}</span>
                 </h3>
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div className="p-3.5 rounded-xl bg-[#F3F4F6] border border-slate-200">
-                    <span className="text-xs text-[#6B7280] font-medium">Tổng Cơ hội</span>
+                    <span className="text-xs text-[#6B7280] font-medium">{isEn ? 'Total Opportunities' : 'Tổng Cơ hội'}</span>
                     <div className="text-xl font-bold text-[#1F2937] mt-1">
                       {summaryData.pipeline.total_opportunities}
                     </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2]">
-                    <span className="text-xs text-[#2E7D32] font-medium">Cơ hội Đang Tư Vấn</span>
+                    <span className="text-xs text-[#2E7D32] font-medium">{isEn ? 'Open Opportunities' : 'Cơ hội Đang Tư Vấn'}</span>
                     <div className="text-xl font-bold text-[#1F2937] mt-1">
                       {summaryData.pipeline.open_opportunities}
                     </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-[#EAF5EC] border border-[#DDF0E2]">
-                    <span className="text-xs text-[#2E7D32] font-medium">Chốt Đơn Thành Công</span>
+                    <span className="text-xs text-[#2E7D32] font-medium">{isEn ? 'Closed Won Deals' : 'Chốt Đơn Thành Công'}</span>
                     <div className="text-xl font-bold text-[#1F2937] mt-1">
                       {summaryData.pipeline.closed_won_opportunities}
                     </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-[#F3F4F6] border border-slate-200">
-                    <span className="text-xs text-[#6B7280] font-medium">Giá Trị Pipeline Mở</span>
+                    <span className="text-xs text-[#6B7280] font-medium">{isEn ? 'Open Pipeline Value' : 'Giá Trị Pipeline Mở'}</span>
                     <div className="text-xl font-bold text-[#1F2937] mt-1">
-                      {Number(summaryData.pipeline.pipeline_value || 0).toLocaleString('vi-VN')} đ
+                      {Number(summaryData.pipeline.pipeline_value || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                     </div>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-100">
-                    <span className="text-xs text-amber-700 font-medium">Tỷ Lệ Chuyển Đổi Chung</span>
+                    <span className="text-xs text-amber-700 font-medium">{isEn ? 'Overall Conversion Rate' : 'Tỷ Lệ Chuyển Đổi Chung'}</span>
                     <div className="text-xl font-bold text-amber-900 mt-1">
                       {summaryData.pipeline.conversion_rate}%
                     </div>
@@ -402,23 +406,23 @@ export default function GeneralReportsPage() {
               <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
                 <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-blue-600" />
-                  <span>Khách Hàng Tiềm Năng Nhập Mới Theo Chu Kỳ ({period === 'day' ? 'Ngày' : 'Tháng'})</span>
+                  <span>{isEn ? `Newly Added Leads by Period (${period === 'day' ? 'Daily' : 'Monthly'})` : `Khách Hàng Tiềm Năng Nhập Mới Theo Chu Kỳ (${period === 'day' ? 'Ngày' : 'Tháng'})`}</span>
                 </h3>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-slate-700">
                     <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
                       <tr>
-                        <th className="px-4 py-3">Chu kỳ thời gian</th>
-                        <th className="px-4 py-3 text-right">Số lượng Leads mới</th>
-                        <th className="px-4 py-3">Biểu đồ tỷ lệ</th>
+                        <th className="px-4 py-3">{isEn ? 'Time Period' : 'Chu kỳ thời gian'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? 'New Leads Count' : 'Số lượng Leads mới'}</th>
+                        <th className="px-4 py-3">{isEn ? 'Ratio Chart' : 'Biểu đồ tỷ lệ'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {leadsData.time_series.length === 0 ? (
                         <tr>
                           <td colSpan={3} className="py-6 text-center text-slate-400">
-                            Không có dữ liệu trong khoảng thời gian này.
+                            {isEn ? 'No data available for this period.' : 'Không có dữ liệu trong khoảng thời gian này.'}
                           </td>
                         </tr>
                       ) : (
@@ -457,16 +461,16 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <h3 className="text-sm font-bold text-[#1F2937] mb-3 flex items-center gap-2">
                     <Layers className="w-4 h-4 text-[#3CB371]" />
-                    <span>Phân Bổ Leads Theo Nguồn Chiến Dịch</span>
+                    <span>{isEn ? 'Lead Distribution by Marketing Campaign' : 'Phân Bổ Leads Theo Nguồn Chiến Dịch'}</span>
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-[#F3F4F6] text-[#6B7280] uppercase border-b border-[#DDF0E2]">
                         <tr>
-                          <th className="px-3 py-2">Chiến dịch tiếp thị</th>
-                          <th className="px-3 py-2 text-center">Leads</th>
-                          <th className="px-3 py-2 text-center">Cơ hội</th>
-                          <th className="px-3 py-2 text-center">Đơn hàng</th>
+                          <th className="px-3 py-2">{isEn ? 'Marketing Campaign' : 'Chiến dịch tiếp thị'}</th>
+                          <th className="px-3 py-2 text-center">{isEn ? 'Leads' : 'Leads'}</th>
+                          <th className="px-3 py-2 text-center">{isEn ? 'Opportunities' : 'Cơ hội'}</th>
+                          <th className="px-3 py-2 text-center">{isEn ? 'Orders' : 'Đơn hàng'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -504,14 +508,14 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <h3 className="text-sm font-bold text-[#1F2937] mb-3 flex items-center gap-2">
                     <Users className="w-4 h-4 text-[#3CB371]" />
-                    <span>Phân Bổ Leads Theo Nhân Viên Phụ Trách</span>
+                    <span>{isEn ? 'Lead Distribution by Assigned Staff' : 'Phân Bổ Leads Theo Nhân Viên Phụ Trách'}</span>
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-[#F3F4F6] text-[#6B7280] uppercase border-b border-[#DDF0E2]">
                         <tr>
-                          <th className="px-3 py-2">Nhân viên phụ trách</th>
-                          <th className="px-3 py-2 text-right">Số Leads đang xử lý</th>
+                          <th className="px-3 py-2">{isEn ? 'Assigned Staff' : 'Nhân viên phụ trách'}</th>
+                          <th className="px-3 py-2 text-right">{isEn ? 'Active Leads Count' : 'Số Leads đang xử lý'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -540,24 +544,24 @@ export default function GeneralReportsPage() {
               <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                 <h3 className="text-base font-bold text-[#1F2937] mb-4 flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5 text-[#3CB371]" />
-                  <span>Số Lượng Đơn & Doanh Thu Theo Chu Kỳ</span>
+                  <span>{isEn ? 'Order Volume & Revenue by Period' : 'Số Lượng Đơn & Doanh Thu Theo Chu Kỳ'}</span>
                 </h3>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-[#1F2937]">
                     <thead className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-xs font-semibold text-[#6B7280] uppercase">
                       <tr>
-                        <th className="px-4 py-3">Chu kỳ</th>
-                        <th className="px-4 py-3 text-center">Số lượng đơn</th>
-                        <th className="px-4 py-3 text-right">Doanh thu chốt</th>
-                        <th className="px-4 py-3 text-right">Giá trị trung bình đơn (AOV)</th>
+                        <th className="px-4 py-3">{isEn ? 'Period' : 'Chu kỳ'}</th>
+                        <th className="px-4 py-3 text-center">{isEn ? 'Orders Count' : 'Số lượng đơn'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? 'Closed Revenue' : 'Doanh thu chốt'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? 'Average Order Value (AOV)' : 'Giá trị trung bình đơn (AOV)'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {ordersData.time_series.length === 0 ? (
                         <tr>
                           <td colSpan={4} className="py-6 text-center text-[#6B7280]">
-                            Không có đơn hàng nào trong khoảng thời gian này.
+                            {isEn ? 'No orders recorded in this period.' : 'Không có đơn hàng nào trong khoảng thời gian này.'}
                           </td>
                         </tr>
                       ) : (
@@ -570,10 +574,10 @@ export default function GeneralReportsPage() {
                               {item.orders_count}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-[#2E7D32]">
-                              {Number(item.revenue || 0).toLocaleString('vi-VN')} đ
+                              {Number(item.revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                             </td>
                             <td className="px-4 py-3 text-right font-medium text-[#1F2937]">
-                              {Number(item.average_order_value || 0).toLocaleString('vi-VN')} đ
+                              {Number(item.average_order_value || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                             </td>
                           </tr>
                         ))
@@ -589,15 +593,15 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <h3 className="text-sm font-bold text-[#1F2937] mb-3 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[#3CB371]" />
-                    <span>Phân Bổ Theo Trạng Thái Đơn Hàng</span>
+                    <span>{isEn ? 'Order Distribution by Status' : 'Phân Bổ Theo Trạng Thái Đơn Hàng'}</span>
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-[#F3F4F6] text-[#6B7280] uppercase border-b border-[#DDF0E2]">
                         <tr>
-                          <th className="px-3 py-2">Trạng thái</th>
-                          <th className="px-3 py-2 text-center">Số lượng</th>
-                          <th className="px-3 py-2 text-right">Tổng tiền</th>
+                          <th className="px-3 py-2">{isEn ? 'Status' : 'Trạng thái'}</th>
+                          <th className="px-3 py-2 text-center">{isEn ? 'Quantity' : 'Số lượng'}</th>
+                          <th className="px-3 py-2 text-right">{isEn ? 'Total Amount' : 'Tổng tiền'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -610,7 +614,7 @@ export default function GeneralReportsPage() {
                               {st.count}
                             </td>
                             <td className="px-3 py-2.5 text-right font-bold text-[#2E7D32]">
-                              {Number(st.total_amount || 0).toLocaleString('vi-VN')} đ
+                              {Number(st.total_amount || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                             </td>
                           </tr>
                         ))}
@@ -623,15 +627,15 @@ export default function GeneralReportsPage() {
                 <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs">
                   <h3 className="text-sm font-bold text-[#1F2937] mb-3 flex items-center gap-2">
                     <Award className="w-4 h-4 text-amber-500" />
-                    <span>Hiệu Suất Chốt Đơn Của Nhân Viên Bán Hàng</span>
+                    <span>{isEn ? 'Sales Staff Closing Performance' : 'Hiệu Suất Chốt Đơn Của Nhân Viên Bán Hàng'}</span>
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-[#F3F4F6] text-[#6B7280] uppercase border-b border-[#DDF0E2]">
                         <tr>
-                          <th className="px-3 py-2">Nhân viên</th>
-                          <th className="px-3 py-2 text-center">Số đơn chốt</th>
-                          <th className="px-3 py-2 text-right">Doanh thu mang về</th>
+                          <th className="px-3 py-2">{isEn ? 'Staff' : 'Nhân viên'}</th>
+                          <th className="px-3 py-2 text-center">{isEn ? 'Closed Orders' : 'Số đơn chốt'}</th>
+                          <th className="px-3 py-2 text-right">{isEn ? 'Revenue Generated' : 'Doanh thu mang về'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -644,7 +648,7 @@ export default function GeneralReportsPage() {
                               {stf.orders_count}
                             </td>
                             <td className="px-3 py-2.5 text-right font-bold text-[#2E7D32]">
-                              {Number(stf.total_revenue || 0).toLocaleString('vi-VN')} đ
+                              {Number(stf.total_revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                             </td>
                           </tr>
                         ))}
@@ -662,14 +666,14 @@ export default function GeneralReportsPage() {
               {/* Thẻ tổng doanh thu - Minimalist Mint & Green Palette */}
               <div className="p-6 rounded-2xl bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] shadow-xs">
                 <span className="text-xs uppercase tracking-wider text-[#2E7D32] font-semibold">
-                  Tổng Doanh Thu Toàn Kỳ Khảo Sát
+                  {isEn ? 'Total Revenue for Surveyed Period' : 'Tổng Doanh Thu Toàn Kỳ Khảo Sát'}
                 </span>
                 <div className="text-3xl font-extrabold mt-1 text-[#1F2937]">
-                  {Number(revenueData.grand_total || 0).toLocaleString('vi-VN')}{' '}
-                  <span className="text-lg font-semibold text-[#3CB371]">VNĐ</span>
+                  {Number(revenueData.grand_total || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')}{' '}
+                  <span className="text-lg font-semibold text-[#3CB371]">{isEn ? 'USD' : 'VNĐ'}</span>
                 </div>
                 <p className="text-xs text-[#2E7D32] mt-2 font-medium">
-                  Dữ liệu được tổng hợp trực tiếp từ các hóa đơn chốt đơn thành công trong hệ thống.
+                  {isEn ? 'Data aggregated directly from successfully closed orders in the system.' : 'Dữ liệu được tổng hợp trực tiếp từ các hóa đơn chốt đơn thành công trong hệ thống.'}
                 </p>
               </div>
 
@@ -679,9 +683,11 @@ export default function GeneralReportsPage() {
                   <div>
                     <h3 className="text-base font-bold text-[#1F2937] flex items-center gap-2">
                       <Package className="w-5 h-5 text-[#3CB371]" />
-                      <span>Phân Bổ Doanh Thu Theo Từng Sản Phẩm (Revenue by Product)</span>
+                      <span>{isEn ? 'Revenue Distribution by Product' : 'Phân Bổ Doanh Thu Theo Từng Sản Phẩm (Revenue by Product)'}</span>
                     </h3>
-                    <p className="text-xs text-[#6B7280] mt-0.5">Đo lường tỷ trọng doanh số và số lượng bán của từng sản phẩm</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">
+                      {isEn ? 'Measuring revenue share and unit sales of each product' : 'Đo lường tỷ trọng doanh số và số lượng bán của từng sản phẩm'}
+                    </p>
                   </div>
                 </div>
 
@@ -689,21 +695,21 @@ export default function GeneralReportsPage() {
                   <table className="w-full text-left text-sm text-[#1F2937]">
                     <thead className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-xs font-semibold text-[#6B7280] uppercase">
                       <tr>
-                        <th className="px-4 py-3">Mã SP</th>
-                        <th className="px-4 py-3">Tên sản phẩm</th>
-                        <th className="px-4 py-3">Danh mục</th>
-                        <th className="px-4 py-3 text-center">Số đơn</th>
-                        <th className="px-4 py-3 text-center">Đã bán (units)</th>
-                        <th className="px-4 py-3 text-right">Doanh thu</th>
-                        <th className="px-4 py-3 text-right">% Đóng góp</th>
-                        <th className="px-4 py-3 w-40">Tỷ trọng</th>
+                        <th className="px-4 py-3">{isEn ? 'Code' : 'Mã SP'}</th>
+                        <th className="px-4 py-3">{isEn ? 'Product Name' : 'Tên sản phẩm'}</th>
+                        <th className="px-4 py-3">{isEn ? 'Category' : 'Danh mục'}</th>
+                        <th className="px-4 py-3 text-center">{isEn ? 'Orders' : 'Số đơn'}</th>
+                        <th className="px-4 py-3 text-center">{isEn ? 'Units Sold' : 'Đã bán (units)'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? 'Revenue' : 'Doanh thu'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? '% Share' : '% Đóng góp'}</th>
+                        <th className="px-4 py-3 w-40">{isEn ? 'Ratio' : 'Tỷ trọng'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {revenueData.by_product.length === 0 ? (
                         <tr>
                           <td colSpan={8} className="py-6 text-center text-[#6B7280]">
-                            Chưa có dữ liệu doanh số sản phẩm trong khoảng thời gian này.
+                            {isEn ? 'No product sales data in this period.' : 'Chưa có dữ liệu doanh số sản phẩm trong khoảng thời gian này.'}
                           </td>
                         </tr>
                       ) : (
@@ -725,7 +731,7 @@ export default function GeneralReportsPage() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-xs text-[#6B7280]">
-                              {item.category_name || 'Mặc định'}
+                              {item.category_name || (isEn ? 'Default' : 'Mặc định')}
                             </td>
                             <td className="px-4 py-3 text-center font-semibold text-[#2E7D32]">
                               {item.orders_count}
@@ -734,7 +740,7 @@ export default function GeneralReportsPage() {
                               {item.units_sold}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-emerald-700">
-                              {Number(item.revenue || 0).toLocaleString('vi-VN')} đ
+                              {Number(item.revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-[#2E7D32]">
                               {item.revenue_share}%
@@ -761,9 +767,11 @@ export default function GeneralReportsPage() {
                   <div>
                     <h3 className="text-base font-bold text-[#1F2937] flex items-center gap-2">
                       <Layers className="w-5 h-5 text-[#3CB371]" />
-                      <span>Phân Bổ Doanh Thu Theo Danh Mục Sản Phẩm (Revenue by Category)</span>
+                      <span>{isEn ? 'Revenue Distribution by Category' : 'Phân Bổ Doanh Thu Theo Danh Mục Sản Phẩm (Revenue by Category)'}</span>
                     </h3>
-                    <p className="text-xs text-[#6B7280] mt-0.5">Đánh giá nhóm sản phẩm chiến lược</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">
+                      {isEn ? 'Strategic product group evaluation' : 'Đánh giá nhóm sản phẩm chiến lược'}
+                    </p>
                   </div>
                 </div>
 
@@ -771,19 +779,19 @@ export default function GeneralReportsPage() {
                   <table className="w-full text-left text-sm text-[#1F2937]">
                     <thead className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-xs font-semibold text-[#6B7280] uppercase">
                       <tr>
-                        <th className="px-4 py-3">Danh mục sản phẩm</th>
-                        <th className="px-4 py-3 text-center">Số đơn</th>
-                        <th className="px-4 py-3 text-center">Số lượng bán</th>
-                        <th className="px-4 py-3 text-right">Doanh thu</th>
-                        <th className="px-4 py-3 text-right">% Tỷ trọng</th>
-                        <th className="px-4 py-3 w-40">Tỷ trọng</th>
+                        <th className="px-4 py-3">{isEn ? 'Product Category' : 'Danh mục sản phẩm'}</th>
+                        <th className="px-4 py-3 text-center">{isEn ? 'Orders' : 'Số đơn'}</th>
+                        <th className="px-4 py-3 text-center">{isEn ? 'Units Sold' : 'Số lượng bán'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? 'Revenue' : 'Doanh thu'}</th>
+                        <th className="px-4 py-3 text-right">{isEn ? '% Share' : '% Tỷ trọng'}</th>
+                        <th className="px-4 py-3 w-40">{isEn ? 'Ratio' : 'Tỷ trọng'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {revenueData.by_category.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="py-6 text-center text-[#6B7280]">
-                            Chưa có dữ liệu doanh số danh mục.
+                            {isEn ? 'No category sales data.' : 'Chưa có dữ liệu doanh số danh mục.'}
                           </td>
                         </tr>
                       ) : (
@@ -799,7 +807,7 @@ export default function GeneralReportsPage() {
                               {cat.units_sold}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-emerald-700">
-                              {Number(cat.revenue || 0).toLocaleString('vi-VN')} đ
+                              {Number(cat.revenue || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-[#2E7D32]">
                               {cat.revenue_share}%
@@ -827,16 +835,16 @@ export default function GeneralReportsPage() {
       {/* Footer Chữ ký khi In ấn */}
       <div className="hidden print:grid grid-cols-2 gap-8 pt-12 text-center text-xs">
         <div>
-          <p className="font-semibold text-slate-800">NGƯỜI LẬP BÁO CÁO</p>
-          <p className="text-slate-400 italic mt-1">(Ký và ghi rõ họ tên)</p>
+          <p className="font-semibold text-slate-800">{isEn ? 'PREPARED BY' : 'NGƯỜI LẬP BÁO CÁO'}</p>
+          <p className="text-slate-400 italic mt-1">{isEn ? '(Signature & full name)' : '(Ký và ghi rõ họ tên)'}</p>
           <div className="h-16"></div>
-          <p className="font-medium text-slate-700">Phòng Kế Hoạch & Phân Tích</p>
+          <p className="font-medium text-slate-700">{isEn ? 'Planning & Analysis Dept' : 'Phòng Kế Hoạch & Phân Tích'}</p>
         </div>
         <div>
-          <p className="font-semibold text-slate-800">GIÁM ĐỐC ĐIỀU HÀNH</p>
-          <p className="text-slate-400 italic mt-1">(Ký, đóng dấu)</p>
+          <p className="font-semibold text-slate-800">{isEn ? 'CHIEF EXECUTIVE OFFICER' : 'GIÁM ĐỐC ĐIỀU HÀNH'}</p>
+          <p className="text-slate-400 italic mt-1">{isEn ? '(Signature & seal)' : '(Ký, đóng dấu)'}</p>
           <div className="h-16"></div>
-          <p className="font-medium text-slate-700">Ban Lãnh Đạo Công Ty</p>
+          <p className="font-medium text-slate-700">{isEn ? 'Company Executive Board' : 'Ban Lãnh Đạo Công Ty'}</p>
         </div>
       </div>
     </div>

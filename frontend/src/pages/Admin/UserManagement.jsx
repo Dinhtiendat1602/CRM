@@ -14,12 +14,14 @@ import {
 } from 'lucide-react';
 import adminApi from '../../api/adminApi';
 import { useAuth } from '../../context/authContextDef';
+import { useLanguage } from '../../context/LanguageContext';
 import Pagination from '../../components/Common/Pagination';
 import SearchInput from '../../components/Common/SearchInput';
 import Modal from '../../components/Common/Modal';
 import ConfirmDialog from '../../components/Common/ConfirmDialog';
 
 export default function UserManagement() {
+  const { isEn } = useLanguage();
   const { user: currentUser } = useAuth();
 
   // State danh sách & phân trang
@@ -145,7 +147,7 @@ export default function UserManagement() {
         if (!cancelled) {
           setAlertInfo({
             type: 'error',
-            message: err?.message || 'Không thể tải danh sách người dùng',
+            message: err?.message || (isEn ? 'Cannot load staff user list' : 'Không thể tải danh sách người dùng'),
           });
         }
       })
@@ -156,7 +158,7 @@ export default function UserManagement() {
     return () => {
       cancelled = true;
     };
-  }, [pagination.page, searchTerm, selectedRole, selectedStatus, reloadKey]);
+  }, [pagination.page, searchTerm, selectedRole, selectedStatus, reloadKey, isEn]);
 
   // Xử lý tạo nhân viên mới
   const handleCreateUser = async (e) => {
@@ -164,7 +166,7 @@ export default function UserManagement() {
     setCreateError(null);
 
     if (!createUserForm.username.trim() || !createUserForm.full_name.trim() || !createUserForm.email.trim()) {
-      setCreateError('Vui lòng điền đầy đủ các trường bắt buộc (*)');
+      setCreateError(isEn ? 'Please fill in all required fields (*)' : 'Vui lòng điền đầy đủ các trường bắt buộc (*)');
       return;
     }
 
@@ -180,7 +182,7 @@ export default function UserManagement() {
 
       setAlertInfo({
         type: 'success',
-        message: `Tạo tài khoản "${createUserForm.username}" thành công! Mật khẩu khởi tạo: 11111111`,
+        message: isEn ? `Created account "${createUserForm.username}" successfully! Default password: 11111111` : `Tạo tài khoản "${createUserForm.username}" thành công! Mật khẩu khởi tạo: 11111111`,
       });
       setCreateModalOpen(false);
       setCreateUserForm({
@@ -193,7 +195,7 @@ export default function UserManagement() {
       setLoading(true);
       setReloadKey((k) => k + 1);
     } catch (err) {
-      setCreateError(err?.message || 'Không thể tạo tài khoản nhân viên');
+      setCreateError(err?.message || (isEn ? 'Cannot create staff account' : 'Không thể tạo tài khoản nhân viên'));
     } finally {
       setCreateLoading(false);
     }
@@ -204,7 +206,7 @@ export default function UserManagement() {
     if (u.id === currentUser?.id) {
       setAlertInfo({
         type: 'error',
-        message: 'Bạn không thể tự vô hiệu hóa tài khoản quản trị viên của chính mình!',
+        message: isEn ? 'You cannot deactivate your own administrator account!' : 'Bạn không thể tự vô hiệu hóa tài khoản quản trị viên của chính mình!',
       });
       return;
     }
@@ -221,7 +223,7 @@ export default function UserManagement() {
       await adminApi.updateUserStatus(userToToggleStatus.id, newStatus);
       setAlertInfo({
         type: 'success',
-        message: `${newStatus ? 'Kích hoạt' : 'Khóa'} tài khoản ${userToToggleStatus.username} thành công!`,
+        message: isEn ? `${newStatus ? 'Activated' : 'Locked'} account ${userToToggleStatus.username} successfully!` : `${newStatus ? 'Kích hoạt' : 'Khóa'} tài khoản ${userToToggleStatus.username} thành công!`,
       });
       setConfirmStatusOpen(false);
       setUserToToggleStatus(null);
@@ -230,7 +232,7 @@ export default function UserManagement() {
     } catch (err) {
       setAlertInfo({
         type: 'error',
-        message: err?.message || 'Không thể cập nhật trạng thái tài khoản',
+        message: err?.message || (isEn ? 'Cannot update account status' : 'Không thể cập nhật trạng thái tài khoản'),
       });
     } finally {
       setStatusLoading(false);
@@ -242,14 +244,14 @@ export default function UserManagement() {
     if (u.id === currentUser?.id) {
       setAlertInfo({
         type: 'error',
-        message: 'Bạn không thể tự xóa tài khoản quản trị của chính mình.',
+        message: isEn ? 'You cannot delete your own administrator account.' : 'Bạn không thể tự xóa tài khoản quản trị của chính mình.',
       });
       return;
     }
     if (u.username?.toLowerCase() === 'admin') {
       setAlertInfo({
         type: 'error',
-        message: 'Không thể xóa tài khoản Quản trị viên hệ thống mặc định (admin).',
+        message: isEn ? 'Cannot delete system default administrator account (admin).' : 'Không thể xóa tài khoản Quản trị viên hệ thống mặc định (admin).',
       });
       return;
     }
@@ -265,7 +267,7 @@ export default function UserManagement() {
       await adminApi.deleteUser(userToDelete.id);
       setAlertInfo({
         type: 'success',
-        message: `Đã xóa tài khoản "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) thành công!`,
+        message: isEn ? `Deleted account "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) successfully!` : `Đã xóa tài khoản "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) thành công!`,
       });
       setConfirmDeleteOpen(false);
       setUserToDelete(null);
@@ -274,7 +276,7 @@ export default function UserManagement() {
     } catch (err) {
       setAlertInfo({
         type: 'error',
-        message: err?.message || 'Không thể xóa tài khoản người dùng',
+        message: err?.message || (isEn ? 'Cannot delete staff account' : 'Không thể xóa tài khoản người dùng'),
       });
     } finally {
       setDeleteLoading(false);
@@ -287,14 +289,14 @@ export default function UserManagement() {
       await adminApi.updateUserRole(targetUser.id, parseInt(newRoleId, 10));
       setAlertInfo({
         type: 'success',
-        message: `Đã cập nhật vai trò cho ${targetUser.username}`,
+        message: isEn ? `Updated role for ${targetUser.username}` : `Đã cập nhật vai trò cho ${targetUser.username}`,
       });
       setLoading(true);
       setReloadKey((k) => k + 1);
     } catch (err) {
       setAlertInfo({
         type: 'error',
-        message: err?.message || 'Không thể cập nhật vai trò',
+        message: err?.message || (isEn ? 'Cannot update role' : 'Không thể cập nhật vai trò'),
       });
     }
   };
@@ -303,7 +305,7 @@ export default function UserManagement() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (!resetPwForm.newPassword || resetPwForm.newPassword.length < 8) {
-      setResetPwError('Mật khẩu mới phải có tối thiểu 8 ký tự');
+      setResetPwError(isEn ? 'New password must be at least 8 characters' : 'Mật khẩu mới phải có tối thiểu 8 ký tự');
       return;
     }
 
@@ -313,13 +315,13 @@ export default function UserManagement() {
       await adminApi.resetUserPassword(selectedUserForReset.id, resetPwForm.newPassword);
       setAlertInfo({
         type: 'success',
-        message: `Đã đặt lại mật khẩu thành công cho ${selectedUserForReset.username}!`,
+        message: isEn ? `Reset password successfully for ${selectedUserForReset.username}!` : `Đã đặt lại mật khẩu thành công cho ${selectedUserForReset.username}!`,
       });
       setResetPwModalOpen(false);
       setSelectedUserForReset(null);
       setResetPwForm({ newPassword: '' });
     } catch (err) {
-      setResetPwError(err?.message || 'Không thể đặt lại mật khẩu');
+      setResetPwError(err?.message || (isEn ? 'Cannot reset password' : 'Không thể đặt lại mật khẩu'));
     } finally {
       setResetPwLoading(false);
     }
@@ -339,17 +341,17 @@ export default function UserManagement() {
     }
   };
 
-  // Nhãn hiển thị tiếng Việt chi tiết cho vai trò (SRS 2.1)
+  // Nhãn hiển thị cho vai trò (SRS 2.1)
   const getRoleLabel = (roleName) => {
     switch (roleName) {
       case 'ADMIN':
-        return 'Quản trị viên (ADMIN)';
+        return isEn ? 'System Admin (ADMIN)' : 'Quản trị viên (ADMIN)';
       case 'SALE_MANAGER':
-        return 'Quản lý bán hàng (SALE_MANAGER)';
+        return isEn ? 'Sales Manager (SALE_MANAGER)' : 'Quản lý bán hàng (SALE_MANAGER)';
       case 'SALESMAN':
-        return 'Nhân viên bán hàng (SALESMAN)';
+        return isEn ? 'Salesman (SALESMAN)' : 'Nhân viên bán hàng (SALESMAN)';
       default:
-        return roleName || 'Chưa gán vai trò';
+        return roleName || (isEn ? 'Unassigned Role' : 'Chưa gán vai trò');
     }
   };
 
@@ -377,7 +379,7 @@ export default function UserManagement() {
             onClick={() => setAlertInfo(null)}
             className="text-xs font-semibold underline cursor-pointer"
           >
-            Đóng
+            {isEn ? 'Close' : 'Đóng'}
           </button>
         </div>
       )}
@@ -385,7 +387,7 @@ export default function UserManagement() {
       {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
       <div className="flex items-center justify-between gap-4">
         <div className="text-xs text-[#6B7280]">
-          Tổng cộng: <strong className="text-[#1F2937]">{pagination.total}</strong> tài khoản nhân sự
+          {isEn ? 'Total:' : 'Tổng cộng:'} <strong className="text-[#1F2937]">{pagination.total}</strong> {isEn ? 'staff accounts' : 'tài khoản nhân sự'}
         </div>
 
         <div className="flex items-center gap-2.5 ml-auto">
@@ -397,10 +399,10 @@ export default function UserManagement() {
             }}
             disabled={loading}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-[#4B5563] text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
-            title="Làm mới danh sách"
+            title={isEn ? 'Refresh list' : 'Làm mới danh sách'}
           >
             <RefreshCw className={`h-3.5 w-3.5 text-[#3CB371] ${loading ? 'animate-spin' : ''}`} />
-            <span>Làm mới</span>
+            <span>{isEn ? 'Refresh' : 'Làm mới'}</span>
           </button>
 
           <button
@@ -409,7 +411,7 @@ export default function UserManagement() {
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
           >
             <UserPlus className="h-3.5 w-3.5" />
-            <span>Thêm nhân viên mới</span>
+            <span>{isEn ? 'Add new staff' : 'Thêm nhân viên mới'}</span>
           </button>
         </div>
       </div>
@@ -423,7 +425,7 @@ export default function UserManagement() {
             setSearchTerm(val);
             setPagination((prev) => ({ ...prev, page: 1 }));
           }}
-          placeholder="Tìm theo username, họ tên hoặc email..."
+          placeholder={isEn ? 'Search by username, full name or email...' : 'Tìm theo username, họ tên hoặc email...'}
         />
 
         {/* Filter Dropdowns */}
@@ -437,7 +439,7 @@ export default function UserManagement() {
             }}
             className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] cursor-pointer min-w-[170px]"
           >
-            <option value="">Tất cả vai trò</option>
+            <option value="">{isEn ? 'All roles' : 'Tất cả vai trò'}</option>
             {roles.map((r) => (
               <option key={r.id} value={r.id}>
                 {getRoleLabel(r.role_name || r.name)}
@@ -454,9 +456,9 @@ export default function UserManagement() {
             }}
             className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] cursor-pointer"
           >
-            <option value="">Tất cả trạng thái</option>
-            <option value="true">Đang kích hoạt</option>
-            <option value="false">Đã khóa</option>
+            <option value="">{isEn ? 'All statuses' : 'Tất cả trạng thái'}</option>
+            <option value="true">{isEn ? 'Active' : 'Đang kích hoạt'}</option>
+            <option value="false">{isEn ? 'Locked' : 'Đã khóa'}</option>
           </select>
         </div>
       </div>
@@ -467,12 +469,12 @@ export default function UserManagement() {
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-[#6B7280] uppercase text-[11px] font-semibold tracking-wider">
-                <th className="py-3.5 px-4 sm:px-6">Nhân viên</th>
-                <th className="py-3.5 px-4">Liên hệ</th>
-                <th className="py-3.5 px-4">Vai trò (Role)</th>
-                <th className="py-3.5 px-4 text-center">Trạng thái</th>
-                <th className="py-3.5 px-4">Ngày tạo</th>
-                <th className="py-3.5 px-4 sm:px-6 text-right">Thao tác</th>
+                <th className="py-3.5 px-4 sm:px-6">{isEn ? 'Staff User' : 'Nhân viên'}</th>
+                <th className="py-3.5 px-4">{isEn ? 'Contact' : 'Liên hệ'}</th>
+                <th className="py-3.5 px-4">{isEn ? 'System Role' : 'Vai trò (Role)'}</th>
+                <th className="py-3.5 px-4 text-center">{isEn ? 'Status' : 'Trạng thái'}</th>
+                <th className="py-3.5 px-4">{isEn ? 'Created At' : 'Ngày tạo'}</th>
+                <th className="py-3.5 px-4 sm:px-6 text-right">{isEn ? 'Actions' : 'Thao tác'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -480,13 +482,13 @@ export default function UserManagement() {
                 <tr>
                   <td colSpan="6" className="text-center py-12 text-slate-400">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-[#3CB371]" />
-                    <span>Đang tải danh sách nhân viên...</span>
+                    <span>{isEn ? 'Loading staff user list...' : 'Đang tải danh sách nhân viên...'}</span>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="text-center py-12 text-[#6B7280]">
-                    Không tìm thấy tài khoản nhân viên nào phù hợp với bộ lọc.
+                    {isEn ? 'No staff user accounts match the current filter.' : 'Không tìm thấy tài khoản nhân viên nào phù hợp với bộ lọc.'}
                   </td>
                 </tr>
               ) : (
@@ -510,7 +512,7 @@ export default function UserManagement() {
                               <span>{u.full_name}</span>
                               {isCurrent && (
                                 <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
-                                  Bạn
+                                  {isEn ? 'You' : 'Bạn'}
                                 </span>
                               )}
                             </div>
@@ -563,10 +565,10 @@ export default function UserManagement() {
                           disabled={isCurrent}
                           title={
                             isCurrent
-                              ? 'Không thể tự khóa tài khoản của bạn'
+                              ? (isEn ? 'Cannot lock your own account' : 'Không thể tự khóa tài khoản của bạn')
                               : u.is_active
-                              ? 'Bấm để khóa tài khoản'
-                              : 'Bấm để mở kích hoạt'
+                              ? (isEn ? 'Click to lock account' : 'Bấm để khóa tài khoản')
+                              : (isEn ? 'Click to activate account' : 'Bấm để mở kích hoạt')
                           }
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                             u.is_active
@@ -577,12 +579,12 @@ export default function UserManagement() {
                           {u.is_active ? (
                             <>
                               <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
-                              <span>Đang hoạt động</span>
+                              <span>{isEn ? 'Active' : 'Đang hoạt động'}</span>
                             </>
                           ) : (
                             <>
                               <UserX className="h-3.5 w-3.5 text-red-600" />
-                              <span>Đã khóa</span>
+                              <span>{isEn ? 'Locked' : 'Đã khóa'}</span>
                             </>
                           )}
                         </button>
@@ -605,10 +607,10 @@ export default function UserManagement() {
                               setResetPwForm({ newPassword: '' });
                             }}
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-[#EAF5EC] hover:text-[#2E7D32] transition-colors cursor-pointer"
-                            title="Đặt lại mật khẩu trực tiếp"
+                            title={isEn ? 'Reset password directly' : 'Đặt lại mật khẩu trực tiếp'}
                           >
                             <KeyRound className="h-3.5 w-3.5 text-amber-600" />
-                            <span>Reset pass</span>
+                            <span>{isEn ? 'Reset pass' : 'Reset pass'}</span>
                           </button>
                           <button
                             type="button"
@@ -617,14 +619,14 @@ export default function UserManagement() {
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                             title={
                               isCurrent
-                                ? 'Không thể xóa tài khoản của chính bạn'
+                                ? (isEn ? 'Cannot delete your own account' : 'Không thể xóa tài khoản của chính bạn')
                                 : u.username?.toLowerCase() === 'admin'
-                                ? 'Không thể xóa tài khoản admin mặc định'
-                                : 'Xóa tài khoản nhân viên'
+                                ? (isEn ? 'Cannot delete default admin account' : 'Không thể xóa tài khoản admin mặc định')
+                                : (isEn ? 'Delete staff account' : 'Xóa tài khoản nhân viên')
                             }
                           >
                             <Trash2 className="h-3.5 w-3.5 text-red-600" />
-                            <span>Xóa</span>
+                            <span>{isEn ? 'Delete' : 'Xóa'}</span>
                           </button>
                         </div>
                       </td>
@@ -650,8 +652,8 @@ export default function UserManagement() {
       <Modal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        title="Thêm nhân viên mới"
-        subtitle="Quản trị viên tạo tài khoản nhân viên và gán vai trò ban đầu"
+        title={isEn ? 'Add New Staff' : 'Thêm nhân viên mới'}
+        subtitle={isEn ? 'Administrator creates a staff account and assigns initial role' : 'Quản trị viên tạo tài khoản nhân viên và gán vai trò ban đầu'}
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
           {createError && (
@@ -664,35 +666,35 @@ export default function UserManagement() {
           <div className="p-3 bg-[#EAF5EC] border border-[#DDF0E2] rounded-xl text-xs text-[#2E7D32] flex items-start gap-2">
             <Shield className="h-4 w-4 text-[#3CB371] shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold">Mật khẩu khởi tạo tự động:</span> Mọi tài khoản mới được gán mật khẩu mặc định là <code className="bg-white px-1.5 py-0.5 rounded border border-[#DDF0E2] font-mono font-bold">11111111</code>. Nhân viên có thể tự đổi sau khi đăng nhập.
+              <span className="font-bold">{isEn ? 'Automatic Default Password:' : 'Mật khẩu khởi tạo tự động:'}</span> {isEn ? 'Every new account is assigned default password' : 'Mọi tài khoản mới được gán mật khẩu mặc định là'} <code className="bg-white px-1.5 py-0.5 rounded border border-[#DDF0E2] font-mono font-bold">11111111</code>. {isEn ? 'Staff can change it after signing in.' : 'Nhân viên có thể tự đổi sau khi đăng nhập.'}
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Tài khoản (Username) <span className="text-red-500">*</span>
+                {isEn ? 'Username' : 'Tài khoản (Username)'} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={createUserForm.username}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, username: e.target.value })}
-                placeholder="vd: sales01"
+                placeholder={isEn ? 'e.g. sales01' : 'vd: sales01'}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Họ và tên <span className="text-red-500">*</span>
+                {isEn ? 'Full Name' : 'Họ và tên'} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={createUserForm.full_name}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, full_name: e.target.value })}
-                placeholder="vd: Nguyễn Văn A"
+                placeholder={isEn ? 'e.g. John Doe' : 'vd: Nguyễn Văn A'}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
@@ -701,7 +703,7 @@ export default function UserManagement() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Email công việc <span className="text-red-500">*</span>
+                {isEn ? 'Work Email' : 'Email công việc'} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -715,13 +717,13 @@ export default function UserManagement() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Số điện thoại
+                {isEn ? 'Phone Number' : 'Số điện thoại'}
               </label>
               <input
                 type="tel"
                 value={createUserForm.phone}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, phone: e.target.value })}
-                placeholder="vd: 0912345678"
+                placeholder={isEn ? 'e.g. 0912345678' : 'vd: 0912345678'}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
               />
             </div>
@@ -729,7 +731,7 @@ export default function UserManagement() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Vai trò ban đầu (Role) <span className="text-red-500">*</span>
+              {isEn ? 'Initial Role' : 'Vai trò ban đầu (Role)'} <span className="text-red-500">*</span>
             </label>
             <select
               value={createUserForm.role_id}
@@ -738,7 +740,7 @@ export default function UserManagement() {
             >
               {roles.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {getRoleLabel(r.role_name || r.name)} — {r.description || 'Quyền hạn hệ thống'}
+                  {getRoleLabel(r.role_name || r.name)} — {r.description || (isEn ? 'System permission' : 'Quyền hạn hệ thống')}
                 </option>
               ))}
             </select>
@@ -750,14 +752,14 @@ export default function UserManagement() {
               onClick={() => setCreateModalOpen(false)}
               className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 cursor-pointer"
             >
-              Hủy bỏ
+              {isEn ? 'Cancel' : 'Hủy bỏ'}
             </button>
             <button
               type="submit"
               disabled={createLoading}
               className="px-4 py-2 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white text-xs font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
             >
-              {createLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
+              {createLoading ? (isEn ? 'Creating...' : 'Đang tạo...') : (isEn ? 'Create Account' : 'Tạo tài khoản')}
             </button>
           </div>
         </form>
@@ -767,8 +769,8 @@ export default function UserManagement() {
       <Modal
         isOpen={resetPwModalOpen}
         onClose={() => setResetPwModalOpen(false)}
-        title={`Đặt lại mật khẩu cho ${selectedUserForReset?.username || ''}`}
-        subtitle="Quản trị viên can thiệp đặt lại mật khẩu trực tiếp khi nhân viên quên mật khẩu"
+        title={isEn ? `Reset Password for ${selectedUserForReset?.username || ''}` : `Đặt lại mật khẩu cho ${selectedUserForReset?.username || ''}`}
+        subtitle={isEn ? 'Administrator resets password directly when staff forgets credentials' : 'Quản trị viên can thiệp đặt lại mật khẩu trực tiếp khi nhân viên quên mật khẩu'}
       >
         <form onSubmit={handleResetPassword} className="space-y-4">
           {resetPwError && (
@@ -780,14 +782,14 @@ export default function UserManagement() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Mật khẩu mới (Tối thiểu 8 ký tự) <span className="text-red-500">*</span>
+              {isEn ? 'New Password (Minimum 8 characters)' : 'Mật khẩu mới (Tối thiểu 8 ký tự)'} <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
               required
               value={resetPwForm.newPassword}
               onChange={(e) => setResetPwForm({ newPassword: e.target.value })}
-              placeholder="Nhập mật khẩu mới..."
+              placeholder={isEn ? 'Enter new password...' : 'Nhập mật khẩu mới...'}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] focus:bg-white text-slate-900"
             />
           </div>
@@ -798,14 +800,14 @@ export default function UserManagement() {
               onClick={() => setResetPwModalOpen(false)}
               className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 cursor-pointer"
             >
-              Hủy
+              {isEn ? 'Cancel' : 'Hủy'}
             </button>
             <button
               type="submit"
               disabled={resetPwLoading}
               className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
             >
-              {resetPwLoading ? 'Đang cập nhật...' : 'Xác nhận đặt lại mật khẩu'}
+              {resetPwLoading ? (isEn ? 'Updating...' : 'Đang cập nhật...') : (isEn ? 'Confirm Password Reset' : 'Xác nhận đặt lại mật khẩu')}
             </button>
           </div>
         </form>
@@ -817,13 +819,26 @@ export default function UserManagement() {
         onClose={() => setConfirmStatusOpen(false)}
         onConfirm={confirmToggleStatus}
         loading={statusLoading}
-        title={userToToggleStatus?.is_active ? 'Khóa tài khoản nhân viên' : 'Kích hoạt lại tài khoản'}
+        title={
+          userToToggleStatus?.is_active
+            ? (isEn ? 'Lock Staff Account' : 'Khóa tài khoản nhân viên')
+            : (isEn ? 'Reactivate Account' : 'Kích hoạt lại tài khoản')
+        }
         message={
           userToToggleStatus?.is_active
-            ? `Bạn có chắc chắn muốn khóa tài khoản "${userToToggleStatus?.username}"? Nhân viên này sẽ không thể đăng nhập vào hệ thống Zen CRM cho đến khi được kích hoạt lại.`
-            : `Bạn có muốn mở lại quyền truy cập cho tài khoản "${userToToggleStatus?.username}"?`
+            ? (isEn
+                ? `Are you sure you want to lock account "${userToToggleStatus?.username}"? This staff member will not be able to log in to Zen CRM until reactivated.`
+                : `Bạn có chắc chắn muốn khóa tài khoản "${userToToggleStatus?.username}"? Nhân viên này sẽ không thể đăng nhập vào hệ thống Zen CRM cho đến khi được kích hoạt lại.`)
+            : (isEn
+                ? `Do you want to re-enable access for account "${userToToggleStatus?.username}"?`
+                : `Bạn có muốn mở lại quyền truy cập cho tài khoản "${userToToggleStatus?.username}"?`)
         }
-        confirmText={userToToggleStatus?.is_active ? 'Khóa tài khoản' : 'Kích hoạt ngay'}
+        confirmText={
+          userToToggleStatus?.is_active
+            ? (isEn ? 'Lock Account' : 'Khóa tài khoản')
+            : (isEn ? 'Activate Now' : 'Kích hoạt ngay')
+        }
+        cancelText={isEn ? 'Cancel' : 'Hủy'}
         isDangerous={userToToggleStatus?.is_active}
       />
 
@@ -838,14 +853,16 @@ export default function UserManagement() {
         }}
         onConfirm={handleConfirmDeleteUser}
         loading={deleteLoading}
-        title="Xác nhận xóa tài khoản nhân viên"
+        title={isEn ? 'Confirm Delete Staff Account' : 'Xác nhận xóa tài khoản nhân viên'}
         message={
           userToDelete
-            ? `Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) khỏi hệ thống Zen CRM? Thao tác này không thể hoàn tác.`
+            ? (isEn
+                ? `Are you sure you want to permanently delete account "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) from Zen CRM? This action cannot be undone.`
+                : `Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản "${userToDelete.full_name || userToDelete.username}" (@${userToDelete.username}) khỏi hệ thống Zen CRM? Thao tác này không thể hoàn tác.`)
             : ''
         }
-        confirmText="Xác nhận xóa"
-        cancelText="Hủy bỏ"
+        confirmText={isEn ? 'Confirm Delete' : 'Xác nhận xóa'}
+        cancelText={isEn ? 'Cancel' : 'Hủy bỏ'}
         isDangerous={true}
       />
     </div>

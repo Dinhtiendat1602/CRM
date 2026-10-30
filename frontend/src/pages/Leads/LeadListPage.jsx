@@ -20,9 +20,11 @@ import {
   AlertCircle,
   CheckCircle2
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function LeadListPage() {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
 
   // State quản lý danh sách & phân trang (BR-03: limit=20)
   const [leads, setLeads] = useState([]);
@@ -197,20 +199,20 @@ export default function LeadListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
+      {/* Top Action Bar */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           {!startDate && !endDate && (
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] shadow-2xs"
-              title="Hệ thống mặc định tối ưu tải khách hàng tiềm năng trong 1 năm gần nhất. Vui lòng chọn Từ ngày / Đến ngày nếu muốn tải dữ liệu các năm trước đó."
+              title={t('oneYearDataTooltip', 'Hệ thống mặc định tối ưu tải khách hàng tiềm năng trong 1 năm gần nhất.')}
             >
               <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
-              <span>Dữ liệu 1 năm</span>
+              <span>{t('oneYearData', 'Dữ liệu 1 năm')}</span>
             </span>
           )}
           <span className="text-xs text-[#6B7280]">
-            Tổng cộng: <strong className="text-[#1F2937]">{pagination.totalRecords}</strong> khách hàng
+            {t('leadsTotalPrefix', 'Tổng cộng:')} <strong className="text-[#1F2937]">{pagination.totalRecords}</strong> {t('leadsTotalSuffix', 'khách hàng')}
           </span>
         </div>
 
@@ -219,7 +221,7 @@ export default function LeadListPage() {
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer ml-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>Thêm Khách Tiềm Năng</span>
+          <span>{t('leadsAddNew', 'Thêm Khách Tiềm Năng')}</span>
         </button>
       </div>
 
@@ -237,7 +239,7 @@ export default function LeadListPage() {
                 onClick={() => navigate('/opportunities')}
                 className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-2xs cursor-pointer"
               >
-                Xem Danh Sách Cơ Hội
+                {t('leadsViewOpportunities', 'Xem Danh Sách Cơ Hội')}
               </button>
             )}
             <button
@@ -277,10 +279,10 @@ export default function LeadListPage() {
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
                 className="w-full px-3 py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
-                title="Từ ngày"
+                title={t('fromDate', 'Từ ngày')}
               />
             </div>
-            <span className="text-xs text-[#6B7280] font-medium">đến</span>
+            <span className="text-xs text-[#6B7280] font-medium">{language === 'en' ? 'to' : 'đến'}</span>
             <div className="relative flex-1">
               <input
                 type="date"
@@ -290,14 +292,14 @@ export default function LeadListPage() {
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
                 className="w-full px-3 py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
-                title="Đến ngày"
+                title={t('toDate', 'Đến ngày')}
               />
             </div>
             {(startDate || endDate) && (
               <button
                 onClick={handleClearDateFilter}
                 className="p-2 text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                title="Xóa lọc ngày"
+                title={t('clearFilter', 'Xóa lọc ngày')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -334,17 +336,17 @@ export default function LeadListPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#EAF5EC]/60 text-[#6B7280] uppercase text-xs font-semibold border-b border-[#DDF0E2]">
               <tr>
-                <th className="py-3.5 px-4">Họ và Tên Lead</th>
-                <th className="py-3.5 px-4">Liên Hệ</th>
-                <th className="py-3.5 px-4">Công Ty / Nghề Nghiệp</th>
-                <th className="py-3.5 px-4">Nguồn</th>
+                <th className="py-3.5 px-4">{t('leadsColName', 'Họ và Tên Lead')}</th>
+                <th className="py-3.5 px-4">{t('leadsColContact', 'Liên Hệ')}</th>
+                <th className="py-3.5 px-4">{language === 'en' ? 'Company / Title' : 'Công Ty / Nghề Nghiệp'}</th>
+                <th className="py-3.5 px-4">{t('leadsColSource', 'Nguồn')}</th>
                 <th className="py-3.5 px-4">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>Ngày Nhập</span>
+                    <span>{t('leadsColDate', 'Ngày Nhập')}</span>
                   </div>
                 </th>
-                <th className="py-3.5 px-4 text-right">Thao Tác</th>
+                <th className="py-3.5 px-4 text-right">{t('leadsColActions', 'Thao Tác')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -353,7 +355,7 @@ export default function LeadListPage() {
                   <td colSpan={6} className="py-12 text-center text-slate-400">
                     <div className="inline-flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-[#3CB371] border-t-transparent rounded-full animate-spin" />
-                      <span>Đang tải dữ liệu khách hàng tiềm năng...</span>
+                      <span>{language === 'en' ? 'Loading leads data...' : 'Đang tải dữ liệu khách hàng tiềm năng...'}</span>
                     </div>
                   </td>
                 </tr>
@@ -362,11 +364,11 @@ export default function LeadListPage() {
                   <td colSpan={6} className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <Users className="w-12 h-12 text-slate-300 stroke-[1.5] mb-2" />
-                      <p className="font-medium text-slate-600">Không tìm thấy khách hàng tiềm năng nào</p>
+                      <p className="font-medium text-slate-600">{t('leadsEmpty', 'Không tìm thấy khách hàng tiềm năng nào')}</p>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {search || startDate || endDate
-                          ? 'Thử thay đổi từ khóa tìm kiếm hoặc xóa bộ lọc ngày.'
-                          : 'Bắt đầu bằng cách thêm mới một khách hàng tiềm năng.'}
+                          ? (language === 'en' ? 'Try changing search keywords or date filter.' : 'Thử thay đổi từ khóa tìm kiếm hoặc xóa bộ lọc ngày.')
+                          : (language === 'en' ? 'Get started by adding a new lead.' : 'Bắt đầu bằng cách thêm mới một khách hàng tiềm năng.')}
                       </p>
                     </div>
                   </td>
@@ -500,9 +502,13 @@ export default function LeadListPage() {
       {/* Hộp thoại xác nhận xóa */}
       <ConfirmDialog
         isOpen={deleteConfirm.isOpen}
-        title="Xác nhận xóa Khách hàng tiềm năng"
-        message={`Bạn có chắc chắn muốn xóa khách hàng "${deleteConfirm.lead ? `${deleteConfirm.lead.last_name || ''} ${deleteConfirm.lead.first_name || ''}`.trim() : ''}"? Toàn bộ thông tin và cơ hội liên quan sẽ bị xóa vĩnh viễn khỏi CSDL.`}
-        confirmText="Xác nhận xóa"
+        title={language === 'en' ? 'Confirm Lead Deletion' : 'Xác nhận xóa Khách hàng tiềm năng'}
+        message={
+          language === 'en'
+            ? `Are you sure you want to delete lead "${deleteConfirm.lead ? `${deleteConfirm.lead.last_name || ''} ${deleteConfirm.lead.first_name || ''}`.trim() : ''}"? All related information and opportunities will be permanently removed.`
+            : `Bạn có chắc chắn muốn xóa khách hàng "${deleteConfirm.lead ? `${deleteConfirm.lead.last_name || ''} ${deleteConfirm.lead.first_name || ''}`.trim() : ''}"? Toàn bộ thông tin và cơ hội liên quan sẽ bị xóa vĩnh viễn khỏi CSDL.`
+        }
+        confirmText={language === 'en' ? 'Confirm Delete' : 'Xác nhận xóa'}
         confirmType="danger"
         loading={deleteConfirm.loading}
         onClose={() => setDeleteConfirm({ isOpen: false, lead: null, loading: false })}

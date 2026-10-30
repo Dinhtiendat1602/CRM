@@ -1,5 +1,6 @@
 import { Layers, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Component hiển thị giao diện phân hệ đang kết nối
@@ -7,6 +8,7 @@ import { useAuth } from '../../context/authContextDef';
  */
 export default function PlaceholderPage({ title, srsRef, description, featureId }) {
   const { user, role } = useAuth();
+  const { isEn } = useLanguage();
   const currentRole = role || user?.role_name || user?.role;
 
   return (
@@ -16,7 +18,7 @@ export default function PlaceholderPage({ title, srsRef, description, featureId 
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
-              {srsRef || 'Phân hệ CRM'}
+              {srsRef || (isEn ? 'CRM Module' : 'Phân hệ CRM')}
             </span>
             {featureId && (
               <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#F3F4F6] text-[#6B7280]">
@@ -31,7 +33,7 @@ export default function PlaceholderPage({ title, srsRef, description, featureId 
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
             <ShieldCheck className="h-4 w-4 text-[#3CB371]" />
-            Đã xác thực ({currentRole})
+            {isEn ? `Authenticated (${currentRole})` : `Đã xác thực (${currentRole})`}
           </span>
         </div>
       </div>
@@ -43,17 +45,20 @@ export default function PlaceholderPage({ title, srsRef, description, featureId 
         </div>
         <div className="max-w-md mx-auto space-y-2">
           <h2 className="text-lg font-bold text-[#1F2937]">
-            Khung giao diện phân hệ đã sẵn sàng
+            {isEn ? 'Module Layout Frame Ready' : 'Khung giao diện phân hệ đã sẵn sàng'}
           </h2>
           <p className="text-sm text-[#6B7280] leading-relaxed">
-            Hệ thống Admin UI, Breadcrumbs, Sidebar Navigation và Role Guard đã được thiết lập chuẩn mực. Dữ liệu bảng biểu và thao tác CRUD sẽ được kích hoạt theo kế hoạch triển khai.
+            {isEn
+              ? 'Admin UI, Breadcrumbs, Sidebar Navigation, and Role Guard have been configured. Data tables and CRUD operations will be activated per schedule.'
+              : 'Hệ thống Admin UI, Breadcrumbs, Sidebar Navigation và Role Guard đã được thiết lập chuẩn mực. Dữ liệu bảng biểu và thao tác CRUD sẽ được kích hoạt theo kế hoạch triển khai.'}
           </p>
         </div>
 
         <div className="pt-4 flex items-center justify-center gap-2 text-xs font-medium text-[#2E7D32]">
-          <CheckCircle2 className="h-4 w-4 text-[#3CB371]" /> Tuyệt đối tuân thủ nguyên tắc "One feature at a time"
+          <CheckCircle2 className="h-4 w-4 text-[#3CB371]" /> {isEn ? 'Strictly complies with "One feature at a time"' : 'Tuyệt đối tuân thủ nguyên tắc "One feature at a time"'}
         </div>
       </div>
     </div>
   );
 }
+

@@ -16,6 +16,7 @@ import {
   Target,
   Package
 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const INITIAL_FORM = {
   first_name: '',
@@ -35,6 +36,7 @@ const INITIAL_FORM = {
 };
 
 export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
+  const { t, language } = useLanguage();
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -243,7 +245,11 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? 'Chỉnh Sửa Khách Hàng Tiềm Năng' : 'Thêm Mới Khách Hàng Tiềm Năng'}
+      title={
+        isEdit
+          ? (language === 'en' ? 'Update Lead Information' : 'Chỉnh Sửa Khách Hàng Tiềm Năng')
+          : (language === 'en' ? 'Add New Lead' : 'Thêm Mới Khách Hàng Tiềm Năng')
+      }
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -677,7 +683,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-[#6B7280] hover:text-[#1F2937] bg-[#F3F4F6] hover:bg-[#EAF5EC] rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
           >
-            Hủy Bỏ
+            {language === 'en' ? 'Cancel' : 'Hủy Bỏ'}
           </button>
           <button
             type="submit"
@@ -685,7 +691,9 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
             className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-[#3CB371] hover:bg-[#38A169] rounded-xl transition-colors shadow-xs hover:shadow-md disabled:opacity-50 cursor-pointer"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isEdit ? 'Cập Nhật Khách Hàng' : 'Lưu Khách Hàng Mới'}
+            {isEdit
+              ? (language === 'en' ? 'Update Lead' : 'Cập Nhật Khách Hàng')
+              : (language === 'en' ? 'Save New Lead' : 'Lưu Khách Hàng Mới')}
           </button>
         </div>
       </form>

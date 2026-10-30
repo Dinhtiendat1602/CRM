@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '../../components/Common/Modal';
 import oppApi from '../../api/oppApi';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   PhoneCall,
   Mail,
@@ -14,13 +15,15 @@ import {
 } from 'lucide-react';
 
 const CONTACT_METHODS = [
-  { value: 'PHONE', label: 'Gọi điện thoại', icon: PhoneCall },
-  { value: 'EMAIL', label: 'Gửi Email', icon: Mail },
-  { value: 'MEETING', label: 'Gặp trực tiếp', icon: Users },
-  { value: 'ZALO', label: 'Nhắn tin Zalo / Chat', icon: MessageSquare },
+  { value: 'PHONE', vi: 'Gọi điện thoại', en: 'Phone Call', icon: PhoneCall },
+  { value: 'EMAIL', vi: 'Gửi Email', en: 'Send Email', icon: Mail },
+  { value: 'MEETING', vi: 'Gặp trực tiếp', en: 'In-person Meeting', icon: Users },
+  { value: 'ZALO', vi: 'Nhắn tin Zalo / Chat', en: 'Zalo / Chat Message', icon: MessageSquare },
 ];
 
 export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess }) {
+  const { isEn } = useLanguage();
+
   const getNowFormatted = () => {
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
@@ -73,7 +76,9 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
   const validate = () => {
     const errors = {};
     if (!formData.content || !formData.content.trim()) {
-      errors.content = 'Vui lòng nhập nội dung chi tiết tương tác chăm sóc.';
+      errors.content = isEn
+        ? 'Please enter detailed interaction content.'
+        : 'Vui lòng nhập nội dung chi tiết tương tác chăm sóc.';
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -84,7 +89,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
     if (!validate()) return;
 
     if (!opportunity?.id) {
-      setErrorMsg('Không xác định được mã cơ hội bán hàng.');
+      setErrorMsg(isEn ? 'Opportunity ID not found.' : 'Không xác định được mã cơ hội bán hàng.');
       return;
     }
 
@@ -116,7 +121,12 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
       onClose();
     } catch (err) {
       console.error('Lỗi thêm nhật ký chăm sóc:', err);
-      setErrorMsg(err.response?.data?.message || 'Có lỗi xảy ra khi lưu nhật ký chăm sóc.');
+      setErrorMsg(
+        err.response?.data?.message ||
+          (isEn
+            ? 'An error occurred while saving follow-up log.'
+            : 'Có lỗi xảy ra khi lưu nhật ký chăm sóc.')
+      );
     } finally {
       setSubmitting(false);
     }
@@ -126,7 +136,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Ghi Nhận Nhật Ký Chăm Sóc Khách Hàng (Follow-up)"
+      title={isEn ? 'Record Follow-up Interaction Log' : 'Ghi Nhận Nhật Ký Chăm Sóc Khách Hàng (Follow-up)'}
       maxWidth="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -141,15 +151,15 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
         {opportunity && (
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs flex flex-wrap items-center justify-between gap-2">
             <div>
-              <span className="text-gray-500">Khách hàng: </span>
+              <span className="text-gray-500">{isEn ? 'Lead: ' : 'Khách hàng: '}</span>
               <strong className="text-gray-800">{opportunity.lead_name || `Lead #${opportunity.lead_id}`}</strong>
             </div>
             <div>
-              <span className="text-gray-500">Sản phẩm: </span>
+              <span className="text-gray-500">{isEn ? 'Product: ' : 'Sản phẩm: '}</span>
               <strong className="text-[#2E7D32]">{opportunity.product_name}</strong>
             </div>
             <div>
-              <span className="text-gray-500">Trạng thái hiện tại: </span>
+              <span className="text-gray-500">{isEn ? 'Current Status: ' : 'Trạng thái hiện tại: '}</span>
               <span className="px-2 py-0.5 rounded font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
                 {opportunity.status}
               </span>
@@ -161,7 +171,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
           {/* Thời gian tương tác */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Thời Gian Liên Hệ <span className="text-red-500">*</span>
+              {isEn ? 'Contact Time' : 'Thời Gian Liên Hệ'} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -180,7 +190,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
           {/* Phương thức liên hệ */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Hình Thức Tương Tác <span className="text-red-500">*</span>
+              {isEn ? 'Interaction Channel' : 'Hình Thức Tương Tác'} <span className="text-red-500">*</span>
             </label>
             <select
               name="contact_method"
@@ -190,7 +200,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             >
               {CONTACT_METHODS.map((m) => (
                 <option key={m.value} value={m.value}>
-                  {m.label}
+                  {m[isEn ? 'en' : 'vi']}
                 </option>
               ))}
             </select>
@@ -200,7 +210,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
         {/* Nội dung tương tác */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Nội Dung Trao Đổi Chi Tiết <span className="text-red-500">*</span>
+            {isEn ? 'Interaction Details' : 'Nội Dung Trao Đổi Chi Tiết'} <span className="text-red-500">*</span>
           </label>
           <textarea
             name="content"
@@ -209,9 +219,13 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             onChange={handleChange}
             className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.content
                 ? 'border-red-400 focus:ring-red-300'
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                : 'border-gray-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
               }`}
-            placeholder="Ví dụ: Gọi điện tư vấn tính năng máy ảnh Sony A7 IV, báo giá khuyến mãi ống kính combo, giải đáp thắc mắc về bảo hành chính hãng..."
+            placeholder={
+              isEn
+                ? 'e.g., Called to consult camera features, quoted bundle discount, answered warranty inquiries...'
+                : 'Ví dụ: Gọi điện tư vấn tính năng máy ảnh Sony A7 IV, báo giá khuyến mãi ống kính combo, giải đáp thắc mắc về bảo hành chính hãng...'
+            }
           />
           {fieldErrors.content && (
             <p className="text-xs text-red-500 mt-1">{fieldErrors.content}</p>
@@ -221,7 +235,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
         {/* Phản hồi của khách hàng */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Phản Hồi & Đánh Giá Của Khách Hàng (Customer Response)
+            {isEn ? 'Customer Feedback & Evaluation' : 'Phản Hồi & Đánh Giá Của Khách Hàng (Customer Response)'}
           </label>
           <textarea
             name="customer_response"
@@ -229,14 +243,18 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             value={formData.customer_response}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
-            placeholder="Ví dụ: Khách quan tâm mức chiết khấu khi mua từ 2 máy trở lên, muốn gửi hợp đồng mẫu qua email..."
+            placeholder={
+              isEn
+                ? 'e.g., Customer is interested in volume discount, requested sample contract via email...'
+                : 'Ví dụ: Khách quan tâm mức chiết khấu khi mua từ 2 máy trở lên, muốn gửi hợp đồng mẫu qua email...'
+            }
           />
         </div>
 
         {/* Kế hoạch tiếp theo */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Kế Hoạch Tiếp Theo (Next Plan)
+            {isEn ? 'Next Action Plan' : 'Kế Hoạch Tiếp Theo (Next Plan)'}
           </label>
           <textarea
             name="next_plan"
@@ -244,7 +262,11 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             value={formData.next_plan}
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
-            placeholder="Ví dụ: Chuẩn bị bảng báo giá gửi trước 17h chiều nay, hẹn gặp khách tại showroom sáng thứ Năm..."
+            placeholder={
+              isEn
+                ? 'e.g., Prepare quotation before 5 PM today, schedule showroom visit for Thursday...'
+                : 'Ví dụ: Chuẩn bị bảng báo giá gửi trước 17h chiều nay, hẹn gặp khách tại showroom sáng thứ Năm...'
+            }
           />
         </div>
 
@@ -252,7 +274,7 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
             <ArrowRightCircle className="w-4 h-4 text-[#3CB371]" />
-            <span>Chuyển Đổi Trạng Thái Cơ Hội (Tùy chọn)</span>
+            <span>{isEn ? 'Update Opportunity Status (Optional)' : 'Chuyển Đổi Trạng Thái Cơ Hội (Tùy chọn)'}</span>
           </label>
           <select
             name="new_status"
@@ -260,15 +282,17 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             onChange={handleChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
           >
-            <option value="">-- Giữ nguyên trạng thái hiện tại --</option>
+            <option value="">{isEn ? '-- Keep current status --' : '-- Giữ nguyên trạng thái hiện tại --'}</option>
             {statuses.map((s) => (
               <option key={s.code} value={s.code}>
-                Chuyển thành: {s.label} ({s.code})
+                {isEn ? `Change to: ${s.code}` : `Chuyển thành: ${s.label} (${s.code})`}
               </option>
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Mẹo: Khi ghi nhận tương tác đầu tiên cho cơ hội mới, trạng thái sẽ tự động nâng cấp lên "Đã liên hệ" (CONTACTED).
+            {isEn
+              ? 'Tip: Recording the first interaction for a new opportunity will automatically update its status to "Contacted" (CONTACTED).'
+              : 'Mẹo: Khi ghi nhận tương tác đầu tiên cho cơ hội mới, trạng thái sẽ tự động nâng cấp lên "Đã liên hệ" (CONTACTED).'}
           </p>
         </div>
 
@@ -278,24 +302,24 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors cursor-pointer"
           >
-            Hủy Bỏ
+            {isEn ? 'Cancel' : 'Hủy Bỏ'}
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-[#3CB371] rounded-lg hover:bg-[#38A169] active:bg-[#2E7D32] focus:outline-none focus:ring-2 focus:ring-[#3CB371]/30 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-[#3CB371] rounded-lg hover:bg-[#38A169] active:bg-[#2E7D32] focus:outline-none focus:ring-2 focus:ring-[#3CB371]/30 transition-colors disabled:opacity-50 cursor-pointer"
           >
             {submitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang ghi nhận...</span>
+                <span>{isEn ? 'Saving...' : 'Đang ghi nhận...'}</span>
               </>
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Lưu Nhật Ký Chăm Sóc</span>
+                <span>{isEn ? 'Save Follow-up Log' : 'Lưu Nhật Ký Chăm Sóc'}</span>
               </>
             )}
           </button>
@@ -304,3 +328,4 @@ export default function FollowUpModal({ isOpen, onClose, opportunity, onSuccess 
     </Modal>
   );
 }
+

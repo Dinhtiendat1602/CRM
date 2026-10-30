@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { ShieldX, ArrowLeft, Home } from 'lucide-react';
 import { useAuth } from '../context/authContextDef';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Forbidden() {
+  const { isEn } = useLanguage();
   const { user, role } = useAuth();
-  const currentRole = role || user?.role_name || user?.role || 'Khách';
+  const currentRole = role || user?.role_name || user?.role || (isEn ? 'Guest' : 'Khách');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] to-[#DDF0E2] flex items-center justify-center p-4">
@@ -18,15 +20,17 @@ export default function Forbidden() {
             HTTP 403 &bull; Access Denied
           </span>
           <h1 className="text-2xl font-bold text-[#1F2937]">
-            Truy cập bị từ chối
+            {isEn ? 'Access Denied' : 'Truy cập bị từ chối'}
           </h1>
           <p className="text-sm text-[#6B7280] leading-relaxed">
-            Tài khoản của bạn không có đủ quyền hạn để truy cập vào phân hệ này theo chính sách bảo mật RBAC.
+            {isEn
+              ? 'Your account does not possess sufficient permissions to access this module according to the RBAC security policy.'
+              : 'Tài khoản của bạn không có đủ quyền hạn để truy cập vào phân hệ này theo chính sách bảo mật RBAC.'}
           </p>
         </div>
 
         <div className="p-3 bg-[#F3F4F6] rounded-xl border border-slate-200 text-xs text-[#6B7280] flex items-center justify-between">
-          <span className="font-medium text-[#6B7280]">Vai trò hiện tại:</span>
+          <span className="font-medium text-[#6B7280]">{isEn ? 'Current Role:' : 'Vai trò hiện tại:'}</span>
           <span className="font-bold text-[#1F2937] bg-white px-2.5 py-1 rounded-md border border-[#DDF0E2] shadow-2xs">
             {currentRole}
           </span>
@@ -38,7 +42,7 @@ export default function Forbidden() {
             onClick={() => window.history.back()}
             className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <ArrowLeft className="h-4 w-4" /> Quay lại
+            <ArrowLeft className="h-4 w-4" /> {isEn ? 'Go Back' : 'Quay lại'}
           </button>
           <Link
             to="/dashboard"

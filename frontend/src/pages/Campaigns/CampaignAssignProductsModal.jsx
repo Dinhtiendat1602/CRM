@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Modal from '../../components/Common/Modal';
 import campaignApi from '../../api/campaignApi';
 import productApi from '../../api/productApi';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   Package,
   Search,
@@ -18,6 +19,7 @@ import {
  * Tuân thủ SRS v1.1 Mục 3.18.1 (Gán sản phẩm cho chiến dịch)
  */
 export default function CampaignAssignProductsModal({ isOpen, onClose, campaign, onSuccess }) {
+  const { isEn } = useLanguage();
   const [products, setProducts] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,7 +47,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
           setSelectedIds(currentAssigned);
         })
         .catch((err) => {
-          setErrorMsg(err.response?.data?.message || 'Không thể tải danh sách sản phẩm.');
+          setErrorMsg(err.response?.data?.message || (isEn ? 'Cannot load product list.' : 'Không thể tải danh sách sản phẩm.'));
         })
         .finally(() => {
           setFetching(false);
@@ -55,7 +57,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
       setSearchQuery('');
       setErrorMsg('');
     }
-  }, [isOpen, campaign]);
+  }, [isOpen, campaign, isEn]);
 
   // Lọc sản phẩm theo từ khóa tìm kiếm
   const filteredProducts = useMemo(() => {
@@ -90,7 +92,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
     if (!campaign?.id) return;
 
     if (selectedIds.length === 0) {
-      setErrorMsg('Vui lòng chọn ít nhất 1 sản phẩm để gán vào chiến dịch.');
+      setErrorMsg(isEn ? 'Please select at least 1 product to assign.' : 'Vui lòng chọn ít nhất 1 sản phẩm để gán vào chiến dịch.');
       return;
     }
 
@@ -102,7 +104,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
       onSuccess?.();
       onClose();
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Không thể gán sản phẩm vào chiến dịch.';
+      const msg = err.response?.data?.message || err.message || (isEn ? 'Failed to assign products to campaign.' : 'Không thể gán sản phẩm vào chiến dịch.');
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -113,8 +115,8 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Gán Sản Phẩm vào Chiến dịch Tiếp thị"
-      subtitle={`Chiến dịch: ${campaign?.name || ''}`}
+      title={isEn ? 'Assign Target Products to Campaign' : 'Gán Sản Phẩm vào Chiến dịch Tiếp thị'}
+      subtitle={`${isEn ? 'Campaign' : 'Chiến dịch'}: ${campaign?.name || ''}`}
       maxWidth="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -132,7 +134,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm theo mã, tên hoặc danh mục sản phẩm..."
+              placeholder={isEn ? 'Search by code, name or category...' : 'Tìm theo mã, tên hoặc danh mục sản phẩm...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
@@ -146,16 +148,16 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
             className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
           >
             <CheckSquare className="w-3.5 h-3.5 text-[#3CB371]" />
-            <span>Chọn / Bỏ chọn lọc</span>
+            <span>{isEn ? 'Select / Deselect filtered' : 'Chọn / Bỏ chọn lọc'}</span>
           </button>
         </div>
 
         {/* Thống kê đã chọn */}
         <div className="flex items-center justify-between text-xs text-slate-500 px-1">
           <span>
-            Đã chọn <strong className="text-[#3CB371] font-semibold">{selectedIds.length}</strong> sản phẩm mục tiêu
+            {isEn ? 'Selected' : 'Đã chọn'} <strong className="text-[#3CB371] font-semibold">{selectedIds.length}</strong> {isEn ? 'target products' : 'sản phẩm mục tiêu'}
           </span>
-          <span>Tổng số trong kho: {products.length}</span>
+          <span>{isEn ? 'Total in inventory' : 'Tổng số trong kho'}: {products.length}</span>
         </div>
 
         {/* Danh sách sản phẩm cuộn */}
@@ -163,12 +165,12 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
           {fetching ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400">
               <Loader2 className="w-6 h-6 animate-spin mb-2 text-[#3CB371]" />
-              <span className="text-sm">Đang tải danh sách sản phẩm...</span>
+              <span className="text-sm">{isEn ? 'Loading product list...' : 'Đang tải danh sách sản phẩm...'}</span>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-slate-400">
               <Package className="w-8 h-8 stroke-1 text-slate-300 mb-2" />
-              <p className="text-sm">Không tìm thấy sản phẩm nào phù hợp.</p>
+              <p className="text-sm">{isEn ? 'No matching products found.' : 'Không tìm thấy sản phẩm nào phù hợp.'}</p>
             </div>
           ) : (
             filteredProducts.map((p) => {
@@ -202,16 +204,16 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
                         </span>
                         {isAlreadyAssigned && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Đã gán
+                            <CheckCircle2 className="w-3 h-3" /> {isEn ? 'Assigned' : 'Đã gán'}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span>Danh mục: {p.category_name || 'Mặc định'}</span>
+                        <span>{isEn ? 'Category' : 'Danh mục'}: {p.category_name || (isEn ? 'Default' : 'Mặc định')}</span>
                         <span>•</span>
-                        <span>Đơn giá: {Number(p.unit_price || 0).toLocaleString('vi-VN')} đ</span>
+                        <span>{isEn ? 'Unit Price' : 'Đơn giá'}: {Number(p.unit_price || 0).toLocaleString(isEn ? 'en-US' : 'vi-VN')} {isEn ? '$' : 'đ'}</span>
                         <span>•</span>
-                        <span>Tồn kho: <strong className="text-slate-700">{p.stock_qty || 0}</strong></span>
+                        <span>{isEn ? 'Stock' : 'Tồn kho'}: <strong className="text-slate-700">{p.stock_qty || 0}</strong></span>
                       </div>
                     </div>
                   </div>
@@ -229,7 +231,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
           >
-            Đóng
+            {isEn ? 'Close' : 'Đóng'}
           </button>
           <button
             type="submit"
@@ -239,12 +241,12 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang lưu...</span>
+                <span>{isEn ? 'Saving...' : 'Đang lưu...'}</span>
               </>
             ) : (
               <>
                 <Layers className="w-4 h-4" />
-                <span>Lưu gán ({selectedIds.length}) sản phẩm</span>
+                <span>{isEn ? `Save assignment (${selectedIds.length}) products` : `Lưu gán (${selectedIds.length}) sản phẩm`}</span>
               </>
             )}
           </button>

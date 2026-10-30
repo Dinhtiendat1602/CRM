@@ -270,6 +270,17 @@
       ],
       "status": "completed",
       "evidence": "1. Cấu hình Tailwind @theme tại frontend/src/index.css định nghĩa các biến màu chuẩn: --color-brand (#3cb371), --color-brand-mint (#eaf5ec - #ddf0e2), --color-dark-gray (#1f2937), --color-muted-gray (#6b7280), --color-light-gray (#f3f4f6), --color-accent-blue (#7ca5f5), --color-accent-purple (#5d3ebc). 2. Cập nhật MainLayout, Sidebar (active menu #3CB371), Header (viền #DDF0E2, badge #EAF5EC, nút gia hạn #3CB371), Modal (nền header #EAF5EC/70, viền #DDF0E2), Pagination (trang active #3CB371), SearchInput (nền #F3F4F6, focus #3CB371), ConfirmDialog. 3. Cập nhật Dashboard (Banner Accent Gradient #7CA5F5 -> #5D3EBC, nút xem dữ liệu #3CB371, thẻ KPI và bảng #DDF0E2), LeadListPage, LeadModal, OpportunityListPage, OpportunityModal, OrderListPage, ProductListPage và Login. 4. Kiểm thử: npm run build thành công trong 258ms, 0 lỗi; 117/117 frontend tests PASS 100%."
+    },
+    {
+      "id": "feat-025",
+      "name": "Quốc Tế Hóa Song Ngữ Toàn Diện (Vietnamese & English Localization)",
+      "description": "Hiện thực hóa hệ thống chuyển đổi ngôn ngữ song ngữ Tiếng Việt và Tiếng Anh toàn diện trên 100% các trang, layout, component, modal, bảng biểu, hộp thoại, thông báo và form trong Zen CRM. Chuyển đổi ngôn ngữ tức thì qua dropdown Header hoặc màn hình Auth mà không cần tải lại trang. Hỗ trợ đầy đủ định dạng số, tiền tệ, ngày tháng và trạng thái.",
+      "dependencies": [
+        "feat-006",
+        "feat-024"
+      ],
+      "status": "completed",
+      "evidence": "1. LanguageContext & translations.js: Quản lý trạng thái ngôn ngữ toàn cục (mặc định vi), lưu trữ localStorage (zen_crm_language), cung cấp useLanguage(), toggleLanguage(), t(), isEn. 2. Hệ thống UI song ngữ 100%: Header (1 dòng tiêu đề to thuần Tiếng Việt khi ở chế độ VI, chuyển đổi EN/VI tại dropdown tài khoản), Sidebar, MainLayout, Pagination, SearchInput, ConfirmDialog, TimeoutWarning, ErrorBoundary, Modal. 3. Toàn bộ các phân hệ nghiệp vụ: Forecast (SetupPlanPage, PerformanceReportPage), Leads (LeadListPage, LeadDetailPage, LeadModal), Opportunities (OpportunityListPage, OpportunityDetailPage, OpportunityModal, FollowUpModal, MakeOrderModal), Orders (OrderListPage, OrderDetailPage), Products (ProductListPage, ProductDetailPage, ProductModal, ProductAssignmentModal, CategoryModal), Campaigns (CampaignListPage, CampaignModal, CampaignAssignProductsModal, CampaignReportPage), Reports (GeneralReportsPage), Dashboard, Admin (UserManagement), Profile (ProfilePage), Auth (Login, ForgotPassword, ResetPassword), Forbidden, NotFound, PlaceholderPage. 4. Kiểm thử: 146/146 backend integration tests PASS; 117/117 frontend tests PASS 100%; Vite client build hoàn tất trong 309ms, 0 lỗi."
     }
   ]
 }

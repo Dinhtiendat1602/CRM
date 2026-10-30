@@ -3,6 +3,7 @@ import Modal from '../../components/Common/Modal';
 import oppApi from '../../api/oppApi';
 import leadApi from '../../api/leadApi';
 import productApi from '../../api/productApi';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   User, 
   Package, 
@@ -32,6 +33,7 @@ export default function OpportunityModal({
   initialProductId, 
   onSuccess 
 }) {
+  const { t, isEn } = useLanguage();
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [leads, setLeads] = useState([]);
   const [products, setProducts] = useState([]);
@@ -237,13 +239,13 @@ export default function OpportunityModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? `Chỉnh Sửa Cơ Hội: #${opportunity.id}` : 'Thêm Cơ Hội Bán Hàng Mới'}
+      title={isEdit ? (isEn ? `Edit Opportunity: #${opportunity.id}` : `Chỉnh Sửa Cơ Hội: #${opportunity.id}`) : (isEn ? 'Create New Opportunity' : 'Thêm Cơ Hội Bán Hàng Mới')}
       maxWidth="max-w-3xl"
     >
       {loadingInitial ? (
         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
           <Loader2 className="w-8 h-8 animate-spin text-[#3CB371] mb-2" />
-          <p className="text-sm">Đang tải danh sách khách hàng và sản phẩm...</p>
+          <p className="text-sm">{isEn ? 'Loading leads and products...' : 'Đang tải danh sách khách hàng và sản phẩm...'}</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -269,7 +271,7 @@ export default function OpportunityModal({
                     onChange={handleChange}
                     className="w-4 h-4 rounded text-[#3CB371] accent-[#3CB371] focus:ring-[#3CB371] border-gray-300"
                   />
-                  <span>Tôi xác nhận vẫn muốn tạo thêm cơ hội này cho khách hàng</span>
+                  <span>{isEn ? 'I confirm I want to create this duplicate opportunity for this lead' : 'Tôi xác nhận vẫn muốn tạo thêm cơ hội này cho khách hàng'}</span>
                 </label>
               )}
             </div>
@@ -279,7 +281,7 @@ export default function OpportunityModal({
             {/* 1. Khách hàng tiềm năng (Lead) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Khách Hàng Tiềm Năng <span className="text-red-500">*</span>
+                {isEn ? 'Lead Customer' : 'Khách Hàng Tiềm Năng'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -296,7 +298,7 @@ export default function OpportunityModal({
                       : 'border-gray-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
                 >
-                  <option value="">-- Chọn khách hàng --</option>
+                  <option value="">{isEn ? '-- Select lead customer --' : '-- Chọn khách hàng --'}</option>
                   {leads.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.full_name || `${l.last_name || ''} ${l.first_name || ''}`} - {l.phone || l.email}
@@ -309,7 +311,7 @@ export default function OpportunityModal({
               )}
               {selectedLead && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Email: <span className="font-medium text-gray-700">{selectedLead.email}</span> | SĐT: <span className="font-medium text-gray-700">{selectedLead.phone}</span>
+                  Email: <span className="font-medium text-gray-700">{selectedLead.email}</span> | {isEn ? 'Phone:' : 'SĐT:'} <span className="font-medium text-gray-700">{selectedLead.phone}</span>
                 </p>
               )}
             </div>
@@ -317,7 +319,7 @@ export default function OpportunityModal({
             {/* 2. Sản phẩm quan tâm (Product) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Sản Phẩm Quan Tâm <span className="text-red-500">*</span>
+                {isEn ? 'Product of Interest' : 'Sản Phẩm Quan Tâm'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -334,10 +336,10 @@ export default function OpportunityModal({
                       : 'border-gray-300 focus:ring-[#3CB371]/20 focus:border-[#3CB371]'
                   }`}
                 >
-                  <option value="">-- Chọn sản phẩm quan tâm --</option>
+                  <option value="">{isEn ? '-- Select product --' : '-- Chọn sản phẩm quan tâm --'}</option>
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
-                      [{p.product_code}] {p.name} - {Number(p.unit_price).toLocaleString('vi-VN')} ₫ (Kho: {p.stock_qty})
+                      [{p.product_code}] {p.name} - {Number(p.unit_price).toLocaleString('vi-VN')} ₫ ({isEn ? 'Stock' : 'Kho'}: {p.stock_qty})
                     </option>
                   ))}
                 </select>
@@ -347,9 +349,9 @@ export default function OpportunityModal({
               )}
               {selectedProduct && (
                 <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
-                  <span>Đơn giá: <strong className="text-[#2E7D32]">{Number(selectedProduct.unit_price).toLocaleString('vi-VN')} ₫</strong></span>
+                  <span>{isEn ? 'Unit price:' : 'Đơn giá:'} <strong className="text-[#2E7D32]">{Number(selectedProduct.unit_price).toLocaleString('vi-VN')} ₫</strong></span>
                   <span>•</span>
-                  <span>Tồn kho: <strong className={selectedProduct.stock_qty <= 5 ? 'text-amber-600' : 'text-emerald-600'}>{selectedProduct.stock_qty}</strong></span>
+                  <span>{isEn ? 'Stock:' : 'Tồn kho:'} <strong className={selectedProduct.stock_qty <= 5 ? 'text-amber-600' : 'text-emerald-600'}>{selectedProduct.stock_qty}</strong></span>
                 </div>
               )}
             </div>
@@ -357,7 +359,7 @@ export default function OpportunityModal({
             {/* 3. Số lượng (Quantity) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Số Lượng Nhu Cầu <span className="text-red-500">*</span>
+                {isEn ? 'Quantity' : 'Số Lượng Nhu Cầu'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -386,7 +388,7 @@ export default function OpportunityModal({
             {/* 4. Trạng thái cơ hội (Status) */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Trạng Thái Tiến Trình <span className="text-red-500">*</span>
+                {isEn ? 'Opportunity Stage' : 'Trạng Thái Tiến Trình'} <span className="text-red-500">*</span>
               </label>
               <select
                 name="status"
@@ -403,12 +405,12 @@ export default function OpportunityModal({
                   ))
                 ) : (
                   <>
-                    <option value="NEW">Mới tạo (NEW)</option>
-                    <option value="CONTACTED">Đã liên hệ (CONTACTED)</option>
-                    <option value="QUALIFIED">Đủ điều kiện (QUALIFIED)</option>
-                    <option value="PROPOSAL">Gửi báo giá (PROPOSAL)</option>
-                    <option value="ORDERED">Đã chốt đơn (ORDERED)</option>
-                    <option value="LOST">Thất bại/Hủy (LOST)</option>
+                    <option value="NEW">{isEn ? 'New (NEW)' : 'Mới tạo (NEW)'}</option>
+                    <option value="CONTACTED">{isEn ? 'Contacted (CONTACTED)' : 'Đã liên hệ (CONTACTED)'}</option>
+                    <option value="QUALIFIED">{isEn ? 'Qualified (QUALIFIED)' : 'Đủ điều kiện (QUALIFIED)'}</option>
+                    <option value="PROPOSAL">{isEn ? 'Proposal (PROPOSAL)' : 'Gửi báo giá (PROPOSAL)'}</option>
+                    <option value="ORDERED">{isEn ? 'Ordered (ORDERED)' : 'Đã chốt đơn (ORDERED)'}</option>
+                    <option value="LOST">{isEn ? 'Lost (LOST)' : 'Thất bại/Hủy (LOST)'}</option>
                   </>
                 )}
               </select>
@@ -417,7 +419,7 @@ export default function OpportunityModal({
             {/* 5. Ngày dự kiến chốt (Expected Close Date) */}
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Ngày Dự Kiến Chốt Đơn (Expected Close Date)
+                {isEn ? 'Expected Close Date' : 'Ngày Dự Kiến Chốt Đơn (Expected Close Date)'}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -436,7 +438,7 @@ export default function OpportunityModal({
             {/* 6. Ghi chú nhu cầu (Notes) */}
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Ghi Chú Nhu Cầu & Đặc Điểm Khách Hàng
+                {isEn ? 'Customer Requirement Notes' : 'Ghi Chú Nhu Cầu & Đặc Điểm Khách Hàng'}
               </label>
               <textarea
                 name="notes"
@@ -444,7 +446,7 @@ export default function OpportunityModal({
                 value={formData.notes}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
-                placeholder="Ví dụ: Khách quan tâm cấu hình Core i7, yêu cầu xuất hóa đơn VAT, giao hàng tại chi nhánh Quận 1..."
+                placeholder={isEn ? 'e.g. Interested in Core i7, requires VAT invoice, delivery to branch...' : 'Ví dụ: Khách quan tâm cấu hình Core i7, yêu cầu xuất hóa đơn VAT, giao hàng tại chi nhánh Quận 1...'}
               />
             </div>
           </div>
@@ -457,10 +459,10 @@ export default function OpportunityModal({
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wider font-semibold text-[#1F2937]">
-                  Giá Trị Dự Kiến Ước Tính (Estimated Value)
+                  {isEn ? 'ESTIMATED TOTAL VALUE' : 'Giá Trị Dự Kiến Ước Tính (Estimated Value)'}
                 </p>
                 <p className="text-xs text-[#6B7280]">
-                  {formData.quantity || 0} sản phẩm × {selectedProduct ? Number(selectedProduct.unit_price).toLocaleString('vi-VN') : '0'} ₫
+                  {formData.quantity || 0} {isEn ? 'items' : 'sản phẩm'} × {selectedProduct ? Number(selectedProduct.unit_price).toLocaleString('vi-VN') : '0'} ₫
                 </p>
               </div>
             </div>
@@ -479,7 +481,7 @@ export default function OpportunityModal({
               disabled={submitting}
               className="px-4 py-2 text-sm font-medium text-[#6B7280] hover:text-[#1F2937] bg-[#F3F4F6] hover:bg-[#EAF5EC] rounded-xl transition-colors cursor-pointer"
             >
-              Hủy Bỏ
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -489,12 +491,12 @@ export default function OpportunityModal({
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Đang lưu...</span>
+                  <span>{t('saving')}</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>{isEdit ? 'Cập Nhật Cơ Hội' : 'Tạo Cơ Hội'}</span>
+                  <span>{isEdit ? (isEn ? 'Update Opportunity' : 'Cập Nhật Cơ Hội') : (isEn ? 'Create Opportunity' : 'Tạo Cơ Hội')}</span>
                 </>
               )}
             </button>

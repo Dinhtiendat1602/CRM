@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Lock, User, ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Lock, User, ArrowRight, AlertCircle, ShieldCheck, Globe } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 import { useAuth } from '../../context/authContextDef';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { isEn, toggleLanguage } = useLanguage();
 
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,11 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.username.trim() || !formData.password) {
-      setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
+      setError(
+        isEn
+          ? 'Please enter both username and password'
+          : 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu'
+      );
       return;
     }
 
@@ -44,18 +50,37 @@ export default function Login() {
         login(user, token);
         navigate(from, { replace: true });
       } else {
-        setError('Phản hồi từ máy chủ không hợp lệ');
+        setError(
+          isEn ? 'Invalid server response.' : 'Phản hồi từ máy chủ không hợp lệ'
+        );
       }
     } catch (err) {
-      setError(err?.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.');
+      setError(
+        err?.message ||
+          (isEn
+            ? 'Sign in failed. Please check your credentials.'
+            : 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.')
+      );
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] via-[#EAF5EC] to-[#DDF0E2] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#EAF5EC] via-[#EAF5EC] to-[#DDF0E2] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans relative">
+      {/* Top right language switcher */}
+      <div className="absolute top-4 right-4">
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 hover:bg-white text-slate-700 shadow-sm border border-[#DDF0E2] transition-colors cursor-pointer"
+          title={isEn ? 'Chuyển sang Tiếng Việt' : 'Switch to English'}
+        >
+          <Globe className="h-3.5 w-3.5 text-[#3CB371]" />
+          <span>{isEn ? 'English' : 'Tiếng Việt'}</span>
+        </button>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Brand Logo */}
         <div className="flex justify-center">
@@ -78,15 +103,23 @@ export default function Login() {
           Zen CRM Platform
         </h2>
         <p className="mt-1 text-center text-xs text-[#6B7280]">
-          Hệ thống Quản trị Quan hệ Khách hàng Doanh nghiệp
+          {isEn
+            ? 'Enterprise Customer Relationship Management System'
+            : 'Hệ thống Quản trị Quan hệ Khách hàng Doanh nghiệp'}
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-[#DDF0E2] space-y-6">
           <div className="border-b border-[#DDF0E2] pb-4">
-            <h3 className="text-lg font-bold text-[#1F2937]">Đăng nhập tài khoản</h3>
-            <p className="text-xs text-[#6B7280]">Nhập thông tin nhân viên để bắt đầu phiên làm việc</p>
+            <h3 className="text-lg font-bold text-[#1F2937]">
+              {isEn ? 'Account Login' : 'Đăng nhập tài khoản'}
+            </h3>
+            <p className="text-xs text-[#6B7280]">
+              {isEn
+                ? 'Enter staff credentials to begin your session'
+                : 'Nhập thông tin nhân viên để bắt đầu phiên làm việc'}
+            </p>
           </div>
 
           {error && (
@@ -99,7 +132,7 @@ export default function Login() {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider mb-1">
-                Tài khoản hoặc Email
+                {isEn ? 'Username or Email' : 'Tài khoản hoặc Email'}
               </label>
               <div className="relative rounded-xl shadow-2xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6B7280]">
@@ -111,7 +144,7 @@ export default function Login() {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  placeholder="Email hoặc tên đăng nhập"
+                  placeholder={isEn ? 'Email or username' : 'Email hoặc tên đăng nhập'}
                   className="block w-full pl-10 pr-3 py-2.5 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/30 focus:border-[#3CB371] focus:bg-white transition-all text-[#1F2937]"
                 />
               </div>
@@ -120,13 +153,13 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-semibold text-[#1F2937] uppercase tracking-wider">
-                  Mật khẩu
+                  {isEn ? 'Password' : 'Mật khẩu'}
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-xs text-[#2E7D32] hover:text-[#38A169] font-medium"
                 >
-                  Quên mật khẩu?
+                  {isEn ? 'Forgot password?' : 'Quên mật khẩu?'}
                 </Link>
               </div>
               <div className="relative rounded-xl shadow-2xs">
@@ -139,7 +172,7 @@ export default function Login() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  placeholder="Mật khẩu"
+                  placeholder={isEn ? 'Password' : 'Mật khẩu'}
                   className="block w-full pl-10 pr-3 py-2.5 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/30 focus:border-[#3CB371] focus:bg-white transition-all text-[#1F2937]"
                 />
               </div>
@@ -151,24 +184,27 @@ export default function Login() {
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] shadow-md shadow-[#3CB371]/20 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-[#3CB371] transition-all cursor-pointer disabled:opacity-50"
             >
               {loading ? (
-                <span>Đang xác thực...</span>
+                <span>{isEn ? 'Authenticating...' : 'Đang xác thực...'}</span>
               ) : (
                 <>
-                  <span>Đăng nhập hệ thống</span>
+                  <span>{isEn ? 'Sign In to System' : 'Đăng nhập hệ thống'}</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
           </form>
-
-
         </div>
 
         <div className="mt-6 text-center text-xs text-[#6B7280] flex items-center justify-center gap-1.5">
           <ShieldCheck className="h-4 w-4 text-[#3CB371]" />
-          <span>Phiên làm việc bảo mật tự động hết hạn sau 30 phút</span>
+          <span>
+            {isEn
+              ? 'Secure session automatically expires after 30 minutes of inactivity'
+              : 'Phiên làm việc bảo mật tự động hết hạn sau 30 phút'}
+          </span>
         </div>
       </div>
     </div>
   );
 }
+

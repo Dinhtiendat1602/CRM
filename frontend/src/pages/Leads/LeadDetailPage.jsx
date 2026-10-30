@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import leadApi from '../../api/leadApi';
 import LeadModal from './LeadModal';
 import ConfirmDialog from '../../components/Common/ConfirmDialog';
+import { useLanguage } from '../../context/LanguageContext';
 import { 
   ArrowLeft, 
   User, 
@@ -24,6 +25,7 @@ import {
 export default function LeadDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isEn } = useLanguage();
 
   const [lead, setLead] = useState(null);
   const [opportunities, setOpportunities] = useState([]);
@@ -47,11 +49,16 @@ export default function LeadDetailPage() {
       setLead(leadObj);
       setOpportunities(data.opportunities || leadObj?.opportunities || []);
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Không tìm thấy thông tin khách hàng tiềm năng.');
+      setErrorMsg(
+        err.response?.data?.message ||
+          (isEn
+            ? 'Lead information not found.'
+            : 'Không tìm thấy thông tin khách hàng tiềm năng.')
+      );
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, isEn]);
 
   useEffect(() => {
     fetchLeadDetail();
@@ -63,7 +70,10 @@ export default function LeadDetailPage() {
       await leadApi.deleteLead(id);
       navigate('/leads', { replace: true });
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi khi xóa khách hàng.');
+      alert(
+        err.response?.data?.message ||
+          (isEn ? 'Failed to delete lead.' : 'Lỗi khi xóa khách hàng.')
+      );
       setDeleteConfirm((prev) => ({ ...prev, loading: false }));
     }
   };
@@ -73,12 +83,14 @@ export default function LeadDetailPage() {
     try {
       if (typeof isoString === 'string' && /^\d{4}-\d{2}-\d{2}/.test(isoString)) {
         const [y, m, d] = isoString.slice(0, 10).split('-');
-        return `${d}/${m}/${y}`;
+        return isEn ? `${y}-${m}-${d}` : `${d}/${m}/${y}`;
       }
       const d = new Date(isoString);
       if (isNaN(d.getTime())) return isoString;
       const pad = (n) => String(n).padStart(2, '0');
-      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+      return isEn
+        ? `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+        : `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
     } catch {
       return isoString;
     }
@@ -90,7 +102,11 @@ export default function LeadDetailPage() {
       const d = new Date(isoString);
       if (isNaN(d.getTime())) return isoString;
       const pad = (n) => String(n).padStart(2, '0');
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+      const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      const dateStr = isEn
+        ? `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+        : `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+      return `${timeStr} ${dateStr}`;
     } catch {
       return isoString;
     }
@@ -98,7 +114,7 @@ export default function LeadDetailPage() {
 
   const formatCurrency = (val) => {
     const num = Number(val) || 0;
-    return `${num.toLocaleString('vi-VN')} đ`;
+    return `${num.toLocaleString(isEn ? 'en-US' : 'vi-VN')} ${isEn ? '$' : 'đ'}`;
   };
 
   const getOppStatusBadge = (status) => {
@@ -116,11 +132,18 @@ export default function LeadDetailPage() {
     }
   };
 
+  const oppStatusLabels = {
+    OPEN: { vi: 'Mới mở', en: 'Open' },
+    FOLLOWING: { vi: 'Đang theo dõi', en: 'Following' },
+    ORDERED: { vi: 'Đã lên đơn', en: 'Ordered' },
+    CANCELLED: { vi: 'Đã hủy', en: 'Cancelled' },
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400">
         <div className="w-8 h-8 border-3 border-[#3CB371] border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-sm">Đang tải hồ sơ khách hàng tiềm năng...</p>
+        <p className="text-sm">{isEn ? 'Loading lead details...' : 'Đang tải hồ sơ khách hàng tiềm năng...'}</p>
       </div>
     );
   }
@@ -129,14 +152,18 @@ export default function LeadDetailPage() {
     return (
       <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center max-w-lg mx-auto mt-12">
         <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-slate-800">Không tìm thấy khách hàng</h2>
-        <p className="text-sm text-slate-500 mt-1 mb-6">{errorMsg || 'Khách hàng không tồn tại hoặc đã bị xóa.'}</p>
+        <h2 className="text-lg font-bold text-slate-800">
+          {isEn ? 'Lead Not Found' : 'Không tìm thấy khách hàng'}
+        </h2>
+        <p className="text-sm text-slate-500 mt-1 mb-6">
+          {errorMsg || (isEn ? 'Lead does not exist or has been deleted.' : 'Khách hàng không tồn tại hoặc đã bị xóa.')}
+        </p>
         <button
           onClick={() => navigate('/leads')}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] text-white rounded-xl text-sm font-semibold hover:bg-[#38A169] transition-colors shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại danh sách</span>
+          <span>{isEn ? 'Back to Leads' : 'Quay lại danh sách'}</span>
         </button>
       </div>
     );
@@ -152,7 +179,7 @@ export default function LeadDetailPage() {
           <button
             onClick={() => navigate('/leads')}
             className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
-            title="Quay lại danh sách"
+            title={isEn ? 'Back to Leads' : 'Quay lại danh sách'}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -164,7 +191,7 @@ export default function LeadDetailPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Ngày nhập hệ thống: {formatDateTime(lead.entered_date)}
+              {isEn ? 'Entered Date:' : 'Ngày nhập hệ thống:'} {formatDateTime(lead.entered_date)}
             </p>
           </div>
         </div>
@@ -175,7 +202,7 @@ export default function LeadDetailPage() {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
             <Edit3 className="w-4 h-4 text-amber-600" />
-            <span>Sửa Thông Tin</span>
+            <span>{isEn ? 'Edit Info' : 'Sửa Thông Tin'}</span>
           </button>
 
           <button
@@ -183,7 +210,7 @@ export default function LeadDetailPage() {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
             <Trash2 className="w-4 h-4" />
-            <span>Xóa Lead</span>
+            <span>{isEn ? 'Delete Lead' : 'Xóa Lead'}</span>
           </button>
 
           <Link
@@ -191,7 +218,7 @@ export default function LeadDetailPage() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-sm font-semibold transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>Tạo Cơ Hội Mới</span>
+            <span>{isEn ? 'Create Opportunity' : 'Tạo Cơ Hội Mới'}</span>
           </Link>
         </div>
       </div>
@@ -203,30 +230,30 @@ export default function LeadDetailPage() {
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
               <User className="w-4 h-4 text-[#3CB371]" />
-              <span>Thông Tin Chi Tiết Khách Hàng</span>
+              <span>{isEn ? 'Lead Details Information' : 'Thông Tin Chi Tiết Khách Hàng'}</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-sm">
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Họ và Tên
+                  {isEn ? 'Full Name' : 'Họ và Tên'}
                 </span>
                 <span className="font-semibold text-slate-800 text-base">{fullName}</span>
               </div>
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Chức Danh / Nghề Nghiệp
+                  {isEn ? 'Job Title / Occupation' : 'Chức Danh / Nghề Nghiệp'}
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Briefcase className="w-4 h-4 text-slate-400" />
-                  {lead.career || lead.title || 'Chưa cập nhật'}
+                  {lead.career || lead.title || (isEn ? 'Not updated' : 'Chưa cập nhật')}
                 </span>
               </div>
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Địa Chỉ Email
+                  {isEn ? 'Email Address' : 'Địa Chỉ Email'}
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Mail className="w-4 h-4 text-slate-400" />
@@ -238,7 +265,7 @@ export default function LeadDetailPage() {
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Số Điện Thoại
+                  {isEn ? 'Phone Number' : 'Số Điện Thoại'}
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Phone className="w-4 h-4 text-slate-400" />
@@ -250,17 +277,17 @@ export default function LeadDetailPage() {
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Công Ty / Doanh Nghiệp
+                  {isEn ? 'Company / Organization' : 'Công Ty / Doanh Nghiệp'}
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Building className="w-4 h-4 text-slate-400" />
-                  {lead.company || 'Khách hàng cá nhân'}
+                  {lead.company || (isEn ? 'Individual Customer' : 'Khách hàng cá nhân')}
                 </span>
               </div>
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Chiến Dịch Nguồn (Campaign)
+                  {isEn ? 'Source Campaign' : 'Chiến Dịch Nguồn (Campaign)'}
                 </span>
                 <span className="inline-block mt-0.5 text-xs font-medium">
                   {lead.campaign_id ? (
@@ -269,11 +296,11 @@ export default function LeadDetailPage() {
                       className="px-2.5 py-1 bg-[#EAF5EC] text-[#2E7D32] hover:bg-[#DDF0E2] rounded-md font-semibold inline-flex items-center gap-1 border border-[#DDF0E2]"
                     >
                       <Target className="w-3.5 h-3.5" />
-                      <span>{lead.campaign_name || `Chiến dịch #${lead.campaign_id}`}</span>
+                      <span>{lead.campaign_name || `${isEn ? 'Campaign' : 'Chiến dịch'} #${lead.campaign_id}`}</span>
                     </Link>
                   ) : (
                     <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md">
-                      {lead.source || 'Website / Trực tiếp'}
+                      {lead.source || (isEn ? 'Website / Direct' : 'Website / Trực tiếp')}
                     </span>
                   )}
                 </span>
@@ -281,7 +308,7 @@ export default function LeadDetailPage() {
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Ngày Sinh (DOB)
+                  {isEn ? 'Date of Birth (DOB)' : 'Ngày Sinh (DOB)'}
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <Calendar className="w-4 h-4 text-slate-400" />
@@ -291,11 +318,11 @@ export default function LeadDetailPage() {
 
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Khu Vực Địa Lý
+                  {isEn ? 'Geographic Location' : 'Khu Vực Địa Lý'}
                 </span>
                 <span className="text-slate-700 flex items-center gap-1.5 mt-0.5">
                   <MapPin className="w-4 h-4 text-slate-400" />
-                  {[lead.city, lead.state, lead.country].filter(Boolean).join(', ') || 'Chưa cập nhật'}
+                  {[lead.city, lead.state, lead.country].filter(Boolean).join(', ') || (isEn ? 'Not updated' : 'Chưa cập nhật')}
                 </span>
               </div>
             </div>
@@ -304,7 +331,7 @@ export default function LeadDetailPage() {
             {lead.address && (
               <div className="pt-3 border-t border-slate-100">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                  Địa Chỉ Cụ Thể
+                  {isEn ? 'Detailed Address' : 'Địa Chỉ Cụ Thể'}
                 </span>
                 <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                   {lead.address}
@@ -315,10 +342,10 @@ export default function LeadDetailPage() {
             {/* Ghi chú nhu cầu */}
             <div className="pt-3 border-t border-slate-100">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                Ghi Chú Nhu Cầu & Quan Tâm (Notes)
+                {isEn ? 'Notes & Interests' : 'Ghi Chú Nhu Cầu & Quan Tâm (Notes)'}
               </span>
               <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/60 whitespace-pre-line">
-                {lead.notes || 'Chưa có ghi chú đặc biệt nào cho khách hàng này.'}
+                {lead.notes || (isEn ? 'No notes recorded for this lead yet.' : 'Chưa có ghi chú đặc biệt nào cho khách hàng này.')}
               </p>
             </div>
           </div>
@@ -329,7 +356,7 @@ export default function LeadDetailPage() {
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-[#3CB371]" />
                 <h2 className="text-base font-bold text-slate-900">
-                  Cơ Hội Bán Hàng Liên Quan (Opportunities)
+                  {isEn ? 'Related Sales Opportunities' : 'Cơ Hội Bán Hàng Liên Quan (Opportunities)'}
                 </h2>
                 <span className="px-2 py-0.5 bg-[#EAF5EC] text-[#2E7D32] rounded-full text-xs font-semibold">
                   {opportunities.length}
@@ -341,23 +368,27 @@ export default function LeadDetailPage() {
                 className="text-xs font-semibold text-[#3CB371] hover:text-[#2E7D32] flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Thêm cơ hội</span>
+                <span>{isEn ? 'Add Opportunity' : 'Thêm cơ hội'}</span>
               </Link>
             </div>
 
             {opportunities.length === 0 ? (
               <div className="text-center py-8 text-slate-400">
                 <Target className="w-10 h-10 text-slate-300 stroke-[1.5] mx-auto mb-2" />
-                <p className="text-sm font-medium text-slate-600">Chưa có cơ hội bán hàng nào cho khách này</p>
+                <p className="text-sm font-medium text-slate-600">
+                  {isEn ? 'No sales opportunities for this lead yet' : 'Chưa có cơ hội bán hàng nào cho khách này'}
+                </p>
                 <p className="text-xs text-slate-400 mt-0.5 mb-4">
-                  Tạo cơ hội để bắt đầu theo dõi tiến độ chăm sóc và chốt đơn hàng.
+                  {isEn
+                    ? 'Create an opportunity to track progress and close deals.'
+                    : 'Tạo cơ hội để bắt đầu theo dõi tiến độ chăm sóc và chốt đơn hàng.'}
                 </p>
                 <Link
                   to={`/opportunities?createForLead=${lead.id}`}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold transition-colors shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Tạo Cơ Hội Đầu Tiên</span>
+                  <span>{isEn ? 'Create First Opportunity' : 'Tạo Cơ Hội Đầu Tiên'}</span>
                 </Link>
               </div>
             ) : (
@@ -365,11 +396,11 @@ export default function LeadDetailPage() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200/60">
                     <tr>
-                      <th className="py-2.5 px-3">Sản Phẩm Quan Tâm</th>
-                      <th className="py-2.5 px-3">Số Lượng</th>
-                      <th className="py-2.5 px-3">Giá Trị Dự Kiến</th>
-                      <th className="py-2.5 px-3">Trạng Thái</th>
-                      <th className="py-2.5 px-3">Ngày Tạo</th>
+                      <th className="py-2.5 px-3">{isEn ? 'Product of Interest' : 'Sản Phẩm Quan Tâm'}</th>
+                      <th className="py-2.5 px-3">{isEn ? 'Quantity' : 'Số Lượng'}</th>
+                      <th className="py-2.5 px-3">{isEn ? 'Estimated Value' : 'Giá Trị Dự Kiến'}</th>
+                      <th className="py-2.5 px-3">{isEn ? 'Status' : 'Trạng Thái'}</th>
+                      <th className="py-2.5 px-3">{isEn ? 'Created Date' : 'Ngày Tạo'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -385,7 +416,7 @@ export default function LeadDetailPage() {
                             className="hover:underline text-[#3CB371] block"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {opp.product_name || `Sản phẩm #${opp.product_id}`}
+                            {opp.product_name || `${isEn ? 'Product' : 'Sản phẩm'} #${opp.product_id}`}
                           </Link>
                           {opp.product_id && (
                             <Link
@@ -393,7 +424,7 @@ export default function LeadDetailPage() {
                               className="text-[11px] text-slate-400 hover:text-slate-600 hover:underline mt-0.5 inline-block"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              Mã SP: {opp.product_code || `#${opp.product_id}`}
+                              {isEn ? 'SKU:' : 'Mã SP:'} {opp.product_code || `#${opp.product_id}`}
                             </Link>
                           )}
                         </td>
@@ -409,7 +440,7 @@ export default function LeadDetailPage() {
                               opp.status
                             )}`}
                           >
-                            {opp.status}
+                            {oppStatusLabels[opp.status]?.[isEn ? 'en' : 'vi'] || opp.status}
                           </span>
                         </td>
                         <td className="py-3 px-3 text-slate-500 font-mono text-[11px]">
@@ -428,25 +459,27 @@ export default function LeadDetailPage() {
         <div className="space-y-6">
           <div className="bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-2xl p-6 shadow-xs">
             <h3 className="text-xs font-semibold text-[#2E7D32] uppercase tracking-wider mb-2">
-              Tóm Tắt Trạng Thái Lead
+              {isEn ? 'Lead Status Summary' : 'Tóm Tắt Trạng Thái Lead'}
             </h3>
             <div className="text-2xl font-bold tracking-tight mb-4 text-[#1F2937]">
-              {opportunities.length > 0 ? `${opportunities.length} Cơ Hội Mở` : 'Lead Mới Tiếp Nhận'}
+              {opportunities.length > 0
+                ? `${opportunities.length} ${isEn ? 'Open Opportunities' : 'Cơ Hội Mở'}`
+                : isEn ? 'New Received Lead' : 'Lead Mới Tiếp Nhận'}
             </div>
             <div className="space-y-3 text-xs text-[#6B7280]">
               <div className="flex items-center justify-between border-b border-[#DDF0E2] pb-2">
-                <span>Nguồn tiếp nhận:</span>
+                <span>{isEn ? 'Acquisition Source:' : 'Nguồn tiếp nhận:'}</span>
                 <span className="font-semibold text-[#1F2937]">{lead.source || 'Website'}</span>
               </div>
               <div className="flex items-center justify-between border-b border-[#DDF0E2] pb-2">
-                <span>Ngày tạo Lead:</span>
+                <span>{isEn ? 'Created Date:' : 'Ngày tạo Lead:'}</span>
                 <span className="font-semibold text-[#1F2937]">{formatDate(lead.entered_date)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Trạng thái kiểm tra:</span>
+                <span>{isEn ? 'Verification Status:' : 'Trạng thái kiểm tra:'}</span>
                 <span className="inline-flex items-center gap-1 text-[#2E7D32] font-semibold">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#3CB371]" />
-                  Hợp lệ & Không trùng
+                  {isEn ? 'Valid & Verified' : 'Hợp lệ & Không trùng'}
                 </span>
               </div>
             </div>
@@ -456,10 +489,12 @@ export default function LeadDetailPage() {
           <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-5 text-xs text-amber-900 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-800 text-sm">
               <FileText className="w-4 h-4 text-amber-600" />
-              <span>Quy trình chăm sóc khách hàng</span>
+              <span>{isEn ? 'Customer Care Workflow' : 'Quy trình chăm sóc khách hàng'}</span>
             </div>
             <p className="leading-relaxed text-amber-800/90">
-              Từ Lead này, Nhân viên bán hàng tạo các <strong>Cơ hội (Opportunity)</strong> gắn với từng sản phẩm. Mỗi lần gọi điện hoặc gửi mail, hãy bấm vào Cơ hội để ghi nhận <strong>Follow-up</strong>.
+              {isEn
+                ? 'From this Lead, sales representatives create Opportunities tied to products. During every call or email, click on the Opportunity to record Follow-ups.'
+                : 'Từ Lead này, Nhân viên bán hàng tạo các Cơ hội (Opportunity) gắn với từng sản phẩm. Mỗi lần gọi điện hoặc gửi mail, hãy bấm vào Cơ hội để ghi nhận Follow-up.'}
             </p>
           </div>
         </div>
@@ -476,9 +511,14 @@ export default function LeadDetailPage() {
       {/* Dialog Xác nhận Xóa */}
       <ConfirmDialog
         isOpen={deleteConfirm.isOpen}
-        title="Xác nhận xóa Khách hàng tiềm năng"
-        message={`Bạn có chắc chắn muốn xóa khách hàng "${fullName}"? Mọi dữ liệu liên quan sẽ bị xóa khỏi hệ thống.`}
-        confirmText="Xác nhận xóa"
+        title={isEn ? 'Confirm Lead Deletion' : 'Xác nhận xóa Khách hàng tiềm năng'}
+        message={
+          isEn
+            ? `Are you sure you want to delete lead "${fullName}"? All related data will be removed from the system.`
+            : `Bạn có chắc chắn muốn xóa khách hàng "${fullName}"? Mọi dữ liệu liên quan sẽ bị xóa khỏi hệ thống.`
+        }
+        confirmText={isEn ? 'Confirm Delete' : 'Xác nhận xóa'}
+        cancelText={isEn ? 'Cancel' : 'Hủy'}
         confirmType="danger"
         loading={deleteConfirm.loading}
         onClose={() => setDeleteConfirm({ isOpen: false, loading: false })}
@@ -487,3 +527,4 @@ export default function LeadDetailPage() {
     </div>
   );
 }
+

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import campaignApi from '../../api/campaignApi';
+import { useLanguage } from '../../context/LanguageContext';
 import CampaignModal from './CampaignModal';
 import CampaignAssignProductsModal from './CampaignAssignProductsModal';
 import Pagination from '../../components/Common/Pagination';
@@ -24,9 +25,9 @@ import {
 } from 'lucide-react';
 
 const STATUS_BADGES = {
-  ACTIVE: { label: 'Đang hoạt động', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  UPCOMING: { label: 'Sắp diễn ra', color: 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]' },
-  ENDED: { label: 'Đã kết thúc', color: 'bg-slate-100 text-slate-700 border-slate-300' },
+  ACTIVE: { vi: 'Đang hoạt động', en: 'Active', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+  UPCOMING: { vi: 'Sắp diễn ra', en: 'Upcoming', color: 'bg-[#EAF5EC] text-[#2E7D32] border-[#DDF0E2]' },
+  ENDED: { vi: 'Đã kết thúc', en: 'Ended', color: 'bg-slate-100 text-slate-700 border-slate-300' },
 };
 
 /**
@@ -35,6 +36,7 @@ const STATUS_BADGES = {
  */
 export default function CampaignListPage() {
   const navigate = useNavigate();
+  const { t, isEn } = useLanguage();
 
   // Danh sách và trạng thái tải
   const [campaigns, setCampaigns] = useState([]);
@@ -127,11 +129,11 @@ export default function CampaignListPage() {
         totalBudget: budgetSum,
       });
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Không thể tải danh sách chiến dịch tiếp thị.');
+      setErrorMsg(err.response?.data?.message || (isEn ? 'Cannot load marketing campaigns.' : 'Không thể tải danh sách chiến dịch tiếp thị.'));
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, search, status, fromDate, toDate, sortBy, sortOrder]);
+  }, [pagination.page, search, status, fromDate, toDate, sortBy, sortOrder, isEn]);
 
   useEffect(() => {
     fetchCampaigns();
@@ -155,7 +157,7 @@ export default function CampaignListPage() {
       setDeletingCampaign(null);
       fetchCampaigns();
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi xóa chiến dịch.');
+      alert(err.response?.data?.message || (isEn ? 'An error occurred while deleting campaign.' : 'Có lỗi xảy ra khi xóa chiến dịch.'));
     } finally {
       setDeleteLoading(false);
     }
@@ -166,7 +168,7 @@ export default function CampaignListPage() {
       {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
       <div className="flex items-center justify-between gap-4">
         <div className="text-xs text-[#6B7280]">
-          Tổng số: <strong className="text-[#1F2937]">{stats.total}</strong> chiến dịch tiếp thị
+          {isEn ? 'Total:' : 'Tổng số:'} <strong className="text-[#1F2937]">{stats.total}</strong> {isEn ? 'marketing campaigns' : 'chiến dịch tiếp thị'}
         </div>
 
         <button
@@ -175,7 +177,7 @@ export default function CampaignListPage() {
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-xl shadow-xs transition-all cursor-pointer ml-auto"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Tạo Chiến Dịch Mới</span>
+          <span>{isEn ? 'Create New Campaign' : 'Tạo Chiến Dịch Mới'}</span>
         </button>
       </div>
 
@@ -187,7 +189,7 @@ export default function CampaignListPage() {
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
-            <div className="text-xs text-slate-500 font-medium">Tổng số chiến dịch</div>
+            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Total Campaigns' : 'Tổng số chiến dịch'}</div>
           </div>
         </div>
 
@@ -197,7 +199,7 @@ export default function CampaignListPage() {
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900">{stats.active}</div>
-            <div className="text-xs text-slate-500 font-medium">Đang hoạt động (ACTIVE)</div>
+            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Active (ACTIVE)' : 'Đang hoạt động (ACTIVE)'}</div>
           </div>
         </div>
 
@@ -207,7 +209,7 @@ export default function CampaignListPage() {
           </div>
           <div>
             <div className="text-2xl font-bold text-[#1F2937]">{stats.upcoming}</div>
-            <div className="text-xs text-slate-500 font-medium">Sắp diễn ra (UPCOMING)</div>
+            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Upcoming (UPCOMING)' : 'Sắp diễn ra (UPCOMING)'}</div>
           </div>
         </div>
 
@@ -219,7 +221,7 @@ export default function CampaignListPage() {
             <div className="text-2xl font-bold text-slate-900">
               {stats.totalBudget.toLocaleString('vi-VN')} <span className="text-xs font-normal">đ</span>
             </div>
-            <div className="text-xs text-slate-500 font-medium">Tổng ngân sách dự toán</div>
+            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Total Planned Budget' : 'Tổng ngân sách dự toán'}</div>
           </div>
         </div>
       </div>
@@ -235,7 +237,7 @@ export default function CampaignListPage() {
                 setSearch(val);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder="Tìm theo tên hoặc mô tả chiến dịch..."
+              placeholder={isEn ? 'Search by campaign name or description...' : 'Tìm theo tên hoặc mô tả chiến dịch...'}
             />
           </div>
 
@@ -249,10 +251,10 @@ export default function CampaignListPage() {
               }}
               className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
             >
-              <option value="">Tất cả trạng thái</option>
-              <option value="ACTIVE">Đang hoạt động</option>
-              <option value="UPCOMING">Sắp diễn ra</option>
-              <option value="ENDED">Đã kết thúc</option>
+              <option value="">{isEn ? 'All statuses' : 'Tất cả trạng thái'}</option>
+              <option value="ACTIVE">{isEn ? 'Active' : 'Đang hoạt động'}</option>
+              <option value="UPCOMING">{isEn ? 'Upcoming' : 'Sắp diễn ra'}</option>
+              <option value="ENDED">{isEn ? 'Ended' : 'Đã kết thúc'}</option>
             </select>
           </div>
 
@@ -265,7 +267,7 @@ export default function CampaignListPage() {
                 setFromDate(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              title="Từ ngày"
+              title={isEn ? 'From date' : 'Từ ngày'}
               className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
           </div>
@@ -278,7 +280,7 @@ export default function CampaignListPage() {
                 setToDate(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              title="Đến ngày"
+              title={isEn ? 'To date' : 'Đến ngày'}
               className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
             />
           </div>
@@ -295,18 +297,18 @@ export default function CampaignListPage() {
               }}
               className="w-full px-2.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
             >
-              <option value="created_at:DESC">Mới nhất</option>
-              <option value="created_at:ASC">Cũ nhất</option>
-              <option value="start_date:DESC">Ngày bắt đầu giảm dần</option>
-              <option value="start_date:ASC">Ngày bắt đầu tăng dần</option>
-              <option value="budget:DESC">Ngân sách cao nhất</option>
-              <option value="name:ASC">Tên A-Z</option>
+              <option value="created_at:DESC">{isEn ? 'Newest' : 'Mới nhất'}</option>
+              <option value="created_at:ASC">{isEn ? 'Oldest' : 'Cũ nhất'}</option>
+              <option value="start_date:DESC">{isEn ? 'Start date descending' : 'Ngày bắt đầu giảm dần'}</option>
+              <option value="start_date:ASC">{isEn ? 'Start date ascending' : 'Ngày bắt đầu tăng dần'}</option>
+              <option value="budget:DESC">{isEn ? 'Highest budget' : 'Ngân sách cao nhất'}</option>
+              <option value="name:ASC">{isEn ? 'Name A-Z' : 'Tên A-Z'}</option>
             </select>
 
             <button
               type="button"
               onClick={handleResetFilters}
-              title="Đặt lại bộ lọc"
+              title={isEn ? 'Reset filters' : 'Đặt lại bộ lọc'}
               className="p-2 text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer shrink-0"
             >
               <RotateCcw className="w-4 h-4" />
@@ -329,14 +331,14 @@ export default function CampaignListPage() {
           <table className="w-full text-left text-sm text-slate-700">
             <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
               <tr>
-                <th className="px-4 py-3.5">Chiến dịch tiếp thị</th>
-                <th className="px-4 py-3.5">Trạng thái</th>
-                <th className="px-4 py-3.5">Thời hạn triển khai</th>
-                <th className="px-4 py-3.5 text-right">Ngân sách</th>
-                <th className="px-4 py-3.5 text-center">Sản phẩm</th>
-                <th className="px-4 py-3.5 text-center">Leads</th>
-                <th className="px-4 py-3.5">Người tạo</th>
-                <th className="px-4 py-3.5 text-right">Thao tác</th>
+                <th className="px-4 py-3.5">{isEn ? 'Marketing Campaign' : 'Chiến dịch tiếp thị'}</th>
+                <th className="px-4 py-3.5">{isEn ? 'Status' : 'Trạng thái'}</th>
+                <th className="px-4 py-3.5">{isEn ? 'Duration' : 'Thời hạn triển khai'}</th>
+                <th className="px-4 py-3.5 text-right">{isEn ? 'Budget' : 'Ngân sách'}</th>
+                <th className="px-4 py-3.5 text-center">{isEn ? 'Products' : 'Sản phẩm'}</th>
+                <th className="px-4 py-3.5 text-center">{isEn ? 'Leads' : 'Leads'}</th>
+                <th className="px-4 py-3.5">{isEn ? 'Created By' : 'Người tạo'}</th>
+                <th className="px-4 py-3.5 text-right">{isEn ? 'Actions' : 'Thao tác'}</th>
               </tr>
             </thead>
 
@@ -346,7 +348,7 @@ export default function CampaignListPage() {
                   <td colSpan={8} className="py-12 text-center text-slate-400">
                     <div className="inline-flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-[#3CB371] border-t-transparent rounded-full animate-spin" />
-                      <span>Đang tải dữ liệu chiến dịch...</span>
+                      <span>{isEn ? 'Loading campaign data...' : 'Đang tải dữ liệu chiến dịch...'}</span>
                     </div>
                   </td>
                 </tr>
@@ -354,15 +356,16 @@ export default function CampaignListPage() {
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
                     <Megaphone className="w-10 h-10 mx-auto stroke-1 text-slate-300 mb-2" />
-                    <p className="font-medium text-slate-600">Không tìm thấy chiến dịch nào</p>
+                    <p className="font-medium text-slate-600">{isEn ? 'No campaigns found' : 'Không tìm thấy chiến dịch nào'}</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Thử điều chỉnh bộ lọc hoặc nhấn nút "Tạo Chiến dịch Mới" để bắt đầu.
+                      {isEn ? 'Try adjusting your filters or click "Create New Campaign" to get started.' : 'Thử điều chỉnh bộ lọc hoặc nhấn nút "Tạo Chiến dịch Mới" để bắt đầu.'}
                     </p>
                   </td>
                 </tr>
               ) : (
                 campaigns.map((c) => {
                   const badge = STATUS_BADGES[c.campaign_status] || STATUS_BADGES.ENDED;
+                  const badgeLabel = isEn ? badge.en : badge.vi;
                   const budgetVal = parseFloat(c.budget || 0);
 
                   return (
@@ -389,7 +392,7 @@ export default function CampaignListPage() {
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${badge.color}`}
                         >
-                          {badge.label}
+                          {badgeLabel}
                         </span>
                       </td>
 
@@ -434,7 +437,7 @@ export default function CampaignListPage() {
 
                       {/* Người tạo */}
                       <td className="px-4 py-3.5 text-xs text-slate-600">
-                        {c.created_by_name || 'Hệ thống'}
+                        {c.created_by_name || (isEn ? 'System' : 'Hệ thống')}
                       </td>
 
                       {/* Thao tác */}
@@ -443,7 +446,7 @@ export default function CampaignListPage() {
                           {/* Xem Báo cáo hiệu quả ROI (SRS 3.19) */}
                           <button
                             type="button"
-                            title="Xem Báo cáo Hiệu quả ROI"
+                            title={isEn ? 'View ROI Performance Report' : 'Xem Báo cáo Hiệu quả ROI'}
                             onClick={() => navigate(`/campaigns/${c.id}/report`)}
                             className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                           >
@@ -453,7 +456,7 @@ export default function CampaignListPage() {
                           {/* Gán sản phẩm mục tiêu (SRS 3.18.1) */}
                           <button
                             type="button"
-                            title="Gán sản phẩm mục tiêu"
+                            title={isEn ? 'Assign Target Products' : 'Gán sản phẩm mục tiêu'}
                             onClick={() => setAssigningCampaign(c)}
                             className="p-1.5 text-[#3CB371] hover:text-[#2E7D32] hover:bg-[#EAF5EC] rounded-lg transition-colors cursor-pointer"
                           >
@@ -463,7 +466,7 @@ export default function CampaignListPage() {
                           {/* Sửa chiến dịch */}
                           <button
                             type="button"
-                            title="Chỉnh sửa thông tin"
+                            title={isEn ? 'Edit Campaign Info' : 'Chỉnh sửa thông tin'}
                             onClick={() => setEditingCampaign(c)}
                             className="p-1.5 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                           >
@@ -473,7 +476,7 @@ export default function CampaignListPage() {
                           {/* Xóa chiến dịch */}
                           <button
                             type="button"
-                            title="Xóa chiến dịch"
+                            title={isEn ? 'Delete Campaign' : 'Xóa chiến dịch'}
                             onClick={() => setDeletingCampaign(c)}
                             className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                           >
@@ -528,17 +531,27 @@ export default function CampaignListPage() {
       <Modal
         isOpen={Boolean(deletingCampaign)}
         onClose={() => setDeletingCampaign(null)}
-        title="Xác nhận xóa chiến dịch tiếp thị"
-        subtitle="Hành động này không thể hoàn tác"
+        title={isEn ? 'Confirm Marketing Campaign Deletion' : 'Xác nhận xóa chiến dịch tiếp thị'}
+        subtitle={isEn ? 'This action cannot be undone' : 'Hành động này không thể hoàn tác'}
         maxWidth="max-w-md"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-sm">
             <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
             <div>
-              Bạn có chắc chắn muốn xóa chiến dịch{' '}
-              <strong className="font-semibold text-rose-950">"{deletingCampaign?.name}"</strong>?
-              Hệ thống sẽ an toàn ngắt liên kết giữa các sản phẩm và khách hàng tiềm năng khỏi chiến dịch này.
+              {isEn ? (
+                <>
+                  Are you sure you want to delete campaign{' '}
+                  <strong className="font-semibold text-rose-950">"{deletingCampaign?.name}"</strong>?
+                  The system will safely detach products and potential leads from this campaign.
+                </>
+              ) : (
+                <>
+                  Bạn có chắc chắn muốn xóa chiến dịch{' '}
+                  <strong className="font-semibold text-rose-950">"{deletingCampaign?.name}"</strong>?
+                  Hệ thống sẽ an toàn ngắt liên kết giữa các sản phẩm và khách hàng tiềm năng khỏi chiến dịch này.
+                </>
+              )}
             </div>
           </div>
 
@@ -549,7 +562,7 @@ export default function CampaignListPage() {
               onClick={() => setDeletingCampaign(null)}
               className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
             >
-              Hủy
+              {isEn ? 'Cancel' : 'Hủy'}
             </button>
             <button
               type="button"
@@ -557,7 +570,7 @@ export default function CampaignListPage() {
               onClick={handleDeleteConfirm}
               className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors cursor-pointer"
             >
-              {deleteLoading ? 'Đang xóa...' : 'Đồng ý xóa'}
+              {deleteLoading ? (isEn ? 'Deleting...' : 'Đang xóa...') : (isEn ? 'Confirm Delete' : 'Đồng ý xóa')}
             </button>
           </div>
         </div>

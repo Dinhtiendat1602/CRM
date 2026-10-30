@@ -12,8 +12,10 @@ import {
 } from 'lucide-react';
 import authApi from '../../api/authApi';
 import { useAuth } from '../../context/authContextDef';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ProfilePage() {
+  const { isEn } = useLanguage();
   const { user: authUser, login, token } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -80,13 +82,13 @@ export default function ProfilePage() {
         login(res.data, token);
         setProfileMsg({
           type: 'success',
-          text: 'Cập nhật thông tin cá nhân thành công!',
+          text: isEn ? 'Personal profile updated successfully!' : 'Cập nhật thông tin cá nhân thành công!',
         });
       }
     } catch (err) {
       setProfileMsg({
         type: 'error',
-        text: err?.message || 'Không thể cập nhật hồ sơ cá nhân.',
+        text: err?.message || (isEn ? 'Failed to update personal profile.' : 'Không thể cập nhật hồ sơ cá nhân.'),
       });
     } finally {
       setLoading(false);
@@ -101,7 +103,7 @@ export default function ProfilePage() {
     if (passwordForm.new_password.length < 8) {
       setPasswordMsg({
         type: 'error',
-        text: 'Mật khẩu mới phải có tối thiểu 8 ký tự.',
+        text: isEn ? 'New password must be at least 8 characters long.' : 'Mật khẩu mới phải có tối thiểu 8 ký tự.',
       });
       return;
     }
@@ -109,7 +111,7 @@ export default function ProfilePage() {
     if (passwordForm.new_password !== passwordForm.confirm_password) {
       setPasswordMsg({
         type: 'error',
-        text: 'Mật khẩu xác nhận không trùng khớp.',
+        text: isEn ? 'Password confirmation does not match.' : 'Mật khẩu xác nhận không trùng khớp.',
       });
       return;
     }
@@ -123,7 +125,7 @@ export default function ProfilePage() {
 
       setPasswordMsg({
         type: 'success',
-        text: 'Đổi mật khẩu thành công! Hãy sử dụng mật khẩu mới cho các lần đăng nhập tiếp theo.',
+        text: isEn ? 'Password changed successfully! Please use your new password for subsequent logins.' : 'Đổi mật khẩu thành công! Hãy sử dụng mật khẩu mới cho các lần đăng nhập tiếp theo.',
       });
       setPasswordForm({
         old_password: '',
@@ -133,7 +135,7 @@ export default function ProfilePage() {
     } catch (err) {
       setPasswordMsg({
         type: 'error',
-        text: err?.message || 'Mật khẩu cũ không chính xác hoặc không hợp lệ.',
+        text: err?.message || (isEn ? 'Current password is incorrect or invalid.' : 'Mật khẩu cũ không chính xác hoặc không hợp lệ.'),
       });
     } finally {
       setLoading(false);
@@ -155,11 +157,11 @@ export default function ProfilePage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
-                Hồ Sơ Người Dùng
+                {isEn ? 'User Profile' : 'Hồ Sơ Người Dùng'}
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] flex items-center gap-1">
                 <Shield className="h-3 w-3" />
-                {profileForm.role_name || 'Member'}
+                {profileForm.role_name || (isEn ? 'Member' : 'Thành viên')}
               </span>
             </div>
             <h1 className="text-2xl font-bold text-[#1F2937]">
@@ -175,7 +177,9 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
           <div className="border-b border-[#DDF0E2] pb-3 flex items-center gap-2">
             <User className="h-5 w-5 text-[#3CB371]" />
-            <h2 className="text-base font-bold text-[#1F2937]">Thông tin cá nhân</h2>
+            <h2 className="text-base font-bold text-[#1F2937]">
+              {isEn ? 'Personal Information' : 'Thông tin cá nhân'}
+            </h2>
           </div>
 
           {profileMsg && (
@@ -198,7 +202,7 @@ export default function ProfilePage() {
           <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs sm:text-sm">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Tài khoản đăng nhập (Không thể đổi)
+                {isEn ? 'Login Username (Cannot be changed)' : 'Tài khoản đăng nhập (Không thể đổi)'}
               </label>
               <input
                 type="text"
@@ -210,7 +214,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Địa chỉ Email công việc (Không thể đổi)
+                {isEn ? 'Work Email Address (Cannot be changed)' : 'Địa chỉ Email công việc (Không thể đổi)'}
               </label>
               <div className="relative rounded-xl shadow-2xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -227,7 +231,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Họ và tên hiển thị <span className="text-red-500">*</span>
+                {isEn ? 'Display Full Name' : 'Họ và tên hiển thị'} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -240,7 +244,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Số điện thoại liên lạc
+                {isEn ? 'Contact Phone Number' : 'Số điện thoại liên lạc'}
               </label>
               <div className="relative rounded-xl shadow-2xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -263,7 +267,7 @@ export default function ProfilePage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
               >
                 <Save className="h-4 w-4" />
-                <span>{loading ? 'Đang lưu...' : 'Lưu thông tin cá nhân'}</span>
+                <span>{loading ? (isEn ? 'Saving...' : 'Đang lưu...') : (isEn ? 'Save Personal Info' : 'Lưu thông tin cá nhân')}</span>
               </button>
             </div>
           </form>
@@ -273,7 +277,9 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl border border-[#DDF0E2] p-6 shadow-xs space-y-4">
           <div className="border-b border-[#DDF0E2] pb-3 flex items-center gap-2">
             <KeyRound className="h-5 w-5 text-amber-600" />
-            <h2 className="text-base font-bold text-[#1F2937]">Đổi mật khẩu tài khoản</h2>
+            <h2 className="text-base font-bold text-[#1F2937]">
+              {isEn ? 'Change Account Password' : 'Đổi mật khẩu tài khoản'}
+            </h2>
           </div>
 
           {passwordMsg && (
@@ -296,7 +302,7 @@ export default function ProfilePage() {
           <form onSubmit={handleChangePassword} className="space-y-4 text-xs sm:text-sm">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Mật khẩu hiện tại <span className="text-red-500">*</span>
+                {isEn ? 'Current Password' : 'Mật khẩu hiện tại'} <span className="text-red-500">*</span>
               </label>
               <div className="relative rounded-xl shadow-2xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -317,7 +323,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Mật khẩu mới (Tối thiểu 8 ký tự) <span className="text-red-500">*</span>
+                {isEn ? 'New Password (Minimum 8 characters)' : 'Mật khẩu mới (Tối thiểu 8 ký tự)'} <span className="text-red-500">*</span>
               </label>
               <div className="relative rounded-xl shadow-2xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -338,7 +344,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Xác nhận mật khẩu mới <span className="text-red-500">*</span>
+                {isEn ? 'Confirm New Password' : 'Xác nhận mật khẩu mới'} <span className="text-red-500">*</span>
               </label>
               <div className="relative rounded-xl shadow-2xs">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -364,7 +370,7 @@ export default function ProfilePage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
               >
                 <KeyRound className="h-4 w-4" />
-                <span>{loading ? 'Đang đổi mật khẩu...' : 'Cập nhật mật khẩu mới'}</span>
+                <span>{loading ? (isEn ? 'Changing password...' : 'Đang đổi mật khẩu...') : (isEn ? 'Update New Password' : 'Cập nhật mật khẩu mới')}</span>
               </button>
             </div>
           </form>

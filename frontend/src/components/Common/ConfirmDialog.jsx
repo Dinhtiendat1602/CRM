@@ -1,24 +1,32 @@
 import { AlertTriangle } from 'lucide-react';
 import Modal from './Modal';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Reusable ConfirmDialog Component
+ * Hỗ trợ song ngữ Tiếng Việt & Tiếng Anh
  */
 export default function ConfirmDialog({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Xác nhận thao tác',
+  title,
   message,
-  confirmText = 'Xác nhận',
-  cancelText = 'Hủy bỏ',
+  confirmText,
+  cancelText,
   isDangerous = false,
   loading = false,
 }) {
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
 
+  const finalTitle = title || t('confirmActionTitle', 'Xác nhận thao tác');
+  const finalConfirmText = confirmText || t('confirmActionBtn', 'Xác nhận');
+  const finalCancelText = cancelText || t('cancelActionBtn', 'Hủy bỏ');
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="max-w-md">
+    <Modal isOpen={isOpen} onClose={onClose} title={finalTitle} maxWidth="max-w-md">
       <div className="space-y-4">
         <div className="flex items-start gap-3">
           <div
@@ -38,7 +46,7 @@ export default function ConfirmDialog({
             disabled={loading}
             className="px-4 py-2 rounded-xl border border-[#DDF0E2] text-[#6B7280] text-xs font-semibold hover:bg-[#EAF5EC] hover:text-[#1F2937] transition-colors cursor-pointer"
           >
-            {cancelText}
+            {finalCancelText}
           </button>
           <button
             type="button"
@@ -50,7 +58,7 @@ export default function ConfirmDialog({
                 : 'bg-[#3CB371] hover:bg-[#38A169] shadow-[#3CB371]/20'
             }`}
           >
-            {loading ? 'Đang xử lý...' : confirmText}
+            {loading ? t('processing', 'Đang xử lý...') : finalConfirmText}
           </button>
         </div>
       </div>

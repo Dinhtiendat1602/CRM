@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-10-30 09:40
-- **Active Task:** Hoàn thiện giao diện Clean Minimalist đúng chuẩn ảnh mẫu (`feat-024`): Nền toàn trang Mint Pastel `#EBF5ED`, Khung ứng dụng White Card lớn `rounded-[28px]`, Sidebar sáng với menu active Nền Trắng tinh icon xanh lá `#3CB371`, tối giản màu sắc và thoáng đãng.
-- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 281ms, 0 lint/build errors).
+- **Last Updated:** 2026-10-30 09:51
+- **Active Task:** Cố định Sidebar menu bên trái khi cuộn, loại bỏ tiêu đề lặp lại bên dưới Header, và thu gọn thông báo tối ưu 1 năm thành mini badge `Dữ liệu 1 năm` tinh tế.
+- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 268ms, 0 lint/build errors).
 - **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
 
 ---

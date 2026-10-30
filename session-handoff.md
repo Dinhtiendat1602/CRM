@@ -9,7 +9,7 @@
      - Màu điểm nhấn (Accent Gradient): Banner & thẻ điểm nhấn (`#7CA5F5` -> `#5D3EBC`).
   2. Nút Flick Tự Động Thêm Vào Cơ Hội Bán Hàng: Khi thêm Khách hàng tiềm năng (`LeadModal.jsx`), bổ sung nút gạt Flick switch cho phép tự động tạo ngay Cơ hội bán hàng (`Opportunity`).
   3. Phân quyền sản phẩm bán hàng & Tối ưu truy vấn 1 năm gần nhất (`feat-022`).
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 281ms không lỗi, giao diện Minimalist đúng 100% ảnh mẫu).
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 268ms không lỗi, sidebar cố định 100% và giao diện gọn gàng).
 - Branch / commit: `main`
 
 - [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**

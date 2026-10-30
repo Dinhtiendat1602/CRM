@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
+import { useLanguage } from '../../context/LanguageContext';
 
 const MENU_ITEMS = [
   {
@@ -95,18 +96,8 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
   const { user, role } = useAuth();
   const currentRole = (role || user?.role_name || user?.role || '').trim().toUpperCase();
 
-  // Đồng bộ ngôn ngữ với Header và localStorage
-  const [language, setLanguage] = useState(() => localStorage.getItem('app_language') || 'vi');
-
-  useEffect(() => {
-    const handleLangSync = (e) => {
-      if (e.detail && (e.detail === 'vi' || e.detail === 'en')) {
-        setLanguage(e.detail);
-      }
-    };
-    window.addEventListener('app_language_changed', handleLangSync);
-    return () => window.removeEventListener('app_language_changed', handleLangSync);
-  }, []);
+  // Đồng bộ ngôn ngữ với Header và LanguageContext
+  const { language, t } = useLanguage();
 
   // Lọc danh sách menu theo quyền hạn vai trò (RBAC)
   const accessibleItems = MENU_ITEMS.filter((item) =>

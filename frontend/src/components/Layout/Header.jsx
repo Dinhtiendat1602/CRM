@@ -13,6 +13,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../../context/authContextDef';
+import { useLanguage } from '../../context/LanguageContext';
 
 // Tiêu đề thuần Tiếng Việt cho từng phân hệ (Không kèm tiếng Anh trong ngoặc)
 const ROUTE_TITLES_VI = {
@@ -63,26 +64,11 @@ export default function Header({ onToggleMobileSidebar }) {
 
   const [currentDateTime, setCurrentDateTime] = useState('');
 
-  // Trạng thái ngôn ngữ (Mặc định Tiếng Việt 'vi', hỗ trợ 'en')
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('app_language') || 'vi';
-  });
+  const { language, setLanguage, t } = useLanguage();
 
   const handleLanguageChange = (lang) => {
     setLanguage(lang);
-    localStorage.setItem('app_language', lang);
-    window.dispatchEvent(new CustomEvent('app_language_changed', { detail: lang }));
   };
-
-  useEffect(() => {
-    const handleLangSync = (e) => {
-      if (e.detail && (e.detail === 'vi' || e.detail === 'en')) {
-        setLanguage(e.detail);
-      }
-    };
-    window.addEventListener('app_language_changed', handleLangSync);
-    return () => window.removeEventListener('app_language_changed', handleLangSync);
-  }, []);
 
   // Đồng hồ thời gian thực cập nhật từng giây theo locale ngôn ngữ được chọn
   useEffect(() => {

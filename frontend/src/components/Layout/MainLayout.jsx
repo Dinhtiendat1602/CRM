@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div className="h-screen bg-[#EBF5ED] flex p-2.5 sm:p-3.5 lg:p-4 font-sans text-[#1F2937] overflow-hidden">
@@ -30,9 +32,9 @@ export default function MainLayout() {
             </div>
           </main>
 
-          {/* Minimalist Footer */}
+          {/* Minimalist Footer - Dynamic Bilingual */}
           <footer className="border-t border-gray-100 py-2.5 px-6 text-center text-xs text-[#9CA3AF] shrink-0">
-            Zen CRM Enterprise &bull; Nền Tảng Quản Trị Khách Hàng Toàn Diện
+            {t('footer', 'Zen CRM Enterprise • Nền Tảng Quản Trị Khách Hàng Toàn Diện')}
           </footer>
         </div>
       </div>

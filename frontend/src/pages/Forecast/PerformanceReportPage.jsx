@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import forecastApi from '../../api/forecastApi';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   Calendar,
   DollarSign,
@@ -48,11 +49,12 @@ ChartJS.register(
 
 /**
  * PerformanceReportPage - Báo cáo Đối soát Doanh số Kế hoạch vs Thực tế 12 Tháng
- * Tuân thủ SRS v1.1 Mục 3.21 (Performance Report: Month | Plan($) | Actually Value($) | %) & BR-07
+ * Hỗ trợ song ngữ Tiếng Việt & Tiếng Anh
  */
 export default function PerformanceReportPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t, language } = useLanguage();
 
   const currentYear = new Date().getFullYear();
   const initialYear = parseInt(searchParams.get('fiscal_year'), 10) || currentYear;
@@ -63,6 +65,9 @@ export default function PerformanceReportPage() {
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const locale = language === 'en' ? 'en-US' : 'vi-VN';
+  const currencySuffix = t('currencyUnit', 'VNĐ');
 
   // Tải danh sách năm tài chính
   useEffect(() => {
@@ -83,11 +88,11 @@ export default function PerformanceReportPage() {
       const res = await forecastApi.getPerformanceReport({ fiscal_year: year });
       setReportData(res.data);
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Không thể tải báo cáo đối soát doanh số.');
+      setErrorMsg(err.response?.data?.message || (language === 'en' ? 'Unable to load sales audit report.' : 'Không thể tải báo cáo đối soát doanh số.'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     fetchPerformance(fiscalYear);
@@ -104,7 +109,9 @@ export default function PerformanceReportPage() {
       return { labels: [], datasets: [] };
     }
 
-    const labels = reportData.months.map((m) => m.month_label);
+    const labels = reportData.months.map((m) =>
+      language === 'en' ? `Month ${m.month}` : m.month_label
+    );
     const planValues = reportData.months.map((m) => m.plan);
     const actualValues = reportData.months.map((m) => m.actually_value);
     const percentages = reportData.months.map((m) => m.percentage);
@@ -114,9 +121,9 @@ export default function PerformanceReportPage() {
       datasets: [
         {
           type: 'bar',
-          label: 'Kế hoạch Plan (VNĐ)',
+          label: language === 'en' ? 'Plan Target (VND)' : 'Kế hoạch Plan (VNĐ)',
           data: planValues,
-          backgroundColor: 'rgba(59, 130, 246, 0.75)', // Blue-500
+          backgroundColor: 'rgba(59, 130, 246, 0.75)',
           borderColor: 'rgb(37, 99, 235)',
           borderWidth: 1.5,
           borderRadius: 6,
@@ -124,9 +131,9 @@ export default function PerformanceReportPage() {
         },
         {
           type: 'bar',
-          label: 'Thực tế Actually Value (VNĐ)',
+          label: language === 'en' ? 'Actual Value (VND)' : 'Thực tế Actually Value (VNĐ)',
           data: actualValues,
-          backgroundColor: 'rgba(16, 185, 129, 0.75)', // Emerald-500
+          backgroundColor: 'rgba(16, 185, 129, 0.75)',
           borderColor: 'rgb(5, 150, 105)',
           borderWidth: 1.5,
           borderRadius: 6,
@@ -134,9 +141,9 @@ export default function PerformanceReportPage() {
         },
         {
           type: 'line',
-          label: 'Tỷ lệ Đạt (%)',
+          label: language === 'en' ? 'Completion (%)' : 'Tỷ lệ Đạt (%)',
           data: percentages,
-          borderColor: 'rgb(245, 158, 11)', // Amber-500
+          borderColor: 'rgb(245, 158, 11)',
           backgroundColor: 'rgba(245, 158, 11, 0.2)',
           pointBackgroundColor: 'rgb(217, 119, 6)',
           pointBorderColor: '#fff',
@@ -148,7 +155,7 @@ export default function PerformanceReportPage() {
         },
       ],
     };
-  }, [reportData]);
+  }, [reportData, language]);
 
   // Cấu hình options cho Chart.js
   const chartOptions = useMemo(() => {
@@ -176,7 +183,7 @@ export default function PerformanceReportPage() {
               if (context.dataset.yAxisID === 'y1') {
                 return `${label}: ${val}%`;
               }
-              return `${label}: ${Number(val).toLocaleString('vi-VN')} đ`;
+              return `${label}: ${Number(val).toLocaleString(locale)} ${currencySuffix}`;
             },
           },
         },
@@ -192,7 +199,7 @@ export default function PerformanceReportPage() {
           position: 'left',
           title: {
             display: true,
-            text: 'Doanh số (VNĐ)',
+            text: language === 'en' ? 'Sales Revenue (VND)' : 'Doanh số (VNĐ)',
             font: { size: 11, weight: 'bold' },
           },
           ticks: {
@@ -211,7 +218,7 @@ export default function PerformanceReportPage() {
           grid: { drawOnChartArea: false },
           title: {
             display: true,
-            text: 'Tỷ lệ hoàn thành (%)',
+            text: language === 'en' ? 'Completion rate (%)' : 'Tỷ lệ hoàn thành (%)',
             font: { size: 11, weight: 'bold' },
           },
           ticks: {
@@ -222,7 +229,7 @@ export default function PerformanceReportPage() {
         },
       },
     };
-  }, []);
+  }, [locale, currencySuffix, language]);
 
   const summary = reportData?.summary || {
     total_plan: 0,
@@ -240,28 +247,32 @@ export default function PerformanceReportPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 print:hidden">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Báo cáo Đối soát Kế hoạch vs Thực tế 12 Tháng
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              {language === 'en'
+                ? '12-Month Sales Plan vs Actual Audit Report'
+                : 'Báo cáo Đối soát Kế hoạch vs Thực tế 12 Tháng'}
             </h1>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Đối chiếu số liệu 12 tháng: Kế hoạch (Plan VNĐ) vs Thực tế (Actually Value VNĐ) vs Tỷ lệ hoàn thành %
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            {t('perfReportSubtitle', 'Đối soát chỉ tiêu kế hoạch (Plan) với doanh thu thực tế (Actually) lũy kế từ đơn hàng')}
           </p>
         </div>
 
         {/* Nút Chọn Năm & Thao tác */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-xs">
-            <Calendar className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-semibold text-slate-700">Năm tài chính:</span>
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-2xs text-xs">
+            <Calendar className="w-3.5 h-3.5 text-[#3CB371]" />
+            <span className="text-xs font-semibold text-slate-700">
+              {t('fiscalYearLabel', 'Năm tài chính:')}
+            </span>
             <select
               value={fiscalYear}
               onChange={(e) => setFiscalYear(parseInt(e.target.value, 10))}
-              className="bg-transparent text-sm font-bold text-emerald-800 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-bold text-[#2E7D32] focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
                 <option key={yr} value={yr}>
-                  Năm {yr}
+                  {language === 'en' ? `Year ${yr}` : `Năm ${yr}`}
                 </option>
               ))}
             </select>
@@ -270,19 +281,19 @@ export default function PerformanceReportPage() {
           <button
             type="button"
             onClick={() => navigate(`/forecast/setup?fiscal_year=${fiscalYear}`)}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] border border-[#DDF0E2] rounded-xl transition-colors cursor-pointer"
           >
-            <Edit className="w-4 h-4" />
-            <span>Sửa Kế Hoạch</span>
+            <Edit className="w-3.5 h-3.5" />
+            <span>{t('btnBackToSetup', 'Thiết Lập Kế Hoạch')}</span>
           </button>
 
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-gray-200 hover:bg-slate-50 rounded-xl shadow-2xs transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-slate-500" />
-            <span>In Báo Cáo</span>
+            <Printer className="w-3.5 h-3.5 text-slate-500" />
+            <span>{t('btnPrintReport', 'In Báo Cáo')}</span>
           </button>
         </div>
       </div>
@@ -291,12 +302,16 @@ export default function PerformanceReportPage() {
       <div className="hidden print:block border-b border-slate-300 pb-4 mb-4">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">BÁO CÁO ĐỐI SOÁT DOANH SỐ KẾ HOẠCH VS THỰC TẾ</h1>
-            <p className="text-sm font-semibold text-emerald-700 mt-0.5">Năm tài chính: {fiscalYear}</p>
+            <h1 className="text-xl font-bold text-slate-900">
+              {language === 'en' ? 'SALES PLAN VS ACTUAL AUDIT REPORT' : 'BÁO CÁO ĐỐI SOÁT DOANH SỐ KẾ HOẠCH VS THỰC TẾ'}
+            </h1>
+            <p className="text-sm font-semibold text-emerald-700 mt-0.5">
+              {language === 'en' ? 'Fiscal Year:' : 'Năm tài chính:'} {fiscalYear}
+            </p>
           </div>
           <div className="text-right text-xs text-slate-600">
-            <p>Ngày in: {new Date().toLocaleDateString('vi-VN')} {new Date().toLocaleTimeString('vi-VN')}</p>
-            <p>Hệ thống Zen CRM — Báo cáo Điều hành</p>
+            <p>{new Date().toLocaleString(locale)}</p>
+            <p>Zen CRM Enterprise — Executive Report</p>
           </div>
         </div>
       </div>
@@ -314,39 +329,51 @@ export default function PerformanceReportPage() {
         {/* 1. Tổng Kế Hoạch */}
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-medium">Chỉ tiêu Plan (VNĐ)</span>
+            <span className="text-xs font-medium">
+              {language === 'en' ? 'Target Plan (VND)' : 'Chỉ tiêu Plan (VNĐ)'}
+            </span>
             <DollarSign className="w-4 h-4 text-blue-500" />
           </div>
           <div className="text-lg font-bold text-slate-900">
-            {Number(summary.total_plan || 0).toLocaleString('vi-VN')}
-            <span className="text-xs font-normal text-slate-500 ml-1">đ</span>
+            {Number(summary.total_plan || 0).toLocaleString(locale)}
+            <span className="text-xs font-normal text-slate-500 ml-1">{currencySuffix}</span>
           </div>
-          <span className="text-[11px] text-slate-400">Kế hoạch cả năm {fiscalYear}</span>
+          <span className="text-[11px] text-slate-400">
+            {language === 'en' ? `Full Year ${fiscalYear} Plan` : `Kế hoạch cả năm ${fiscalYear}`}
+          </span>
         </div>
 
         {/* 2. Thực Tế Đạt Được */}
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-medium">Thực tế Actually (VNĐ)</span>
+            <span className="text-xs font-medium">
+              {language === 'en' ? 'Actual Revenue (VND)' : 'Thực tế Actually (VNĐ)'}
+            </span>
             <ShoppingCart className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="text-lg font-bold text-emerald-700">
-            {Number(summary.total_actual || 0).toLocaleString('vi-VN')}
-            <span className="text-xs font-normal text-slate-500 ml-1">đ</span>
+            {Number(summary.total_actual || 0).toLocaleString(locale)}
+            <span className="text-xs font-normal text-slate-500 ml-1">{currencySuffix}</span>
           </div>
-          <span className="text-[11px] text-emerald-600 font-medium">Từ {summary.total_orders || 0} đơn hàng</span>
+          <span className="text-[11px] text-emerald-600 font-medium">
+            {language === 'en' ? `From ${summary.total_orders || 0} orders` : `Từ ${summary.total_orders || 0} đơn hàng`}
+          </span>
         </div>
 
         {/* 3. Tỷ Lệ Hoàn Thành */}
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-medium">Tỷ lệ Hoàn thành (%)</span>
+            <span className="text-xs font-medium">
+              {language === 'en' ? 'Completion Rate (%)' : 'Tỷ lệ Hoàn thành (%)'}
+            </span>
             <Percent className="w-4 h-4 text-amber-500" />
           </div>
           <div className="text-xl font-extrabold text-amber-600">
             {summary.overall_percentage}%
           </div>
-          <span className="text-[11px] text-slate-400">BR-07: Actually / Plan</span>
+          <span className="text-[11px] text-slate-400">
+            {language === 'en' ? 'Actually / Plan' : 'Thực tế / Kế hoạch'}
+          </span>
         </div>
 
         {/* 4. Chênh Lệch Doanh Số */}
@@ -354,7 +381,9 @@ export default function PerformanceReportPage() {
           isAheadOfPlan ? 'border-emerald-200 bg-emerald-50/20' : 'border-rose-200 bg-rose-50/20'
         }`}>
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-bold text-slate-700">Chênh lệch (Variance)</span>
+            <span className="text-xs font-bold text-slate-700">
+              {language === 'en' ? 'Variance' : 'Chênh lệch'}
+            </span>
             {isAheadOfPlan ? (
               <TrendingUp className="w-4 h-4 text-emerald-600" />
             ) : (
@@ -362,42 +391,54 @@ export default function PerformanceReportPage() {
             )}
           </div>
           <div className={`text-lg font-bold ${isAheadOfPlan ? 'text-emerald-700' : 'text-rose-600'}`}>
-            {summary.variance > 0 ? `+${Number(summary.variance).toLocaleString('vi-VN')}` : Number(summary.variance).toLocaleString('vi-VN')} đ
+            {summary.variance > 0 ? `+${Number(summary.variance).toLocaleString(locale)}` : Number(summary.variance).toLocaleString(locale)} {currencySuffix}
           </div>
           <span className="text-[11px] text-slate-500">
-            {isAheadOfPlan ? 'Vượt kế hoạch' : 'Chưa đạt mục tiêu'}
+            {isAheadOfPlan
+              ? (language === 'en' ? 'Ahead of plan' : 'Vượt kế hoạch')
+              : (language === 'en' ? 'Behind target' : 'Chưa đạt mục tiêu')}
           </span>
         </div>
 
         {/* 5. Đánh Giá Tiến Độ */}
         <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs print:border-slate-300">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-xs font-medium">Đánh giá chung</span>
+            <span className="text-xs font-medium">
+              {language === 'en' ? 'Overall Status' : 'Đánh giá chung'}
+            </span>
             <Award className="w-4 h-4 text-indigo-500" />
           </div>
           <div className="text-sm font-bold text-slate-800 mt-1">
             {summary.overall_percentage >= 100
-              ? 'Xuất sắc'
+              ? (language === 'en' ? 'Excellent' : 'Xuất sắc')
               : summary.overall_percentage >= 80
-              ? 'Tăng trưởng tốt'
+              ? (language === 'en' ? 'Good Growth' : 'Tăng trưởng tốt')
               : summary.overall_percentage >= 50
-              ? 'Tiến độ bình thường'
-              : 'Cần đẩy mạnh bán hàng'}
+              ? (language === 'en' ? 'On Track' : 'Tiến độ bình thường')
+              : (language === 'en' ? 'Needs Acceleration' : 'Cần đẩy mạnh bán hàng')}
           </div>
-          <span className="text-[11px] text-slate-400">Năm tài chính {fiscalYear}</span>
+          <span className="text-[11px] text-slate-400">
+            {language === 'en' ? `Fiscal Year ${fiscalYear}` : `Năm tài chính ${fiscalYear}`}
+          </span>
         </div>
       </div>
 
-      {/* Biểu Đồ Trực Quan Hóa Bằng Chart.js (Mixed Chart) */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs print:hidden">
+      {/* Biểu Đồ Trực Quan Hóa Bằng Chart.js */}
+      <div className="p-5 rounded-2xl bg-white border border-[#DDF0E2] shadow-xs print:hidden">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <BarChart2 className="w-5 h-5 text-indigo-600" />
-              <span>Biểu Đồ Đối Soát Doanh Số 12 Tháng Năm {fiscalYear}</span>
+              <BarChart2 className="w-5 h-5 text-[#3CB371]" />
+              <span>
+                {language === 'en'
+                  ? `12-Month Sales Audit Chart for Year ${fiscalYear}`
+                  : `Biểu Đồ Đối Soát Doanh Số 12 Tháng Năm ${fiscalYear}`}
+              </span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Cột Kế hoạch (Plan) vs Cột Thực tế (Actually Value) vs Đường Tỷ lệ hoàn thành %
+              {language === 'en'
+                ? 'Target Plan Bars vs Actual Value Bars vs Completion Rate Curve'
+                : 'Cột Kế hoạch (Plan) vs Cột Thực tế (Actually Value) vs Đường Tỷ lệ hoàn thành %'}
             </p>
           </div>
         </div>
@@ -405,8 +446,8 @@ export default function PerformanceReportPage() {
         <div className="h-80 w-full">
           {loading ? (
             <div className="h-full flex items-center justify-center text-slate-400">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-600 mr-2" />
-              <span>Đang kết xuất biểu đồ...</span>
+              <Loader2 className="w-6 h-6 animate-spin text-[#3CB371] mr-2" />
+              <span>{language === 'en' ? 'Rendering chart...' : 'Đang kết xuất biểu đồ...'}</span>
             </div>
           ) : (
             <Chart type="bar" data={chartData} options={chartOptions} />
@@ -414,30 +455,32 @@ export default function PerformanceReportPage() {
         </div>
       </div>
 
-      {/* Bảng Đối Soát 12 Tháng (Month | Plan($) | Actually Value($) | %) */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+      {/* Bảng Đối Soát 12 Tháng */}
+      <div className="bg-white rounded-2xl border border-[#DDF0E2] shadow-xs overflow-hidden">
+        <div className="p-4 bg-slate-50/80 border-b border-[#DDF0E2] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Bảng Số Liệu Đối Soát Chi Tiết 12 Tháng
+              {language === 'en'
+                ? '12-Month Detailed Sales Audit Table'
+                : 'Bảng Số Liệu Đối Soát Chi Tiết 12 Tháng'}
             </span>
             <span className="text-xs text-slate-400 font-normal">
-              (Tỷ lệ % = Thực tế / Kế hoạch * 100)
+              ({language === 'en' ? '% Rate = Actually / Plan * 100' : 'Tỷ lệ % = Thực tế / Kế hoạch * 100'})
             </span>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
+            <thead className="bg-[#F3F4F6] border-b border-[#DDF0E2] text-xs font-semibold text-slate-600 uppercase">
               <tr>
-                <th className="px-5 py-3">Tháng (Month)</th>
-                <th className="px-5 py-3 text-right">Kế hoạch Plan ($)</th>
-                <th className="px-5 py-3 text-right">Thực tế Actually Value ($)</th>
-                <th className="px-5 py-3 text-center">Đơn chốt</th>
-                <th className="px-5 py-3 text-right">Chênh lệch ($)</th>
-                <th className="px-5 py-3 text-right">Tỷ lệ Hoàn thành (%)</th>
-                <th className="px-5 py-3 text-center">Trạng thái đánh giá</th>
+                <th className="px-5 py-3">{t('thMonth', 'Tháng (Month)')}</th>
+                <th className="px-5 py-3 text-right">{t('thPlanAmount', 'Kế hoạch Plan ($)')}</th>
+                <th className="px-5 py-3 text-right">{t('thActualAmount', 'Thực tế Actually Value ($)')}</th>
+                <th className="px-5 py-3 text-center">{language === 'en' ? 'Orders' : 'Đơn chốt'}</th>
+                <th className="px-5 py-3 text-right">{language === 'en' ? 'Variance ($)' : 'Chênh lệch ($)'}</th>
+                <th className="px-5 py-3 text-right">{t('thCompletionPct', 'Tỷ lệ Hoàn thành (%)')}</th>
+                <th className="px-5 py-3 text-center">{t('thProgressEval', 'Trạng thái đánh giá')}</th>
               </tr>
             </thead>
 
@@ -445,46 +488,59 @@ export default function PerformanceReportPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-2" />
-                    <span>Đang tổng hợp số liệu đối soát...</span>
+                    <Loader2 className="w-6 h-6 animate-spin text-[#3CB371] mx-auto mb-2" />
+                    <span>{language === 'en' ? 'Synthesizing audit figures...' : 'Đang tổng hợp số liệu đối soát...'}</span>
                   </td>
                 </tr>
               ) : (
                 reportData?.months?.map((m) => {
                   const isPositive = m.variance >= 0;
+                  const monthLabel = language === 'en' ? `Month ${m.month}` : m.month_label;
 
                   // Xác định badge đánh giá
-                  let statusBadge = { label: 'Chưa đạt', color: 'bg-rose-100 text-rose-800 border-rose-200' };
+                  let statusBadge = {
+                    label: language === 'en' ? 'Pending' : 'Chưa đạt',
+                    color: 'bg-rose-100 text-rose-800 border-rose-200',
+                  };
                   if (m.percentage >= 100) {
-                    statusBadge = { label: 'Vượt chỉ tiêu', color: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold' };
+                    statusBadge = {
+                      label: language === 'en' ? 'Target Met' : 'Vượt chỉ tiêu',
+                      color: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+                    };
                   } else if (m.percentage >= 80) {
-                    statusBadge = { label: 'Đạt tốt', color: 'bg-blue-100 text-blue-800 border-blue-200' };
+                    statusBadge = {
+                      label: language === 'en' ? 'Good' : 'Đạt tốt',
+                      color: 'bg-blue-100 text-blue-800 border-blue-200',
+                    };
                   } else if (m.percentage >= 50) {
-                    statusBadge = { label: 'Đang tiến triển', color: 'bg-amber-100 text-amber-800 border-amber-200' };
+                    statusBadge = {
+                      label: language === 'en' ? 'Progressing' : 'Đang tiến triển',
+                      color: 'bg-amber-100 text-amber-800 border-amber-200',
+                    };
                   }
 
                   return (
-                    <tr key={m.month} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={m.month} className="hover:bg-[#EAF5EC]/40 transition-colors">
                       {/* Tháng */}
                       <td className="px-5 py-3.5 font-bold text-slate-900">
-                        {m.month_label}
+                        {monthLabel}
                       </td>
 
                       {/* Kế hoạch Plan ($) */}
                       <td className="px-5 py-3.5 text-right font-medium text-slate-700">
                         {m.plan > 0 ? (
-                          `${m.plan.toLocaleString('vi-VN')} đ`
+                          `${m.plan.toLocaleString(locale)} ${currencySuffix}`
                         ) : (
-                          <span className="text-slate-400">0 đ</span>
+                          <span className="text-slate-400">0 {currencySuffix}</span>
                         )}
                       </td>
 
                       {/* Thực tế Actually Value ($) */}
                       <td className="px-5 py-3.5 text-right font-bold text-emerald-700">
                         {m.actually_value > 0 ? (
-                          `${m.actually_value.toLocaleString('vi-VN')} đ`
+                          `${m.actually_value.toLocaleString(locale)} ${currencySuffix}`
                         ) : (
-                          <span className="text-slate-400">0 đ</span>
+                          <span className="text-slate-400">0 {currencySuffix}</span>
                         )}
                       </td>
 
@@ -497,7 +553,7 @@ export default function PerformanceReportPage() {
                       <td className={`px-5 py-3.5 text-right font-semibold ${
                         isPositive ? 'text-emerald-700' : 'text-rose-600'
                       }`}>
-                        {m.variance > 0 ? `+${m.variance.toLocaleString('vi-VN')}` : m.variance.toLocaleString('vi-VN')} đ
+                        {m.variance > 0 ? `+${m.variance.toLocaleString(locale)}` : m.variance.toLocaleString(locale)} {currencySuffix}
                       </td>
 
                       {/* Tỷ lệ % */}
@@ -520,22 +576,22 @@ export default function PerformanceReportPage() {
             </tbody>
 
             {/* Dòng Tổng cộng cả năm */}
-            <tfoot className="bg-slate-50 border-t-2 border-slate-200 text-sm font-bold text-slate-900">
+            <tfoot className="bg-[#F3F4F6] border-t-2 border-[#DDF0E2] text-sm font-bold text-slate-900">
               <tr>
                 <td className="px-5 py-3.5 uppercase">
-                  TỔNG KẾT NĂM {fiscalYear}:
+                  {language === 'en' ? `ANNUAL TOTAL ${fiscalYear}:` : `TỔNG KẾT NĂM ${fiscalYear}:`}
                 </td>
                 <td className="px-5 py-3.5 text-right text-blue-700 font-extrabold">
-                  {summary.total_plan.toLocaleString('vi-VN')} đ
+                  {summary.total_plan.toLocaleString(locale)} {currencySuffix}
                 </td>
                 <td className="px-5 py-3.5 text-right text-emerald-700 font-extrabold">
-                  {summary.total_actual.toLocaleString('vi-VN')} đ
+                  {summary.total_actual.toLocaleString(locale)} {currencySuffix}
                 </td>
                 <td className="px-5 py-3.5 text-center text-blue-700 font-extrabold">
                   {summary.total_orders}
                 </td>
                 <td className={`px-5 py-3.5 text-right font-extrabold ${isAheadOfPlan ? 'text-emerald-700' : 'text-rose-600'}`}>
-                  {summary.variance > 0 ? `+${summary.variance.toLocaleString('vi-VN')}` : summary.variance.toLocaleString('vi-VN')} đ
+                  {summary.variance > 0 ? `+${summary.variance.toLocaleString(locale)}` : summary.variance.toLocaleString(locale)} {currencySuffix}
                 </td>
                 <td className="px-5 py-3.5 text-right text-amber-700 font-extrabold text-base">
                   {summary.overall_percentage}%
@@ -544,28 +600,14 @@ export default function PerformanceReportPage() {
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
                     isAheadOfPlan ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                   }`}>
-                    {isAheadOfPlan ? 'VƯỢT CHỈ TIÊU' : 'ĐANG THEO DÕI'}
+                    {isAheadOfPlan
+                      ? (language === 'en' ? 'AHEAD OF TARGET' : 'VƯỢT CHỈ TIÊU')
+                      : (language === 'en' ? 'MONITORING' : 'ĐANG THEO DÕI')}
                   </span>
                 </td>
               </tr>
             </tfoot>
           </table>
-        </div>
-      </div>
-
-      {/* Footer Chữ ký khi In ấn */}
-      <div className="hidden print:grid grid-cols-2 gap-8 pt-12 text-center text-xs">
-        <div>
-          <p className="font-semibold text-slate-800">TRƯỞNG PHÒNG KINH DOANH</p>
-          <p className="text-slate-400 italic mt-1">(Ký và ghi rõ họ tên)</p>
-          <div className="h-16"></div>
-          <p className="font-medium text-slate-700">Quản Lý Bán Hàng</p>
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800">GIÁM ĐỐC ĐIỀU HÀNH</p>
-          <p className="text-slate-400 italic mt-1">(Ký, đóng dấu)</p>
-          <div className="h-16"></div>
-          <p className="font-medium text-slate-700">Ban Giám Đốc</p>
         </div>
       </div>
     </div>

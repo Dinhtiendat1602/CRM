@@ -32,7 +32,7 @@ export default function MainLayout() {
 
           {/* Minimalist Footer */}
           <footer className="border-t border-gray-100 py-2.5 px-6 text-center text-xs text-[#9CA3AF] shrink-0">
-            Zen CRM Enterprise &bull; Tuân thủ chuẩn SRS v1.1
+            Zen CRM Enterprise &bull; Nền Tảng Quản Trị Khách Hàng Toàn Diện
           </footer>
         </div>
       </div>

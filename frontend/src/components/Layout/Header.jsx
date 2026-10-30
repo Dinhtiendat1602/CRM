@@ -145,7 +145,7 @@ export default function Header({ onToggleMobileSidebar }) {
           <button
             type="button"
             onClick={() => setSessionOpen(!sessionOpen)}
-            title="Phiên làm việc tự động đếm ngược 30 phút bất hoạt (SRS 5.3). Bấm để xem chi tiết hoặc gia hạn."
+            title="Phiên làm việc tự động đếm ngược 30 phút bất hoạt. Bấm để xem chi tiết hoặc gia hạn."
             className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-medium border transition-all cursor-pointer ${
               sessionRemainingSeconds && sessionRemainingSeconds <= 120
                 ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse font-bold'
@@ -171,7 +171,7 @@ export default function Header({ onToggleMobileSidebar }) {
             <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-[#DDF0E2] p-4 z-50 animate-fade-in text-xs space-y-3">
               <div className="flex items-center gap-2 pb-2 border-b border-[#DDF0E2]">
                 <ShieldCheck className="w-4 h-4 text-[#3CB371]" />
-                <span className="font-bold text-[#1F2937]">Bảo Mật Phiên Làm Việc (SRS 5.3)</span>
+                <span className="font-bold text-[#1F2937]">Bảo Mật Phiên Làm Việc</span>
               </div>
 
               <div className="bg-[#F3F4F6] p-2.5 rounded-xl border border-[#DDF0E2] space-y-1">

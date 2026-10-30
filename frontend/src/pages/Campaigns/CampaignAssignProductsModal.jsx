@@ -114,7 +114,7 @@ export default function CampaignAssignProductsModal({ isOpen, onClose, campaign,
       isOpen={isOpen}
       onClose={onClose}
       title="Gán Sản Phẩm vào Chiến dịch Tiếp thị"
-      subtitle={`Chiến dịch: ${campaign?.name || ''} (SRS 3.18.1)`}
+      subtitle={`Chiến dịch: ${campaign?.name || ''}`}
       maxWidth="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">

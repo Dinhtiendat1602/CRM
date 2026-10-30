@@ -16,7 +16,7 @@ export default function PlaceholderPage({ title, srsRef, description, featureId 
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
-              {srsRef || 'SRS v1.1'}
+              {srsRef || 'Phân hệ CRM'}
             </span>
             {featureId && (
               <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#F3F4F6] text-[#6B7280]">

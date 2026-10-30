@@ -443,7 +443,7 @@ export default function CampaignListPage() {
                           {/* Xem Báo cáo hiệu quả ROI (SRS 3.19) */}
                           <button
                             type="button"
-                            title="Xem Báo cáo Hiệu quả ROI (SRS 3.19)"
+                            title="Xem Báo cáo Hiệu quả ROI"
                             onClick={() => navigate(`/campaigns/${c.id}/report`)}
                             className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                           >
@@ -453,7 +453,7 @@ export default function CampaignListPage() {
                           {/* Gán sản phẩm mục tiêu (SRS 3.18.1) */}
                           <button
                             type="button"
-                            title="Gán sản phẩm mục tiêu (SRS 3.18.1)"
+                            title="Gán sản phẩm mục tiêu"
                             onClick={() => setAssigningCampaign(c)}
                             className="p-1.5 text-[#3CB371] hover:text-[#2E7D32] hover:bg-[#EAF5EC] rounded-lg transition-colors cursor-pointer"
                           >

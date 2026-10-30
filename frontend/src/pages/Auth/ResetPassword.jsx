@@ -32,7 +32,7 @@ export default function ResetPassword() {
       });
       setSuccess(true);
     } catch (err) {
-      setError(err?.message || 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn (SRS 3.14).');
+      setError(err?.message || 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export default function ResetPassword() {
           <div className="border-b border-[#DDF0E2] pb-4">
             <h3 className="text-xl font-bold text-[#1F2937]">Thiết lập mật khẩu mới</h3>
             <p className="text-xs text-[#6B7280] mt-1">
-              Nhập mật khẩu mới an toàn cho tài khoản của bạn (SRS 3.14).
+              Nhập mật khẩu mới an toàn cho tài khoản của bạn.
             </p>
           </div>
 

@@ -511,7 +511,7 @@ export default function OpportunityListPage() {
                           {opp.status !== 'ORDERED' && (
                             <button
                               onClick={() => setMakeOrderState({ isOpen: true, opportunity: opp })}
-                              title="Chốt đơn hàng (Make an Order - SRS 3.12)"
+                              title="Chốt đơn hàng (Xuất hóa đơn)"
                               className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                             >
                               <ShoppingBag className="w-4 h-4" />

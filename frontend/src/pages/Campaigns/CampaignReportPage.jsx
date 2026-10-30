@@ -142,7 +142,7 @@ export default function CampaignReportPage() {
               </span>
             </div>
             <p className="text-sm text-slate-500 mt-0.5">
-              Báo cáo Đo lường Hiệu quả Tiếp thị & Lợi tức Đầu tư (SRS 3.19)
+              Báo cáo Đo lường Hiệu quả Tiếp thị & Lợi tức Đầu tư
             </p>
           </div>
         </div>
@@ -319,7 +319,6 @@ export default function CampaignReportPage() {
           <div className="overflow-x-auto">
             <div className="p-4 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
               <span>Danh sách Sản phẩm mục tiêu thuộc Chiến dịch</span>
-              <span className="text-slate-400 font-normal">SRS 3.18.1</span>
             </div>
 
             <table className="w-full text-left text-sm text-slate-700">
@@ -430,7 +429,6 @@ export default function CampaignReportPage() {
           <div className="overflow-x-auto print:mt-6">
             <div className="p-4 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
               <span>Danh sách Khách hàng tiềm năng thu được từ Chiến dịch</span>
-              <span className="text-slate-400 font-normal">SRS 3.19</span>
             </div>
 
             <table className="w-full text-left text-sm text-slate-700">

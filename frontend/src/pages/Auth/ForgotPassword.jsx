@@ -38,7 +38,7 @@ export default function ForgotPassword() {
             </Link>
             <h3 className="text-xl font-bold text-[#1F2937]">Quên mật khẩu?</h3>
             <p className="text-xs text-[#6B7280] mt-1">
-              Nhập email đã đăng ký tài khoản nhân viên để nhận liên kết đặt lại mật khẩu (SRS 3.14).
+              Nhập email đã đăng ký tài khoản nhân viên để nhận liên kết đặt lại mật khẩu.
             </p>
           </div>
 

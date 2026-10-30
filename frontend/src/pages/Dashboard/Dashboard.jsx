@@ -253,56 +253,56 @@ export default function Dashboard() {
   const quickActions = [
     {
       title: 'Khách tiềm năng',
-      desc: 'Quản lý thông tin & nguồn khách hàng mới (SRS 3.1 - 3.5)',
+      desc: 'Quản lý thông tin & nguồn khách hàng mới',
       path: '/leads',
       roles: ['SALESMAN', 'SALE_MANAGER'],
       color: 'text-blue-600 bg-blue-50 border-blue-200',
     },
     {
       title: 'Cơ hội bán hàng',
-      desc: 'Theo dõi tiến trình đàm phán & nhật ký Follow-up (SRS 3.6 - 3.11)',
+      desc: 'Theo dõi tiến trình đàm phán & nhật ký chăm sóc',
       path: '/opportunities',
       roles: ['SALESMAN', 'SALE_MANAGER'],
       color: 'text-amber-600 bg-amber-50 border-amber-200',
     },
     {
       title: 'Đơn hàng (Orders)',
-      desc: 'Xem hóa đơn bán hàng & lịch sử chốt đơn (SRS 3.12)',
+      desc: 'Xem hóa đơn bán hàng & lịch sử chốt đơn xuất kho',
       path: '/orders',
       roles: ['SALESMAN', 'SALE_MANAGER'],
       color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
     },
     {
       title: 'Quản lý Sản phẩm',
-      desc: 'Quản trị kho hàng, đơn giá & cơ hội theo SP (SRS 3.15 - 3.17)',
+      desc: 'Quản trị kho hàng, đơn giá & cơ hội theo từng sản phẩm',
       path: '/products',
       roles: ['SALE_MANAGER'],
       color: 'text-indigo-600 bg-indigo-50 border-indigo-200',
     },
     {
       title: 'Chiến dịch Tiếp thị',
-      desc: 'Lập kế hoạch & đo lường hiệu quả ROI tiếp thị (SRS 3.18 - 3.19)',
+      desc: 'Lập kế hoạch & đo lường hiệu quả ROI tiếp thị',
       path: '/campaigns',
       roles: ['SALE_MANAGER'],
       color: 'text-pink-600 bg-pink-50 border-pink-200',
     },
     {
       title: 'Kế hoạch Doanh số',
-      desc: 'Chỉ tiêu 12 tháng & Báo cáo đối soát thực tế (SRS 3.20 - 3.21)',
+      desc: 'Chỉ tiêu 12 tháng & Báo cáo đối soát thực tế',
       path: '/forecast/setup',
       roles: ['SALE_MANAGER'],
       color: 'text-cyan-600 bg-cyan-50 border-cyan-200',
     },
     {
       title: 'Báo cáo Bán hàng',
-      desc: 'Báo cáo Lead, Đơn & Doanh số theo Sản phẩm (SRS 2.1)',
+      desc: 'Báo cáo Lead, Đơn & Doanh số theo Sản phẩm',
       path: '/reports',
       roles: ['SALE_MANAGER'],
       color: 'text-violet-600 bg-violet-50 border-violet-200',
     },
     {
       title: 'Quản trị Người dùng',
-      desc: 'Xem danh sách, phân vai trò & đặt lại mật khẩu (SRS 2.1)',
+      desc: 'Xem danh sách, phân vai trò & đặt lại mật khẩu',
       path: '/admin/users',
       roles: ['ADMIN'],
       color: 'text-purple-600 bg-purple-50 border-purple-200',
@@ -800,7 +800,7 @@ export default function Dashboard() {
                       {summary.totalStock.toLocaleString()} đơn vị
                     </span>
                     <span className="text-[11px] text-slate-500 mt-0.5 block">
-                      Sẵn sàng xuất đơn (SRS 3.12)
+                      Sẵn sàng xuất đơn
                     </span>
                   </div>
 

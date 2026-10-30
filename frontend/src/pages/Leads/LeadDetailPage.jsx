@@ -203,7 +203,7 @@ export default function LeadDetailPage() {
           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
               <User className="w-4 h-4 text-[#3CB371]" />
-              <span>Thông Tin Chi Tiết Khách Hàng (SRS 3.2.3 REQ-4)</span>
+              <span>Thông Tin Chi Tiết Khách Hàng</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-sm">
@@ -456,7 +456,7 @@ export default function LeadDetailPage() {
           <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-5 text-xs text-amber-900 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-800 text-sm">
               <FileText className="w-4 h-4 text-amber-600" />
-              <span>Quy trình chăm sóc (SRS 3.6 - 3.12)</span>
+              <span>Quy trình chăm sóc khách hàng</span>
             </div>
             <p className="leading-relaxed text-amber-800/90">
               Từ Lead này, Nhân viên bán hàng tạo các <strong>Cơ hội (Opportunity)</strong> gắn với từng sản phẩm. Mỗi lần gọi điện hoặc gửi mail, hãy bấm vào Cơ hội để ghi nhận <strong>Follow-up</strong>.

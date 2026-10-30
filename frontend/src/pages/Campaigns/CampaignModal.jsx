@@ -125,7 +125,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
       isOpen={isOpen}
       onClose={onClose}
       title={isEdit ? 'Chỉnh sửa Chiến dịch Tiếp thị' : 'Tạo Chiến dịch Tiếp thị Mới'}
-      subtitle="SRS 3.18 — Quản lý kế hoạch chiến dịch, thời hạn triển khai và ngân sách"
+      subtitle="Quản lý kế hoạch chiến dịch, thời hạn triển khai và ngân sách"
       maxWidth="max-w-xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -237,7 +237,7 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
             <p className="text-xs text-rose-600 mt-1">{fieldErrors.budget}</p>
           ) : (
             <p className="text-xs text-slate-500 mt-1">
-              Ngân sách này được dùng làm mẫu số để tự động tính tỷ suất lợi nhuận ROI (SRS 3.19).
+              Ngân sách này được dùng làm mẫu số để tự động tính tỷ suất lợi nhuận ROI.
             </p>
           )}
         </div>

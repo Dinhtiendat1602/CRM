@@ -155,7 +155,7 @@ export default function ProfilePage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2]">
-                SRS 3.13 &bull; User Profile
+                Hồ Sơ Người Dùng
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF5EC] text-[#2E7D32] border border-[#DDF0E2] flex items-center gap-1">
                 <Shield className="h-3 w-3" />

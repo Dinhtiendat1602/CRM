@@ -651,7 +651,7 @@ export default function UserManagement() {
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         title="Thêm nhân viên mới"
-        subtitle="Quản trị viên tạo tài khoản nhân viên và gán vai trò ban đầu (SRS 2.1)"
+        subtitle="Quản trị viên tạo tài khoản nhân viên và gán vai trò ban đầu"
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
           {createError && (
@@ -768,7 +768,7 @@ export default function UserManagement() {
         isOpen={resetPwModalOpen}
         onClose={() => setResetPwModalOpen(false)}
         title={`Đặt lại mật khẩu cho ${selectedUserForReset?.username || ''}`}
-        subtitle="Quản trị viên can thiệp đặt lại mật khẩu trực tiếp khi nhân viên quên mật khẩu (SRS 2.1)"
+        subtitle="Quản trị viên can thiệp đặt lại mật khẩu trực tiếp khi nhân viên quên mật khẩu"
       >
         <form onSubmit={handleResetPassword} className="space-y-4">
           {resetPwError && (

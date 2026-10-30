@@ -453,7 +453,7 @@ export default function OpportunityDetailPage() {
               <span>Dòng Thời Gian Chăm Sóc Khách Hàng (Follow-up Activity Timeline)</span>
             </h2>
             <p className="text-xs text-gray-500 mt-1">
-              Ghi nhận toàn bộ cuộc gọi, email, gặp mặt, phản hồi của khách và kế hoạch tương tác tiếp theo (SRS 3.11)
+              Ghi nhận toàn bộ cuộc gọi, email, gặp mặt, phản hồi của khách và kế hoạch tương tác tiếp theo
             </p>
           </div>
 

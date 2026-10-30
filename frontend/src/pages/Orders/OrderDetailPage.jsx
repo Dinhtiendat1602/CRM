@@ -143,7 +143,7 @@ export default function OrderDetailPage() {
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-0.5">
-              Hóa đơn xuất hàng bảo tồn giá bán tại thời điểm chốt (SRS 3.12) • Mã ID #{order.id}
+              Hóa đơn xuất hàng bảo tồn giá bán tại thời điểm chốt • Mã ID #{order.id}
             </p>
           </div>
         </div>
@@ -280,7 +280,7 @@ export default function OrderDetailPage() {
         <div className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 flex items-center gap-2">
             <Package className="w-4 h-4 text-[#3CB371]" />
-            <span>Chi Tiết Sản Phẩm & Giá Bán Bảo Tồn (SRS 3.12)</span>
+            <span>Chi Tiết Sản Phẩm & Giá Bán Bảo Tồn</span>
           </h2>
 
           <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -335,7 +335,7 @@ export default function OrderDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 pt-4">
           <div className="text-xs text-gray-500 max-w-md space-y-1">
             <p className="font-semibold text-gray-700">Điều khoản thanh toán & Giao nhận:</p>
-            <p>• Giá trên là giá bán chính thức đã được chốt và bảo tồn tại thời điểm lập đơn (SRS 3.12).</p>
+            <p>• Giá trên là giá bán chính thức đã được chốt và bảo tồn tại thời điểm lập đơn.</p>
             <p>• Hàng hóa được kiểm tra và xuất kho theo đúng quy chuẩn kiểm kê tồn kho Zen CRM.</p>
           </div>
 

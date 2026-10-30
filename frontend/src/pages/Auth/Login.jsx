@@ -166,7 +166,7 @@ export default function Login() {
 
         <div className="mt-6 text-center text-xs text-[#6B7280] flex items-center justify-center gap-1.5">
           <ShieldCheck className="h-4 w-4 text-[#3CB371]" />
-          <span>Phiên làm việc bảo mật tự động hết hạn sau 30 phút (SRS 5.3)</span>
+          <span>Phiên làm việc bảo mật tự động hết hạn sau 30 phút</span>
         </div>
       </div>
     </div>

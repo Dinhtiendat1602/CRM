@@ -449,21 +449,21 @@ export default function LeadListPage() {
                           <button
                             onClick={() => navigate(`/leads/${lead.id}`)}
                             className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                            title="Xem chi tiết (SRS 3.2.3 REQ-4)"
+                            title="Xem chi tiết"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleEdit(lead)}
                             className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                            title="Chỉnh sửa (SRS 3.4)"
+                            title="Chỉnh sửa"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(lead)}
                             className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="Xóa Lead (SRS 3.5)"
+                            title="Xóa khách hàng tiềm năng"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

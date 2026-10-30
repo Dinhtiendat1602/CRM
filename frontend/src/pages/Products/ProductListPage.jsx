@@ -379,7 +379,7 @@ export default function ProductListPage() {
                         <button
                           onClick={() => navigate(`/products/${prod.id}`)}
                           className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                          title="Xem chi tiết, Cơ hội & Đơn hàng (SRS 3.16, 3.17)"
+                          title="Xem chi tiết, Cơ hội & Đơn hàng"
                         >
                           <Eye className="w-4 h-4" />
                         </button>

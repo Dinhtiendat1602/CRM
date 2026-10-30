@@ -155,7 +155,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
             <div>
               <h2 className="text-lg font-bold leading-tight text-[#1F2937]">Chốt Đơn Hàng (Make an Order)</h2>
               <p className="text-xs text-[#6B7280] mt-0.5">
-                Chuyển Cơ Hội #{opportunity.id} thành Hóa đơn xuất kho chính thức (SRS 3.12)
+                Chuyển Cơ Hội #{opportunity.id} thành Hóa đơn xuất kho chính thức
               </p>
             </div>
           </div>
@@ -279,7 +279,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
                 <Calendar className="w-4 h-4 text-gray-400 absolute right-3.5 top-3 pointer-events-none" />
               </div>
               <span className="text-xs text-gray-400 mt-1 block">
-                Ngày ghi nhận doanh thu và trừ tồn kho (SRS 3.12)
+                Ngày ghi nhận doanh thu và trừ tồn kho
               </span>
             </div>
           </div>
@@ -349,7 +349,7 @@ export default function MakeOrderModal({ isOpen, onClose, opportunity, onSuccess
           {/* Card Tổng Tiền Realtime */}
           <div className="p-4 bg-[#EAF5EC] rounded-xl border border-[#DDF0E2] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-xs uppercase font-semibold text-[#2E7D32]">Giá Trị Đơn Hàng Bảo Tồn (SRS 3.12)</p>
+              <p className="text-xs uppercase font-semibold text-[#2E7D32]">Giá Trị Đơn Hàng Bảo Tồn</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 {numQuantity} cái × {unitPrice.toLocaleString('vi-VN')} ₫/cái
               </p>

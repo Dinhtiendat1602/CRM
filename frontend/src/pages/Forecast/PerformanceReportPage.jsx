@@ -243,12 +243,9 @@ export default function PerformanceReportPage() {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
               Báo cáo Đối soát Kế hoạch vs Thực tế 12 Tháng
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
-              SRS 3.21
-            </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Đối chiếu số liệu 12 tháng: Kế hoạch (Plan VNĐ) vs Thực tế (Actually Value VNĐ) vs Tỷ lệ hoàn thành % (BR-07)
+            Đối chiếu số liệu 12 tháng: Kế hoạch (Plan VNĐ) vs Thực tế (Actually Value VNĐ) vs Tỷ lệ hoàn thành %
           </p>
         </div>
 
@@ -276,7 +273,7 @@ export default function PerformanceReportPage() {
             className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
           >
             <Edit className="w-4 h-4" />
-            <span>Sửa Kế Hoạch (SRS 3.20)</span>
+            <span>Sửa Kế Hoạch</span>
           </button>
 
           <button
@@ -295,7 +292,7 @@ export default function PerformanceReportPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-xl font-bold text-slate-900">BÁO CÁO ĐỐI SOÁT DOANH SỐ KẾ HOẠCH VS THỰC TẾ</h1>
-            <p className="text-sm font-semibold text-emerald-700 mt-0.5">Năm tài chính: {fiscalYear} (SRS 3.21)</p>
+            <p className="text-sm font-semibold text-emerald-700 mt-0.5">Năm tài chính: {fiscalYear}</p>
           </div>
           <div className="text-right text-xs text-slate-600">
             <p>Ngày in: {new Date().toLocaleDateString('vi-VN')} {new Date().toLocaleTimeString('vi-VN')}</p>
@@ -417,15 +414,15 @@ export default function PerformanceReportPage() {
         </div>
       </div>
 
-      {/* Bảng Đối Soát 12 Tháng Chuẩn SRS 3.21 (Month | Plan($) | Actually Value($) | %) */}
+      {/* Bảng Đối Soát 12 Tháng (Month | Plan($) | Actually Value($) | %) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Bảng Số Liệu Đối Soát Chi Tiết 12 Tháng (SRS 3.21)
+              Bảng Số Liệu Đối Soát Chi Tiết 12 Tháng
             </span>
             <span className="text-xs text-slate-400 font-normal">
-              (Quy chuẩn đối soát BR-07: % = Actually / Plan * 100)
+              (Tỷ lệ % = Thực tế / Kế hoạch * 100)
             </span>
           </div>
         </div>

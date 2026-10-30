@@ -226,7 +226,7 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Chiến Dịch Quảng Bá (SRS 3.18)
+              Chiến Dịch Quảng Bá
             </label>
             <div className="relative">
               <select

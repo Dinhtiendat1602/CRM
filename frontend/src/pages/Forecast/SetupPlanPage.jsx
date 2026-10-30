@@ -216,7 +216,7 @@ export default function SetupPlanPage() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2E7D32] bg-[#EAF5EC] hover:bg-[#DDF0E2] border border-[#DDF0E2] rounded-xl transition-colors cursor-pointer"
           >
             <BarChart2 className="w-3.5 h-3.5" />
-            <span>Xem Đối Soát (SRS 3.21)</span>
+            <span>Xem Báo Cáo Đối Soát</span>
           </button>
         </div>
       </div>
@@ -250,7 +250,7 @@ export default function SetupPlanPage() {
             {totalYearPlan.toLocaleString('vi-VN')} <span className="text-sm font-semibold text-[#3CB371]">VNĐ</span>
           </div>
           <p className="text-xs text-[#2E7D32] mt-2 font-medium">
-            Mẫu số chuẩn dùng để đối soát tỷ lệ hoàn thành % trên Dashboard và Performance Report (SRS 3.21).
+            Mẫu số chuẩn dùng để đối soát tỷ lệ hoàn thành % trên Bảng điều khiển và Báo cáo hiệu suất.
           </p>
         </div>
 
@@ -266,7 +266,7 @@ export default function SetupPlanPage() {
           <div className="flex items-center gap-3 text-xs text-[#6B7280] mt-3 pt-2 border-t border-[#DDF0E2]/60">
             <span>12 kỳ đánh giá doanh số</span>
             <span>•</span>
-            <span>Quy chuẩn SRS 3.20</span>
+            <span>Kế hoạch năm chuẩn hóa</span>
           </div>
         </div>
 
@@ -356,7 +356,7 @@ export default function SetupPlanPage() {
         <div className="p-4 bg-[#F3F4F6]/50 border-b border-[#DDF0E2] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#1F2937]">
-              Bảng Nhập Định Mức Doanh Thu 12 Tháng (SRS 3.20)
+              Bảng Nhập Định Mức Doanh Thu 12 Tháng
             </span>
             <span className="text-xs text-[#6B7280] font-normal">
               (Đơn vị tiền tệ: VNĐ)

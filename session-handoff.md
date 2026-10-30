@@ -3,10 +3,9 @@
 # Session Handoff
 
 ## Current Objective
-  1. Thay đổi logo vector Zen CRM hiện đại, khắc phục triệt để lỗi logo bị viền che/cắt góc (tăng gap layout `gap-5` và căn giữa cân đối khi thu gọn).
-  2. Xóa bỏ banner chào mừng cồng kềnh trên Dashboard, giữ lại thanh công cụ mini tinh tế.
-  3. Đồng bộ loại bỏ toàn bộ các thẻ màu tím (`#7CA5F5` -> `#5D3EBC`) sang bảng màu xanh lá / mint tối giản (`#EAF5EC`, `#3CB371`, `#1F2937`) ở Kế hoạch doanh số (`SetupPlanPage.jsx`), Báo cáo (`GeneralReportsPage.jsx`), Modal chốt đơn (`MakeOrderModal.jsx`), Chi tiết lead (`LeadDetailPage.jsx`), và Avatar người dùng.
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 298ms không lỗi, logo vector sắc nét không bị che, màu sắc tối giản chuẩn mực).
+  1. Loại bỏ toàn bộ các chuỗi văn bản kỹ thuật "Tuân thủ chuẩn SRS v1.1" và các nhãn mã đặc tả "(SRS ...)" trên toàn bộ giao diện người dùng (Footer, Modal, Tooltips, Subtitles, Badges).
+  2. Duy trì giao diện sạch sẽ, thanh lịch, chuẩn mực phần mềm thương mại Enterprise.
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 274ms không lỗi, giao diện sạch hoàn toàn các nhãn kỹ thuật).
 - Branch / commit: `main`
 
 - [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**

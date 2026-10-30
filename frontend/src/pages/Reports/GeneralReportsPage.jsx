@@ -681,7 +681,7 @@ export default function GeneralReportsPage() {
                       <Package className="w-5 h-5 text-[#3CB371]" />
                       <span>Phân Bổ Doanh Thu Theo Từng Sản Phẩm (Revenue by Product)</span>
                     </h3>
-                    <p className="text-xs text-[#6B7280] mt-0.5">SRS 2.1 — Đo lường tỷ trọng doanh số và số lượng bán của từng sản phẩm</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Đo lường tỷ trọng doanh số và số lượng bán của từng sản phẩm</p>
                   </div>
                 </div>
 
@@ -763,7 +763,7 @@ export default function GeneralReportsPage() {
                       <Layers className="w-5 h-5 text-[#3CB371]" />
                       <span>Phân Bổ Doanh Thu Theo Danh Mục Sản Phẩm (Revenue by Category)</span>
                     </h3>
-                    <p className="text-xs text-[#6B7280] mt-0.5">SRS 2.1 — Đánh giá nhóm sản phẩm chiến lược</p>
+                    <p className="text-xs text-[#6B7280] mt-0.5">Đánh giá nhóm sản phẩm chiến lược</p>
                   </div>
                 </div>
 

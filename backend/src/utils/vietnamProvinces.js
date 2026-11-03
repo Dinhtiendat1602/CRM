@@ -71,3 +71,4 @@ const VIETNAM_PROVINCES = [
 module.exports = {
   VIETNAM_PROVINCES,
 };
+

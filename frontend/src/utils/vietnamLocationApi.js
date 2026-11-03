@@ -88,6 +88,7 @@ export const POPULAR_COUNTRIES = [
 // Bộ nhớ cache tạm thời trong phiên làm việc
 let cachedProvinces = null;
 const cachedDistricts = new Map();
+const cachedWards = new Map();
 
 /**
  * Lấy danh sách 63 Tỉnh/Thành phố từ API Quốc gia Việt Nam (provinces.open-api.vn)
@@ -177,3 +178,56 @@ export async function fetchDistrictsByProvince(provinceCodeOrName) {
 
   return [];
 }
+
+/**
+ * Lấy danh sách Phường / Xã theo Quận/Huyện từ API Quốc gia
+ */
+export async function fetchWardsByDistrict(districtCodeOrName, districtsList = []) {
+  if (!districtCodeOrName) return [];
+
+  let code = null;
+  if (typeof districtCodeOrName === 'number') {
+    code = districtCodeOrName;
+  } else {
+    const searchName = String(districtCodeOrName).trim().toLowerCase();
+    const allDistricts = [...districtsList, ...Array.from(cachedDistricts.values()).flat()];
+    const found = allDistricts.find(
+      (d) =>
+        String(d.code) === String(districtCodeOrName) ||
+        d.name.toLowerCase() === searchName ||
+        d.name.toLowerCase().replace(/^(quận|huyện|thị xã|thành phố)\s+/i, '') === searchName
+    );
+    if (found) code = found.code;
+  }
+
+  if (!code) return [];
+  if (cachedWards.has(code)) return cachedWards.get(code);
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    const res = await fetch(`https://provinces.open-api.vn/api/d/${code}?depth=2`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.wards)) {
+        const wards = data.wards.map((w) => ({
+          code: w.code,
+          name: w.name,
+          division_type: w.division_type,
+        }));
+        cachedWards.set(code, wards);
+        return wards;
+      }
+    }
+  } catch (err) {
+    console.info('Không thể tải Phường/Xã từ API Quốc gia:', err?.message || err);
+  }
+
+  return [];
+}
+

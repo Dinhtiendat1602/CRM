@@ -304,6 +304,52 @@
       ],
       "status": "completed",
       "evidence": "1. Backend Python FastAPI (ai_service/): database.py quản lý kết nối PostgreSQL, crm_tools.py định nghĩa 6 công cụ Function Calling cho Gemini, gemini_engine.py tích hợp Google GenAI SDK và quản lý bộ nhớ hội thoại session-based, main.py cung cấp REST API (/api/health, /api/chat, /api/chat/reset, /api/quick-prompts) trên cổng 8000. 2. Frontend React: AIChatWidget.jsx với nút FAB nổi góc dưới phải, giao diện Mint Pastel chuẩn thương hiệu, hộp thoại chat kèm gợi ý câu hỏi 1 chạm và bộ định dạng Markdown tùy chỉnh; nhúng vào MainLayout.jsx. 3. Kiểm thử: 7/7 bài kiểm tra tự động tại ai_service/test_ai_service.py PASS; 146/146 tests backend PASS; 117/117 tests frontend PASS; Vite production build thành công trong 373ms; Curl kiểm tra thực tế AI trả lời và gọi tool CSDL chính xác 100%."
+    },
+    {
+      "id": "feat-028",
+      "name": "Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard)",
+      "description": "Nâng cấp AI Agent cho phép người dùng ra lệnh bằng ngôn ngữ tự nhiên trong chat widget (VD: 'Thêm khách hàng mới Nguyễn Văn Nam, SĐT 0987112233, Email nam.nguyen@gmail.com, Địa chỉ 456 Trần Phú Đà Nẵng, Nghề Kỹ sư'). Agent tự động bóc tách các thực thể (Họ và tên đệm, Tên, Số điện thoại, Email, Nghề nghiệp, Địa chỉ, Chiến dịch), tự động kiểm tra chống trùng lặp SĐT/Email theo quy chuẩn BR-02, thực thi lệnh INSERT trực tiếp vào bảng leads của CSDL PostgreSQL và trả về phản hồi xác nhận kèm ID khách hàng mới cùng gợi ý bước chăm sóc tiếp theo.",
+      "dependencies": [
+        "feat-002",
+        "feat-008",
+        "feat-027"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Gọi API chat với prompt tự nhiên yêu cầu thêm khách hàng; kiểm tra agent tự động gọi tool create_lead; kiểm tra bản ghi được lưu thực tế vào bảng leads; kiểm tra cơ chế bắt trùng lặp BR-02 khi nhập SĐT/Email đã có."
+    },
+    {
+      "id": "feat-029",
+      "name": "Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching)",
+      "description": "Agent tự động tiếp nhận yêu cầu tạo cơ hội kinh doanh qua tin nhắn (VD: 'Tạo cơ hội cho anh Nam mua 2 bộ Kit Livestream Pro 4K dự kiến chốt 20/11'). Agent tự động tìm kiếm thông tin khách hàng tiềm năng bằng SĐT/Email/Tên, truy vấn kho sản phẩm để khớp mã và đơn giá niêm yết, tự động tính tổng giá trị dự kiến (quantity * unit_price), lưu vào bảng opportunities với trạng thái NEW và phản hồi tóm tắt chi tiết cơ hội.",
+      "dependencies": [
+        "feat-010",
+        "feat-012",
+        "feat-028"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Ra lệnh tạo cơ hội qua chat; kiểm tra agent tự khớp lead_id và product_id; kiểm tra tính đúng giá trị ước tính và bản ghi mới trong CSDL bảng opportunities."
+    },
+    {
+      "id": "feat-030",
+      "name": "Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition)",
+      "description": "Agent tự động tiếp nhận báo cáo kết quả cuộc gọi/gặp gỡ của nhân viên bán hàng (VD: 'Vừa gọi điện cho khách Nam, khách hào hứng xin báo giá, kế hoạch ngày mai gửi báo giá qua Zalo'). Agent tự động trích xuất nội dung, phản hồi khách hàng, kế hoạch tiếp theo và hình thức liên hệ (PHONE/EMAIL/MEETING), lưu vào bảng follow_ups, đồng thời tự động cập nhật trạng thái cơ hội bán hàng liên quan từ NEW sang CONTACTED (SRS 3.11).",
+      "dependencies": [
+        "feat-014",
+        "feat-029"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Gửi ghi chép cuộc gọi qua chat; kiểm tra bản ghi mới trong bảng follow_ups và trạng thái cơ hội chuyển đổi thành công sang CONTACTED."
+    },
+    {
+      "id": "feat-031",
+      "name": "Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync)",
+      "description": "Agent hỗ trợ chốt đơn hàng trực tiếp qua chat (VD: 'Chốt đơn hàng cho khách Nam cơ hội vừa rồi, thanh toán Chuyển khoản, giao hàng về 456 Trần Phú'). Agent tự động kiểm tra số lượng tồn kho sản phẩm, áp dụng giao dịch an toàn Transaction & Row-level Lock (SRS 3.12), tạo mã đơn hàng duy nhất ORD-YYYYMMDD-XXXX trong bảng orders, tự động trừ số lượng tồn kho stock_qty trong bảng products và chuyển trạng thái cơ hội sang ORDERED.",
+      "dependencies": [
+        "feat-015",
+        "feat-030"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Ra lệnh chốt đơn qua chat; kiểm tra bản ghi orders mới được tạo, tồn kho sản phẩm giảm chính xác và cơ hội chuyển sang ORDERED."
     }
   ]
 }

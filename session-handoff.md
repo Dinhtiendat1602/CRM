@@ -3,11 +3,29 @@
 # Session Handoff
 
 ## Current Objective
-1. Xây dựng Chatbot AI bằng Python (FastAPI microservice `ai_service/`) kết hợp Google Gemini API (`gemini-flash-lite-latest` / Gemini 3.5 Flash-Lite) và Function Calling tự động truy vấn CSDL PostgreSQL (`CRM`).
-2. Tích hợp Trợ lý AI (AIChatWidget.jsx) vào ứng dụng Frontend React (`MainLayout.jsx`), cung cấp nút FAB góc dưới phải và hộp thoại chat thông minh có quick prompts.
-3. Viết unit tests cho AI Service (`test_ai_service.py`), bảo vệ API key trong `.gitignore`, tạo script khởi động nhanh `start.sh` và tài liệu hướng dẫn `ai_service/README.md`.
-- Current status: HOÀN THÀNH 100% (270/270 tests PASS: 146 backend + 117 frontend + 7 AI Service unit tests, Uvicorn cổng 8000 online, Vite client build 373ms không lỗi).
+1. Lập danh sách và đặc tả các tính năng cần thiết trong `feature_list.json` để nâng cấp AI Chatbot thành Agent tự động thao tác nghiệp vụ cho người dùng (Autonomous Action Agent):
+   - `feat-028`: Tự động thêm Khách hàng tiềm năng mới qua ngôn ngữ tự nhiên kèm kiểm tra chống trùng lặp BR-02 (`create_lead`).
+   - `feat-029`: Tự động tạo Cơ hội bán hàng và khớp mã/đơn giá sản phẩm (`create_opportunity`).
+   - `feat-030`: Tự động ghi nhận Nhật ký chăm sóc khách hàng và chuyển đổi trạng thái Pipeline sang `CONTACTED` (`add_follow_up`).
+   - `feat-031`: Tự động chốt Đơn hàng trực tiếp qua chat và cập nhật trừ kho tức thì (`make_order`).
+2. Giữ nguyên trạng thái mã nguồn sạch sẽ, không tự ý viết code trước khi người dùng xác nhận và yêu cầu thực thi.
+- Current status: HOÀN THÀNH LẬP DANH MỤC TÍNH NĂNG & ĐẶC TẢ YÊU CẦU (Status: Planned). 270/270 tests PASS (146 backend + 117 frontend + 7 AI Service).
 - Branch / commit: `main`
+
+- [ ] **Lộ Trình Nâng Cấp Zen CRM Autonomous Action Agent (`feat-028` -> `feat-031`):**
+  - **1. `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Planned):**
+    - Trích xuất thực thể từ câu chat: Họ và tên đệm, Tên, Số điện thoại, Email, Địa chỉ, Nghề nghiệp.
+    - Kiểm tra hợp lệ và chống trùng lặp theo BR-02: Nếu SĐT/Email đã có thì báo người dùng, không tạo trùng.
+    - Ghi dữ liệu vào bảng `leads` PostgreSQL và trả về thẻ xác nhận kèm ID.
+  - **2. `feat-029` - Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Planned):**
+    - Tiếp nhận yêu cầu mua hàng qua chat -> Tìm khách hàng -> Khớp mã/tên sản phẩm trong kho.
+    - Tính toán giá trị ước tính (`quantity * unit_price`) và lưu vào bảng `opportunities`.
+  - **3. `feat-030` - Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Planned):**
+    - Tiếp nhận báo cáo cuộc gọi/email/gặp mặt -> Lưu vào bảng `follow_ups`.
+    - Tự động đổi trạng thái Cơ hội từ `NEW` sang `CONTACTED`.
+  - **4. `feat-031` - Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Planned):**
+    - Chốt đơn qua chat -> Khóa dòng an toàn -> Tạo mã đơn `ORD-...` trong `orders`.
+    - Trừ số lượng tồn kho `stock_qty` trong `products` và cập nhật cơ hội sang `ORDERED`.
 
 - [x] **Trợ Lý AI Thông Minh Zen CRM (Python FastAPI & Gemini 3.5 Flash-Lite - `feat-027`):**
   - **1. Microservice Backend Python (`ai_service/`):**

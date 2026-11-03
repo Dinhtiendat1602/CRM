@@ -383,23 +383,30 @@
 
 ### III. What's In Progress (Việc đang thực hiện)
 
-- Chuẩn bị bước vào **`feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án**:
-  - Đối soát luồng liên hoàn 4 vai trò (Admin -> Manager -> Salesman -> Khách hàng) theo đúng kịch bản trong [PLANS.md](file:///Users/zen/CNTT/Fullstack/internship/docs/PLANS.md).
-  - Kiểm tra tính nhất quán giữa tài liệu SRS, sơ đồ CSDL, tài liệu bảo mật và mã nguồn thực tế.
+- **Lập kế hoạch & Đặc tả lộ trình Nâng cấp Autonomous Action Agent (`feat-028` -> `feat-031`):**
+  - **`feat-028` (Planned):** Trợ lý AI Tự động Thêm Khách hàng Tiềm năng (Autonomous Lead Creation & Deduplication Guard) qua ngôn ngữ tự nhiên.
+  - **`feat-029` (Planned):** Trợ lý AI Tự động Tạo Cơ hội Bán hàng & Khớp Sản phẩm (Autonomous Opportunity Creation & Product Matching).
+  - **`feat-030` (Planned):** Trợ lý AI Tự động Ghi Nhật ký Chăm sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition).
+  - **`feat-031` (Planned):** Trợ lý AI Tự động Chốt Đơn hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync).
 
 ---
 
 ### IV. What's Next (Các bước tiếp theo)
 
-1. **Khởi chạy `feat-021`**: Kiểm thử E2E liên vết các phân hệ:
+1. **Chuẩn bị môi trường triển khai cho Agentic Action Tools khi người dùng yêu cầu bắt đầu code:**
+   - Xây dựng hàm `execute_mutation` có quản lý Transaction ACID trong `database.py`.
+   - Định nghĩa các Action Tools trong `crm_tools.py` (`create_lead`, `create_opportunity`, `add_follow_up`, `make_order`).
+   - Tinh chỉnh Prompt System Instruction cho Gemini Engine để tự động bóc tách thực thể và yêu cầu xác nhận khi cần.
+   - Viết các test case kiểm thử tự động tại `test_ai_service.py`.
+2. **Khởi chạy `feat-021`**: Kiểm thử E2E liên vết các phân hệ:
    - *Bước 1 (Admin):* Đăng nhập `admin` / `11111111` -> Tạo tài khoản nhân viên mới -> Phân quyền vai trò -> Khóa/Mở khóa/Xóa nhân viên.
    - *Bước 2 (Manager):* Đăng nhập `manager` / `11111111` -> Thiết lập Kế hoạch doanh số 12 tháng -> Tạo Danh mục & Sản phẩm -> Tạo Chiến dịch tiếp thị & Gán sản phẩm mục tiêu -> Xem Báo cáo hiệu quả ROI chiến dịch.
    - *Bước 3 (Salesman):* Đăng nhập `sale` / `11111111` -> Thêm Khách hàng tiềm năng mới (kiểm tra chống trùng lặp BR-02) -> Tạo Cơ hội bán hàng liên kết Lead và Sản phẩm -> Ghi nhật ký tư vấn chăm sóc Follow-up (đổi trạng thái cơ hội sang CONTACTED) -> Chốt đơn hàng Make Order (kiểm tra khóa dòng Row-level Lock, trừ tồn kho tự động, sinh mã đơn `ORD-YYYYMMDD-XXXX`).
    - *Bước 4 (Đối soát):* Đăng nhập lại `manager` hoặc `sale` -> Kiểm tra Bảng đối soát KPI 12 tháng (`/forecast/performance`) tự động cập nhật doanh thu thực tế -> Kiểm tra Báo cáo bán hàng tổng hợp (`/reports`).
    - *Bước 5 (Trợ lý AI):* Mở Trợ lý AI Zen CRM tại góc màn hình -> Đặt câu hỏi truy vấn dữ liệu thực tế -> Kiểm tra đối soát câu trả lời của AI khớp 100% với dữ liệu trong database PostgreSQL.
    - *Bước 6 (Bảo mật phiên):* Thử nghiệm đồng hồ đếm ngược phiên làm việc và nút Demo Auto-Logout 10s tại Header để chứng minh tính năng an toàn phiên làm việc theo SRS 5.3 & BR-11.
-2. Rà soát Definition of Done trong [AGENTS.md](file:///Users/zen/CNTT/Fullstack/internship/AGENTS.md) và đánh dấu hoàn thành `feat-021` trong [feature_list.json](file:///Users/zen/CNTT/Fullstack/internship/feature_list.json).
-3. Đóng gói mã nguồn, tạo commit tổng kết và hoàn thiện biên bản bàn giao.
+3. Rà soát Definition of Done trong [AGENTS.md](file:///Users/zen/CNTT/Fullstack/internship/AGENTS.md) và đánh dấu hoàn thành `feat-021` trong [feature_list.json](file:///Users/zen/CNTT/Fullstack/internship/feature_list.json).
+4. Đóng gói mã nguồn, tạo commit tổng kết và hoàn thiện biên bản bàn giao.
 
 ---
 

@@ -49,6 +49,13 @@ const leadApi = {
   deleteLead: (id) => {
     return axiosClient.delete(`/leads/${id}`);
   },
+
+  /**
+   * Lấy danh mục 63 Tỉnh / Thành phố Quốc gia Việt Nam
+   */
+  getVietnamProvinces: () => {
+    return axiosClient.get('/leads/vn-provinces');
+  },
 };
 
 export default leadApi;

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { VIETNAM_PROVINCES } = require('../utils/vietnamProvinces');
 
 /**
  * Controller Quản lý Khách hàng tiềm năng (Leads Module)
@@ -588,6 +589,23 @@ exports.deleteLead = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: `Đã xóa khách hàng tiềm năng "${lead.last_name} ${lead.first_name}" thành công.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Lấy danh mục 63 Tỉnh / Thành phố Quốc gia Việt Nam chuẩn Tổng cục Thống kê
+ * GET /api/leads/vn-provinces
+ */
+exports.getVietnamProvinces = async (req, res, next) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      message: 'Lấy danh mục 63 Tỉnh / Thành phố Quốc gia Việt Nam thành công.',
+      total: VIETNAM_PROVINCES.length,
+      data: VIETNAM_PROVINCES,
     });
   } catch (error) {
     next(error);

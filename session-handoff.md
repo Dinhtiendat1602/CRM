@@ -3,11 +3,29 @@
 # Session Handoff
 
 ## Current Objective
-  1. Loại bỏ dòng breadcrumb nhỏ ở Header, chỉ giữ lại duy nhất 1 dòng tiêu đề to thuần Tiếng Việt khi ở chế độ VI.
-  2. Thay thế mục "API Health Check" trong dropdown tài khoản người dùng thành bộ chuyển đổi ngôn ngữ song ngữ Tiếng Việt 🇻🇳 và Tiếng Anh 🇬🇧.
-  3. Xây dựng hệ thống i18n toàn diện (`LanguageContext`, `translations.js`): Đồng bộ hóa ngôn ngữ sang 100% các phân hệ nghiệp vụ (Dashboard, Forecast, Leads, Opportunities, Orders, Products, Campaigns, Reports, Admin Users, Profile, Auth Login/ForgotPassword/ResetPassword, Layout Header/Sidebar/Footer, Modals, Tables, Dialogs, và Error Pages).
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 309ms không lỗi). Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
+1. Tích hợp API Đơn vị Hành chính Quốc gia Việt Nam (`provinces.open-api.vn` kèm danh mục 63 tỉnh/thành phố và gợi ý quận/huyện) vào biểu mẫu Khách hàng tiềm năng (`LeadModal.jsx`).
+2. Tinh chỉnh giao diện địa chỉ: `ĐỊA CHỈ LIÊN HỆ` | `TỈNH / THÀNH PHỐ` | `QUỐC GIA` khớp với thiết kế.
+3. Rà soát và chuẩn hóa số liệu Báo cáo Bán hàng (`report.controller.js`): Khắc phục lỗi so sánh ngày, triệt tiêu Cartesian product và chuẩn hóa tỷ lệ chuyển đổi.
+- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 331ms không lỗi). Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
 - Branch / commit: `main`
+
+- [x] **Tích Hợp API Quốc Gia Việt Nam Cho Địa Chỉ & Chuẩn Hóa Báo Cáo (`feat-026`):**
+  - **1. Tích hợp API Hành chính Quốc gia Việt Nam:**
+    - [vietnamLocationApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/utils/vietnamLocationApi.js): Kết nối API `https://provinces.open-api.vn/api/p/` và `https://provinces.open-api.vn/api/p/${code}?depth=2`, có timeout và fallback 63 Tỉnh/Thành phố chuẩn Tổng cục Thống kê (GSO) + danh sách quốc gia phổ biến.
+    - [vietnamProvinces.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/utils/vietnamProvinces.js): Cung cấp danh mục 63 tỉnh thành chuẩn phía máy chủ.
+    - [lead.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/lead.controller.js) & [lead.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/lead.routes.js): Bổ sung endpoint `GET /api/leads/vn-provinces`.
+    - [leadApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/leadApi.js): Bổ sung `getVietnamProvinces()`.
+    - [LeadModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadModal.jsx): Giao diện 3 cột `ĐỊA CHỈ LIÊN HỆ` | `TỈNH / THÀNH PHỐ` | `QUỐC GIA`, `<datalist id="vn-provinces-list">` với 63 tỉnh thành, tự động điền Quốc gia "Việt Nam", hỗ trợ gợi ý nhanh danh sách Quận/Huyện từ API để bấm 1 chạm thêm vào `address`.
+  - **2. Chuẩn hóa Số liệu Báo cáo Bán hàng ([report.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/report.controller.js)):**
+    - Sửa `entered_date = CURRENT_DATE` thành `entered_date::date = CURRENT_DATE` để nhận diện đúng Lead nhập trong ngày (`today_leads = 1`).
+    - Sửa `byCampaignQuery` và `byUserQuery` từ `COUNT(l.id)` thành `COUNT(DISTINCT l.id)` để triệt tiêu lỗi Cartesian product khi JOIN (tổng Leads chuẩn xác 22).
+    - Sửa tỷ lệ chuyển đổi `conversion_rate` từ `total_orders / total_leads` (122.73%) thành `(converted_leads / total_leads) * 100` (72.73% chuẩn CRM).
+    - Cast `orders_count` và `units_sold` sang kiểu `int` trong `getRevenueReport`.
+  - **3. Bằng chứng kiểm thử:**
+    - Frontend build: `vite build` 331ms, 0 lỗi.
+    - Frontend tests: 117/117 tests PASS 100%.
+    - Backend tests: 146/146 tests PASS 100%.
+
 
 
 - [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**

@@ -4,6 +4,11 @@ import leadApi from '../../api/leadApi';
 import productApi from '../../api/productApi';
 import oppApi from '../../api/oppApi';
 import { 
+  fetchVietnamProvinces, 
+  fetchDistrictsByProvince, 
+  POPULAR_COUNTRIES 
+} from '../../utils/vietnamLocationApi';
+import { 
   User, 
   Mail, 
   Phone, 
@@ -55,6 +60,41 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
   });
 
   const isEdit = Boolean(lead?.id);
+
+  // State API Quốc gia Việt Nam cho Tỉnh/Thành phố & Địa chỉ
+  const [provinces, setProvinces] = useState([]);
+  const [loadingProvinces, setLoadingProvinces] = useState(false);
+  const [districts, setDistricts] = useState([]);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  // Tải danh sách 63 Tỉnh/Thành phố từ API Quốc gia Việt Nam khi mở modal
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingProvinces(true);
+      fetchVietnamProvinces()
+        .then((list) => {
+          setProvinces(list || []);
+        })
+        .finally(() => {
+          setLoadingProvinces(false);
+        });
+    }
+  }, [isOpen]);
+
+  // Tải danh sách Quận/Huyện khi Tỉnh/Thành phố thay đổi
+  useEffect(() => {
+    if (formData.city && formData.city.trim()) {
+      setLoadingDistricts(true);
+      fetchDistrictsByProvince(formData.city)
+        .then((list) => {
+          setDistricts(list || []);
+        })
+        .catch(() => setDistricts([]))
+        .finally(() => setLoadingDistricts(false));
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.city]);
 
   // Nạp danh sách sản phẩm khi mở modal thêm mới
   useEffect(() => {
@@ -141,13 +181,36 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'city') {
+      setFormData((prev) => ({
+        ...prev,
+        city: value,
+        country: prev.country || 'Việt Nam',
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: '' }));
     }
     if (duplicateWarning[name]) {
       setDuplicateWarning((prev) => ({ ...prev, [name]: null }));
     }
+  };
+
+  // Chọn nhanh Quận / Huyện từ API gợi ý để điền vào Địa chỉ liên hệ
+  const handleSelectDistrict = (districtName) => {
+    if (!districtName) return;
+    setFormData((prev) => {
+      const currentAddr = (prev.address || '').trim();
+      if (!currentAddr) {
+        return { ...prev, address: districtName };
+      }
+      if (currentAddr.includes(districtName)) {
+        return prev;
+      }
+      return { ...prev, address: `${currentAddr}, ${districtName}` };
+    });
   };
 
   const validate = () => {
@@ -457,7 +520,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
           </div>
         </div>
 
-        {/* Địa chỉ & Thành phố & Quốc gia */}
+        {/* Địa chỉ & Thành phố & Quốc gia (Tích hợp API Quốc gia Việt Nam) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-1">
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -467,6 +530,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
               <input
                 type="text"
                 name="address"
+                list="vn-districts-list"
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="123 Nguyễn Trãi, P. Bến Thành"
@@ -474,20 +538,49 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
               />
               <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
+            <datalist id="vn-districts-list">
+              {districts.map((d) => (
+                <option key={d.code} value={formData.address ? `${formData.address}, ${d.name}` : d.name}>
+                  {d.name}
+                </option>
+              ))}
+            </datalist>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Tỉnh / Thành Phố
-            </label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              placeholder="TP. Hồ Chí Minh"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Tỉnh / Thành Phố
+              </label>
+              {loadingProvinces ? (
+                <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <Loader2 className="w-2.5 h-2.5 animate-spin text-[#3CB371]" />
+                  API VN
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium text-[#2E7D32] bg-[#EAF5EC] px-1.5 py-0.5 rounded-md border border-[#DDF0E2]">
+                  API 63 Tỉnh VN
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="city"
+                list="vn-provinces-list"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="TP. Hồ Chí Minh"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
+              />
+            </div>
+            <datalist id="vn-provinces-list">
+              {provinces.map((p) => (
+                <option key={p.code} value={p.short_name}>
+                  {p.name}
+                </option>
+              ))}
+            </datalist>
           </div>
 
           <div>
@@ -497,13 +590,41 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
             <input
               type="text"
               name="country"
+              list="countries-list"
               value={formData.country}
               onChange={handleChange}
               placeholder="Việt Nam"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all"
             />
+            <datalist id="countries-list">
+              {POPULAR_COUNTRIES.map((c, i) => (
+                <option key={i} value={c} />
+              ))}
+            </datalist>
           </div>
         </div>
+
+        {/* Thanh gợi ý nhanh Quận / Huyện từ API khi đã chọn Tỉnh thành */}
+        {districts.length > 0 && (
+          <div className="bg-[#EAF5EC]/60 border border-[#DDF0E2] rounded-xl p-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#2E7D32] mb-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>Gợi ý Quận/Huyện từ API Quốc gia ({formData.city}): Bấm để thêm nhanh vào địa chỉ</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+              {districts.slice(0, 16).map((d) => (
+                <button
+                  key={d.code}
+                  type="button"
+                  onClick={() => handleSelectDistrict(d.name)}
+                  className="px-2 py-1 text-xs bg-white hover:bg-[#3CB371] hover:text-white text-slate-700 font-medium rounded-lg border border-[#DDF0E2] transition-colors shadow-2xs cursor-pointer"
+                >
+                  + {d.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Ghi chú */}
         <div>

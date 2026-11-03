@@ -17,7 +17,7 @@ exports.getSummaryReport = async (req, res, next) => {
     // 1. Thống kê Khách hàng tiềm năng (Leads)
     const leadsQuery = `
       SELECT
-        COUNT(*) FILTER (WHERE entered_date = CURRENT_DATE) AS today_leads,
+        COUNT(*) FILTER (WHERE entered_date::date = CURRENT_DATE) AS today_leads,
         COUNT(*) FILTER (WHERE entered_date >= DATE_TRUNC('month', CURRENT_DATE)) AS month_leads,
         COUNT(*) FILTER (WHERE entered_date >= DATE_TRUNC('year', CURRENT_DATE)) AS year_leads,
         COUNT(*) AS total_leads
@@ -36,7 +36,8 @@ exports.getSummaryReport = async (req, res, next) => {
         COALESCE(SUM(total_amount) FILTER (WHERE order_date::date = CURRENT_DATE), 0) AS today_revenue,
         COALESCE(SUM(total_amount) FILTER (WHERE order_date >= DATE_TRUNC('month', CURRENT_DATE)), 0) AS month_revenue,
         COALESCE(SUM(total_amount) FILTER (WHERE order_date >= DATE_TRUNC('year', CURRENT_DATE)), 0) AS year_revenue,
-        COALESCE(SUM(total_amount), 0) AS total_revenue
+        COALESCE(SUM(total_amount), 0) AS total_revenue,
+        COUNT(DISTINCT lead_id) AS converted_leads
       FROM orders;
     `;
     const ordersRes = await db.query(ordersQuery);
@@ -67,10 +68,10 @@ exports.getSummaryReport = async (req, res, next) => {
     const yearRevenue = parseFloat(ordersStats.year_revenue || 0);
     const targetAchievementRate = yearTarget > 0 ? Number(((yearRevenue / yearTarget) * 100).toFixed(2)) : 0;
 
-    // Tỷ lệ chuyển đổi tổng thể (Leads -> Orders)
+    // Tỷ lệ chuyển đổi chuẩn CRM: (Số khách hàng đã chốt đơn thành công / Tổng số Leads) * 100%
     const totalLeadsNum = parseInt(leadsStats.total_leads, 10) || 0;
-    const totalOrdersNum = parseInt(ordersStats.total_orders, 10) || 0;
-    const globalConversionRate = totalLeadsNum > 0 ? Number(((totalOrdersNum / totalLeadsNum) * 100).toFixed(2)) : 0;
+    const convertedLeadsNum = parseInt(ordersStats.converted_leads, 10) || 0;
+    const globalConversionRate = totalLeadsNum > 0 ? Number(((convertedLeadsNum / totalLeadsNum) * 100).toFixed(2)) : 0;
 
     return res.status(200).json({
       success: true,
@@ -149,7 +150,7 @@ exports.getLeadReport = async (req, res, next) => {
       SELECT
         COALESCE(c.id, 0) AS campaign_id,
         COALESCE(c.name, 'Trực tiếp / Không qua chiến dịch') AS campaign_name,
-        COUNT(l.id) AS leads_count,
+        COUNT(DISTINCT l.id) AS leads_count,
         COUNT(DISTINCT opp.id) AS opportunities_count,
         COUNT(DISTINCT ord.id) AS orders_count
       FROM leads l
@@ -167,7 +168,7 @@ exports.getLeadReport = async (req, res, next) => {
       SELECT
         COALESCE(u.id, 0) AS user_id,
         COALESCE(u.full_name, 'Chưa phân công') AS staff_name,
-        COUNT(l.id) AS leads_count
+        COUNT(DISTINCT l.id) AS leads_count
       FROM leads l
       LEFT JOIN users u ON l.assigned_to = u.id
       ${whereClause}
@@ -342,6 +343,8 @@ exports.getRevenueReport = async (req, res, next) => {
       const share = grandTotal > 0 ? Number(((rev / grandTotal) * 100).toFixed(2)) : 0;
       return {
         ...row,
+        orders_count: parseInt(row.orders_count, 10) || 0,
+        units_sold: parseInt(row.units_sold, 10) || 0,
         revenue: rev,
         revenue_share: share,
       };
@@ -369,6 +372,8 @@ exports.getRevenueReport = async (req, res, next) => {
       const share = grandTotal > 0 ? Number(((rev / grandTotal) * 100).toFixed(2)) : 0;
       return {
         ...row,
+        orders_count: parseInt(row.orders_count, 10) || 0,
+        units_sold: parseInt(row.units_sold, 10) || 0,
         revenue: rev,
         revenue_share: share,
       };

@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-10-30 15:50
-- **Active Task:** Hoàn thiện hệ thống quốc tế hóa song ngữ i18n toàn diện (`LanguageContext`, `translations.js`): Đồng bộ hóa ngôn ngữ 100% các phân hệ nghiệp vụ, layout, modals, components, tables và dialogs (`feat-025`).
-- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 309ms, 0 lint/build errors).
+- **Last Updated:** 2026-11-03 08:30
+- **Active Task:** Tích hợp API Đơn vị Hành chính Quốc gia Việt Nam cho Địa chỉ Lead & Chuẩn hóa Số liệu Báo cáo (`feat-026`).
+- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 331ms, 0 lint/build errors).
 - **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
 
 

@@ -11,6 +11,9 @@ router.use(authorizeRoles('SALESMAN', 'SALE_MANAGER', 'ADMIN'));
 // Kiểm tra trùng lặp email/SĐT (đặt trước :id để không bị bắt nhầm param)
 router.get('/check-duplicate', leadController.checkDuplicate);
 
+// Lấy danh mục 63 Tỉnh / Thành phố Quốc gia Việt Nam (đặt trước :id)
+router.get('/vn-provinces', leadController.getVietnamProvinces);
+
 // Lấy danh sách Khách tiềm năng (phân trang 20 dòng, sort/filter ngày nhập, search tên) (SRS 3.2, 3.3)
 router.get('/', leadController.getLeads);
 

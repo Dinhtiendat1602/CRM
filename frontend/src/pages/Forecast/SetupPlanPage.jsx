@@ -34,6 +34,14 @@ const MONTH_DATA = [
  * SetupPlanPage - Thiết lập Kế hoạch Doanh số 12 Tháng
  * Hỗ trợ giao diện song ngữ Tiếng Việt & Tiếng Anh
  */
+// Hàm format số tiền với dấu chấm phân cách hàng nghìn chuẩn Việt Nam (VD: 150000000 -> 150.000.000)
+function formatNumberWithDots(val) {
+  if (val === undefined || val === null || val === '' || val === 0 || val === '0') return '';
+  const digits = String(val).replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
 export default function SetupPlanPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -98,9 +106,10 @@ export default function SetupPlanPage() {
     setSearchParams({ fiscal_year: fiscalYear });
   }, [fiscalYear, fetchPlans, setSearchParams]);
 
-  // Xử lý thay đổi giá trị một tháng
-  const handleTargetChange = (month, value) => {
-    const num = Math.max(0, parseFloat(value) || 0);
+  // Xử lý thay đổi giá trị một tháng (tự động loại bỏ dấu chấm và cập nhật số tiền)
+  const handleTargetChange = (month, rawValue) => {
+    const cleanDigits = String(rawValue).replace(/\D/g, '');
+    const num = cleanDigits ? Math.max(0, parseInt(cleanDigits, 10)) : 0;
     setTargets((prev) => ({ ...prev, [month]: num }));
     setSuccessMsg('');
   };
@@ -127,7 +136,8 @@ export default function SetupPlanPage() {
 
   // Công cụ chia đều 12 tháng
   const handleApplyEvenSplit = () => {
-    const total = parseFloat(quickTotal);
+    const cleanDigits = String(quickTotal).replace(/\D/g, '');
+    const total = parseFloat(cleanDigits);
     if (!total || total <= 0) {
       setErrorMsg(language === 'en' ? 'Please enter a valid positive annual total.' : 'Vui lòng nhập tổng chỉ tiêu năm hợp lệ (> 0).');
       return;
@@ -334,10 +344,14 @@ export default function SetupPlanPage() {
           {/* Chia đều tổng năm */}
           <div className="flex items-center gap-1.5">
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder={t('quickCalcPlaceholder', 'Nhập tổng năm...')}
-              value={quickTotal}
-              onChange={(e) => setQuickTotal(e.target.value)}
+              value={formatNumberWithDots(quickTotal)}
+              onChange={(e) => {
+                const clean = e.target.value.replace(/\D/g, '');
+                setQuickTotal(clean);
+              }}
               className="w-40 px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
             />
             <button
@@ -456,13 +470,12 @@ export default function SetupPlanPage() {
                         <div className="relative max-w-md">
                           <DollarSign className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                           <input
-                            type="number"
-                            min="0"
-                            step="1000000"
-                            value={targets[month] === 0 ? '' : targets[month]}
+                            type="text"
+                            inputMode="numeric"
+                            value={formatNumberWithDots(targets[month])}
                             onChange={(e) => handleTargetChange(month, e.target.value)}
                             placeholder={`0 (${currencySuffix})`}
-                            className="w-full pl-9 pr-4 py-2 text-sm font-semibold rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
+                            className="w-full pl-9 pr-4 py-2 text-sm font-semibold rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all text-slate-800"
                           />
                         </div>
                       </td>

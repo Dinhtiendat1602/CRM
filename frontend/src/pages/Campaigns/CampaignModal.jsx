@@ -16,6 +16,14 @@ const INITIAL_FORM = {
  * Modal Thêm mới / Cập nhật Chiến dịch Tiếp thị
  * Tuân thủ SRS v1.1 Mục 3.18.1 (Validate tên, ngày bắt đầu/kết thúc, ngân sách)
  */
+// Format số tiền với dấu chấm phân cách hàng nghìn (VD: 50000000 -> 50.000.000)
+function formatNumberWithDots(val) {
+  if (val === undefined || val === null || val === '') return '';
+  const digits = String(val).replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
 export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) {
   const { t, isEn } = useLanguage();
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -53,7 +61,12 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'budget') {
+      const clean = value.replace(/\D/g, '');
+      setFormData((prev) => ({ ...prev, budget: clean }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -221,13 +234,12 @@ export default function CampaignModal({ isOpen, onClose, campaign, onSuccess }) 
           <div className="relative">
             <DollarSign className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               name="budget"
-              min="0"
-              step="1000"
-              value={formData.budget}
+              value={formatNumberWithDots(formData.budget)}
               onChange={handleChange}
-              placeholder={isEn ? 'E.g. 50000000 (Defaults to 0 if empty)' : 'VD: 50000000 (Để trống sẽ mặc định là 0)'}
+              placeholder={isEn ? 'E.g. 50.000.000 (Defaults to 0 if empty)' : 'VD: 50.000.000 (Để trống sẽ mặc định là 0)'}
               className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white focus:outline-none focus:ring-2 transition-all ${
                 fieldErrors.budget
                   ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'

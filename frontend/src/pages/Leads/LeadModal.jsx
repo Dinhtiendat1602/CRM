@@ -140,7 +140,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
   useEffect(() => {
     if (formData.district && formData.district.trim()) {
       setLoadingWards(true);
-      fetchWardsByDistrict(formData.district, districts)
+      fetchWardsByDistrict(formData.district, districts, formData.city)
         .then((list) => {
           setWards(list || []);
         })
@@ -149,7 +149,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
     } else {
       setWards([]);
     }
-  }, [formData.district, districts]);
+  }, [formData.district, districts, formData.city]);
 
   // Nạp danh sách sản phẩm khi mở modal thêm mới
   useEffect(() => {
@@ -596,31 +596,26 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
             )}
           </div>
 
-          {/* Hàng 1: Các Tỉnh -> Các Huyện -> Các Xã */}
+          {/* Hàng 1: Các Tỉnh -> Các Huyện -> Các Xã (Tự có sẵn 100% không lo rớt mạng) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {/* 1. TỈNH / THÀNH PHỐ */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                 Tỉnh / Thành Phố
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="city"
-                  list="vn-provinces-list"
-                  value={formData.city}
-                  onChange={handleChange}
-                  placeholder="TP. Hồ Chí Minh / Hà Nội"
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all placeholder:text-slate-400"
-                />
-              </div>
-              <datalist id="vn-provinces-list">
+              <select
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all text-slate-800 cursor-pointer"
+              >
+                <option value="">-- Chọn Tỉnh / Thành phố ({provinces.length}) --</option>
                 {provinces.map((p) => (
                   <option key={p.code} value={p.short_name}>
                     {p.name}
                   </option>
                 ))}
-              </datalist>
+              </select>
             </div>
 
             {/* 2. QUẬN / HUYỆN */}
@@ -629,31 +624,30 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Quận / Huyện
                 </label>
-                {loadingDistricts && (
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-[#3CB371]" />
-                    Đang nạp...
+                {districts.length > 0 && (
+                  <span className="text-[10px] font-medium text-[#2E7D32]">
+                    {districts.length} quận/huyện
                   </span>
                 )}
               </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="district"
-                  list="vn-districts-list"
-                  value={formData.district}
-                  onChange={handleChange}
-                  placeholder={districts.length > 0 ? "Quận 1 / Cầu Giấy..." : "Chọn Tỉnh/Thành trước"}
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all placeholder:text-slate-400"
-                />
-              </div>
-              <datalist id="vn-districts-list">
+              <select
+                name="district"
+                value={formData.district}
+                onChange={handleChange}
+                disabled={!formData.city || districts.length === 0}
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all text-slate-800 disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer"
+              >
+                <option value="">
+                  {!formData.city 
+                    ? '-- Chọn Tỉnh/Thành trước --' 
+                    : `-- Chọn Quận / Huyện (${districts.length}) --`}
+                </option>
                 {districts.map((d) => (
                   <option key={d.code} value={d.name}>
                     {d.name}
                   </option>
                 ))}
-              </datalist>
+              </select>
             </div>
 
             {/* 3. PHƯỜNG / XÃ (Ô CÁC XÃ) */}
@@ -662,31 +656,30 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }) {
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Phường / Xã
                 </label>
-                {loadingWards && (
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-[#3CB371]" />
-                    Đang nạp...
+                {wards.length > 0 && (
+                  <span className="text-[10px] font-medium text-[#2E7D32]">
+                    {wards.length} xã/phường
                   </span>
                 )}
               </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="ward"
-                  list="vn-wards-list"
-                  value={formData.ward}
-                  onChange={handleChange}
-                  placeholder={wards.length > 0 ? "Phường Bến Nghé / Xã..." : "Chọn Quận/Huyện trước"}
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all placeholder:text-slate-400"
-                />
-              </div>
-              <datalist id="vn-wards-list">
+              <select
+                name="ward"
+                value={formData.ward}
+                onChange={handleChange}
+                disabled={!formData.district || wards.length === 0}
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#3CB371] focus:ring-2 focus:ring-[#3CB371]/20 transition-all text-slate-800 disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer"
+              >
+                <option value="">
+                  {!formData.district 
+                    ? '-- Chọn Quận/Huyện trước --' 
+                    : `-- Chọn Phường / Xã (${wards.length}) --`}
+                </option>
                 {wards.map((w) => (
                   <option key={w.code} value={w.name}>
                     {w.name}
                   </option>
                 ))}
-              </datalist>
+              </select>
             </div>
           </div>
 

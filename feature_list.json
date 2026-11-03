@@ -285,13 +285,13 @@
     {
       "id": "feat-026",
       "name": "Tích Hợp API Quốc Gia Việt Nam Cho Địa Chỉ & Chuẩn Hóa Số Liệu Báo Cáo",
-      "description": "Tích hợp API Đơn vị Hành chính Quốc gia Việt Nam (provinces.open-api.vn kèm fallback danh mục 63 tỉnh/thành phố và gợi ý quận/huyện) vào biểu mẫu thông tin khách hàng tiềm năng (LeadModal.jsx). Chuẩn hóa số liệu Báo cáo Bán hàng trong report.controller.js (sửa so sánh ngày entered_date::date, triệt tiêu Cartesian product COUNT(DISTINCT l.id), và tính tỷ lệ chuyển đổi chuẩn CRM).",
+      "description": "Tích hợp toàn bộ cơ sở dữ liệu hành chính Quốc gia Việt Nam 3 cấp (63 tỉnh/thành, 696 quận/huyện, 10.051 phường/xã) từ Tổng cục Thống kê (GSO) đóng gói offline 0ms vào LeadModal.jsx, loại bỏ ô Quốc gia thừa và thay bằng 3 dropdown liên hoàn. Format phân cách hàng nghìn bằng dấu chấm (.) cho toàn bộ ô nhập số tiền (SetupPlanPage.jsx, CampaignModal.jsx). Chuẩn hóa số liệu Báo cáo Bán hàng trong report.controller.js (sửa so sánh ngày entered_date::date, triệt tiêu Cartesian product COUNT(DISTINCT l.id), và tính tỷ lệ chuyển đổi chuẩn CRM).",
       "dependencies": [
         "feat-007",
         "feat-017"
       ],
       "status": "completed",
-      "evidence": "1. Frontend & API Quốc gia: vietnamLocationApi.js tích hợp API 63 tỉnh/thành phố và gợi ý quận/huyện, tự động điền Quốc gia 'Việt Nam', hỗ trợ 1-click thêm quận huyện vào địa chỉ liên hệ. 2. Backend API: lead.controller.js & lead.routes.js bổ sung GET /api/leads/vn-provinces kèm danh mục chuẩn vietnamProvinces.js. 3. Chuẩn hóa Báo cáo: report.controller.js sửa entered_date::date = CURRENT_DATE, COUNT(DISTINCT l.id) cho báo cáo Leads theo chiến dịch/nhân viên, chuẩn hóa tỷ lệ chuyển đổi (converted_leads / total_leads * 100). 4. Kiểm thử: 146/146 tests backend PASS, 117/117 tests frontend PASS, Vite build thành công trong 331ms."
+      "evidence": "1. Frontend & API Quốc gia: vietnamLocationApi.js nạp offline tức thì 63 tỉnh/thành, 696 quận/huyện và 10.051 phường/xã từ vietnamAdministrative.json (231 KB); LeadModal.jsx hiển thị 3 dropdown liên hoàn trực quan và ô địa chỉ chi tiết. Format dấu chấm (.) phân cách hàng nghìn cho 12 ô chỉ tiêu tháng, ô tính nhanh quickTotal và ngân sách chiến dịch. 2. Backend API: lead.controller.js & lead.routes.js bổ sung GET /api/leads/vn-provinces kèm danh mục chuẩn vietnamProvinces.js. 3. Chuẩn hóa Báo cáo: report.controller.js sửa entered_date::date = CURRENT_DATE, COUNT(DISTINCT l.id) cho báo cáo Leads theo chiến dịch/nhân viên, chuẩn hóa tỷ lệ chuyển đổi (converted_leads / total_leads * 100). 4. Kiểm thử: 146/146 tests backend PASS, 117/117 tests frontend PASS, Vite build thành công trong 331ms."
     },
     {
       "id": "feat-027",

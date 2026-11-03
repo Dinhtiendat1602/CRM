@@ -69,3 +69,4 @@ Kết quả mong đợi: `Ran 7 tests ... OK`
 - `POST /api/chat`: Gửi câu hỏi và nhận câu trả lời phân tích từ Gemini AI.
 - `POST /api/chat/reset`: Làm mới phiên hội thoại (xóa bộ nhớ đệm lịch sử chat).
 - `GET /api/quick-prompts`: Danh sách các câu hỏi gợi ý nhanh cho giao diện.
+

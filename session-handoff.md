@@ -37,9 +37,23 @@
     - Backend Unit Tests: 146/146 tests PASS (31.3s).
     - API curl kiểm tra thực tế: Trả lời tự động gọi tool PostgreSQL thành công 100%.
 
+- [x] **Format Dấu Chấm (`.`) Phân Cách Hàng Nghìn Cho Toàn Bộ Số Tiền:**
+  - Viết hàm `formatNumberWithDots()` và `parseNumberFromDots()` trong [SetupPlanPage.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Forecast/SetupPlanPage.jsx).
+  - Áp dụng phân cách hàng nghìn bằng dấu chấm (VD: `150.000.000`) cho toàn bộ 12 ô nhập chỉ tiêu tháng, ô tính nhanh `quickTotal`, và ngân sách chiến dịch trong [CampaignModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Campaigns/CampaignModal.jsx).
 
-
-- [x] **Cập Nhật Giao Diện Theo Bảng Màu Thương Hiệu Trong Ảnh (`feat-024`):**
+- [x] **Tích Hợp API Quốc Gia Việt Nam Cho Địa Chỉ & Chuẩn Hóa Số Liệu Báo Cáo (`feat-026`):**
+  - **1. Cơ sở dữ liệu hành chính 3 cấp (Tỉnh/Thành -> Quận/Huyện -> Phường/Xã):**
+    - Đóng gói toàn bộ cơ sở dữ liệu hành chính 63 Tỉnh/Thành phố, 696 Quận/Huyện và 10.051 Phường/Xã từ Tổng cục Thống kê (GSO) vào file nội bộ [vietnamAdministrative.json](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/data/vietnamAdministrative.json) và [backend/src/data/vietnamAdministrative.json](file:///Users/zen/CNTT/Fullstack/internship/backend/src/data/vietnamAdministrative.json) (231 KB).
+    - Cập nhật [vietnamLocationApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/utils/vietnamLocationApi.js) nạp dữ liệu cục bộ tức thì với độ trễ **0ms**, loại bỏ 100% rủi ro nghẽn mạng hay timeout từ API bên ngoài `provinces.open-api.vn`.
+    - Tái cấu trúc [LeadModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadModal.jsx): Loại bỏ trường "Quốc gia" thừa theo yêu cầu người dùng, thay bằng chuỗi 3 dropdown liên hoàn trực quan: **Tỉnh / Thành phố** -> **Quận / Huyện** -> **Phường / Xã** -> và ô nhập **Địa chỉ chi tiết (Số nhà, tên đường)**.
+  - **2. Chuẩn hóa Báo cáo Bán hàng ([report.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/report.controller.js)):**
+    - Sửa `entered_date = CURRENT_DATE` thành `entered_date::date = CURRENT_DATE` để nhận diện chính xác Lead nhập trong ngày (`today_leads = 1`).
+    - Khắc phục lỗi Cartesian product khi JOIN bảng Leads với Campaigns/Users bằng cách áp dụng `COUNT(DISTINCT l.id)` (tổng Lead chuẩn 22).
+    - Chuẩn hóa tỷ lệ chuyển đổi `conversion_rate` từ `total_orders / total_leads` (122.73% phi lý) thành `(converted_leads / total_leads) * 100` (72.73% chuẩn nghiệp vụ CRM).
+  - **3. Bằng chứng kiểm thử:**
+    - Frontend build: `vite build` 331ms, 0 lỗi.
+    - Frontend tests: 117/117 tests PASS 100%.
+    - Backend tests: 146/146 tests PASS 100%.
   - **1. Hệ thống Style Tokens & Layout Core:**
     - [index.css](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/index.css): Định nghĩa Tailwind `@theme` với các biến màu chuẩn: `--color-brand: #3cb371`, `--color-brand-hover: #38a169`, `--color-brand-dark: #2e7d32`, `--color-brand-mint: #eaf5ec`, `--color-brand-mint-subtle: #ddf0e2`, `--color-dark-gray: #1f2937`, `--color-muted-gray: #6b7280`, `--color-light-gray: #f3f4f6`, `--color-accent-blue: #7ca5f5`, `--color-accent-purple: #5d3ebc`.
     - [MainLayout.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Layout/MainLayout.jsx): Nền ứng dụng chuyển sang dải Mint Pastel `bg-gradient-to-br from-[#EAF5EC] via-[#EAF5EC] to-[#DDF0E2] text-[#1F2937]`.

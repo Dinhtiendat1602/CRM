@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import AIChatWidget from '../Chat/AIChatWidget';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function MainLayout() {
@@ -36,6 +37,9 @@ export default function MainLayout() {
           <footer className="border-t border-gray-100 py-2.5 px-6 text-center text-xs text-[#9CA3AF] shrink-0">
             {t('footer', 'Zen CRM Enterprise • Nền Tảng Quản Trị Khách Hàng Toàn Diện')}
           </footer>
+
+          {/* Trợ lý AI Zen CRM Floating Widget */}
+          <AIChatWidget />
         </div>
       </div>
     </div>

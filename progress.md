@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-03 08:30
-- **Active Task:** Tích hợp API Đơn vị Hành chính Quốc gia Việt Nam cho Địa chỉ Lead & Chuẩn hóa Số liệu Báo cáo (`feat-026`).
-- **Current Status:** HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 331ms, 0 lint/build errors).
+- **Last Updated:** 2026-11-03 10:25
+- **Active Task:** Xây dựng Trợ lý AI Thông minh Zen CRM bằng Python FastAPI & Gemini 3.5 Flash-Lite, kết nối CSDL PostgreSQL & Tích hợp Widget Chat vào React Frontend (`feat-027`).
+- **Current Status:** HOÀN THÀNH 100% (270/270 tests PASS: 146 backend + 117 frontend + 7 AI Service unit tests, Uvicorn cổng 8000 online, Vite client build 373ms, 0 errors).
 - **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
 
 

@@ -7,6 +7,17 @@ node_modules/
 .env
 backend/.env
 frontend/.env
+ai_service/.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+ai_service/venv/
+.venv/
+venv/
+ENV/
 
 # Build output
 frontend/dist/

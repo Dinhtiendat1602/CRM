@@ -292,6 +292,18 @@
       ],
       "status": "completed",
       "evidence": "1. Frontend & API Quốc gia: vietnamLocationApi.js tích hợp API 63 tỉnh/thành phố và gợi ý quận/huyện, tự động điền Quốc gia 'Việt Nam', hỗ trợ 1-click thêm quận huyện vào địa chỉ liên hệ. 2. Backend API: lead.controller.js & lead.routes.js bổ sung GET /api/leads/vn-provinces kèm danh mục chuẩn vietnamProvinces.js. 3. Chuẩn hóa Báo cáo: report.controller.js sửa entered_date::date = CURRENT_DATE, COUNT(DISTINCT l.id) cho báo cáo Leads theo chiến dịch/nhân viên, chuẩn hóa tỷ lệ chuyển đổi (converted_leads / total_leads * 100). 4. Kiểm thử: 146/146 tests backend PASS, 117/117 tests frontend PASS, Vite build thành công trong 331ms."
+    },
+    {
+      "id": "feat-027",
+      "name": "Trợ Lý AI Thông Minh Zen CRM (Python FastAPI & Gemini 3.5 Flash-Lite)",
+      "description": "Xây dựng AI Service bằng Python FastAPI kết nối Google Gemini API (gemini-flash-lite-latest) với Function Calling tự động tra cứu dữ liệu thời gian thực từ CSDL PostgreSQL (CRM): Leads, Doanh số & Kế hoạch (Sales Forecast), Danh mục & Tồn kho sản phẩm, Cơ hội bán hàng (Pipeline), Chiến dịch tiếp thị. Tích hợp giao diện Chat Widget hiện đại (AIChatWidget.jsx) vào ứng dụng React (MainLayout.jsx) với nút FAB góc phải, gợi ý câu hỏi nhanh 1 chạm và hỗ trợ hiển thị Markdown/VND đầy đủ.",
+      "dependencies": [
+        "feat-001",
+        "feat-002",
+        "feat-006"
+      ],
+      "status": "completed",
+      "evidence": "1. Backend Python FastAPI (ai_service/): database.py quản lý kết nối PostgreSQL, crm_tools.py định nghĩa 6 công cụ Function Calling cho Gemini, gemini_engine.py tích hợp Google GenAI SDK và quản lý bộ nhớ hội thoại session-based, main.py cung cấp REST API (/api/health, /api/chat, /api/chat/reset, /api/quick-prompts) trên cổng 8000. 2. Frontend React: AIChatWidget.jsx với nút FAB nổi góc dưới phải, giao diện Mint Pastel chuẩn thương hiệu, hộp thoại chat kèm gợi ý câu hỏi 1 chạm và bộ định dạng Markdown tùy chỉnh; nhúng vào MainLayout.jsx. 3. Kiểm thử: 7/7 bài kiểm tra tự động tại ai_service/test_ai_service.py PASS; 146/146 tests backend PASS; 117/117 tests frontend PASS; Vite production build thành công trong 373ms; Curl kiểm tra thực tế AI trả lời và gọi tool CSDL chính xác 100%."
     }
   ]
 }

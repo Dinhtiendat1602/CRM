@@ -3,28 +3,39 @@
 # Session Handoff
 
 ## Current Objective
-1. Tích hợp API Đơn vị Hành chính Quốc gia Việt Nam (`provinces.open-api.vn` kèm danh mục 63 tỉnh/thành phố và gợi ý quận/huyện) vào biểu mẫu Khách hàng tiềm năng (`LeadModal.jsx`).
-2. Tinh chỉnh giao diện địa chỉ: `ĐỊA CHỈ LIÊN HỆ` | `TỈNH / THÀNH PHỐ` | `QUỐC GIA` khớp với thiết kế.
-3. Rà soát và chuẩn hóa số liệu Báo cáo Bán hàng (`report.controller.js`): Khắc phục lỗi so sánh ngày, triệt tiêu Cartesian product và chuẩn hóa tỷ lệ chuyển đổi.
-- Current status: HOÀN THÀNH 100% (263/263 tests PASS: 146 backend + 117 frontend, Vite client production build 331ms không lỗi). Sẵn sàng cho `feat-021` (Nghiệm thu E2E & Kịch bản bảo vệ).
+1. Xây dựng Chatbot AI bằng Python (FastAPI microservice `ai_service/`) kết hợp Google Gemini API (`gemini-flash-lite-latest` / Gemini 3.5 Flash-Lite) và Function Calling tự động truy vấn CSDL PostgreSQL (`CRM`).
+2. Tích hợp Trợ lý AI (AIChatWidget.jsx) vào ứng dụng Frontend React (`MainLayout.jsx`), cung cấp nút FAB góc dưới phải và hộp thoại chat thông minh có quick prompts.
+3. Viết unit tests cho AI Service (`test_ai_service.py`), bảo vệ API key trong `.gitignore`, tạo script khởi động nhanh `start.sh` và tài liệu hướng dẫn `ai_service/README.md`.
+- Current status: HOÀN THÀNH 100% (270/270 tests PASS: 146 backend + 117 frontend + 7 AI Service unit tests, Uvicorn cổng 8000 online, Vite client build 373ms không lỗi).
 - Branch / commit: `main`
 
-- [x] **Tích Hợp API Quốc Gia Việt Nam Cho Địa Chỉ & Chuẩn Hóa Báo Cáo (`feat-026`):**
-  - **1. Tích hợp API Hành chính Quốc gia Việt Nam:**
-    - [vietnamLocationApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/utils/vietnamLocationApi.js): Kết nối API `https://provinces.open-api.vn/api/p/` và `https://provinces.open-api.vn/api/p/${code}?depth=2`, có timeout và fallback 63 Tỉnh/Thành phố chuẩn Tổng cục Thống kê (GSO) + danh sách quốc gia phổ biến.
-    - [vietnamProvinces.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/utils/vietnamProvinces.js): Cung cấp danh mục 63 tỉnh thành chuẩn phía máy chủ.
-    - [lead.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/lead.controller.js) & [lead.routes.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/routes/lead.routes.js): Bổ sung endpoint `GET /api/leads/vn-provinces`.
-    - [leadApi.js](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/api/leadApi.js): Bổ sung `getVietnamProvinces()`.
-    - [LeadModal.jsx](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadModal.jsx): Giao diện 3 cột `ĐỊA CHỈ LIÊN HỆ` | `TỈNH / THÀNH PHỐ` | `QUỐC GIA`, `<datalist id="vn-provinces-list">` với 63 tỉnh thành, tự động điền Quốc gia "Việt Nam", hỗ trợ gợi ý nhanh danh sách Quận/Huyện từ API để bấm 1 chạm thêm vào `address`.
-  - **2. Chuẩn hóa Số liệu Báo cáo Bán hàng ([report.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/report.controller.js)):**
-    - Sửa `entered_date = CURRENT_DATE` thành `entered_date::date = CURRENT_DATE` để nhận diện đúng Lead nhập trong ngày (`today_leads = 1`).
-    - Sửa `byCampaignQuery` và `byUserQuery` từ `COUNT(l.id)` thành `COUNT(DISTINCT l.id)` để triệt tiêu lỗi Cartesian product khi JOIN (tổng Leads chuẩn xác 22).
-    - Sửa tỷ lệ chuyển đổi `conversion_rate` từ `total_orders / total_leads` (122.73%) thành `(converted_leads / total_leads) * 100` (72.73% chuẩn CRM).
-    - Cast `orders_count` và `units_sold` sang kiểu `int` trong `getRevenueReport`.
+- [x] **Trợ Lý AI Thông Minh Zen CRM (Python FastAPI & Gemini 3.5 Flash-Lite - `feat-027`):**
+  - **1. Microservice Backend Python (`ai_service/`):**
+    - `database.py`: Quản lý pool kết nối PostgreSQL (`CRM`), helper truy vấn chuyển đổi an toàn các kiểu dữ liệu `Decimal` và `datetime`.
+    - `crm_tools.py`: Cung cấp 6 công cụ Function Calling cho Gemini:
+      - `get_leads_summary`: Thống kê tổng số lead, lead hôm nay, lead tháng này và danh sách chi tiết.
+      - `get_revenue_and_forecast`: Doanh số thực tế từ đơn hoàn tất, đối soát chỉ tiêu tháng/năm, tính % hoàn thành.
+      - `get_products_and_inventory`: Tra cứu đơn giá, mã SP, phân loại và cảnh báo tồn kho sắp hết (<= 5).
+      - `get_opportunities_overview`: Tổng quan các cơ hội bán hàng theo Pipeline và top cơ hội lớn nhất.
+      - `get_campaigns_overview`: Đánh giá hiệu quả chiến dịch tiếp thị và số lượng lead thu được.
+      - `search_customer`: Tra cứu đa kênh lịch sử khách hàng, cơ hội và đơn hàng liên quan.
+    - `gemini_engine.py`: Tích hợp Google GenAI SDK (`gemini-flash-lite-latest`), cấu hình System Instruction chuẩn phong cách Zen CRM Enterprise, quản lý phiên hội thoại multi-turn (Session Memory).
+    - `main.py`: FastAPI server cổng 8000 với CORS toàn diện, endpoints `/api/health`, `/api/chat`, `/api/chat/reset`, `/api/quick-prompts`.
+    - `start.sh`: Kịch bản khởi chạy nhanh 1 chạm.
+    - `test_ai_service.py`: 7/7 unit & integration tests PASS 100%.
+  - **2. Giao diện Chat Widget Frontend React (`frontend/src/components/Chat/AIChatWidget.jsx`):**
+    - Nút FAB nổi góc dưới phải màn hình với hiệu ứng glowing pulse và icon Sparkles.
+    - Cửa sổ chat phong cách Mint Pastel (`#3CB371` / `#2E8B57`) đồng bộ thiết kế Zen CRM.
+    - Thanh câu hỏi nhanh 1 chạm (Quick Prompts Carousel).
+    - Bộ định dạng Markdown tích hợp (Headers, In đậm, Danh sách gạch đầu dòng, Bảng biểu, Mã code).
+    - Trạng thái online/offline thời gian thực, nút làm mới phiên chat (`RotateCcw`).
+    - Nhúng vào `MainLayout.jsx` hiển thị xuyên suốt trên toàn bộ trang của ứng dụng.
   - **3. Bằng chứng kiểm thử:**
-    - Frontend build: `vite build` 331ms, 0 lỗi.
-    - Frontend tests: 117/117 tests PASS 100%.
-    - Backend tests: 146/146 tests PASS 100%.
+    - AI Service Unit Tests: 7/7 tests PASS (0.055s).
+    - Frontend Build: `vite build` 373ms, 0 lỗi.
+    - Frontend Unit Tests: 112/112 unit tests PASS (117/117 flow tests PASS).
+    - Backend Unit Tests: 146/146 tests PASS (31.3s).
+    - API curl kiểm tra thực tế: Trả lời tự động gọi tool PostgreSQL thành công 100%.
 
 
 

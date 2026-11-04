@@ -40,11 +40,19 @@ class TestAIService(unittest.TestCase):
         self.assertIn("prompts", data)
         self.assertGreaterEqual(len(data["prompts"]), 3)
 
+    def test_format_vietnamese_name(self):
+        """Kiểm tra format tên tiếng Việt tự nhiên."""
+        name1 = crm_tools.format_vietnamese_name("Nguyen", "Van An")
+        self.assertEqual(name1, "Nguyen Van An")
+
+        name2 = crm_tools.format_vietnamese_name("Đức", "Phan Cảnh")
+        self.assertEqual(name2, "Phan Cảnh Đức")
+
     def test_crm_leads_tool(self):
         """Kiểm tra công cụ tra cứu Leads trả về dữ liệu chuẩn."""
         res = crm_tools.get_leads_summary(limit=3)
         self.assertNotIn("error", res)
-        self.assertIn("tong_so_lead", res)
+        self.assertIn("tong_so_lead_toan_he_thong", res)
         self.assertIn("danh_sach_lead", res)
         self.assertIsInstance(res["danh_sach_lead"], list)
 
@@ -54,12 +62,31 @@ class TestAIService(unittest.TestCase):
         self.assertNotIn("error", res)
         self.assertIn("doanh_thu_thang_thuc_te_vnd", res)
         self.assertIn("chi_tieu_ke_hoach_thang_vnd", res)
+        self.assertIn("bang_tong_hop_doanh_thu_cac_thang_nam", res)
 
     def test_crm_products_tool(self):
         """Kiểm tra công cụ tra cứu tồn kho sản phẩm."""
-        res = crm_tools.get_products_and_inventory(query="")
+        res = crm_tools.get_products_and_inventory(query="bàn phím")
         self.assertNotIn("error", res)
-        self.assertIn("tong_so_san_pham_tim_thay", res)
+        self.assertIn("tong_so_san_pham_toan_he_thong", res)
+        self.assertGreaterEqual(res["so_san_pham_khop_tim_kiem"], 1)
+
+    def test_crm_orders_tool(self):
+        """Kiểm tra công cụ tra cứu đơn hàng."""
+        res = crm_tools.get_orders_summary(limit=5)
+        self.assertNotIn("error", res)
+        self.assertIn("tong_so_don_hang", res)
+        self.assertIn("danh_sach_don_hang", res)
+        self.assertGreaterEqual(len(res["danh_sach_don_hang"]), 1)
+
+    def test_crm_search_customer_tool(self):
+        """Kiểm tra tìm kiếm khách hàng Nguyễn Văn An cùng chi tiết đơn hàng đã mua."""
+        res = crm_tools.search_customer("Nguyễn Văn An")
+        self.assertNotIn("error", res)
+        self.assertIn("khach_hang", res)
+        self.assertEqual(res["khach_hang"]["ho_va_ten"], "Nguyen Van An")
+        self.assertIn("chi_tiet_don_hang_va_san_pham_da_mua", res)
+        self.assertGreaterEqual(len(res["chi_tiet_don_hang_va_san_pham_da_mua"]), 1)
 
     def test_reset_session_endpoint(self):
         """Kiểm tra reset session chat."""
@@ -70,4 +97,3 @@ class TestAIService(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

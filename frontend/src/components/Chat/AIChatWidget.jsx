@@ -3,10 +3,10 @@ import {
   Bot,
   Sparkles,
   Send,
-  X,
   RotateCcw,
-  MessageSquare,
   ChevronDown,
+  Maximize2,
+  Minimize2,
   Loader2,
   AlertCircle,
   TrendingUp,
@@ -105,6 +105,7 @@ function formatMarkdown(content) {
 
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
@@ -139,6 +140,20 @@ export default function AIChatWidget() {
       inputRef.current?.focus();
     }
   }, [isOpen, messages]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (isMaximized) {
+          setIsMaximized(false);
+        } else {
+          setIsOpen(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isMaximized]);
 
   const handleSendMessage = async (userText) => {
     const textToSend = userText || input;
@@ -221,7 +236,13 @@ export default function AIChatWidget() {
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="w-[360px] sm:w-[420px] h-[580px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-emerald-100 flex flex-col overflow-hidden mb-3.5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4">
+        <div
+          className={`${
+            isMaximized
+              ? 'w-[95vw] sm:w-[780px] md:w-[920px] lg:w-[1100px] xl:w-[1250px] h-[88vh] max-h-[92vh] border-2 border-emerald-300'
+              : 'w-[360px] sm:w-[440px] md:w-[460px] h-[600px] max-h-[85vh] border border-emerald-100'
+          } bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden mb-3.5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4`}
+        >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#2E8B57] to-[#3CB371] px-4 py-3.5 text-white flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-2.5">
@@ -241,6 +262,11 @@ export default function AIChatWidget() {
                 </div>
                 <div className="text-[11px] text-emerald-100 flex items-center gap-1">
                   <span>{isOnline ? 'Gemini 3.5 Flash-Lite • DB Connected' : 'Chưa kết nối Backend AI'}</span>
+                  {isMaximized && (
+                    <span className="ml-1 px-1.5 py-0.2 rounded-full bg-white/20 text-[10px] font-medium">
+                      Toàn màn hình
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -254,8 +280,18 @@ export default function AIChatWidget() {
                 <RotateCcw className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setIsOpen(false)}
-                title="Thu nhỏ"
+                onClick={() => setIsMaximized(!isMaximized)}
+                title={isMaximized ? 'Thu nhỏ về kích thước chuẩn' : 'Phóng to cửa sổ chat'}
+                className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+              >
+                {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsMaximized(false);
+                }}
+                title="Thu nhỏ / Đóng"
                 className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
               >
                 <ChevronDown className="w-5 h-5" />
@@ -307,9 +343,9 @@ export default function AIChatWidget() {
                       <Bot className="w-4 h-4" />
                     </div>
                   )}
-                  <div className={`max-w-[84%] flex flex-col ${isAssistant ? 'items-start' : 'items-end'}`}>
+                  <div className={`${isMaximized ? 'max-w-[92%]' : 'max-w-[84%]'} flex flex-col ${isAssistant ? 'items-start' : 'items-end'}`}>
                     <div
-                      className={`rounded-2xl px-3.5 py-2.5 text-xs sm:text-[13px] leading-relaxed shadow-2xs ${
+                      className={`rounded-2xl px-4 py-2.5 ${isMaximized ? 'text-xs sm:text-sm' : 'text-xs sm:text-[13px]'} leading-relaxed shadow-2xs ${
                         isAssistant
                           ? 'bg-white text-gray-800 border border-gray-100 rounded-tl-xs'
                           : 'bg-[#2E8B57] text-white rounded-tr-xs font-medium'

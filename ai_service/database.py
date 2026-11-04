@@ -31,7 +31,23 @@ def get_pool():
             user=DB_USER,
             password=DB_PASSWORD,
         )
+        init_extensions()
     return _pool
+
+def init_extensions():
+    """Khởi tạo extension unaccent để hỗ trợ tìm kiếm tiếng Việt không dấu/có dấu đồng nhất."""
+    try:
+        pool = _pool
+        if pool:
+            conn = pool.getconn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("CREATE EXTENSION IF NOT EXISTS unaccent;")
+                    conn.commit()
+            finally:
+                pool.putconn(conn)
+    except Exception as e:
+        print("[Database Extension Warning]", e)
 
 @contextmanager
 def get_db_connection():

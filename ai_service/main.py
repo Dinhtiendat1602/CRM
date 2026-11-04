@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,21 +49,29 @@ def handle_chat(payload: ChatRequest):
     if not payload.message.strip():
         raise HTTPException(status_code=400, detail="Nội dung tin nhắn không được để trống.")
     
+    session_id = payload.session_id or "default"
+    user_msg = payload.message.strip()
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{now_str}] 💬 [User - Session '{session_id}']: {user_msg}")
+
     reply = engine.chat(
-        user_message=payload.message.strip(),
-        session_id=payload.session_id or "default"
+        user_message=user_msg,
+        session_id=session_id
     )
+
+    print(f"[{now_str}] 🤖 [Zen AI Reply ({len(reply)} ký tự)]")
     return ChatResponse(
         reply=reply,
-        session_id=payload.session_id or "default"
+        session_id=session_id
     )
 
 @app.post("/api/chat/reset")
 def reset_chat_session(payload: ResetRequest):
-    success = engine.reset_session(payload.session_id or "default")
+    session_id = payload.session_id or "default"
+    success = engine.reset_session(session_id)
     return {
         "message": "Đã làm mới phiên trò chuyện thành công.",
-        "session_id": payload.session_id or "default",
+        "session_id": session_id,
         "cleared": success
     }
 
@@ -73,7 +82,8 @@ def get_quick_prompts():
             "👥 Hôm nay hệ thống có bao nhiêu Lead mới?",
             "📊 Doanh thu và tiến độ chỉ tiêu tháng này?",
             "📦 Kiểm tra sản phẩm nào đang sắp hết hàng?",
-            "🎯 Tổng quan các cơ hội bán hàng (Opportunities) đang mở?",
+            "🛒 Khách hàng Nguyễn Văn An đã mua những gì?",
+            "🎯 Tổng quan các cơ hội bán hàng lớn nhất?",
             "📢 Hiệu quả các chiến dịch tiếp thị gần đây?"
         ]
     }
@@ -81,4 +91,3 @@ def get_quick_prompts():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-

@@ -629,13 +629,31 @@ def search_customer(keyword: str) -> dict:
         return {"error": f"Lỗi khi tra cứu khách hàng: {str(e)}"}
 
 
-# Danh sách các công cụ cung cấp cho Gemini
+# =============================================================================
+# DANH SÁCH BỘ CÔNG CỤ FUNCTION CALLING CUNG CẤP CHO GEMINI AI
+# =============================================================================
+# Gemini Engine sử dụng danh sách này để đăng ký các tool thời gian thực.
+# Mỗi khi người dùng trò chuyện, Gemini sẽ tự động nhận diện ý định (Intent)
+# và kích hoạt hàm tương ứng để truy vấn dữ liệu trực tiếp từ PostgreSQL.
 ALL_CRM_TOOLS = [
+    # 1. Tra cứu khách hàng tiềm năng: Tổng số lead, số lead mới hôm nay/tháng này và lọc tìm kiếm theo tên, SĐT, email
     get_leads_summary,
+
+    # 2. Thống kê tài chính & KPI: Doanh thu thực tế, tiến độ hoàn thành chỉ tiêu kế hoạch và bảng phân rã doanh thu 12 tháng năm tài chính
     get_revenue_and_forecast,
+
+    # 3. Quản lý kho & danh mục: Tra cứu toàn bộ danh mục sản phẩm, đơn giá, số lượng tồn kho thực tế và cảnh báo sắp hết hàng (<= 5)
     get_products_and_inventory,
+
+    # 4. Quản lý phễu bán hàng (Pipeline): Phân bố cơ hội qua 6 giai đoạn (NEW, CONTACTED,...) và top deal giá trị lớn nhất
     get_opportunities_overview,
+
+    # 5. Đánh giá chiến dịch tiếp thị: Danh sách chiến dịch marketing, ngân sách chi tiêu và hiệu quả số lượng lead thu được
     get_campaigns_overview,
+
+    # 6. Quản trị đơn hàng: Tra cứu các đơn hàng gần nhất, tìm kiếm theo mã đơn (ORD-...), tên khách hàng hoặc sản phẩm
     get_orders_summary,
+
+    # 7. Hồ sơ khách hàng 360 độ: Tra cứu chi tiết một khách hàng theo tên (hỗ trợ có dấu/không dấu), SĐT, email; bao gồm lịch sử mua hàng, sản phẩm đã mua, cơ hội và nhật ký chăm sóc
     search_customer,
 ]

@@ -12,7 +12,12 @@ import {
   TrendingUp,
   Users,
   Package,
-  Layers
+  Layers,
+  History,
+  Clock,
+  Plus,
+  Trash2,
+  MessageSquare
 } from 'lucide-react';
 
 const AI_API_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
@@ -106,21 +111,50 @@ function formatMarkdown(content) {
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content:
-        'Xin chào! Tôi là **Zen AI Assistant** 🤖\nTôi được kết nối trực tiếp với cơ sở dữ liệu Zen CRM để hỗ trợ bạn tra cứu **Leads, Doanh số, Tồn kho & Cơ hội bán hàng** trong thời gian thực.\n\nBạn cần tôi hỗ trợ việc gì hôm nay?',
-      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-    },
-  ]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [sessionsList, setSessionsList] = useState([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
+  const [sessionId, setSessionId] = useState(() => {
+    const saved = localStorage.getItem('zen_crm_ai_session_id');
+    if (saved) return saved;
+    const newId = 'sess_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('zen_crm_ai_session_id', newId);
+    return newId;
+  });
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('zen_crm_ai_chat_messages');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content:
+          'Xin chào! Tôi là **Zen AI Assistant** 🤖\nTôi được kết nối trực tiếp với cơ sở dữ liệu Zen CRM để hỗ trợ bạn tra cứu **Leads, Doanh số, Tồn kho & Cơ hội bán hàng** trong thời gian thực.\n\nBạn cần tôi hỗ trợ việc gì hôm nay?',
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      },
+    ];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const [sessionId] = useState(() => 'sess_' + Math.random().toString(36).substring(2, 9));
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Tự động lưu lịch sử tin nhắn vào localStorage khi có tin mới
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      try {
+        localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(messages));
+      } catch {
+        // storage quota exceeded or disabled
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     // Health check AI service on mount
@@ -203,7 +237,7 @@ export default function AIChatWidget() {
         {
           id: 'err_' + Date.now(),
           role: 'assistant',
-          content: `⚠️ **Không thể kết nối với Zen AI Service:**\n\n${err.message}\n\n*Gợi ý:* Hãy chắc chắn bạn đã khởi động Python AI Service bằng lệnh:\n\`ai_service/start.sh\` hoặc \`uvicorn main:app --port 8000\``,
+          content: `⚠️ **Không thể kết nối với Zen AI Service:**\n\n${err.message}\n\n*Gợi ý:* Hãy chắc chắn bạn đã khởi động Python AI Service bằng lệnh:\n\`ai-agent-service/start.sh\` hoặc \`uvicorn main:app --port 8000\``,
           time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -222,26 +256,118 @@ export default function AIChatWidget() {
     } catch {
       // ignore
     }
-    setMessages([
+    const resetMsg = [
       {
         id: 'reset_' + Date.now(),
         role: 'assistant',
         content: '🔄 Phiên hội thoại đã được làm mới. Bạn có thể hỏi tôi câu hỏi mới bất kỳ lúc nào!',
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
-    ]);
+    ];
+    setMessages(resetMsg);
+    try {
+      localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(resetMsg));
+    } catch {
+      // ignore
+    }
+  };
+
+  const loadSessions = async () => {
+    setLoadingSessions(true);
+    try {
+      const res = await fetch(`${AI_API_BASE}/api/chat/sessions`);
+      if (res.ok) {
+        const data = await res.json();
+        setSessionsList(data.sessions || []);
+      }
+    } catch (e) {
+      console.error('Không thể nạp danh sách phiên chat:', e);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showHistory) {
+      loadSessions();
+    }
+  }, [showHistory]);
+
+  const handleSelectSession = async (targetSessionId) => {
+    if (targetSessionId === sessionId) {
+      setShowHistory(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${AI_API_BASE}/api/chat/history?session_id=${targetSessionId}`);
+      if (res.ok) {
+        const data = await res.json();
+        const serverMessages = (data.messages || []).map((m) => ({
+          id: m.id || 'msg_' + Math.random(),
+          role: m.role,
+          content: m.content,
+          time: m.timestamp
+            ? new Date(m.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        }));
+
+        if (serverMessages.length > 0) {
+          setMessages(serverMessages);
+          localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(serverMessages));
+        }
+      }
+    } catch (err) {
+      console.error('Lỗi khi nạp tin nhắn phiên cũ:', err);
+    } finally {
+      setSessionId(targetSessionId);
+      localStorage.setItem('zen_crm_ai_session_id', targetSessionId);
+      setLoading(false);
+      setShowHistory(false);
+    }
+  };
+
+  const handleStartNewChat = () => {
+    const newId = 'sess_' + Math.random().toString(36).substring(2, 9);
+    setSessionId(newId);
+    localStorage.setItem('zen_crm_ai_session_id', newId);
+    const welcomeMsg = [
+      {
+        id: 'welcome_' + Date.now(),
+        role: 'assistant',
+        content:
+          'Xin chào! Tôi là **Zen AI Assistant** 🤖\nTôi được kết nối trực tiếp với cơ sở dữ liệu Zen CRM để hỗ trợ bạn tra cứu **Leads, Doanh số, Tồn kho & Cơ hội bán hàng** trong thời gian thực.\n\nBạn cần tôi hỗ trợ việc gì hôm nay?',
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      },
+    ];
+    setMessages(welcomeMsg);
+    localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(welcomeMsg));
+    setShowHistory(false);
+  };
+
+  const handleDeleteSession = async (targetId) => {
+    try {
+      await fetch(`${AI_API_BASE}/api/chat/session?session_id=${targetId}`, { method: 'DELETE' });
+      setSessionsList((prev) => prev.filter((s) => s.session_id !== targetId));
+      if (targetId === sessionId) {
+        handleStartNewChat();
+      }
+    } catch (err) {
+      console.error('Lỗi khi xóa phiên trò chuyện:', err);
+    }
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <div className="fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
         <div
           className={`${
             isMaximized
               ? 'w-[95vw] sm:w-[780px] md:w-[920px] lg:w-[1100px] xl:w-[1250px] h-[88vh] max-h-[92vh] border-2 border-emerald-300'
-              : 'w-[360px] sm:w-[440px] md:w-[460px] h-[600px] max-h-[85vh] border border-emerald-100'
-          } bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden mb-3.5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4`}
+              : 'w-[calc(100vw-24px)] sm:w-[440px] md:w-[460px] h-[580px] max-h-[85vh] border border-emerald-100'
+          } bg-white rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden mb-3.5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4`}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#2E8B57] to-[#3CB371] px-4 py-3.5 text-white flex items-center justify-between shadow-xs">
@@ -273,8 +399,24 @@ export default function AIChatWidget() {
 
             <div className="flex items-center gap-1">
               <button
+                onClick={() => setShowHistory(!showHistory)}
+                title={showHistory ? 'Quay lại cuộc trò chuyện' : 'Lịch sử các cuộc trò chuyện'}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  showHistory ? 'bg-white text-emerald-800 shadow-xs' : 'text-white/80 hover:text-white hover:bg-white/15'
+                }`}
+              >
+                <History className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleStartNewChat}
+                title="Tạo cuộc trò chuyện mới"
+                className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <button
                 onClick={handleReset}
-                title="Làm mới cuộc trò chuyện"
+                title="Làm mới cuộc trò chuyện hiện tại"
                 className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -299,134 +441,231 @@ export default function AIChatWidget() {
             </div>
           </div>
 
-          {/* Quick Prompts Carousel */}
-          <div className="bg-emerald-50/70 border-b border-emerald-100/60 px-3 py-2 overflow-x-auto no-scrollbar flex gap-1.5 shrink-0">
-            {QUICK_PROMPTS.map((qp, idx) => {
-              const IconComp = qp.icon;
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleSendMessage(qp.query)}
-                  disabled={loading}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100/60 hover:border-emerald-300 transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
-                >
-                  <IconComp className="w-3 h-3 text-[#2E8B57]" />
-                  <span>{qp.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Messages Body */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-gray-50/50">
-            {!isOnline && (
-              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-semibold">AI Service chưa chạy trên cổng 8000</div>
-                  <div className="text-[11px] text-amber-700 mt-0.5">
-                    Hãy chạy <code className="bg-amber-100 px-1 py-0.2 rounded font-mono">ai_service/start.sh</code> để kích hoạt trợ lý AI.
-                  </div>
+          {showHistory ? (
+            /* History Drawer / Panel */
+            <div className="flex-1 flex flex-col overflow-hidden bg-gray-50/70">
+              <div className="p-3 bg-white border-b border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+                  <Clock className="w-4 h-4 text-emerald-600" />
+                  <span>Lịch sử các cuộc trò chuyện</span>
                 </div>
-              </div>
-            )}
-
-            {messages.map((msg) => {
-              const isAssistant = msg.role === 'assistant';
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex items-start gap-2.5 ${isAssistant ? 'justify-start' : 'justify-end'}`}
+                <button
+                  onClick={handleStartNewChat}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-medium transition cursor-pointer"
+                  title="Bắt đầu phiên hội thoại mới"
                 >
-                  {isAssistant && (
-                    <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs text-xs font-bold mt-0.5">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Hội thoại mới</span>
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {loadingSessions ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-2 text-xs">
+                    <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+                    <span>Đang nạp danh sách lịch sử...</span>
+                  </div>
+                ) : sessionsList.length === 0 ? (
+                  <div className="py-12 text-center text-gray-400 text-xs space-y-2">
+                    <MessageSquare className="w-8 h-8 mx-auto text-gray-300 stroke-1" />
+                    <p className="font-medium text-gray-600">Chưa có lịch sử hội thoại nào</p>
+                    <p className="text-[11px] text-gray-400 max-w-[260px] mx-auto">
+                      Mọi câu hỏi và kết quả tra cứu CRM của bạn sẽ tự động được lưu và hiển thị tại đây.
+                    </p>
+                  </div>
+                ) : (
+                  sessionsList.map((sess) => {
+                    const isCurrent = sess.session_id === sessionId;
+                    return (
+                      <div
+                        key={sess.session_id}
+                        onClick={() => handleSelectSession(sess.session_id)}
+                        className={`group relative p-3 rounded-xl border transition-all cursor-pointer ${
+                          isCurrent
+                            ? 'bg-emerald-50/90 border-emerald-300 shadow-2xs'
+                            : 'bg-white border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/30 shadow-2xs'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <MessageSquare
+                                className={`w-3.5 h-3.5 shrink-0 ${
+                                  isCurrent ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'
+                                }`}
+                              />
+                              <h4 className="text-xs font-semibold text-gray-800 truncate">
+                                {sess.title || 'Cuộc trò chuyện Zen AI'}
+                              </h4>
+                              {isCurrent && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded-full font-medium shrink-0">
+                                  Đang mở
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5 text-[11px] text-gray-400">
+                              <span>{sess.message_count || 0} tin nhắn</span>
+                              <span>•</span>
+                              <span>
+                                {sess.updated_at
+                                  ? new Date(sess.updated_at).toLocaleString('vi-VN', {
+                                      dateStyle: 'short',
+                                      timeStyle: 'short',
+                                    })
+                                  : 'Vừa xong'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSession(sess.session_id);
+                            }}
+                            title="Xóa cuộc trò chuyện này"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Quick Prompts Carousel */}
+              <div className="bg-emerald-50/70 border-b border-emerald-100/60 px-3 py-2 overflow-x-auto no-scrollbar flex gap-1.5 shrink-0">
+                {QUICK_PROMPTS.map((qp, idx) => {
+                  const IconComp = qp.icon;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleSendMessage(qp.query)}
+                      disabled={loading}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100/60 hover:border-emerald-300 transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
+                    >
+                      <IconComp className="w-3 h-3 text-[#2E8B57]" />
+                      <span>{qp.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Messages Body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-gray-50/50">
+                {!isOnline && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold">AI Service chưa chạy trên cổng 8000</div>
+                      <div className="text-[11px] text-amber-700 mt-0.5">
+                        Hãy chạy <code className="bg-amber-100 px-1 py-0.2 rounded font-mono">ai-agent-service/start.sh</code> để kích hoạt trợ lý AI.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {messages.map((msg) => {
+                  const isAssistant = msg.role === 'assistant';
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex items-start gap-2.5 ${isAssistant ? 'justify-start' : 'justify-end'}`}
+                    >
+                      {isAssistant && (
+                        <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs text-xs font-bold mt-0.5">
+                          <Bot className="w-4 h-4" />
+                        </div>
+                      )}
+                      <div className={`${isMaximized ? 'max-w-[92%]' : 'max-w-[84%]'} flex flex-col ${isAssistant ? 'items-start' : 'items-end'}`}>
+                        <div
+                          className={`rounded-2xl px-4 py-2.5 ${isMaximized ? 'text-xs sm:text-sm' : 'text-xs sm:text-[13px]'} leading-relaxed shadow-2xs ${
+                            isAssistant
+                              ? 'bg-white text-gray-800 border border-gray-100 rounded-tl-xs'
+                              : 'bg-[#2E8B57] text-white rounded-tr-xs font-medium'
+                          }`}
+                        >
+                          {isAssistant ? (
+                            <div
+                              className="prose-xs space-y-1.5"
+                              dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }}
+                            />
+                          ) : (
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-gray-400 mt-1 px-1">{msg.time}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {loading && (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs text-xs">
                       <Bot className="w-4 h-4" />
                     </div>
-                  )}
-                  <div className={`${isMaximized ? 'max-w-[92%]' : 'max-w-[84%]'} flex flex-col ${isAssistant ? 'items-start' : 'items-end'}`}>
-                    <div
-                      className={`rounded-2xl px-4 py-2.5 ${isMaximized ? 'text-xs sm:text-sm' : 'text-xs sm:text-[13px]'} leading-relaxed shadow-2xs ${
-                        isAssistant
-                          ? 'bg-white text-gray-800 border border-gray-100 rounded-tl-xs'
-                          : 'bg-[#2E8B57] text-white rounded-tr-xs font-medium'
-                      }`}
-                    >
-                      {isAssistant ? (
-                        <div
-                          className="prose-xs space-y-1.5"
-                          dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }}
-                        />
-                      ) : (
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                      )}
+                    <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-xs px-3.5 py-2.5 shadow-2xs flex items-center gap-2 text-xs text-gray-600">
+                      <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
+                      <span>Zen AI đang phân tích dữ liệu CRM...</span>
                     </div>
-                    <span className="text-[10px] text-gray-400 mt-1 px-1">{msg.time}</span>
                   </div>
-                </div>
-              );
-            })}
+                )}
+                <div ref={messagesEndRef} />
+              </div>
 
-            {loading && (
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs text-xs">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-xs px-3.5 py-2.5 shadow-2xs flex items-center gap-2 text-xs text-gray-600">
-                  <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
-                  <span>Zen AI đang phân tích dữ liệu CRM...</span>
+              {/* Input Footer */}
+              <div className="p-3 bg-white border-t border-gray-100">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Hỏi về Lead, Doanh số, Sản phẩm, Tồn kho..."
+                    disabled={loading}
+                    className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-3.5 py-2 text-xs sm:text-sm text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/40 focus:border-[#3CB371] transition-all placeholder:text-gray-400"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || loading}
+                    className="p-2.5 rounded-2xl bg-[#2E8B57] text-white hover:bg-[#257347] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+                    title="Gửi câu hỏi"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+                <div className="text-[10px] text-gray-400 text-center mt-1.5 flex items-center justify-center gap-1">
+                  <span>Được hỗ trợ bởi Google Gemini & PostgreSQL</span>
                 </div>
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input Footer */}
-          <div className="p-3 bg-white border-t border-gray-100">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="flex items-center gap-2"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Hỏi về Lead, Doanh số, Sản phẩm, Tồn kho..."
-                disabled={loading}
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-3.5 py-2 text-xs sm:text-sm text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-[#3CB371]/40 focus:border-[#3CB371] transition-all placeholder:text-gray-400"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || loading}
-                className="p-2.5 rounded-2xl bg-[#2E8B57] text-white hover:bg-[#257347] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
-                title="Gửi câu hỏi"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
-            <div className="text-[10px] text-gray-400 text-center mt-1.5 flex items-center justify-center gap-1">
-              <span>Được hỗ trợ bởi Google Gemini & PostgreSQL</span>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       )}
 
       {/* Floating Action Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-[#2E8B57] to-[#3CB371] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 border-white/80"
+        className="group relative flex items-center gap-1.5 sm:gap-2.5 px-3 py-2 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-[#2E8B57] to-[#3CB371] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 border-white/80"
         title="Mở Trợ lý AI Zen CRM"
       >
-        <span className="relative flex h-3 w-3">
+        <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-amber-400"></span>
         </span>
-        <Bot className="w-5 h-5 text-white" />
-        <span className="font-semibold text-sm tracking-wide">Trợ lý AI</span>
-        <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300 group-hover:rotate-12 transition-transform" />
+        <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+        <span className="font-semibold text-xs sm:text-sm tracking-wide">Trợ lý AI</span>
+        <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 group-hover:rotate-12 transition-transform" />
       </button>
     </div>
   );

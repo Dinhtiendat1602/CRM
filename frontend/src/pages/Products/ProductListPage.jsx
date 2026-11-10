@@ -157,61 +157,62 @@ export default function ProductListPage() {
         </div>
 
         {isManagerOrAdmin && (
-          <div className="flex flex-wrap items-center gap-2.5 ml-auto">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 ml-auto">
             <button
               onClick={() => setIsAssignmentModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
               title={isEn ? 'Assign authorized products per salesperson' : 'Phân quyền những sản phẩm mà từng nhân viên được phép bán'}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#3CB371]" />
-              <span>{isEn ? 'Sales Permissions' : 'Phân Quyền Bán Hàng'}</span>
+              <span className="hidden xs:inline">{isEn ? 'Sales Permissions' : 'Phân Quyền'}</span>
+              <span className="xs:hidden">{isEn ? 'Permissions' : 'Phân Quyền'}</span>
             </button>
 
             <button
               onClick={() => setIsCategoryModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-xl text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-white hover:bg-[#EAF5EC] border border-[#DDF0E2] text-[#1F2937] rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
             >
               <FolderTree className="w-3.5 h-3.5 text-[#2E7D32]" />
-              <span>{isEn ? 'Manage Categories' : 'Quản Lý Danh Mục'}</span>
+              <span>{isEn ? 'Categories' : 'Danh Mục'}</span>
             </button>
 
             <button
               onClick={handleCreateProduct}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3.5 sm:py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{isEn ? 'Add Product' : 'Thêm Sản Phẩm'}</span>
+              <span>{isEn ? 'Add Product' : 'Thêm SP'}</span>
             </button>
           </div>
         )}
       </div>
 
       {/* Control Bar: Tìm kiếm, Lọc danh mục, Sắp xếp */}
-      <div className="bg-white p-4 rounded-2xl border border-[#DDF0E2] shadow-xs">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div className="bg-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-[#DDF0E2] shadow-xs">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-2 sm:gap-3 items-center">
           {/* Ô tìm kiếm theo Tên hoặc Mã SP */}
-          <div className="md:col-span-6">
+          <div className="col-span-2 md:col-span-6">
             <SearchInput
               value={search}
               onChange={(val) => {
                 setSearch(val);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder={isEn ? 'Search by product code or name...' : 'Tìm theo mã sản phẩm hoặc tên sản phẩm...'}
+              placeholder={isEn ? 'Search product...' : 'Tìm mã hoặc tên sản phẩm...'}
             />
           </div>
 
           {/* Bộ lọc Danh mục */}
-          <div className="md:col-span-3">
+          <div className="col-span-1 md:col-span-3">
             <select
               value={categoryId}
               onChange={(e) => {
                 setCategoryId(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-lg sm:rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371] cursor-pointer"
             >
-              <option value="">{isEn ? '-- All categories --' : '-- Tất cả danh mục --'}</option>
+              <option value="">{isEn ? '-- Categories --' : '-- Tất cả danh mục --'}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name} ({c.products_count || 0})
@@ -221,7 +222,7 @@ export default function ProductListPage() {
           </div>
 
           {/* Sắp xếp */}
-          <div className="md:col-span-3 flex items-center gap-2">
+          <div className="col-span-1 md:col-span-3 flex items-center gap-1.5">
             <select
               value={`${sortBy}_${sortOrder}`}
               onChange={(e) => {
@@ -230,7 +231,7 @@ export default function ProductListPage() {
                 setSortOrder(so);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-600"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-300 rounded-lg sm:rounded-xl text-[11px] sm:text-xs text-slate-700 focus:outline-none focus:border-indigo-600 cursor-pointer"
             >
               <option value="created_at_DESC">{isEn ? 'Newest first' : 'Mới nhất trước'}</option>
               <option value="created_at_ASC">{isEn ? 'Oldest first' : 'Cũ nhất trước'}</option>

@@ -4,36 +4,8 @@ Mỗi hàm đều có docstring rõ ràng và type hints để Gemini hiểu ch�
 """
 
 from datetime import datetime
-from database import query_all, query_one
-
-def format_vietnamese_name(first_name: str, last_name: str) -> str:
-    """
-    Chuẩn hóa ghép họ và tên tiếng Việt một cách tự nhiên và chính xác.
-    Xử lý tự động cả 2 trường hợp:
-    1. first_name = Họ ('Nguyen'), last_name = Tên đệm & Tên ('Van An') -> 'Nguyen Van An'
-    2. last_name = Họ & Tên đệm ('Phan Cảnh'), first_name = Tên ('Đức') -> 'Phan Cảnh Đức'
-    """
-    fn = (first_name or "").strip()
-    ln = (last_name or "").strip()
-    if not fn:
-        return ln
-    if not ln:
-        return fn
-
-    common_surnames = {
-        'nguyen', 'tran', 'le', 'pham', 'hoang', 'huynh', 'phan', 'vu', 'vo', 
-        'dang', 'bui', 'do', 'ho', 'ngo', 'duong', 'ly', 'dinh', 'trinh', 'mai', 
-        'dao', 'doan', 'luong', 'nguyễn', 'trần', 'lê', 'phạm', 'hoàng', 'huỳnh', 
-        'phần', 'vũ', 'võ', 'đặng', 'bùi', 'đỗ', 'hồ', 'ngô', 'dương', 'lý', 'đinh', 'trịnh'
-    }
-
-    fn_lower = fn.lower()
-    ln_lower = ln.lower().split()
-    first_word_ln = ln_lower[0] if ln_lower else ""
-
-    if fn_lower in common_surnames and first_word_ln not in common_surnames:
-        return f"{fn} {ln}"
-    return f"{ln} {fn}"
+from src.database.connection import query_all, query_one
+from src.utils.normalizer import format_vietnamese_name
 
 
 def get_leads_summary(limit: int = 10, query: str = "") -> dict:
@@ -657,3 +629,6 @@ ALL_CRM_TOOLS = [
     # 7. Hồ sơ khách hàng 360 độ: Tra cứu chi tiết một khách hàng theo tên (hỗ trợ có dấu/không dấu), SĐT, email; bao gồm lịch sử mua hàng, sản phẩm đã mua, cơ hội và nhật ký chăm sóc
     search_customer,
 ]
+
+QUERY_TOOLS = ALL_CRM_TOOLS
+

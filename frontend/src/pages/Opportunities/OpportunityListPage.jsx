@@ -219,53 +219,53 @@ export default function OpportunityListPage() {
 
         <button
           onClick={handleOpenCreateModal}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-xs font-semibold rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer ml-auto"
+          className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-[11px] sm:text-xs font-semibold rounded-lg sm:rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer ml-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>{t('oppAddNew')}</span>
         </button>
       </div>
 
-      {/* Cards thống kê nhanh */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
-            <Briefcase className="w-6 h-6" />
+      {/* Cards thống kê nhanh - 2 hàng trên mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+        <div className="bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-xs flex items-center gap-2.5 sm:gap-4">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
+            <Briefcase className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs uppercase font-semibold text-[#6B7280]">{isEn ? 'TOTAL OPPORTUNITIES' : 'Tổng Số Cơ Hội'}</p>
-            <p className="text-2xl font-bold text-[#1F2937]">{pagination.totalRecords}</p>
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase font-semibold text-[#6B7280] truncate">{isEn ? 'TOTAL OPPS' : 'Tổng Số Cơ Hội'}</p>
+            <p className="text-base sm:text-2xl font-bold text-[#1F2937] leading-tight">{pagination.totalRecords}</p>
           </div>
         </div>
 
-        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-            <Coins className="w-6 h-6" />
+        <div className="bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-xs flex items-center gap-2.5 sm:gap-4">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAF5EC] text-[#2E7D32] flex items-center justify-center flex-shrink-0">
+            <CheckCircle2 className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs uppercase font-semibold text-[#6B7280]">{isEn ? 'ESTIMATED VALUE (THIS PAGE)' : 'Doanh Thu Dự Kiến (Trang này)'}</p>
-            <p className="text-2xl font-bold text-emerald-700">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase font-semibold text-[#6B7280] truncate">{isEn ? 'SPEC' : 'Quy Chuẩn'}</p>
+            <p className="text-xs sm:text-sm font-semibold text-[#1F2937] mt-0.5 leading-tight">{isEn ? '20 rows/page' : '20 dòng/trang'}</p>
+          </div>
+        </div>
+
+        <div className="col-span-2 sm:col-span-1 bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-xs flex items-center gap-2.5 sm:gap-4">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+            <Coins className="w-4 h-4 sm:w-6 sm:h-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase font-semibold text-[#6B7280] truncate">{isEn ? 'ESTIMATED VALUE' : 'Doanh Thu Dự Kiến (Trang này)'}</p>
+            <p className="text-base sm:text-2xl font-bold text-emerald-700 leading-tight truncate">
               {Number(currentTotalValue).toLocaleString('vi-VN')} ₫
             </p>
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#2E7D32] flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs uppercase font-semibold text-[#6B7280]">{isEn ? 'DISPLAY SPEC' : 'Quy Chuẩn Hiển Thị'}</p>
-            <p className="text-sm font-semibold text-[#1F2937] mt-1">{isEn ? '20 rows/page (BR-03)' : '20 dòng/trang (BR-03)'}</p>
           </div>
         </div>
       </div>
 
       {/* Bộ lọc & Tìm kiếm */}
-      <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+      <div className="bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-xs">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-2 sm:gap-3">
           {/* Ô tìm kiếm đa năng: Tên Lead hoặc Sản phẩm (SRS 3.8) */}
-          <div className="md:col-span-3">
+          <div className="col-span-2 md:col-span-3">
             <SearchInput
               value={search}
               onChange={(val) => {
@@ -277,27 +277,51 @@ export default function OpportunityListPage() {
           </div>
 
           {/* Lọc theo Trạng thái (Status) */}
-          <div className="md:col-span-3">
+          <div className="col-span-1 md:col-span-3">
             <select
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white cursor-pointer"
             >
               <option value="">{isEn ? '-- All stages --' : '-- Tất cả trạng thái --'}</option>
-              <option value="NEW">{isEn ? 'New (NEW)' : 'Mới tạo (NEW)'}</option>
-              <option value="CONTACTED">{isEn ? 'Contacted (CONTACTED)' : 'Đã liên hệ (CONTACTED)'}</option>
-              <option value="QUALIFIED">{isEn ? 'Qualified (QUALIFIED)' : 'Đủ điều kiện (QUALIFIED)'}</option>
-              <option value="PROPOSAL">{isEn ? 'Proposal (PROPOSAL)' : 'Gửi báo giá (PROPOSAL)'}</option>
-              <option value="ORDERED">{isEn ? 'Ordered (ORDERED)' : 'Đã chốt đơn (ORDERED)'}</option>
-              <option value="LOST">{isEn ? 'Lost (LOST)' : 'Thất bại/Hủy (LOST)'}</option>
+              <option value="NEW">{isEn ? 'New' : 'Mới tạo'}</option>
+              <option value="CONTACTED">{isEn ? 'Contacted' : 'Đã liên hệ'}</option>
+              <option value="QUALIFIED">{isEn ? 'Qualified' : 'Đủ điều kiện'}</option>
+              <option value="PROPOSAL">{isEn ? 'Proposal' : 'Gửi báo giá'}</option>
+              <option value="ORDERED">{isEn ? 'Ordered' : 'Đã chốt đơn'}</option>
+              <option value="LOST">{isEn ? 'Lost' : 'Thất bại/Hủy'}</option>
             </select>
           </div>
 
+          {/* Sắp xếp cột & Đảo chiều (BR-04) */}
+          <div className="col-span-1 md:col-span-2 flex items-center gap-1.5">
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+              className="w-full px-2 sm:px-2.5 py-1.5 sm:py-2 text-[11px] sm:text-xs border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white cursor-pointer"
+              title={isEn ? 'Sort by' : 'Tiêu chí sắp xếp'}
+            >
+              <option value="created_at">{isEn ? 'Created Date' : 'Ngày tạo'}</option>
+              <option value="expected_close_date">{isEn ? 'Expected Close' : 'Ngày chốt'}</option>
+              <option value="quantity">{isEn ? 'Quantity' : 'Số lượng'}</option>
+            </select>
+            <button
+              onClick={toggleSortOrder}
+              className="p-1.5 sm:p-2 text-xs border border-gray-300 rounded-lg sm:rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-colors flex-shrink-0 cursor-pointer"
+              title={isEn ? `Sort: ${sortOrder === 'ASC' ? 'Ascending' : 'Descending'}` : `Sắp xếp: ${sortOrder === 'ASC' ? 'Tăng dần' : 'Giảm dần'}`}
+            >
+              {sortOrder === 'ASC' ? '↑' : '↓'}
+            </button>
+          </div>
+
           {/* Lọc theo ngày: Từ ngày (BR-05) */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <input
               type="date"
               value={fromDate}
@@ -305,13 +329,13 @@ export default function OpportunityListPage() {
                 setFromDate(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               title={isEn ? 'Filter from date' : 'Lọc từ ngày tạo'}
             />
           </div>
 
           {/* Lọc theo ngày: Đến ngày (BR-05) */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <input
               type="date"
               value={toDate}
@@ -319,7 +343,7 @@ export default function OpportunityListPage() {
                 setToDate(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371]"
               title={isEn ? 'Filter to date' : 'Lọc đến ngày tạo'}
             />
           </div>

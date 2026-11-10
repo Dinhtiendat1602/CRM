@@ -4,10 +4,10 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-04 10:30
-- **Active Task:** Nâng cấp độ chính xác và mở rộng bộ công cụ Function Calling cho Trợ lý AI Zen CRM (`feat-027`).
-- **Current Status:** HOÀN THÀNH 100% (273/273 tests PASS: 146 backend + 117 frontend + 10 AI Service unit tests; live test Chat API trả về chính xác 100% dữ liệu thực tế).
-- **Next Feature:** `feat-021` - Kiểm thử E2E Toàn diện, Nghiệm thu 100% SRS & Kịch bản Bảo vệ Đồ án.
+- **Last Updated:** 2026-11-05 11:00
+- **Active Task:** Tích hợp Lịch sử Cuộc trò chuyện đa phiên (Multi-session History Drawer & Persistence) cho Trợ lý AI Zen CRM (`feat-027`).
+- **Current Status:** HOÀN THÀNH 100% (279/279 tests PASS: 146 backend + 117 frontend + 16 AI Agent Service tests; Vite build thành công 379ms, 0 lỗi runtime).
+- **Next Feature:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard).
 
 
 ---
@@ -438,7 +438,7 @@
 |---|---|---|
 | `npm test` (trong `backend/`) | **PASS (146/146 passed, 0 failures)** | `app.test.js` (2) + `auth.test.js` (12) + `db.test.js` (6) + `forgot-password.test.js` (6) + `user.test.js` (16) + `lead.test.js` (15) + `product.test.js` (20) + `opportunity.test.js` (18) + `order.test.js` (15) + `campaign.test.js` (19) + `forecast.test.js` (15) + `dashboard.test.js` (4) |
 | `npm test` (trong `frontend/`) | **PASS (117/117 passed, 0 failures)** | `admin-ui.test.js` (10) + `leads-ui.test.js` (10) + `login-flow.test.js` (5) + `opportunities-ui.test.js` (10) + `orders-ui.test.js` (12) + `products-ui.test.js` (14) + `session-timeout.test.js` (6) + `user-management.test.js` (10) + `campaigns-ui.test.js` (14) + `forecast-ui.test.js` (10) + `dashboard-ui.test.js` (9) + `leads-ui.test.js` flick switch (7) |
-| `python3 test_ai_service.py` (trong `ai_service/`) | **PASS (10/10 passed, 0 failures)** | Kiểm tra healthcheck, prompts, format tên tiếng Việt, tra cứu Leads, Doanh số 12 tháng, Sản phẩm kho, Đơn hàng, Tìm kiếm khách hàng khớp đa chiều tiếng Việt (0.082s) |
+| `venv/bin/pytest tests/` (trong `ai-agent-service/`) | **PASS (15/15 passed, 0 failures)** | Kiểm tra healthcheck, prompts, format tên tiếng Việt, tra cứu Leads, Doanh số 12 tháng, Sản phẩm kho, Đơn hàng, Tìm kiếm khách hàng đa chiều, Intent Router, Lead Creation BR-02 (0.62s) |
 | `npm run lint` (trong `frontend/`) | **PASS (0 errors, 0 warnings trong component AI)** | Oxlint kiểm tra 76 files frontend, AIChatWidget.jsx 0 lỗi, 0 cảnh báo |
-| `npm run build` (trong `frontend/`) | **PASS (built in 441ms)** | Vite production client build hoàn tất, bundle `dist/` sẵn sàng triển khai |
-| **Toàn bộ hệ thống** | **PASS (273/273 tests passed 100%)** | 146 backend integration tests + 117 frontend tests + 10 AI Service unit tests vượt qua tuyệt đối |
+| `npm run build` (trong `frontend/`) | **PASS (built in 345ms)** | Vite production client build hoàn tất, bundle `dist/` sẵn sàng triển khai |
+| **Toàn bộ hệ thống** | **PASS (278/278 tests passed 100%)** | 146 backend integration tests + 117 frontend tests + 15 AI Agent Service tests vượt qua tuyệt đối |

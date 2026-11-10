@@ -164,92 +164,92 @@ export default function CampaignListPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Action Bar (Không lặp lại tiêu đề vì đã có trên Header) */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="text-xs text-[#6B7280]">
-          {isEn ? 'Total:' : 'Tổng số:'} <strong className="text-[#1F2937]">{stats.total}</strong> {isEn ? 'marketing campaigns' : 'chiến dịch tiếp thị'}
+    <div className="space-y-3.5 sm:space-y-6">
+      {/* Top Action Bar */}
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="text-[11px] sm:text-xs text-[#6B7280]">
+          {isEn ? 'Total:' : 'Tổng số:'} <strong className="text-[#1F2937]">{stats.total}</strong> {isEn ? 'campaigns' : 'chiến dịch'}
         </div>
 
         <button
           type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-xl shadow-xs transition-all cursor-pointer ml-auto"
+          className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-white bg-[#3CB371] hover:bg-[#38A169] active:bg-[#2E7D32] rounded-lg sm:rounded-xl shadow-xs transition-all cursor-pointer ml-auto"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>{isEn ? 'Create New Campaign' : 'Tạo Chiến Dịch Mới'}</span>
+          <span>{isEn ? 'Create Campaign' : 'Tạo Chiến Dịch'}</span>
         </button>
       </div>
 
-      {/* Thẻ Thống kê KPIs Nhanh */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-[#EAF5EC] flex items-center justify-center text-[#3CB371]">
-            <Megaphone className="w-6 h-6" />
+      {/* Thẻ Thống kê KPIs Nhanh - Tối ưu 2 hàng trên mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
+        <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex items-center gap-2 sm:gap-3.5">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg bg-[#EAF5EC] flex items-center justify-center text-[#3CB371] shrink-0">
+            <Megaphone className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
-            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Total Campaigns' : 'Tổng số chiến dịch'}</div>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900">{stats.active}</div>
-            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Active (ACTIVE)' : 'Đang hoạt động (ACTIVE)'}</div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-2xl font-bold text-slate-900 leading-tight">{stats.total}</div>
+            <div className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">{isEn ? 'Total' : 'Tổng chiến dịch'}</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-[#EAF5EC] flex items-center justify-center text-[#3CB371]">
-            <Clock className="w-6 h-6" />
+        <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-2 sm:gap-3.5">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="text-2xl font-bold text-[#1F2937]">{stats.upcoming}</div>
-            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Upcoming (UPCOMING)' : 'Sắp diễn ra (UPCOMING)'}</div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-2xl font-bold text-slate-900 leading-tight">{stats.active}</div>
+            <div className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">{isEn ? 'Active' : 'Đang chạy'}</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-            <DollarSign className="w-6 h-6" />
+        <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-[#DDF0E2] shadow-xs flex items-center gap-2 sm:gap-3.5">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg bg-[#EAF5EC] flex items-center justify-center text-[#3CB371] shrink-0">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900">
-              {stats.totalBudget.toLocaleString('vi-VN')} <span className="text-xs font-normal">đ</span>
+          <div className="min-w-0">
+            <div className="text-base sm:text-2xl font-bold text-[#1F2937] leading-tight">{stats.upcoming}</div>
+            <div className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">{isEn ? 'Upcoming' : 'Sắp diễn ra'}</div>
+          </div>
+        </div>
+
+        <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-2 sm:gap-3.5">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+            <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs sm:text-lg lg:text-xl font-bold text-slate-900 leading-tight truncate">
+              {stats.totalBudget.toLocaleString('vi-VN')} <span className="text-[10px] sm:text-xs font-normal">đ</span>
             </div>
-            <div className="text-xs text-slate-500 font-medium">{isEn ? 'Total Planned Budget' : 'Tổng ngân sách dự toán'}</div>
+            <div className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">{isEn ? 'Budget' : 'Tổng ngân sách'}</div>
           </div>
         </div>
       </div>
 
-      {/* Thanh Lọc, Tìm Kiếm & Sắp Xếp */}
-      <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+      {/* Thanh Lọc, Tìm Kiếm & Sắp Xếp - Tối ưu hàng nhỏ gọn trên mobile */}
+      <div className="p-2.5 sm:p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-2 sm:gap-3">
           {/* Ô tìm kiếm */}
-          <div className="md:col-span-4">
+          <div className="col-span-2 md:col-span-4">
             <SearchInput
               value={search}
               onChange={(val) => {
                 setSearch(val);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder={isEn ? 'Search by campaign name or description...' : 'Tìm theo tên hoặc mô tả chiến dịch...'}
+              placeholder={isEn ? 'Search campaigns...' : 'Tìm kiếm chiến dịch...'}
             />
           </div>
 
           {/* Lọc Trạng thái */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <select
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
             >
               <option value="">{isEn ? 'All statuses' : 'Tất cả trạng thái'}</option>
               <option value="ACTIVE">{isEn ? 'Active' : 'Đang hoạt động'}</option>
@@ -258,35 +258,8 @@ export default function CampaignListPage() {
             </select>
           </div>
 
-          {/* Lọc Khoảng ngày (BR-05) */}
-          <div className="md:col-span-2">
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => {
-                setFromDate(e.target.value);
-                setPagination((prev) => ({ ...prev, page: 1 }));
-              }}
-              title={isEn ? 'From date' : 'Từ ngày'}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => {
-                setToDate(e.target.value);
-                setPagination((prev) => ({ ...prev, page: 1 }));
-              }}
-              title={isEn ? 'To date' : 'Đến ngày'}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
-            />
-          </div>
-
           {/* Sắp xếp & Nút Reset */}
-          <div className="md:col-span-2 flex items-center gap-2">
+          <div className="col-span-1 md:col-span-2 flex items-center gap-1.5">
             <select
               value={`${sortBy}:${sortOrder}`}
               onChange={(e) => {
@@ -295,12 +268,12 @@ export default function CampaignListPage() {
                 setSortOrder(so);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-2.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
+              className="w-full px-2 sm:px-2.5 py-1.5 sm:py-2 text-[11px] sm:text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all cursor-pointer"
             >
               <option value="created_at:DESC">{isEn ? 'Newest' : 'Mới nhất'}</option>
               <option value="created_at:ASC">{isEn ? 'Oldest' : 'Cũ nhất'}</option>
-              <option value="start_date:DESC">{isEn ? 'Start date descending' : 'Ngày bắt đầu giảm dần'}</option>
-              <option value="start_date:ASC">{isEn ? 'Start date ascending' : 'Ngày bắt đầu tăng dần'}</option>
+              <option value="start_date:DESC">{isEn ? 'Start date desc' : 'Ngày bắt đầu ↓'}</option>
+              <option value="start_date:ASC">{isEn ? 'Start date asc' : 'Ngày bắt đầu ↑'}</option>
               <option value="budget:DESC">{isEn ? 'Highest budget' : 'Ngân sách cao nhất'}</option>
               <option value="name:ASC">{isEn ? 'Name A-Z' : 'Tên A-Z'}</option>
             </select>
@@ -309,10 +282,37 @@ export default function CampaignListPage() {
               type="button"
               onClick={handleResetFilters}
               title={isEn ? 'Reset filters' : 'Đặt lại bộ lọc'}
-              className="p-2 text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer shrink-0"
+              className="p-1.5 sm:p-2 text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer shrink-0"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
+          </div>
+
+          {/* Lọc Khoảng ngày (BR-05) - 2 ô ngày chung 1 hàng trên mobile */}
+          <div className="col-span-1 md:col-span-2">
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => {
+                setFromDate(e.target.value);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+              title={isEn ? 'From date' : 'Từ ngày'}
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
+            />
+          </div>
+
+          <div className="col-span-1 md:col-span-2">
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => {
+                setToDate(e.target.value);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+              title={isEn ? 'To date' : 'Đến ngày'}
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] transition-all"
+            />
           </div>
         </div>
       </div>

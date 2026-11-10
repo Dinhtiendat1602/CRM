@@ -1,21 +1,11 @@
-from pathlib import Path
-import os
 from contextlib import contextmanager
 from datetime import date, datetime
 from decimal import Decimal
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2.pool import ThreadedConnectionPool
-from dotenv import load_dotenv
 
-env_path = Path(__file__).resolve().parent / ".env"
-load_dotenv(dotenv_path=env_path)
-
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = int(os.getenv("DB_PORT", "5432"))
-DB_NAME = os.getenv("DB_NAME", "CRM")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+from config.settings import settings
 
 _pool = None
 
@@ -25,11 +15,11 @@ def get_pool():
         _pool = ThreadedConnectionPool(
             minconn=1,
             maxconn=10,
-            host=DB_HOST,
-            port=DB_PORT,
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
+            host=settings.DB_HOST,
+            port=settings.DB_PORT,
+            dbname=settings.DB_NAME,
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD,
         )
         init_extensions()
     return _pool
@@ -84,6 +74,14 @@ def query_one(query: str, params: tuple = None) -> dict:
             row = cur.fetchone()
             return _serialize_row(dict(row)) if row else None
 
+def execute_commit(query: str, params: tuple = None) -> int:
+    """Thực thi câu lệnh INSERT / UPDATE / DELETE và commit giao dịch."""
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params or ())
+            conn.commit()
+            return cur.rowcount
+
 def check_db_health() -> bool:
     try:
         with get_db_connection() as conn:
@@ -93,3 +91,4 @@ def check_db_health() -> bool:
     except Exception as e:
         print("DB Healthcheck error:", e)
         return False
+

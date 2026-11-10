@@ -303,7 +303,7 @@
         "feat-006"
       ],
       "status": "completed",
-      "evidence": "1. Backend Python FastAPI (ai_service/): database.py quản lý kết nối PostgreSQL, crm_tools.py định nghĩa 6 công cụ Function Calling cho Gemini, gemini_engine.py tích hợp Google GenAI SDK và quản lý bộ nhớ hội thoại session-based, main.py cung cấp REST API (/api/health, /api/chat, /api/chat/reset, /api/quick-prompts) trên cổng 8000. 2. Frontend React: AIChatWidget.jsx với nút FAB nổi góc dưới phải, giao diện Mint Pastel chuẩn thương hiệu, hộp thoại chat kèm gợi ý câu hỏi 1 chạm và bộ định dạng Markdown tùy chỉnh; nhúng vào MainLayout.jsx. 3. Kiểm thử: 7/7 bài kiểm tra tự động tại ai_service/test_ai_service.py PASS; 146/146 tests backend PASS; 117/117 tests frontend PASS; Vite production build thành công trong 373ms; Curl kiểm tra thực tế AI trả lời và gọi tool CSDL chính xác 100%."
+      "evidence": "1. Backend Python FastAPI (ai-agent-service/): Tái cấu trúc chuẩn Clean Architecture gồm config/ (prompts & pydantic settings), src/agents/ (base_agent, crm_agent, router), src/tools/ (7 query tools + 2 action tools), src/database/ (connection pool, unaccent), src/memory/ (session buffer & persistent file logging & redis fallback), src/schemas/ (Pydantic models), src/api/ (FastAPI routes) trên cổng 8000. 2. Quản lý Lịch sử Hội thoại (Multi-session History Drawer): Backend hỗ trợ lưu bền vững file JSON theo session_id, API GET /api/chat/sessions, GET /api/chat/history, DELETE /api/chat/session; Frontend AIChatWidget.jsx tích hợp nút Lịch sử (History icon), Drawer quản lý danh sách cuộc trò chuyện trước đây, mở lại phiên cũ, bắt đầu phiên mới (+ Cuộc trò chuyện mới) và xóa phiên. 3. Frontend React: AIChatWidget.jsx với nút FAB nổi góc dưới phải, hỗ trợ phóng to/thu nhỏ (minimize/expand), giao diện Mint Pastel chuẩn thương hiệu, hộp thoại chat kèm gợi ý câu hỏi 1 chạm và bộ định dạng Markdown tùy chỉnh; nhúng vào MainLayout.jsx. 4. Kiểm thử: 16/16 bài kiểm tra tự động tại ai-agent-service/tests (kèm test_chat_history_persistence) PASS; 146/146 tests backend PASS; 117/117 tests frontend PASS; Vite production build thành công trong 379ms; Curl kiểm tra thực tế AI trả lời và gọi tool CSDL chính xác 100%."
     },
     {
       "id": "feat-028",
@@ -350,6 +350,43 @@
       ],
       "status": "planned",
       "evidence": "Kế hoạch kiểm thử: Ra lệnh chốt đơn qua chat; kiểm tra bản ghi orders mới được tạo, tồn kho sản phẩm giảm chính xác và cơ hội chuyển sang ORDERED."
+    },
+    {
+      "id": "feat-032",
+      "name": "Hộp Thoại Xác Nhận Hành Động Nguy Hiểm & Thẻ Tác Vụ Tương Tác (Human-In-The-Loop Confirmation UI)",
+      "description": "Khi người dùng ra lệnh cho Agent thực hiện các hành động nhạy cảm (như chốt đơn hàng trừ tồn kho, xóa khách hàng, cập nhật hợp đồng giá trị lớn), Agent không commit ngay vào CSDL mà trả về Thẻ Tác Vụ Xác Nhận (Interactive Action Card) ngay trong khung Chat Widget. Thẻ hiển thị tóm tắt chi tiết hành động cùng 2 nút bấm [Xác Nhận Thực Hiện] và [Hủy Bỏ], đảm bảo kiểm soát an toàn tuyệt đối và minh bạch trước khi thay đổi dữ liệu.",
+      "dependencies": [
+        "feat-027",
+        "feat-028",
+        "feat-031"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Ra lệnh chốt đơn; kiểm tra khung chat trả về Action Card ở trạng thái chờ xác nhận; kiểm tra click 'Xác Nhận' mới tiến hành lưu CSDL; kiểm tra click 'Hủy Bỏ' thì giao dịch bị hủy an toàn."
+    },
+    {
+      "id": "feat-033",
+      "name": "Đồng Bộ Thời Gian Thực Dữ Liệu Giữa Chatbot và Giao Diện Bảng CRM (Real-time Cross-Module UI Sync)",
+      "description": "Khi Agent thực hiện thành công bất kỳ tác vụ tự động nào (thêm Lead mới, tạo Opportunity, chốt Order) từ Chatbot, hệ thống phát tín hiệu Custom Event trên trình duyệt. Các trang quản lý liên quan (LeadListPage, OpportunityListPage, OrderListPage, Dashboard) lập tức tự động nạp và hiển thị bản ghi mới trên bảng dữ liệu mà người dùng không cần bấm F5 hay Reload trang.",
+      "dependencies": [
+        "feat-006",
+        "feat-027",
+        "feat-028",
+        "feat-031"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Mở song song trang Leads/Orders và Chat Widget; ra lệnh thêm Lead qua chat; kiểm tra bảng Leads tự động chèn dòng mới ngay sau khi Agent báo thành công mà không reload trang."
+    },
+    {
+      "id": "feat-034",
+      "name": "Phân Tích Thông Minh & Chấm Điểm Xác Suất Chốt Đơn Bằng AI (AI Deal Win-Rate Scoring & Sales Coaching)",
+      "description": "Trợ lý AI phân tích lịch sử chăm sóc (Follow-ups), số ngày trong Pipeline, ngân sách khách hàng và danh mục sản phẩm để tự động tính điểm xác suất chốt đơn thành công (Win-rate %) cho từng Cơ hội bán hàng. Đồng thời AI đưa ra đề xuất chiến thuật cụ thể (Sales Coaching Suggestions) cho Salesman để tăng tốc độ chuyển đổi và phòng ngừa rủi ro mất khách (LOST).",
+      "dependencies": [
+        "feat-014",
+        "feat-016",
+        "feat-027"
+      ],
+      "status": "planned",
+      "evidence": "Kế hoạch kiểm thử: Yêu cầu AI phân tích một cơ hội bán hàng cụ thể; kiểm tra AI trả về điểm số win-rate %, phân tích ưu/nhược điểm và gợi ý hành động tiếp theo dựa trên dữ liệu nhật ký chăm sóc thực tế."
     }
   ]
 }

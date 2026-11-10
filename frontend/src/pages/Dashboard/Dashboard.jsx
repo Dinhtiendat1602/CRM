@@ -431,33 +431,33 @@ export default function Dashboard() {
       {/* Khi đã kích hoạt xem dữ liệu: Hiển thị đầy đủ KPI Cards & Bảng số liệu 1 năm gần nhất */}
       {hasLoaded && (
         <>
-          {/* KPI Cards (Được tính toán động từ DB) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* KPI Cards (Được tính toán động từ DB - Tối ưu 2 hàng trên mobile) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
             {kpis.map((kpi, idx) => {
               const Icon = kpi.icon;
               return (
                 <div
                   key={idx}
-                  className="bg-white rounded-2xl border border-gray-100 p-5 shadow-xs hover:shadow-sm transition-all relative overflow-hidden"
+                  className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-5 shadow-xs hover:shadow-sm transition-all relative overflow-hidden"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-[#6B7280]">{kpi.label}</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-[#6B7280] truncate">{kpi.label}</span>
                     <div
-                      className="h-9 w-9 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center shadow-2xs"
+                      className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center shadow-2xs shrink-0"
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
                   </div>
 
-                  <div className="mt-3">
+                  <div className="mt-2 sm:mt-3">
                     {loading ? (
-                      <div className="h-8 w-24 bg-slate-100 rounded animate-pulse" />
+                      <div className="h-6 sm:h-8 w-20 sm:w-24 bg-slate-100 rounded animate-pulse" />
                     ) : (
-                      <div className="text-2xl font-bold text-[#1F2937] tracking-tight">{kpi.value}</div>
+                      <div className="text-base sm:text-2xl font-bold text-[#1F2937] tracking-tight leading-tight truncate">{kpi.value}</div>
                     )}
-                    <div className="mt-1 flex items-center gap-1 text-xs text-[#6B7280]">
-                      <ArrowUpRight className="h-3.5 w-3.5 text-[#3CB371]" />
-                      <span>{kpi.change}</span>
+                    <div className="mt-0.5 sm:mt-1 flex items-center gap-1 text-[10px] sm:text-xs text-[#6B7280]">
+                      <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#3CB371]" />
+                      <span className="truncate">{kpi.change}</span>
                     </div>
                   </div>
                 </div>
@@ -875,29 +875,29 @@ export default function Dashboard() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
           {allowedActions.map((action, idx) => (
             <Link
               key={idx}
               to={action.path}
-              className="group p-4 rounded-xl border border-[#DDF0E2] hover:border-[#3CB371] hover:shadow-md transition-all flex flex-col justify-between bg-white hover:bg-[#EAF5EC]/40"
+              className="group p-2.5 sm:p-4 rounded-xl border border-[#DDF0E2] hover:border-[#3CB371] hover:shadow-md transition-all flex flex-col justify-between bg-white hover:bg-[#EAF5EC]/40"
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-[#1F2937] group-hover:text-[#2E7D32] transition-colors text-sm">
+                  <span className="font-bold text-[#1F2937] group-hover:text-[#2E7D32] transition-colors text-xs sm:text-sm truncate">
                     {action.title}
                   </span>
-                  <ArrowRight className="h-4 w-4 text-[#6B7280] group-hover:text-[#2E7D32] group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#6B7280] group-hover:text-[#2E7D32] group-hover:translate-x-1 transition-all shrink-0" />
                 </div>
-                <p className="text-xs text-[#6B7280] mt-1 line-clamp-2">
+                <p className="text-[11px] sm:text-xs text-[#6B7280] mt-1 line-clamp-2">
                   {action.desc}
                 </p>
               </div>
-              <div className="mt-3 pt-2 border-t border-[#DDF0E2] flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider">
-                  {isEn ? 'Access now' : 'Truy cập ngay'}
+              <div className="mt-2 sm:mt-3 pt-2 border-t border-[#DDF0E2] flex items-center justify-between">
+                <span className="text-[9px] sm:text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider truncate">
+                  {isEn ? 'Access' : 'Truy cập'}
                 </span>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${action.color}`}>
+                <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border ${action.color} shrink-0`}>
                   {action.roles.includes('ADMIN')
                     ? (isEn ? 'Admin Only' : 'Chỉ Admin')
                     : action.roles.includes('SALE_MANAGER')

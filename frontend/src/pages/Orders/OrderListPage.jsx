@@ -166,60 +166,60 @@ export default function OrderListPage() {
 
         <button
           onClick={() => navigate('/opportunities')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-xs font-semibold rounded-xl shadow-xs transition-all hover:shadow-md cursor-pointer ml-auto"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 bg-[#3CB371] hover:bg-[#38A169] text-white text-[11px] sm:text-xs font-semibold rounded-lg sm:rounded-xl shadow-xs transition-all hover:shadow-md cursor-pointer ml-auto"
         >
-          <ShoppingCart className="w-4 h-4" />
-          <span>{isEn ? '+ Make Order from Opportunity' : '+ Chốt Đơn Từ Cơ Hội'}</span>
+          <ShoppingCart className="w-3.5 h-3.5" />
+          <span>{isEn ? '+ Make Order' : '+ Chốt Đơn Từ Cơ Hội'}</span>
         </button>
       </div>
 
-      {/* Thẻ Thống kê KPI */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Thẻ Thống kê KPI - 2 hàng trên mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
         {/* Card 1: Tổng số đơn hàng */}
-        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
-            <ShoppingCart className="w-6 h-6" />
+        <div className="bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 shadow-xs flex items-center gap-2.5 sm:gap-4">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAF5EC] text-[#3CB371] flex items-center justify-center flex-shrink-0">
+            <ShoppingCart className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">{t('orderTotalCount')}</p>
-            <p className="text-2xl font-extrabold text-[#1F2937] mt-0.5">
-              {summary.totalOrders} <span className="text-xs font-normal text-[#6B7280]">{isEn ? 'orders' : 'đơn'}</span>
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-[#6B7280] truncate">{t('orderTotalCount')}</p>
+            <p className="text-base sm:text-2xl font-extrabold text-[#1F2937] leading-tight">
+              {summary.totalOrders} <span className="text-[10px] sm:text-xs font-normal text-[#6B7280]">{isEn ? 'orders' : 'đơn'}</span>
             </p>
           </div>
         </div>
 
-        {/* Card 2: Tổng doanh thu đã chốt */}
-        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-            <DollarSign className="w-6 h-6" />
+        {/* Card 2: Tổng sản phẩm xuất kho */}
+        <div className="bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 shadow-xs flex items-center gap-2.5 sm:gap-4">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAF5EC] text-[#2E7D32] flex items-center justify-center flex-shrink-0">
+            <Package className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">{t('orderTotalRevenue')}</p>
-            <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-[#6B7280] truncate">{t('orderTotalProducts')}</p>
+            <p className="text-base sm:text-2xl font-extrabold text-[#2E7D32] leading-tight">
+              {summary.totalItems} <span className="text-[10px] sm:text-xs font-normal text-[#6B7280]">{isEn ? 'units' : 'SP'}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Card 3: Tổng doanh thu đã chốt (chiếm full 2 cột trên hàng 2 của mobile) */}
+        <div className="col-span-2 sm:col-span-1 bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 shadow-xs flex items-center gap-2.5 sm:gap-4">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+            <DollarSign className="w-4 h-4 sm:w-6 sm:h-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-[#6B7280] truncate">{t('orderTotalRevenue')}</p>
+            <p className="text-base sm:text-2xl font-extrabold text-emerald-700 leading-tight truncate">
               {Number(summary.totalRevenue || 0).toLocaleString('vi-VN')} ₫
-            </p>
-          </div>
-        </div>
-
-        {/* Card 3: Tổng sản phẩm xuất kho */}
-        <div className="bg-white border border-[#DDF0E2] rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#EAF5EC] text-[#2E7D32] flex items-center justify-center flex-shrink-0">
-            <Package className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs uppercase font-bold tracking-wider text-[#6B7280]">{t('orderTotalProducts')}</p>
-            <p className="text-2xl font-extrabold text-[#2E7D32] mt-0.5">
-              {summary.totalItems} <span className="text-xs font-normal text-[#6B7280]">{isEn ? 'units' : 'sản phẩm'}</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* Bộ Lọc & Tìm Kiếm */}
-      <div className="bg-white border border-[#DDF0E2] rounded-2xl p-4 shadow-xs space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+      <div className="bg-white border border-[#DDF0E2] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-xs">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-2 sm:gap-3">
           {/* Tìm kiếm đa năng */}
-          <div className="md:col-span-4">
+          <div className="col-span-2 md:col-span-4">
             <SearchInput
               value={search}
               onChange={(val) => {
@@ -231,25 +231,36 @@ export default function OrderListPage() {
           </div>
 
           {/* Lọc trạng thái đơn */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <select
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white cursor-pointer"
             >
               <option value="">{isEn ? '-- All statuses --' : '-- Tất cả trạng thái --'}</option>
-              <option value="COMPLETED">{isEn ? 'Completed (COMPLETED)' : 'Đã hoàn tất (COMPLETED)'}</option>
-              <option value="PROCESSING">{isEn ? 'Processing (PROCESSING)' : 'Đang xử lý (PROCESSING)'}</option>
-              <option value="PENDING">{isEn ? 'Pending Payment (PENDING)' : 'Chờ thanh toán (PENDING)'}</option>
-              <option value="CANCELLED">{isEn ? 'Cancelled (CANCELLED)' : 'Đã hủy (CANCELLED)'}</option>
+              <option value="COMPLETED">{isEn ? 'Completed' : 'Đã hoàn tất'}</option>
+              <option value="PROCESSING">{isEn ? 'Processing' : 'Đang xử lý'}</option>
+              <option value="PENDING">{isEn ? 'Pending' : 'Chờ thanh toán'}</option>
+              <option value="CANCELLED">{isEn ? 'Cancelled' : 'Đã hủy'}</option>
             </select>
           </div>
 
+          {/* Nút Đặt lại bộ lọc */}
+          <div className="col-span-1 md:col-span-2 flex items-center">
+            <button
+              onClick={handleResetFilters}
+              className="w-full flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 text-[11px] sm:text-xs font-semibold rounded-lg sm:rounded-xl transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>{isEn ? 'Reset' : 'Đặt Lại'}</span>
+            </button>
+          </div>
+
           {/* Lọc từ ngày (BR-05) */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <div className="relative">
               <input
                 type="date"
@@ -258,14 +269,14 @@ export default function OrderListPage() {
                   setFromDate(e.target.value);
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
                 title={isEn ? 'Filter from order date' : 'Lọc từ ngày chốt đơn'}
               />
             </div>
           </div>
 
           {/* Lọc đến ngày (BR-05) */}
-          <div className="md:col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <div className="relative">
               <input
                 type="date"
@@ -274,21 +285,10 @@ export default function OrderListPage() {
                   setToDate(e.target.value);
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3CB371]/20 focus:border-[#3CB371] bg-white"
                 title={isEn ? 'Filter to order date' : 'Lọc đến ngày chốt đơn'}
               />
             </div>
-          </div>
-
-          {/* Nút Đặt lại bộ lọc */}
-          <div className="md:col-span-2 flex items-center gap-2">
-            <button
-              onClick={handleResetFilters}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>{isEn ? 'Reset' : 'Đặt Lại'}</span>
-            </button>
           </div>
         </div>
 

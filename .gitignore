@@ -7,14 +7,15 @@ node_modules/
 .env
 backend/.env
 frontend/.env
-ai_service/.env
+ai-agent-service/.env
 *.env
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-ai_service/venv/
+ai-agent-service/venv/
+ai-agent-service/storage/logs/
 .venv/
 venv/
 ENV/

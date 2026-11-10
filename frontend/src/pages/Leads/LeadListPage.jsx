@@ -218,28 +218,28 @@ export default function LeadListPage() {
 
         <button
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-xl text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer ml-auto"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 bg-[#3CB371] hover:bg-[#38A169] text-white rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold shadow-xs transition-all shadow-[#3CB371]/20 hover:shadow-md cursor-pointer ml-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>{t('leadsAddNew', 'Thêm Khách Tiềm Năng')}</span>
         </button>
       </div>
 
       {/* Thông báo thành công (Hỗ trợ hiển thị khi tạo tự động cơ hội) */}
       {successMsg && (
-        <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-sm shadow-2xs">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="flex items-center justify-between p-3 sm:p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl sm:rounded-2xl text-xs sm:text-sm shadow-2xs">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
             <span className="font-semibold">{successMsg.text}</span>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             {successMsg.hasOpp && (
               <button
                 type="button"
                 onClick={() => navigate('/opportunities')}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-2xs cursor-pointer"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-semibold rounded-lg sm:rounded-xl transition-colors shadow-2xs cursor-pointer"
               >
-                {t('leadsViewOpportunities', 'Xem Danh Sách Cơ Hội')}
+                {t('leadsViewOpportunities', 'Xem Cơ Hội')}
               </button>
             )}
             <button
@@ -247,29 +247,29 @@ export default function LeadListPage() {
               onClick={() => setSuccessMsg(null)}
               className="text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
       )}
 
       {/* Control Bar: Tìm kiếm, Bộ lọc khoảng ngày, Sort (SRS 3.2, 3.3, BR-04, BR-05) */}
-      <div className="bg-white p-4 rounded-2xl border border-[#DDF0E2] shadow-xs space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div className="bg-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-[#DDF0E2] shadow-xs">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-2 sm:gap-3 items-center">
           {/* Search Input (SRS 3.3) */}
-          <div className="md:col-span-5">
+          <div className="col-span-2 md:col-span-5">
             <SearchInput
               value={search}
               onChange={(val) => {
                 setSearch(val);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              placeholder="Tìm kiếm theo tên khách hàng (Nguyễn Văn An, Bích...)"
+              placeholder="Tìm theo tên khách hàng..."
             />
           </div>
 
           {/* Date Filter: Start Date -> End Date (BR-05) */}
-          <div className="md:col-span-5 flex items-center gap-2">
+          <div className="col-span-2 md:col-span-5 flex items-center gap-1.5 sm:gap-2">
             <div className="relative flex-1">
               <input
                 type="date"
@@ -278,7 +278,7 @@ export default function LeadListPage() {
                   setStartDate(e.target.value);
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="w-full px-3 py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-lg sm:rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
                 title={t('fromDate', 'Từ ngày')}
               />
             </div>
@@ -291,26 +291,26 @@ export default function LeadListPage() {
                   setEndDate(e.target.value);
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="w-full px-3 py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F3F4F6] border border-[#DDF0E2] rounded-lg sm:rounded-xl text-xs text-[#1F2937] focus:outline-hidden focus:border-[#3CB371] focus:ring-1 focus:ring-[#3CB371]"
                 title={t('toDate', 'Đến ngày')}
               />
             </div>
             {(startDate || endDate) && (
               <button
                 onClick={handleClearDateFilter}
-                className="p-2 text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
                 title={t('clearFilter', 'Xóa lọc ngày')}
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             )}
           </div>
 
           {/* Sắp xếp theo Ngày Nhập (BR-04) */}
-          <div className="md:col-span-2 flex justify-end">
+          <div className="col-span-2 md:col-span-2 flex justify-end">
             <button
               onClick={handleToggleSortOrder}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#F3F4F6] hover:bg-[#EAF5EC] border border-[#DDF0E2] rounded-xl text-xs font-semibold text-[#1F2937] transition-colors cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#F3F4F6] hover:bg-[#EAF5EC] border border-[#DDF0E2] rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold text-[#1F2937] transition-colors cursor-pointer"
               title="Nhấn để đổi chiều sắp xếp"
             >
               <ArrowUpDown className="w-3.5 h-3.5 text-[#6B7280]" />
@@ -318,8 +318,6 @@ export default function LeadListPage() {
             </button>
           </div>
         </div>
-
-
       </div>
 
       {/* Error Banner */}

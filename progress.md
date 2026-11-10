@@ -442,3 +442,22 @@
 | `npm run lint` (trong `frontend/`) | **PASS (0 errors, 0 warnings trong component AI)** | Oxlint kiểm tra 76 files frontend, AIChatWidget.jsx 0 lỗi, 0 cảnh báo |
 | `npm run build` (trong `frontend/`) | **PASS (built in 345ms)** | Vite production client build hoàn tất, bundle `dist/` sẵn sàng triển khai |
 | **Toàn bộ hệ thống** | **PASS (278/278 tests passed 100%)** | 146 backend integration tests + 117 frontend tests + 15 AI Agent Service tests vượt qua tuyệt đối |
+
+---
+
+### [2026-11-10] Chuyển Đổi Nâng Cấp Hệ Thống AI Agent Service Sang Framework LangGraph
+
+- **Mục tiêu:** Tái cấu trúc toàn bộ AI Agent Service từ cơ chế gọi trực tiếp Google GenAI SDK sang **LangGraph (StateGraph & ReAct Engine)**, thiết lập nền tảng chuẩn công nghiệp cho Autonomous Agent, Multi-turn Context Memory, Human-in-the-Loop và Tool Execution Loop.
+- **Những việc đã hoàn thành:**
+  1. Cài đặt các thư viện `langgraph`, `langchain-core`, `langchain-google-genai` vào môi trường ảo `ai-agent-service/venv` và cập nhật `requirements.txt`.
+  2. Chuẩn hóa 9 CRM Tools (`src/tools/`) thành LangChain Tools thông qua decorator/factory `tool()` từ `langchain_core.tools`, đồng thời bảo toàn mảng hàm nguyên bản `RAW_CRM_TOOLS` phục vụ các unit tests độc lập.
+  3. Xây dựng schema `CRMState` tại `src/agents/state.py` và biên dịch đồ thị `CompiledStateGraph` tại `src/agents/base_agent.py` thông qua `create_react_agent` với `MemorySaver` checkpointer.
+  4. Hiện thực hóa cơ chế `_hydrate_session_if_needed`: tự động nạp lại lịch sử tin nhắn từ kho lưu trữ bền vững (Redis/File JSON) vào State Checkpointer của LangGraph khi khởi động lại dịch vụ hoặc chuyển phiên trò chuyện.
+  5. Xây dựng bộ vá lỗi tư duy suy luận `patch_langchain_gemini_thought_signature()` tại `src/llm/client.py`: tự động bảo toàn và chuyển tiếp trường `thought_signature` từ các mô hình tư duy Gemini 2.5 / 3 khi trả kết quả Function Calling ngược về API, triệt tiêu hoàn toàn lỗi `400 Function call is missing a thought_signature in functionCall parts`.
+  6. Mở rộng API: Cập nhật thông tin framework trong `/api/health` và tạo endpoint `GET /api/agent/graph` kết xuất mã sơ đồ Mermaid trực quan của đồ thị LangGraph.
+  7. Bổ sung bài kiểm thử cấu trúc đồ thị `test_langgraph_crm_agent_structure` tại `tests/test_agent_actions.py`.
+- **Bằng chứng kiểm thử (Evidence):**
+  - `ai-agent-service/tests/run_tests.py`: **17/17 tests PASS** (12 test queries + 5 test agent actions, 0 failures).
+  - Kiểm thử trực tiếp gọi Gemini API và truy vấn PostgreSQL thời gian thực với LangGraph: Agent phản hồi chính xác 22 Leads và nhớ ngữ cảnh chỉ ra Lead mới nhất ở lượt hỏi thứ hai.
+  - Backend integration tests: **146/146 tests PASS** (6 suites, 31.6s).
+  - Frontend Vite build: **Thành công trong 359ms** (0 lỗi runtime, bundle sạch).

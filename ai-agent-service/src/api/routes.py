@@ -14,9 +14,20 @@ def healthcheck():
     return {
         "status": "online" if db_ok else "degraded",
         "service": "Zen CRM AI Agent Service (Enterprise)",
+        "framework": "LangGraph (StateGraph)",
         "database_connected": db_ok,
         "model": settings.GEMINI_MODEL,
         "tools_loaded": len(crm_agent.tools)
+    }
+
+@router.get("/api/agent/graph")
+@router.get("/api/v1/agent/graph")
+def get_agent_graph():
+    return {
+        "framework": "LangGraph",
+        "nodes": list(crm_agent.graph.nodes.keys()),
+        "tools": [t.name for t in crm_agent.tools],
+        "mermaid": crm_agent.graph.get_graph().draw_mermaid()
     }
 
 @router.post("/api/chat", response_model=ChatResponse)

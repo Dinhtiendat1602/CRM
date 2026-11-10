@@ -84,3 +84,35 @@ def test_chat_history_persistence():
     # Dọn dẹp
     memory.clear_session(test_session)
     assert len(memory.get_history(test_session)) == 0
+
+def test_langgraph_crm_agent_structure():
+    from src.agents import crm_agent, BaseAgent, CRMAgent
+    from langgraph.graph.state import CompiledStateGraph
+    
+    assert isinstance(crm_agent, CRMAgent)
+    assert isinstance(crm_agent, BaseAgent)
+    assert isinstance(crm_agent.graph, CompiledStateGraph)
+    
+    node_names = list(crm_agent.graph.nodes.keys())
+    assert "agent" in node_names
+    assert "tools" in node_names
+    assert len(crm_agent.tools) == 9
+    
+    # Kiểm tra hydrate session khi có lịch sử sẵn
+    from src.memory.redis_memory import memory
+    hydrate_session = "test_hydrate_session"
+    memory.clear_session(hydrate_session)
+    memory.save_message(hydrate_session, "user", "Tin nhắn trước đó")
+    memory.save_message(hydrate_session, "assistant", "Câu trả lời trước đó")
+    
+    crm_agent._hydrate_session_if_needed(hydrate_session)
+    config = {"configurable": {"thread_id": hydrate_session}}
+    state = crm_agent.graph.get_state(config)
+    assert "messages" in state.values
+    assert len(state.values["messages"]) >= 2
+    
+    # Test reset session dọn dẹp cả checkpointer và memory
+    res_reset = crm_agent.reset_session(hydrate_session)
+    assert res_reset is True
+    assert len(memory.get_history(hydrate_session)) == 0
+

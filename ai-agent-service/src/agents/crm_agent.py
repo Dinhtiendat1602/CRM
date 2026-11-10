@@ -1,4 +1,4 @@
-"""Agent nghiệp vụ chuyên sâu Zen CRM Enterprise."""
+"""Agent nghiệp vụ chuyên sâu Zen CRM Enterprise trên nền tảng LangGraph."""
 from src.agents.base_agent import BaseAgent
 from src.tools import ALL_CRM_TOOLS
 from src.agents.router import router
@@ -14,9 +14,10 @@ class CRMAgent(BaseAgent):
         # Lưu tin nhắn người dùng vào lịch sử hội thoại
         memory.save_message(session_id=session_id, role="user", content=user_message)
         
-        # Nhận diện ý định sơ bộ
+        # Nhận diện ý định sơ bộ (hỗ trợ phân loại và logging)
         intent = router.classify(user_message)
-        # Thực thi hội thoại qua Gemini với đầy đủ Function Calling
+        
+        # Thực thi hội thoại qua đồ thị LangGraph (hỗ trợ Function Calling & ReAct loops)
         reply = self.execute_chat(user_message, session_id=session_id)
         
         # Lưu câu trả lời của AI vào lịch sử hội thoại
@@ -24,8 +25,4 @@ class CRMAgent(BaseAgent):
         log_ai_reply(session_id, len(reply))
         return reply
 
-    def reset_session(self, session_id: str = "default") -> bool:
-        return memory.clear_session(session_id)
-
 crm_agent = CRMAgent()
-

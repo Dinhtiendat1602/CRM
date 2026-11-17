@@ -67,3 +67,4 @@ def get_current_user(authorization: Optional[str] = Header(None)) -> Dict[str, A
         "email": "manager@zencrm.vn",
         "full_name": "Quản lý kinh doanh"
     }
+

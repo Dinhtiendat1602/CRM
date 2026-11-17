@@ -28,3 +28,4 @@ def get_current_user_context() -> Dict[str, Any]:
 def reset_current_user(token):
     """Đặt lại ngữ cảnh người dùng sau khi kết thúc request."""
     _user_context.reset(token)
+

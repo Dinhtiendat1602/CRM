@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-17 09:55
-- **Active Task:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (RBAC), Bảo mật Dữ liệu Cấp Bản Ghi (RLS) & Phân bổ Công cụ Động cho AI Agent Zen CRM trên LangGraph.
-- **Current Status:** HOÀN THÀNH 100% (284/284 tests PASS: 146 backend + 117 frontend + 21 AI Agent Service tests; Vite build thành công trong 667ms, 0 lỗi runtime).
+- **Last Updated:** 2026-11-17 10:45
+- **Active Task:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (RBAC), Bảo mật Dữ liệu Cấp Bản Ghi (RLS), Phân bổ Công cụ Động & Cách ly Lịch sử Trò chuyện theo Vai trò cho AI Agent Zen CRM trên LangGraph.
+- **Current Status:** HOÀN THÀNH 100% (285/285 tests PASS: 146 backend + 117 frontend + 22 AI Agent Service tests; Vite build thành công trong 381ms, 0 lỗi runtime).
 - **Next Feature:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard).
 
 

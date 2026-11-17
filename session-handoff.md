@@ -3,9 +3,9 @@
 # Session Handoff - Biên Bản Bàn Giao Phiên Làm Việc
 
 ## 1. Hiện Trạng & Mục Tiêu Phiên (Current State & Objective)
-- **Thời gian bàn giao:** 2026-11-17 09:55
-- **Nội dung trọng tâm:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (End-to-End Role-Based Access Control - RBAC), Bảo mật Dữ liệu Động (Row-Level Security - RLS) và Phân bổ Công cụ theo Vai trò cho Zen CRM AI Assistant trên nền tảng LangGraph.
-- **Trạng thái hệ thống:** HOÀN THÀNH 100% (21/21 AI Agent tests PASS + 146/146 backend tests PASS; Vite build thành công trong 667ms; Live E2E chat với PostgreSQL và Gemini đạt kết quả xuất sắc 100%).
+- **Thời gian bàn giao:** 2026-11-17 10:45
+- **Nội dung trọng tâm:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (RBAC), Bảo mật Dữ liệu Động (RLS), Phân bổ Công cụ theo Vai trò và **Cách ly Triệt để Lịch sử Trò chuyện theo Từng Vai trò (Role-Isolated Chat History & Sessions)** cho Zen CRM AI Assistant trên nền tảng LangGraph.
+- **Trạng thái hệ thống:** HOÀN THÀNH 100% (22/22 AI Agent tests PASS + 146/146 backend tests PASS; Vite build thành công trong 381ms; Live E2E chat & history isolation với PostgreSQL và Gemini đạt kết quả xuất sắc 100%).
 - **Cổng dịch vụ đang cấu hình:**
   - Express Backend: `http://localhost:5001`
   - React Frontend: `http://localhost:8080`
@@ -40,15 +40,26 @@
    - [`src/tools/lead_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/lead_tools.py): Tự động gán `assigned_to = user_id` khi Salesman tạo Lead mới; chặn Admin tạo Lead.
    - [`src/tools/order_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/order_tools.py): Kiểm tra quyền phân phối sản phẩm trong `salesman_products` trước khi tạo cơ hội bán hàng.
 
-4. **Đồng Bộ Frontend React (AIChatWidget.jsx):**
-   - Tự động gắn header `Authorization: Bearer <token>` vào tất cả các yêu cầu API (`/api/chat`, `/api/chat/reset`, `/api/chat/history`, `/api/chat/sessions`, `/api/health`).
-   - Hiển thị huy hiệu vai trò (Admin / Manager / Sales) trên thanh tiêu đề của Chat Widget.
-   - Tùy biến các nút bấm gợi ý câu hỏi 1 chạm (Quick Prompts) thích ứng chính xác theo vai trò đăng nhập.
+4. **Cách Ly Triệt Để Lịch Sử Trò Chuyện Theo Từng Vai Trò (Role & User History Isolation):**
+   - [`src/memory/redis_memory.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/memory/redis_memory.py):
+     - Lưu trữ metadata gắn liền phiên: `{"role": ..., "user_id": ..., "username": ..., "updated_at": ...}`.
+     - Hàm `list_saved_sessions(role, user_id)`: Lọc nghiêm ngặt chỉ trả về các phiên thuộc đúng vai trò (và đúng `user_id` đối với Salesman).
+     - Hàm `get_session_role(session_id)` & `get_session_user_id(session_id)` hỗ trợ kiểm soát quyền đọc/xóa.
+   - [`src/api/routes.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/api/routes.py):
+     - `GET /api/chat/sessions`: Tự động truyền vai trò và ID của token người dùng vào `list_saved_sessions`.
+     - `GET /api/chat/history`: Chặn hoàn toàn và trả về rỗng nếu người dùng cố truy cập lịch sử của vai trò khác.
+     - `DELETE /api/chat/session`: Chặn xóa phiên của vai trò hoặc nhân viên khác (HTTP 403 Forbidden).
 
-5. **Kiểm Thử Đầy Đủ & Xác Thực Thực Tế:**
-   - Bổ sung 4 bài test tự động chuyên sâu trong `tests/test_agent_actions.py`: `test_role_based_access_control_jwt`, `test_admin_tools_and_restrictions`, `test_salesman_tools_rls_and_restrictions`, `test_role_graphs_tool_allocation`.
-   - Chạy thành công 21/21 bài kiểm thử tự động của AI Agent Service (100% PASS).
-   - Chạy kịch bản live E2E: Admin gọi thành công `get_admin_system_overview`, Salesman chỉ tra cứu đúng 3 sản phẩm được gán trong `salesman_products`.
+5. **Đồng Bộ Frontend React (AIChatWidget.jsx):**
+   - Tích hợp hook `useAuth()` để theo dõi người dùng và vai trò đăng nhập hiện tại theo thời gian thực.
+   - Cô lập vùng nhớ trình duyệt (Scoped `localStorage`): Phân tách khóa theo định dạng `zen_crm_ai_session_id_${role}_${userId}` và `zen_crm_ai_chat_messages_${role}_${userId}`.
+   - Khi chuyển đổi tài khoản/vai trò, khung chat tự động hoán đổi phiên và tin nhắn của đúng tài khoản đó, không bao giờ bị lẫn lộn giữa Admin, Manager và Salesman.
+   - Drawer Lịch sử hiển thị huy hiệu vai trò `({roleBadge})` và chỉ liệt kê danh sách các phiên thuộc vai trò tương ứng.
+
+6. **Kiểm Thử Đầy Đủ & Xác Thực Thực Tế:**
+   - Bổ sung bài test `test_chat_history_role_isolation` trong `tests/test_agent_actions.py`.
+   - Bộ kiểm thử AI Agent Service đạt **22/22 tests PASS (100%)**.
+   - Bộ kiểm thử Live E2E (`scratch/verify_e2e_rbac.py`): Xác nhận Admin chỉ thấy session của Admin, Salesman chỉ thấy session của Salesman, truy cập chéo lịch sử bị chặn hoàn toàn.
 
 ---
 
@@ -56,17 +67,17 @@
 
 | Bộ kiểm thử | Kết quả | Ghi chú |
 |---|---|---|
-| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (21/21)** | 12 test queries + 9 test agent actions (có đầy đủ 4 bài test RBAC/RLS) |
-| Live E2E Role Chat (`scratch/verify_e2e_rbac.py`) | **PASS (100%)** | Admin tra cứu đúng thống kê 20 users; Salesman chỉ lấy đúng 3 sản phẩm được phân quyền |
+| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (22/22)** | 12 test queries + 10 test agent actions (kèm `test_chat_history_role_isolation`) |
+| Live E2E Role Chat & History Isolation | **PASS (100%)** | Admin chỉ thấy sessions của Admin; Salesman chỉ thấy sessions của Salesman; đọc chéo bị chặn |
 | AI Service Healthcheck (`GET /api/health`) | **HTTP 200 OK** | `roles_supported: ['ADMIN', 'SALE_MANAGER', 'SALESMAN']`, `tools_loaded: {ADMIN: 1, SALE_MANAGER: 9, SALESMAN: 7}` |
 | AI Service Graph Endpoint (`GET /api/agent/graph`) | **HTTP 200 OK** | Trả về đúng sơ đồ Mermaid và số lượng công cụ cho từng Role |
 | Backend Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures, 31.5s |
-| Frontend Build (`npm run build`) | **PASS (667ms)** | Vite production build `dist/` thành công, 0 lỗi lint/syntax |
+| Frontend Build (`npm run build`) | **PASS (381ms)** | Vite production build `dist/` thành công, 0 lỗi lint/syntax |
 
 ---
 
 ## 4. Rủi Ro & Vướng Mắc Tồn Đọng (Blockers & Risks)
-- **Không có blocker nào.** Hệ thống RBAC và phân quyền công cụ vận hành hoàn hảo, an toàn và bảo mật cao.
+- **Không có blocker nào.** Hệ thống RBAC, phân quyền công cụ và cách ly lịch sử hội thoại vận hành an toàn và bảo mật 100%.
 
 ---
 

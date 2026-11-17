@@ -65,10 +65,34 @@ def handle_chat(payload: ChatRequest, user: dict = Depends(get_current_user)):
 @router.get("/api/v1/chat/history")
 def get_chat_history(session_id: str = "default", user: dict = Depends(get_current_user)):
     from src.memory.redis_memory import memory
+    user_role = user.get("role", "SALE_MANAGER")
+    user_id = user.get("id")
+    sess_role = memory.get_session_role(session_id)
+    sess_uid = memory.get_session_user_id(session_id)
+
+    # Chặn truy cập nếu phiên thuộc vai trò khác
+    if sess_role and sess_role != user_role:
+        return {
+            "session_id": session_id,
+            "role": user_role,
+            "total_messages": 0,
+            "messages": []
+        }
+
+    # Đối với Salesman: chặn xem phiên của salesman khác
+    if user_role == "SALESMAN" and sess_uid is not None and user_id is not None:
+        if int(sess_uid) != int(user_id):
+            return {
+                "session_id": session_id,
+                "role": user_role,
+                "total_messages": 0,
+                "messages": []
+            }
+
     history = memory.get_history(session_id)
     return {
         "session_id": session_id,
-        "role": user.get("role"),
+        "role": user_role,
         "total_messages": len(history),
         "messages": history
     }
@@ -77,17 +101,33 @@ def get_chat_history(session_id: str = "default", user: dict = Depends(get_curre
 @router.get("/api/v1/chat/sessions")
 def get_chat_sessions(user: dict = Depends(get_current_user)):
     from src.memory.redis_memory import memory
+    user_role = user.get("role", "SALE_MANAGER")
+    user_id = user.get("id")
+    sessions = memory.list_saved_sessions(role=user_role, user_id=user_id)
     return {
         "user": user.get("username"),
-        "role": user.get("role"),
-        "sessions": memory.list_saved_sessions()
+        "role": user_role,
+        "sessions": sessions
     }
 
 @router.delete("/api/chat/session")
 @router.delete("/api/v1/chat/session")
 def delete_chat_session(session_id: str, user: dict = Depends(get_current_user)):
     from src.memory.redis_memory import memory
+    user_role = user.get("role", "SALE_MANAGER")
+    user_id = user.get("id")
+    sess_role = memory.get_session_role(session_id)
+    sess_uid = memory.get_session_user_id(session_id)
+
+    # Chặn xóa nếu phiên thuộc vai trò khác
+    if sess_role and sess_role != user_role:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền xóa phiên hội thoại của vai trò khác.")
+    if user_role == "SALESMAN" and sess_uid is not None and user_id is not None:
+        if int(sess_uid) != int(user_id):
+            raise HTTPException(status_code=403, detail="Bạn không có quyền xóa phiên hội thoại của nhân viên khác.")
+
     deleted = memory.clear_session(session_id)
+    crm_agent.reset_session(session_id)
     return {"session_id": session_id, "deleted": deleted}
 
 @router.post("/api/chat/reset")

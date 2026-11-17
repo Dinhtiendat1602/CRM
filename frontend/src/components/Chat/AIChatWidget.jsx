@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../../context/authContextDef';
 import {
   Bot,
   Sparkles,
@@ -151,6 +152,16 @@ function formatMarkdown(content) {
 }
 
 export default function AIChatWidget() {
+  const { user: authUser, role: authRole } = useAuth();
+  const currentRole = (authRole || authUser?.role || 'SALE_MANAGER').toUpperCase();
+  const currentUserId = authUser?.id || authUser?.username || 'user';
+  const roleStorageKey = `${currentRole}_${currentUserId}`;
+  const sessionKey = `zen_crm_ai_session_id_${roleStorageKey}`;
+  const messagesKey = `zen_crm_ai_chat_messages_${roleStorageKey}`;
+
+  const activePrompts = ROLE_QUICK_PROMPTS[currentRole] || ROLE_QUICK_PROMPTS.SALE_MANAGER;
+  const roleBadge = currentRole === 'ADMIN' ? 'Admin' : currentRole === 'SALESMAN' ? 'Sales' : 'Manager';
+
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -158,25 +169,25 @@ export default function AIChatWidget() {
   const [loadingSessions, setLoadingSessions] = useState(false);
 
   const [sessionId, setSessionId] = useState(() => {
-    const saved = localStorage.getItem('zen_crm_ai_session_id');
+    const saved = localStorage.getItem(sessionKey);
     if (saved) return saved;
-    const newId = 'sess_' + Math.random().toString(36).substring(2, 9);
-    localStorage.setItem('zen_crm_ai_session_id', newId);
+    const newId = `${currentRole.toLowerCase()}_sess_${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem(sessionKey, newId);
     return newId;
   });
+
   const [messages, setMessages] = useState(() => {
     try {
-      const saved = localStorage.getItem('zen_crm_ai_chat_messages');
+      const saved = localStorage.getItem(messagesKey);
       if (saved) return JSON.parse(saved);
     } catch {
       // fallback
     }
-    const user = getCurrentUser();
     return [
       {
         id: 'welcome',
         role: 'assistant',
-        content: getWelcomeMessageForUser(user),
+        content: getWelcomeMessageForUser(authUser),
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
     ];
@@ -187,21 +198,49 @@ export default function AIChatWidget() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const currentUser = getCurrentUser();
-  const currentRole = currentUser?.role || 'SALE_MANAGER';
-  const activePrompts = ROLE_QUICK_PROMPTS[currentRole] || ROLE_QUICK_PROMPTS.SALE_MANAGER;
-  const roleBadge = currentRole === 'ADMIN' ? 'Admin' : currentRole === 'SALESMAN' ? 'Sales' : 'Manager';
+  // Khi tài khoản hoặc vai trò thay đổi, chuyển đổi phiên và tin nhắn riêng của tài khoản/vai trò đó
+  useEffect(() => {
+    const savedSession = localStorage.getItem(sessionKey);
+    const savedMsgs = localStorage.getItem(messagesKey);
 
-  // Tự động lưu lịch sử tin nhắn vào localStorage khi có tin mới
+    if (savedSession) {
+      setSessionId(savedSession);
+    } else {
+      const newId = `${currentRole.toLowerCase()}_sess_${Math.random().toString(36).substring(2, 9)}`;
+      setSessionId(newId);
+      localStorage.setItem(sessionKey, newId);
+    }
+
+    if (savedMsgs) {
+      try {
+        setMessages(JSON.parse(savedMsgs));
+      } catch {
+        // fallback
+      }
+    } else {
+      const initialWelcome = [
+        {
+          id: 'welcome_' + Date.now(),
+          role: 'assistant',
+          content: getWelcomeMessageForUser(authUser),
+          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        },
+      ];
+      setMessages(initialWelcome);
+      localStorage.setItem(messagesKey, JSON.stringify(initialWelcome));
+    }
+  }, [roleStorageKey]);
+
+  // Tự động lưu lịch sử tin nhắn vào localStorage theo role/user khi có tin mới
   useEffect(() => {
     if (messages && messages.length > 0) {
       try {
-        localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(messages));
+        localStorage.setItem(messagesKey, JSON.stringify(messages));
       } catch {
         // storage quota exceeded or disabled
       }
     }
-  }, [messages]);
+  }, [messages, messagesKey]);
 
   useEffect(() => {
     // Health check AI service on mount
@@ -303,18 +342,17 @@ export default function AIChatWidget() {
     } catch {
       // ignore
     }
-    const user = getCurrentUser();
     const resetMsg = [
       {
         id: 'reset_' + Date.now(),
         role: 'assistant',
-        content: `🔄 Phiên hội thoại đã được làm mới.\n\n${getWelcomeMessageForUser(user)}`,
+        content: `🔄 Phiên hội thoại đã được làm mới.\n\n${getWelcomeMessageForUser(authUser)}`,
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
     ];
     setMessages(resetMsg);
     try {
-      localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(resetMsg));
+      localStorage.setItem(messagesKey, JSON.stringify(resetMsg));
     } catch {
       // ignore
     }
@@ -367,34 +405,33 @@ export default function AIChatWidget() {
 
         if (serverMessages.length > 0) {
           setMessages(serverMessages);
-          localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(serverMessages));
+          localStorage.setItem(messagesKey, JSON.stringify(serverMessages));
         }
       }
     } catch (err) {
       console.error('Lỗi khi nạp tin nhắn phiên cũ:', err);
     } finally {
       setSessionId(targetSessionId);
-      localStorage.setItem('zen_crm_ai_session_id', targetSessionId);
+      localStorage.setItem(sessionKey, targetSessionId);
       setLoading(false);
       setShowHistory(false);
     }
   };
 
   const handleStartNewChat = () => {
-    const newId = 'sess_' + Math.random().toString(36).substring(2, 9);
+    const newId = `${currentRole.toLowerCase()}_sess_` + Math.random().toString(36).substring(2, 9);
     setSessionId(newId);
-    localStorage.setItem('zen_crm_ai_session_id', newId);
-    const user = getCurrentUser();
+    localStorage.setItem(sessionKey, newId);
     const welcomeMsg = [
       {
         id: 'welcome_' + Date.now(),
         role: 'assistant',
-        content: getWelcomeMessageForUser(user),
+        content: getWelcomeMessageForUser(authUser),
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
     ];
     setMessages(welcomeMsg);
-    localStorage.setItem('zen_crm_ai_chat_messages', JSON.stringify(welcomeMsg));
+    localStorage.setItem(messagesKey, JSON.stringify(welcomeMsg));
     setShowHistory(false);
   };
 
@@ -505,7 +542,7 @@ export default function AIChatWidget() {
               <div className="p-3 bg-white border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
                   <Clock className="w-4 h-4 text-emerald-600" />
-                  <span>Lịch sử các cuộc trò chuyện</span>
+                  <span>Lịch sử hội thoại ({roleBadge})</span>
                 </div>
                 <button
                   onClick={handleStartNewChat}
@@ -526,7 +563,7 @@ export default function AIChatWidget() {
                 ) : sessionsList.length === 0 ? (
                   <div className="py-12 text-center text-gray-400 text-xs space-y-2">
                     <MessageSquare className="w-8 h-8 mx-auto text-gray-300 stroke-1" />
-                    <p className="font-medium text-gray-600">Chưa có lịch sử hội thoại nào</p>
+                    <p className="font-medium text-gray-600">Chưa có lịch sử hội thoại nào cho vai trò {roleBadge}</p>
                     <p className="text-[11px] text-gray-400 max-w-[260px] mx-auto">
                       Mọi câu hỏi và kết quả tra cứu CRM của bạn sẽ tự động được lưu và hiển thị tại đây.
                     </p>

@@ -251,3 +251,54 @@ def test_role_graphs_tool_allocation():
     assert "create_opportunity" in salesman_tool_names
 
 
+def test_chat_history_role_isolation():
+    """Kiểm tra cách ly lịch sử trò chuyện nghiêm ngặt theo vai trò và người dùng."""
+    from src.memory.redis_memory import memory
+
+    sess_admin = "test_iso_admin_sess"
+    sess_mgr = "test_iso_mgr_sess"
+    sess_sales = "test_iso_sales_sess"
+
+    # Dọn dẹp trước
+    memory.clear_session(sess_admin)
+    memory.clear_session(sess_mgr)
+    memory.clear_session(sess_sales)
+
+    # 1. Lưu phiên cho từng vai trò
+    admin_u = {"id": 1, "username": "admin", "role": "ADMIN"}
+    mgr_u = {"id": 2, "username": "manager", "role": "SALE_MANAGER"}
+    sales_u = {"id": 3, "username": "salesman1", "role": "SALESMAN"}
+
+    memory.save_message(sess_admin, "user", "Tin nhắn từ Admin", user=admin_u)
+    memory.save_message(sess_mgr, "user", "Tin nhắn từ Manager", user=mgr_u)
+    memory.save_message(sess_sales, "user", "Tin nhắn từ Salesman", user=sales_u)
+
+    # 2. Kiểm tra list_saved_sessions lọc chính xác
+    admin_sessions = [s["session_id"] for s in memory.list_saved_sessions(role="ADMIN")]
+    assert sess_admin in admin_sessions
+    assert sess_mgr not in admin_sessions
+    assert sess_sales not in admin_sessions
+
+    mgr_sessions = [s["session_id"] for s in memory.list_saved_sessions(role="SALE_MANAGER")]
+    assert sess_mgr in mgr_sessions
+    assert sess_admin not in mgr_sessions
+    assert sess_sales not in mgr_sessions
+
+    sales_sessions = [s["session_id"] for s in memory.list_saved_sessions(role="SALESMAN", user_id=3)]
+    assert sess_sales in sales_sessions
+    assert sess_admin not in sales_sessions
+    assert sess_mgr not in sales_sessions
+
+    # 3. Kiểm tra vai trò của session
+    assert memory.get_session_role(sess_admin) == "ADMIN"
+    assert memory.get_session_role(sess_mgr) == "SALE_MANAGER"
+    assert memory.get_session_role(sess_sales) == "SALESMAN"
+    assert memory.get_session_user_id(sess_sales) == 3
+
+    # Dọn dẹp
+    memory.clear_session(sess_admin)
+    memory.clear_session(sess_mgr)
+    memory.clear_session(sess_sales)
+
+
+

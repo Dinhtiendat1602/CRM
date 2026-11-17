@@ -3,9 +3,9 @@
 # Session Handoff - Biên Bản Bàn Giao Phiên Làm Việc
 
 ## 1. Hiện Trạng & Mục Tiêu Phiên (Current State & Objective)
-- **Thời gian bàn giao:** 2026-11-10 10:25
-- **Nội dung trọng tâm:** Tái cấu trúc & Chuyển đổi toàn diện Zen CRM AI Assistant sang Framework **LangGraph** (`StateGraph`, `create_react_agent`, `MemorySaver` checkpointer và bảo toàn `thought_signature`).
-- **Trạng thái hệ thống:** HOÀN THÀNH 100% (17/17 AI Agent tests PASS + 146/146 backend tests PASS; Vite build thành công trong 359ms; Live chat multi-turn với CSDL PostgreSQL hoạt động chuẩn xác 100%).
+- **Thời gian bàn giao:** 2026-11-17 09:55
+- **Nội dung trọng tâm:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (End-to-End Role-Based Access Control - RBAC), Bảo mật Dữ liệu Động (Row-Level Security - RLS) và Phân bổ Công cụ theo Vai trò cho Zen CRM AI Assistant trên nền tảng LangGraph.
+- **Trạng thái hệ thống:** HOÀN THÀNH 100% (21/21 AI Agent tests PASS + 146/146 backend tests PASS; Vite build thành công trong 667ms; Live E2E chat với PostgreSQL và Gemini đạt kết quả xuất sắc 100%).
 - **Cổng dịch vụ đang cấu hình:**
   - Express Backend: `http://localhost:5001`
   - React Frontend: `http://localhost:8080`
@@ -16,36 +16,39 @@
 
 ## 2. Công Việc Vừa Mới Thực Thi Trong Phiên Này (Just Completed)
 
-1. **Cài Đặt Thư Viện LangGraph & Chuẩn Hóa Dependencies:**
-   - Cập nhật [`requirements.txt`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/requirements.txt): Bổ sung `langgraph>=0.2.0`, `langchain-core>=0.3.0`, `langchain-google-genai>=2.0.0`.
-   - Cài đặt thành công các gói phụ thuộc vào môi trường ảo `ai-agent-service/venv`.
+1. **Xác thực JWT Token & Quản lý Ngữ cảnh An toàn (Context-Aware Execution):**
+   - [`src/api/auth.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/api/auth.py): Xây dựng dependency `get_current_user(authorization)` giải mã Bearer JWT token dùng chung `JWT_SECRET` với Express Backend, xác thực 3 vai trò (`ADMIN`, `SALE_MANAGER`, `SALESMAN`), hỗ trợ fallback tương thích ngược.
+   - [`src/utils/context.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/utils/context.py): Áp dụng `contextvars.ContextVar` lưu trữ danh tính `current_user` thread-safe theo từng request, cho phép các Tools tự động đọc vai trò/ID người dùng mà không làm thay đổi JSON Schema của Tool cung cấp cho LLM.
 
-2. **Chuyển Đổi CRM Tools sang LangChain StructuredTools:**
-   - [`src/tools/__init__.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/__init__.py):
-     - Chuẩn hóa toàn bộ 9 CRM tools (`get_leads_summary`, `get_revenue_and_forecast`, `get_products_and_inventory`, `get_opportunities_overview`, `get_campaigns_overview`, `get_orders_summary`, `search_customer`, `create_lead`, `create_opportunity`) thành LangChain Tools thông qua `langchain_core.tools.tool`.
-     - Đồng thời duy trì mảng `RAW_CRM_TOOLS` và các hàm gốc để không phá vỡ bất kỳ unit tests độc lập nào.
+2. **Phân Bổ LangGraph Subgraphs Độc Lập Theo Vai Trò (Dynamic Tool Permissions):**
+   - [`src/tools/__init__.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/__init__.py): Phân chia rõ ràng:
+     - `ADMIN_LANGCHAIN_TOOLS`: 1 công cụ giám sát kỹ thuật (`get_admin_system_overview`).
+     - `MANAGER_LANGCHAIN_TOOLS`: Toàn quyền 9 công cụ CRM toàn công ty.
+     - `SALESMAN_LANGCHAIN_TOOLS`: 7 công cụ phục vụ bán hàng cá nhân, loại bỏ hoàn toàn các công cụ doanh số và ngân sách chiến dịch tiếp thị.
+   - [`config/prompts.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/config/prompts.py): Xây dựng `ADMIN_SYSTEM_INSTRUCTION`, `MANAGER_SYSTEM_INSTRUCTION`, `SALESMAN_SYSTEM_INSTRUCTION` và hàm `get_system_prompt_for_role(role, user)`.
+   - [`src/agents/base_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py): Biên dịch 3 đồ thị ReAct độc lập `self.role_graphs["ADMIN"]`, `self.role_graphs["SALE_MANAGER"]`, `self.role_graphs["SALESMAN"]` dùng chung `MemorySaver` checkpointer.
+   - [`src/agents/crm_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/crm_agent.py): Tiếp nhận `user`, tự động định tuyến sang đồ thị phù hợp và dọn dẹp context qua `try ... finally`.
 
-3. **Hiện Thực Hóa LangGraph State & Base Agent:**
-   - [`src/agents/state.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/state.py): Định nghĩa schema `CRMState` với `messages: Annotated[Sequence[BaseMessage], add_messages]`.
-   - [`src/agents/base_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py):
-     - Biên dịch đồ thị `CompiledStateGraph` bằng `create_react_agent` với `MemorySaver` checkpointer.
-     - Hàm `_hydrate_session_if_needed`: Tự động phục hồi lịch sử từ `SessionMemory` (Redis/File JSON) vào LangGraph Checkpointer khi mở phiên cũ hoặc sau khi khởi động lại server.
-     - Hàm `reset_session`: Xóa sạch thread trong LangGraph checkpointer qua `checkpointer.delete_thread(session_id)` kết hợp `memory.clear_session`.
-   - [`src/agents/crm_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/crm_agent.py): Kế thừa `BaseAgent`, tích hợp Intent Classifier, hệ thống logging và lưu trữ bền vững.
+3. **Bảo Mật Dữ Liệu Cấp Bản Ghi (Row-Level Security - RLS) Trong Các Công Cụ SQL:**
+   - [`src/tools/admin_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/admin_tools.py): `get_admin_system_overview` kiểm tra trạng thái CSDL và phân bố người dùng theo vai trò; chặn Admin truy cập/thay đổi dữ liệu kinh doanh.
+   - [`src/tools/query_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/query_tools.py):
+     - `get_leads_summary`: Salesman chỉ truy vấn khách hàng gán cho mình (`leads.assigned_to = user_id`).
+     - `get_revenue_and_forecast` & `get_campaigns_overview`: Trả về lỗi từ chối quyền truy cập nếu là Salesman.
+     - `get_products_and_inventory`: Salesman chỉ xem các sản phẩm được phân quyền bán (`salesman_products`).
+     - `get_opportunities_overview`: Salesman chỉ thấy cơ hội do mình tạo hoặc khách do mình phụ trách.
+     - `get_orders_summary` & `search_customer`: Áp dụng bộ lọc phụ trách cho Salesman.
+   - [`src/tools/lead_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/lead_tools.py): Tự động gán `assigned_to = user_id` khi Salesman tạo Lead mới; chặn Admin tạo Lead.
+   - [`src/tools/order_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/order_tools.py): Kiểm tra quyền phân phối sản phẩm trong `salesman_products` trước khi tạo cơ hội bán hàng.
 
-4. **Khắc Phục Lỗi Thought Signature Của Gemini 2.5 / 3 Thinking Models:**
-   - [`src/llm/client.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/llm/client.py):
-     - Xây dựng hàm `patch_langchain_gemini_thought_signature()` tự động trích xuất `thought_signature` từ `Candidate.parts` vào `AIMessage.tool_calls` và đính kèm lại vào `Part(function_call=..., thought_signature=...)` khi gửi kết quả thực thi Tool ngược lại cho Gemini API.
-     - Loại bỏ triệt để lỗi `400 Function call is missing a thought_signature in functionCall parts`.
+4. **Đồng Bộ Frontend React (AIChatWidget.jsx):**
+   - Tự động gắn header `Authorization: Bearer <token>` vào tất cả các yêu cầu API (`/api/chat`, `/api/chat/reset`, `/api/chat/history`, `/api/chat/sessions`, `/api/health`).
+   - Hiển thị huy hiệu vai trò (Admin / Manager / Sales) trên thanh tiêu đề của Chat Widget.
+   - Tùy biến các nút bấm gợi ý câu hỏi 1 chạm (Quick Prompts) thích ứng chính xác theo vai trò đăng nhập.
 
-5. **Mở Rộng API Endpoints (`src/api/routes.py`):**
-   - Bổ sung `framework: "LangGraph (StateGraph)"` trong `/api/health`.
-   - Thêm endpoint `GET /api/agent/graph` trả về danh sách Nodes, Tools và mã sơ đồ Mermaid sinh trực tiếp từ LangGraph.
-
-6. **Kiểm Thử & Xác Thực Nghiệp Vụ:**
-   - [`tests/test_agent_actions.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/tests/test_agent_actions.py): Bổ sung `test_langgraph_crm_agent_structure`.
-   - Chạy thành công 17/17 tests tự động của AI Agent Service (100% PASS).
-   - Kiểm thử hội thoại đa lượt thực tế (Live multi-turn conversation) truy vấn CSDL PostgreSQL và Gemini API thành công mỹ mãn.
+5. **Kiểm Thử Đầy Đủ & Xác Thực Thực Tế:**
+   - Bổ sung 4 bài test tự động chuyên sâu trong `tests/test_agent_actions.py`: `test_role_based_access_control_jwt`, `test_admin_tools_and_restrictions`, `test_salesman_tools_rls_and_restrictions`, `test_role_graphs_tool_allocation`.
+   - Chạy thành công 21/21 bài kiểm thử tự động của AI Agent Service (100% PASS).
+   - Chạy kịch bản live E2E: Admin gọi thành công `get_admin_system_overview`, Salesman chỉ tra cứu đúng 3 sản phẩm được gán trong `salesman_products`.
 
 ---
 
@@ -53,17 +56,17 @@
 
 | Bộ kiểm thử | Kết quả | Ghi chú |
 |---|---|---|
-| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (17/17)** | Đầy đủ 12 test queries + 5 test agent actions (có `test_langgraph_crm_agent_structure`) |
-| Live LangGraph Multi-turn Chat | **PASS** | Turn 1: Tra cứu đúng 22 Leads và vẽ bảng. Turn 2: Nhớ ngữ cảnh xác định chính xác Lead mới nhất là Phan Cảnh Đức #38 |
-| AI Service Healthcheck (`GET /api/health`) | **HTTP 200 OK** | `framework: LangGraph (StateGraph)`, `status: online`, `tools_loaded: 9` |
-| AI Service Graph Endpoint (`GET /api/agent/graph`) | **HTTP 200 OK** | Xuất đúng nodes `['__start__', 'agent', 'tools']` và chuỗi Mermaid đồ thị |
-| Backend Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures, 31.6s |
-| Frontend Build (`npm run build`) | **PASS (359ms)** | Vite production build `dist/` thành công, 0 lỗi |
+| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (21/21)** | 12 test queries + 9 test agent actions (có đầy đủ 4 bài test RBAC/RLS) |
+| Live E2E Role Chat (`scratch/verify_e2e_rbac.py`) | **PASS (100%)** | Admin tra cứu đúng thống kê 20 users; Salesman chỉ lấy đúng 3 sản phẩm được phân quyền |
+| AI Service Healthcheck (`GET /api/health`) | **HTTP 200 OK** | `roles_supported: ['ADMIN', 'SALE_MANAGER', 'SALESMAN']`, `tools_loaded: {ADMIN: 1, SALE_MANAGER: 9, SALESMAN: 7}` |
+| AI Service Graph Endpoint (`GET /api/agent/graph`) | **HTTP 200 OK** | Trả về đúng sơ đồ Mermaid và số lượng công cụ cho từng Role |
+| Backend Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures, 31.5s |
+| Frontend Build (`npm run build`) | **PASS (667ms)** | Vite production build `dist/` thành công, 0 lỗi lint/syntax |
 
 ---
 
 ## 4. Rủi Ro & Vướng Mắc Tồn Đọng (Blockers & Risks)
-- **Không có blocker nào.** Hệ thống LangGraph vận hành trơn tru và hoàn toàn tương thích ngược với API Frontend hiện có.
+- **Không có blocker nào.** Hệ thống RBAC và phân quyền công cụ vận hành hoàn hảo, an toàn và bảo mật cao.
 
 ---
 
@@ -73,5 +76,3 @@
 3. **`feat-030`:** Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition).
 4. **`feat-031`:** Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync với Transaction Lock).
 5. **`feat-032`:** Hộp Thoại Xác Nhận Hành Động Nguy Hiểm & Thẻ Tác Vụ Tương Tác (Human-In-The-Loop Confirmation UI & Action Cards tận dụng tính năng `interrupt_before` của LangGraph).
-6. **`feat-033`:** Đồng Bộ Thời Gian Thực Dữ Liệu Giữa Chatbot và Giao Diện Bảng CRM (Real-time Cross-Module UI Sync).
-7. **`feat-034`:** Phân Tích Thông Minh & Chấm Điểm Xác Suất Chốt Đơn Bằng AI (AI Deal Win-Rate Scoring & Sales Coaching).

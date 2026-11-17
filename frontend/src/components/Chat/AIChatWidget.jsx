@@ -22,12 +22,54 @@ import {
 
 const AI_API_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
 
-const QUICK_PROMPTS = [
-  { label: 'Leads mới hôm nay', query: 'Hôm nay hệ thống có bao nhiêu Lead mới và danh sách cụ thể?', icon: Users },
-  { label: 'Báo cáo doanh số tháng', query: 'Báo cáo doanh thu thực tế và tiến độ chỉ tiêu tháng này?', icon: TrendingUp },
-  { label: 'Kiểm tra tồn kho', query: 'Kiểm tra xem có sản phẩm nào đang sắp hết hàng không?', icon: Package },
-  { label: 'Cơ hội bán hàng', query: 'Tổng quan các cơ hội bán hàng (Opportunities) đang mở?', icon: Layers },
-];
+const getCurrentUser = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+};
+
+const ROLE_QUICK_PROMPTS = {
+  ADMIN: [
+    { label: 'Trạng thái hệ thống', query: 'Kiểm tra trạng thái hệ thống và kết nối CSDL PostgreSQL?', icon: Sparkles },
+    { label: 'Thống kê người dùng', query: 'Thống kê số lượng người dùng theo từng vai trò?', icon: Users },
+    { label: 'Tài khoản hoạt động', query: 'Báo cáo tổng số tài khoản đang hoạt động và bị khóa?', icon: Layers },
+  ],
+  SALESMAN: [
+    { label: 'Khách hàng của tôi', query: 'Hôm nay tôi có bao nhiêu khách hàng tiềm năng mới?', icon: Users },
+    { label: 'Sản phẩm được bán', query: 'Kiểm tra danh mục sản phẩm tôi được phân quyền bán?', icon: Package },
+    { label: 'Cơ hội phụ trách', query: 'Tổng quan các cơ hội bán hàng tôi đang phụ trách?', icon: Layers },
+    { label: 'Đơn hàng gần đây', query: 'Danh sách đơn hàng gần nhất của khách hàng do tôi phụ trách?', icon: TrendingUp },
+  ],
+  SALE_MANAGER: [
+    { label: 'Leads mới hôm nay', query: 'Hôm nay hệ thống có bao nhiêu Lead mới và danh sách cụ thể?', icon: Users },
+    { label: 'Báo cáo doanh số tháng', query: 'Báo cáo doanh thu thực tế và tiến độ chỉ tiêu tháng này?', icon: TrendingUp },
+    { label: 'Kiểm tra tồn kho', query: 'Kiểm tra xem có sản phẩm nào đang sắp hết hàng không?', icon: Package },
+    { label: 'Cơ hội bán hàng', query: 'Tổng quan các cơ hội bán hàng (Opportunities) đang mở?', icon: Layers },
+  ]
+};
+
+const getWelcomeMessageForUser = (user) => {
+  const role = user?.role || 'SALE_MANAGER';
+  const name = user?.full_name || user?.username || '';
+  if (role === 'ADMIN') {
+    return `Xin chào ${name || 'Quản trị viên'}! Tôi là **Zen System Administrator AI** 🖥️\nTôi hỗ trợ bạn theo dõi **Sức khỏe hệ thống, Kết nối CSDL PostgreSQL & Thống kê tài khoản người dùng** theo vai trò.\n\nBạn cần kiểm tra thông số kỹ thuật nào hôm nay?`;
+  }
+  if (role === 'SALESMAN') {
+    return `Xin chào ${name || 'bạn'}! Tôi là **Zen Sales Assistant** 💼\nTôi hỗ trợ bạn tra cứu **Khách hàng phụ trách, Cơ hội bán hàng, Sản phẩm được phân quyền & Tạo Lead mới** nhanh chóng.\n\nBạn cần tôi hỗ trợ việc gì hôm nay?`;
+  }
+  return `Xin chào ${name || 'Quản lý'}! Tôi là **Zen AI Assistant** 📊\nTôi được kết nối trực tiếp với cơ sở dữ liệu Zen CRM để hỗ trợ bạn tra cứu **Leads, Doanh số toàn công ty, Tồn kho & Chiến dịch** trong thời gian thực.\n\nBạn cần xem báo cáo nào hôm nay?`;
+};
 
 function formatMarkdown(content) {
   if (!content) return '';
@@ -129,12 +171,12 @@ export default function AIChatWidget() {
     } catch {
       // fallback
     }
+    const user = getCurrentUser();
     return [
       {
         id: 'welcome',
         role: 'assistant',
-        content:
-          'Xin chào! Tôi là **Zen AI Assistant** 🤖\nTôi được kết nối trực tiếp với cơ sở dữ liệu Zen CRM để hỗ trợ bạn tra cứu **Leads, Doanh số, Tồn kho & Cơ hội bán hàng** trong thời gian thực.\n\nBạn cần tôi hỗ trợ việc gì hôm nay?',
+        content: getWelcomeMessageForUser(user),
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
     ];
@@ -144,6 +186,11 @@ export default function AIChatWidget() {
   const [isOnline, setIsOnline] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const currentUser = getCurrentUser();
+  const currentRole = currentUser?.role || 'SALE_MANAGER';
+  const activePrompts = ROLE_QUICK_PROMPTS[currentRole] || ROLE_QUICK_PROMPTS.SALE_MANAGER;
+  const roleBadge = currentRole === 'ADMIN' ? 'Admin' : currentRole === 'SALESMAN' ? 'Sales' : 'Manager';
 
   // Tự động lưu lịch sử tin nhắn vào localStorage khi có tin mới
   useEffect(() => {
@@ -158,7 +205,7 @@ export default function AIChatWidget() {
 
   useEffect(() => {
     // Health check AI service on mount
-    fetch(`${AI_API_BASE}/api/health`, { method: 'GET' })
+    fetch(`${AI_API_BASE}/api/health`, { method: 'GET', headers: getAuthHeaders() })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         setIsOnline(!!data?.database_connected);
@@ -207,7 +254,7 @@ export default function AIChatWidget() {
     try {
       const res = await fetch(`${AI_API_BASE}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           message: textToSend.trim(),
           session_id: sessionId,
@@ -250,17 +297,18 @@ export default function AIChatWidget() {
     try {
       await fetch(`${AI_API_BASE}/api/chat/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ session_id: sessionId }),
       });
     } catch {
       // ignore
     }
+    const user = getCurrentUser();
     const resetMsg = [
       {
         id: 'reset_' + Date.now(),
         role: 'assistant',
-        content: '🔄 Phiên hội thoại đã được làm mới. Bạn có thể hỏi tôi câu hỏi mới bất kỳ lúc nào!',
+        content: `🔄 Phiên hội thoại đã được làm mới.\n\n${getWelcomeMessageForUser(user)}`,
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
     ];
@@ -275,7 +323,9 @@ export default function AIChatWidget() {
   const loadSessions = async () => {
     setLoadingSessions(true);
     try {
-      const res = await fetch(`${AI_API_BASE}/api/chat/sessions`);
+      const res = await fetch(`${AI_API_BASE}/api/chat/sessions`, {
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         setSessionsList(data.sessions || []);
@@ -301,7 +351,9 @@ export default function AIChatWidget() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${AI_API_BASE}/api/chat/history?session_id=${targetSessionId}`);
+      const res = await fetch(`${AI_API_BASE}/api/chat/history?session_id=${targetSessionId}`, {
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         const serverMessages = (data.messages || []).map((m) => ({
@@ -332,12 +384,12 @@ export default function AIChatWidget() {
     const newId = 'sess_' + Math.random().toString(36).substring(2, 9);
     setSessionId(newId);
     localStorage.setItem('zen_crm_ai_session_id', newId);
+    const user = getCurrentUser();
     const welcomeMsg = [
       {
         id: 'welcome_' + Date.now(),
         role: 'assistant',
-        content:
-          'Xin chào! Tôi là **Zen AI Assistant** 🤖\nTôi được kết nối trực tiếp với cơ sở dữ liệu Zen CRM để hỗ trợ bạn tra cứu **Leads, Doanh số, Tồn kho & Cơ hội bán hàng** trong thời gian thực.\n\nBạn cần tôi hỗ trợ việc gì hôm nay?',
+        content: getWelcomeMessageForUser(user),
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       },
     ];
@@ -348,7 +400,10 @@ export default function AIChatWidget() {
 
   const handleDeleteSession = async (targetId) => {
     try {
-      await fetch(`${AI_API_BASE}/api/chat/session?session_id=${targetId}`, { method: 'DELETE' });
+      await fetch(`${AI_API_BASE}/api/chat/session?session_id=${targetId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
       setSessionsList((prev) => prev.filter((s) => s.session_id !== targetId));
       if (targetId === sessionId) {
         handleStartNewChat();
@@ -384,6 +439,9 @@ export default function AIChatWidget() {
               <div>
                 <div className="flex items-center gap-1.5 font-bold text-sm leading-tight tracking-wide">
                   <span>Zen AI Assistant</span>
+                  <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-semibold tracking-wider">
+                    {roleBadge}
+                  </span>
                   <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                 </div>
                 <div className="text-[11px] text-emerald-100 flex items-center gap-1">
@@ -538,7 +596,7 @@ export default function AIChatWidget() {
             <>
               {/* Quick Prompts Carousel */}
               <div className="bg-emerald-50/70 border-b border-emerald-100/60 px-3 py-2 overflow-x-auto no-scrollbar flex gap-1.5 shrink-0">
-                {QUICK_PROMPTS.map((qp, idx) => {
+                {activePrompts.map((qp, idx) => {
                   const IconComp = qp.icon;
                   return (
                     <button

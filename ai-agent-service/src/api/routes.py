@@ -1,8 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
+"""API Endpoints cho Zen CRM AI Agent Service với cơ chế xác thực JWT và phân quyền vai trò (RBAC)."""
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends, Header
 from src.schemas import ChatRequest, ChatResponse, ResetRequest, QuickPromptsResponse
 from src.agents import crm_agent
 from src.database.connection import check_db_health
 from config.settings import settings
+from src.api.auth import get_current_user
+from src.tools import get_tools_for_role
 
 router = APIRouter()
 
@@ -17,29 +21,39 @@ def healthcheck():
         "framework": "LangGraph (StateGraph)",
         "database_connected": db_ok,
         "model": settings.GEMINI_MODEL,
-        "tools_loaded": len(crm_agent.tools)
+        "roles_supported": ["ADMIN", "SALE_MANAGER", "SALESMAN"],
+        "tools_loaded": {
+            "ADMIN": len(get_tools_for_role("ADMIN")),
+            "SALE_MANAGER": len(get_tools_for_role("SALE_MANAGER")),
+            "SALESMAN": len(get_tools_for_role("SALESMAN"))
+        }
     }
 
 @router.get("/api/agent/graph")
 @router.get("/api/v1/agent/graph")
-def get_agent_graph():
+def get_agent_graph(role: str = "SALE_MANAGER"):
+    clean_role = (role or "SALE_MANAGER").upper()
+    graph = crm_agent.role_graphs.get(clean_role, crm_agent.graph)
+    tools = get_tools_for_role(clean_role)
     return {
+        "role": clean_role,
         "framework": "LangGraph",
-        "nodes": list(crm_agent.graph.nodes.keys()),
-        "tools": [t.name for t in crm_agent.tools],
-        "mermaid": crm_agent.graph.get_graph().draw_mermaid()
+        "nodes": list(graph.nodes.keys()),
+        "tools": [t.name for t in tools],
+        "mermaid": graph.get_graph().draw_mermaid()
     }
 
 @router.post("/api/chat", response_model=ChatResponse)
 @router.post("/api/v1/chat", response_model=ChatResponse)
-def handle_chat(payload: ChatRequest):
+def handle_chat(payload: ChatRequest, user: dict = Depends(get_current_user)):
     if not payload.message.strip():
         raise HTTPException(status_code=400, detail="Nội dung tin nhắn không được để trống.")
     
     session_id = payload.session_id or "default"
     reply = crm_agent.chat(
         user_message=payload.message.strip(),
-        session_id=session_id
+        session_id=session_id,
+        user=user
     )
 
     return ChatResponse(
@@ -49,46 +63,66 @@ def handle_chat(payload: ChatRequest):
 
 @router.get("/api/chat/history")
 @router.get("/api/v1/chat/history")
-def get_chat_history(session_id: str = "default"):
+def get_chat_history(session_id: str = "default", user: dict = Depends(get_current_user)):
     from src.memory.redis_memory import memory
     history = memory.get_history(session_id)
     return {
         "session_id": session_id,
+        "role": user.get("role"),
         "total_messages": len(history),
         "messages": history
     }
 
 @router.get("/api/chat/sessions")
 @router.get("/api/v1/chat/sessions")
-def get_chat_sessions():
+def get_chat_sessions(user: dict = Depends(get_current_user)):
     from src.memory.redis_memory import memory
     return {
+        "user": user.get("username"),
+        "role": user.get("role"),
         "sessions": memory.list_saved_sessions()
     }
 
 @router.delete("/api/chat/session")
 @router.delete("/api/v1/chat/session")
-def delete_chat_session(session_id: str):
+def delete_chat_session(session_id: str, user: dict = Depends(get_current_user)):
     from src.memory.redis_memory import memory
     deleted = memory.clear_session(session_id)
     return {"session_id": session_id, "deleted": deleted}
 
 @router.post("/api/chat/reset")
 @router.post("/api/v1/chat/reset")
-def reset_chat_session(payload: ResetRequest):
+def reset_chat_session(payload: ResetRequest, user: dict = Depends(get_current_user)):
     session_id = payload.session_id or "default"
     success = crm_agent.reset_session(session_id)
     return {
         "message": "Đã làm mới phiên trò chuyện thành công.",
         "session_id": session_id,
+        "role": user.get("role"),
         "cleared": success
     }
 
 @router.get("/api/quick-prompts", response_model=QuickPromptsResponse)
 @router.get("/api/v1/quick-prompts", response_model=QuickPromptsResponse)
-def get_quick_prompts():
-    return QuickPromptsResponse(
-        prompts=[
+def get_quick_prompts(user: dict = Depends(get_current_user)):
+    role = user.get("role", "SALE_MANAGER")
+    if role == "ADMIN":
+        prompts = [
+            "🖥️ Kiểm tra trạng thái hệ thống và kết nối CSDL PostgreSQL?",
+            "👥 Thống kê số lượng người dùng theo từng vai trò?",
+            "🔐 Báo cáo tổng số tài khoản đang hoạt động và bị khóa?"
+        ]
+    elif role == "SALESMAN":
+        prompts = [
+            "👥 Hôm nay tôi có bao nhiêu khách hàng tiềm năng mới?",
+            "📦 Kiểm tra danh mục sản phẩm tôi được phân quyền bán?",
+            "🎯 Tổng quan các cơ hội bán hàng tôi đang phụ trách?",
+            "🛒 Danh sách đơn hàng gần nhất của khách hàng do tôi phụ trách?",
+            "➕ Thêm khách hàng mới Nguyễn Văn Nam SĐT 0987112233"
+        ]
+    else:
+        # SALE_MANAGER
+        prompts = [
             "👥 Hôm nay hệ thống có bao nhiêu Lead mới?",
             "📊 Doanh thu và tiến độ chỉ tiêu tháng này?",
             "📦 Kiểm tra sản phẩm nào đang sắp hết hàng?",
@@ -97,5 +131,5 @@ def get_quick_prompts():
             "📢 Hiệu quả các chiến dịch tiếp thị gần đây?",
             "➕ Thêm khách hàng mới Nguyễn Văn Nam SĐT 0987112233"
         ]
-    )
 
+    return QuickPromptsResponse(prompts=prompts)

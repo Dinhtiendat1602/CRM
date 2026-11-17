@@ -116,3 +116,138 @@ def test_langgraph_crm_agent_structure():
     assert res_reset is True
     assert len(memory.get_history(hydrate_session)) == 0
 
+
+def test_role_based_access_control_jwt():
+    """Kiểm tra mã hóa, giải mã JWT và phân quyền vai trò người dùng."""
+    import jwt
+    from config.settings import settings
+    from src.api.auth import decode_jwt_token, get_current_user
+
+    # 1. Tạo JWT mẫu cho SALESMAN
+    payload = {
+        "id": 3,
+        "username": "salesman1",
+        "email": "salesman1@zencrm.vn",
+        "role": "SALESMAN",
+        "full_name": "Nhân viên Bán hàng 1"
+    }
+    token = jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    
+    # 2. Giải mã xác thực
+    decoded = decode_jwt_token(token)
+    assert decoded["username"] == "salesman1"
+    assert decoded["role"] == "SALESMAN"
+
+    # 3. Trích xuất qua FastAPI dependency
+    user = get_current_user(f"Bearer {token}")
+    assert user["id"] == 3
+    assert user["role"] == "SALESMAN"
+    assert user["full_name"] == "Nhân viên Bán hàng 1"
+
+    # 4. Fallback khi không có token (chế độ an toàn cho manager)
+    fallback_user = get_current_user(None)
+    assert fallback_user["role"] == "SALE_MANAGER"
+
+
+def test_admin_tools_and_restrictions():
+    """Kiểm tra quyền hạn và giới hạn bảo mật của vai trò ADMIN."""
+    from src.utils.context import set_current_user, reset_current_user
+    from src.tools.admin_tools import get_admin_system_overview
+    from src.tools.lead_tools import create_lead
+    from src.tools.order_tools import create_opportunity
+
+    # Thiết lập ngữ cảnh ADMIN
+    admin_user = {"id": 1, "username": "admin", "role": "ADMIN", "full_name": "Quản trị viên"}
+    tok = set_current_user(admin_user)
+    try:
+        # ADMIN được phép truy vấn trạng thái hệ thống
+        overview = get_admin_system_overview()
+        assert "error" not in overview
+        assert "trang_thai_he_thong" in overview
+        assert overview["trang_thai_he_thong"]["dich_vu"] == "Zen CRM Enterprise Core"
+        assert "thong_ke_vai_tro" in overview
+
+        # ADMIN bị chặn tạo khách hàng hoặc cơ hội kinh doanh
+        lead_res = create_lead("Test", "Admin", "0911223344")
+        assert "error" in lead_res
+        assert "ADMIN" in lead_res["error"]
+
+        opp_res = create_opportunity(1, "PROD-001")
+        assert "error" in opp_res
+        assert "ADMIN" in opp_res["error"]
+    finally:
+        reset_current_user(tok)
+
+    # Người dùng không phải ADMIN bị từ chối công cụ admin
+    sales_user = {"id": 3, "username": "sales", "role": "SALESMAN"}
+    tok_sales = set_current_user(sales_user)
+    try:
+        denied = get_admin_system_overview()
+        assert "error" in denied
+    finally:
+        reset_current_user(tok_sales)
+
+
+def test_salesman_tools_rls_and_restrictions():
+    """Kiểm tra Row-Level Security và giới hạn truy vấn của SALESMAN."""
+    from src.utils.context import set_current_user, reset_current_user
+    from src.tools.query_tools import (
+        get_revenue_and_forecast,
+        get_campaigns_overview,
+        get_leads_summary,
+        get_products_and_inventory
+    )
+
+    salesman_user = {"id": 3, "username": "salesman1", "role": "SALESMAN", "full_name": "Lê Văn Bán Hàng"}
+    tok = set_current_user(salesman_user)
+    try:
+        # 1. Bị từ chối xem doanh thu & kế hoạch toàn công ty
+        rev = get_revenue_and_forecast()
+        assert "error" in rev
+        assert "Quản lý" in rev["error"]
+
+        # 2. Bị từ chối xem chiến dịch tiếp thị
+        camp = get_campaigns_overview()
+        assert "error" in camp
+        assert "Quản lý" in camp["error"]
+
+        # 3. Row-level security: Chỉ xem leads do mình phụ trách
+        leads = get_leads_summary(limit=20)
+        assert "error" not in leads
+        assert "danh_sach_lead" in leads
+
+        # 4. Chỉ xem các sản phẩm được phân quyền
+        prods = get_products_and_inventory()
+        assert "error" not in prods
+        assert "danh_sach_san_pham" in prods
+    finally:
+        reset_current_user(tok)
+
+
+def test_role_graphs_tool_allocation():
+    """Kiểm tra việc phân bổ công cụ chính xác cho từng đồ thị LangGraph theo Role."""
+    from src.agents import crm_agent
+
+    assert "ADMIN" in crm_agent.role_graphs
+    assert "SALE_MANAGER" in crm_agent.role_graphs
+    assert "SALESMAN" in crm_agent.role_graphs
+
+    from src.tools import get_tools_for_role
+    admin_tools = get_tools_for_role("ADMIN")
+    manager_tools = get_tools_for_role("SALE_MANAGER")
+    salesman_tools = get_tools_for_role("SALESMAN")
+
+    assert len(admin_tools) == 1
+    assert admin_tools[0].name == "get_admin_system_overview"
+
+    assert len(manager_tools) == 9
+    assert len(salesman_tools) == 7
+
+    salesman_tool_names = [t.name for t in salesman_tools]
+    assert "get_revenue_and_forecast" not in salesman_tool_names
+    assert "get_campaigns_overview" not in salesman_tool_names
+    assert "get_leads_summary" in salesman_tool_names
+    assert "create_lead" in salesman_tool_names
+    assert "create_opportunity" in salesman_tool_names
+
+

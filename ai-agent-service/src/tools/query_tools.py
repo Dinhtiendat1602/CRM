@@ -6,6 +6,7 @@ Mỗi hàm đều có docstring rõ ràng và type hints để Gemini hiểu ch�
 from datetime import datetime
 from src.database.connection import query_all, query_one
 from src.utils.normalizer import format_vietnamese_name
+from src.utils.context import get_current_user_context
 
 
 def get_leads_summary(limit: int = 10, query: str = "") -> dict:
@@ -14,49 +15,75 @@ def get_leads_summary(limit: int = 10, query: str = "") -> dict:
     - limit: Số lượng lead cần lấy (mặc định 10).
     - query: Từ khóa tìm kiếm theo họ tên (có dấu hoặc không dấu), số điện thoại hoặc email.
     Trả về tổng số lead trong hệ thống, số lead mới hôm nay, số lead tháng này và danh sách chi tiết.
+    Đối với Salesman: Tự động chỉ trả về các khách hàng do nhân viên này phụ trách.
     """
+    user = get_current_user_context()
+    is_salesman = (user.get("role") == "SALESMAN")
+    user_id = user.get("id")
+
     try:
-        total_res = query_one("SELECT COUNT(*) AS total FROM leads")
+        if is_salesman:
+            total_res = query_one("SELECT COUNT(*) AS total FROM leads WHERE assigned_to = %s", (user_id,))
+        else:
+            total_res = query_one("SELECT COUNT(*) AS total FROM leads")
         total = total_res["total"] if total_res else 0
 
         today_str = datetime.now().strftime("%Y-%m-%d")
-        today_res = query_one(
-            "SELECT COUNT(*) AS today_count FROM leads WHERE DATE(entered_date) = %s",
-            (today_str,)
-        )
+        if is_salesman:
+            today_res = query_one(
+                "SELECT COUNT(*) AS today_count FROM leads WHERE DATE(entered_date) = %s AND assigned_to = %s",
+                (today_str, user_id)
+            )
+        else:
+            today_res = query_one(
+                "SELECT COUNT(*) AS today_count FROM leads WHERE DATE(entered_date) = %s",
+                (today_str,)
+            )
         today_count = today_res["today_count"] if today_res else 0
 
         current_month = datetime.now().month
         current_year = datetime.now().year
-        month_res = query_one(
-            "SELECT COUNT(*) AS month_count FROM leads WHERE EXTRACT(MONTH FROM entered_date) = %s AND EXTRACT(YEAR FROM entered_date) = %s",
-            (current_month, current_year)
-        )
+        if is_salesman:
+            month_res = query_one(
+                "SELECT COUNT(*) AS month_count FROM leads WHERE EXTRACT(MONTH FROM entered_date) = %s AND EXTRACT(YEAR FROM entered_date) = %s AND assigned_to = %s",
+                (current_month, current_year, user_id)
+            )
+        else:
+            month_res = query_one(
+                "SELECT COUNT(*) AS month_count FROM leads WHERE EXTRACT(MONTH FROM entered_date) = %s AND EXTRACT(YEAR FROM entered_date) = %s",
+                (current_month, current_year)
+            )
         month_count = month_res["month_count"] if month_res else 0
+
+        where_clauses = []
+        params = []
 
         if query.strip():
             like_val = f"%{query.strip()}%"
-            leads_sql = """
-                SELECT id, first_name, last_name, email, phone, career, address, entered_date
-                FROM leads
-                WHERE phone ILIKE %s 
+            where_clauses.append("""(
+                phone ILIKE %s 
                    OR email ILIKE %s 
                    OR unaccent(first_name) ILIKE unaccent(%s)
                    OR unaccent(last_name) ILIKE unaccent(%s)
                    OR unaccent(first_name || ' ' || last_name) ILIKE unaccent(%s)
                    OR unaccent(last_name || ' ' || first_name) ILIKE unaccent(%s)
-                ORDER BY entered_date DESC
-                LIMIT %s
-            """
-            leads = query_all(leads_sql, (like_val, like_val, like_val, like_val, like_val, like_val, limit))
-        else:
-            leads_sql = """
-                SELECT id, first_name, last_name, email, phone, career, address, entered_date
-                FROM leads
-                ORDER BY entered_date DESC
-                LIMIT %s
-            """
-            leads = query_all(leads_sql, (limit,))
+            )""")
+            params.extend([like_val, like_val, like_val, like_val, like_val, like_val])
+
+        if is_salesman:
+            where_clauses.append("assigned_to = %s")
+            params.append(user_id)
+
+        where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+        leads_sql = f"""
+            SELECT id, first_name, last_name, email, phone, career, address, entered_date
+            FROM leads
+            {where_sql}
+            ORDER BY entered_date DESC
+            LIMIT %s
+        """
+        params.append(limit)
+        leads = query_all(leads_sql, tuple(params))
 
         formatted_leads = []
         for l in leads:
@@ -90,6 +117,12 @@ def get_revenue_and_forecast(year: int = None, month: int = None) -> dict:
     Trả về doanh thu thực tế, số đơn hàng thành công, chỉ tiêu kế hoạch, tỉ lệ đạt được và bảng tổng hợp 12 tháng.
     """
     try:
+        user = get_current_user_context()
+        if user.get("role") == "SALESMAN":
+            return {
+                "error": "Quyền truy cập bị từ chối: Báo cáo tài chính, chỉ tiêu và doanh số toàn công ty chỉ dành riêng cho vai trò Quản lý (Sale Manager)."
+            }
+
         now = datetime.now()
         target_year = year or now.year
         target_month = month or now.month
@@ -172,18 +205,34 @@ def get_products_and_inventory(query: str = "", low_stock_only: bool = False, li
     - query: Tên sản phẩm, danh mục hoặc mã sản phẩm cần tìm (hỗ trợ tiếng Việt có dấu và không dấu).
     - low_stock_only: Chỉ hiển thị các sản phẩm sắp hết hàng (tồn kho <= 5).
     - limit: Số lượng sản phẩm hiển thị (mặc định 25).
+    Đối với Salesman: Tự động chỉ hiển thị các sản phẩm được phân quyền bán (salesman_products).
     """
+    user = get_current_user_context()
+    is_salesman = (user.get("role") == "SALESMAN")
+    user_id = user.get("id")
+
     try:
-        # Tổng số sản phẩm toàn hệ thống
-        total_products_res = query_one("SELECT COUNT(*) AS total FROM products")
-        total_products = total_products_res["total"] if total_products_res else 0
-
-        # Số sản phẩm cảnh báo tồn kho thấp (<= 5)
-        low_stock_count = query_one("SELECT COUNT(*) AS cnt FROM products WHERE stock_qty <= 5")
-        low_count = low_stock_count["cnt"] if low_stock_count else 0
-
         where_clauses = []
         params = []
+
+        if is_salesman:
+            where_clauses.append("p.id IN (SELECT product_id FROM salesman_products WHERE user_id = %s)")
+            params.append(user_id)
+            total_products_res = query_one(
+                "SELECT COUNT(*) AS total FROM salesman_products WHERE user_id = %s",
+                (user_id,)
+            )
+            low_stock_count = query_one("""
+                SELECT COUNT(*) AS cnt FROM products p
+                JOIN salesman_products sp ON p.id = sp.product_id
+                WHERE sp.user_id = %s AND p.stock_qty <= 5
+            """, (user_id,))
+        else:
+            total_products_res = query_one("SELECT COUNT(*) AS total FROM products")
+            low_stock_count = query_one("SELECT COUNT(*) AS cnt FROM products WHERE stock_qty <= 5")
+
+        total_products = total_products_res["total"] if total_products_res else 0
+        low_count = low_stock_count["cnt"] if low_stock_count else 0
 
         if query.strip():
             where_clauses.append("(unaccent(p.name) ILIKE unaccent(%s) OR p.product_code ILIKE %s OR unaccent(c.name) ILIKE unaccent(%s))")
@@ -239,34 +288,70 @@ def get_opportunities_overview() -> dict:
     Tra cứu tổng quan về Cơ hội bán hàng (Opportunities).
     Bao gồm phân bố theo từng giai đoạn (NEW, CONTACTED, QUALIFIED, PROPOSAL, ORDERED, LOST)
     và danh sách các cơ hội bán hàng có giá trị lớn nhất hiện có.
+    Đối với Salesman: Tự động chỉ hiển thị các cơ hội do nhân viên phụ trách hoặc tạo lập.
     """
     try:
-        status_sql = """
-            SELECT status, COUNT(*) AS count 
-            FROM opportunities 
-            GROUP BY status
-        """
-        status_rows = query_all(status_sql)
+        user = get_current_user_context()
+        is_salesman = (user.get("role") == "SALESMAN")
+        user_id = user.get("id")
+
+        if is_salesman:
+            status_sql = """
+                SELECT o.status, COUNT(*) AS count 
+                FROM opportunities o
+                JOIN leads l ON o.lead_id = l.id
+                WHERE (o.created_by = %s OR l.assigned_to = %s)
+                GROUP BY o.status
+            """
+            status_rows = query_all(status_sql, (user_id, user_id))
+        else:
+            status_sql = """
+                SELECT status, COUNT(*) AS count 
+                FROM opportunities 
+                GROUP BY status
+            """
+            status_rows = query_all(status_sql)
         pipeline = {r["status"]: r["count"] for r in status_rows}
 
-        top_opps_sql = """
-            SELECT 
-                o.id,
-                l.first_name, l.last_name, l.phone,
-                p.name AS product_name,
-                o.quantity,
-                p.unit_price,
-                (o.quantity * p.unit_price) AS estimated_value,
-                o.status,
-                o.expected_close_date
-            FROM opportunities o
-            JOIN leads l ON o.lead_id = l.id
-            JOIN products p ON o.product_id = p.id
-            WHERE o.status NOT IN ('ORDERED', 'LOST')
-            ORDER BY estimated_value DESC
-            LIMIT 6
-        """
-        top_rows = query_all(top_opps_sql)
+        if is_salesman:
+            top_opps_sql = """
+                SELECT 
+                    o.id,
+                    l.first_name, l.last_name, l.phone,
+                    p.name AS product_name,
+                    o.quantity,
+                    p.unit_price,
+                    (o.quantity * p.unit_price) AS estimated_value,
+                    o.status,
+                    o.expected_close_date
+                FROM opportunities o
+                JOIN leads l ON o.lead_id = l.id
+                JOIN products p ON o.product_id = p.id
+                WHERE o.status NOT IN ('ORDERED', 'LOST')
+                  AND (o.created_by = %s OR l.assigned_to = %s)
+                ORDER BY estimated_value DESC
+                LIMIT 6
+            """
+            top_rows = query_all(top_opps_sql, (user_id, user_id))
+        else:
+            top_opps_sql = """
+                SELECT 
+                    o.id,
+                    l.first_name, l.last_name, l.phone,
+                    p.name AS product_name,
+                    o.quantity,
+                    p.unit_price,
+                    (o.quantity * p.unit_price) AS estimated_value,
+                    o.status,
+                    o.expected_close_date
+                FROM opportunities o
+                JOIN leads l ON o.lead_id = l.id
+                JOIN products p ON o.product_id = p.id
+                WHERE o.status NOT IN ('ORDERED', 'LOST')
+                ORDER BY estimated_value DESC
+                LIMIT 6
+            """
+            top_rows = query_all(top_opps_sql)
 
         top_opps = []
         for r in top_rows:
@@ -282,12 +367,22 @@ def get_opportunities_overview() -> dict:
                 "ngay_du_kien_chot": str(r["expected_close_date"]) if r["expected_close_date"] else "Chưa rõ"
             })
 
-        total_open_val_res = query_one("""
-            SELECT COALESCE(SUM(o.quantity * p.unit_price), 0) AS total_val
-            FROM opportunities o
-            JOIN products p ON o.product_id = p.id
-            WHERE o.status NOT IN ('ORDERED', 'LOST')
-        """)
+        if is_salesman:
+            total_open_val_res = query_one("""
+                SELECT COALESCE(SUM(o.quantity * p.unit_price), 0) AS total_val
+                FROM opportunities o
+                JOIN leads l ON o.lead_id = l.id
+                JOIN products p ON o.product_id = p.id
+                WHERE o.status NOT IN ('ORDERED', 'LOST')
+                  AND (o.created_by = %s OR l.assigned_to = %s)
+            """, (user_id, user_id))
+        else:
+            total_open_val_res = query_one("""
+                SELECT COALESCE(SUM(o.quantity * p.unit_price), 0) AS total_val
+                FROM opportunities o
+                JOIN products p ON o.product_id = p.id
+                WHERE o.status NOT IN ('ORDERED', 'LOST')
+            """)
         total_open_val = float(total_open_val_res["total_val"]) if total_open_val_res else 0.0
 
         return {
@@ -305,8 +400,15 @@ def get_campaigns_overview(query: str = "") -> dict:
     Tra cứu danh sách các chiến dịch tiếp thị (Campaigns) đang diễn ra hoặc đã kết thúc,
     ngân sách và số lượng Lead thu thập được từ mỗi chiến dịch.
     - query: Tìm kiếm chiến dịch theo tên (tùy chọn).
+    Đối với Salesman: Bị từ chối vì báo cáo chiến dịch chỉ dành cho cấp Quản lý.
     """
     try:
+        user = get_current_user_context()
+        if user.get("role") == "SALESMAN":
+            return {
+                "error": "Quyền truy cập bị từ chối: Báo cáo chiến dịch và ngân sách tiếp thị chỉ dành riêng cho Quản lý (Sale Manager)."
+            }
+
         where_sql = ""
         params = []
         if query.strip():
@@ -359,10 +461,19 @@ def get_orders_summary(limit: int = 10, query: str = "", status: str = "") -> di
     - query: Tìm kiếm theo mã đơn (VD: 'ORD-20260115-0001'), tên khách hàng hoặc tên sản phẩm.
     - status: Lọc theo trạng thái đơn ('COMPLETED', 'PENDING', 'CANCELLED').
     Trả về tổng số đơn, tổng giá trị và chi tiết từng đơn hàng kèm tên sản phẩm, số lượng, ngày đặt.
+    Đối với Salesman: Tự động chỉ hiển thị các đơn hàng của khách hàng do nhân viên phụ trách.
     """
     try:
+        user = get_current_user_context()
+        is_salesman = (user.get("role") == "SALESMAN")
+        user_id = user.get("id")
+
         where_clauses = []
         params = []
+
+        if is_salesman:
+            where_clauses.append("l.assigned_to = %s")
+            params.append(user_id)
 
         if query.strip():
             where_clauses.append("""(
@@ -417,8 +528,8 @@ def get_orders_summary(limit: int = 10, query: str = "", status: str = "") -> di
             ORDER BY o.order_date DESC
             LIMIT %s
         """
-        params.append(limit)
-        rows = query_all(orders_sql, tuple(params))
+        orders_params = list(params) + [limit]
+        rows = query_all(orders_sql, tuple(orders_params))
 
         orders_list = []
         for r in rows:
@@ -454,25 +565,38 @@ def search_customer(keyword: str) -> dict:
     Tìm kiếm thông tin chi tiết một khách hàng cụ thể theo số điện thoại, email hoặc họ tên.
     Hỗ trợ tìm kiếm tiếng Việt có dấu hoặc không dấu, thứ tự họ tên tự nhiên.
     Trả về thông tin cá nhân cùng toàn bộ lịch sử các sản phẩm đã mua, đơn hàng và cơ hội bán hàng.
+    Đối với Salesman: Tự động chỉ tìm kiếm trong tệp khách hàng do nhân viên phụ trách.
     """
     try:
+        user = get_current_user_context()
+        is_salesman = (user.get("role") == "SALESMAN")
+        user_id = user.get("id")
+
         clean_keyword = keyword.strip()
         like_val = f"%{clean_keyword}%"
 
-        lead_sql = """
+        salesman_clause = "AND assigned_to = %s" if is_salesman else ""
+        lead_sql = f"""
             SELECT id, first_name, last_name, email, phone, career, address, entered_date
             FROM leads
-            WHERE phone ILIKE %s 
+            WHERE (phone ILIKE %s 
                OR email ILIKE %s 
                OR unaccent(first_name) ILIKE unaccent(%s)
                OR unaccent(last_name) ILIKE unaccent(%s)
                OR unaccent(first_name || ' ' || last_name) ILIKE unaccent(%s)
-               OR unaccent(last_name || ' ' || first_name) ILIKE unaccent(%s)
+               OR unaccent(last_name || ' ' || first_name) ILIKE unaccent(%s))
+               {salesman_clause}
             ORDER BY entered_date DESC
             LIMIT 5
         """
-        matching_leads = query_all(lead_sql, (like_val, like_val, like_val, like_val, like_val, like_val))
+        lead_params = [like_val, like_val, like_val, like_val, like_val, like_val]
+        if is_salesman:
+            lead_params.append(user_id)
+
+        matching_leads = query_all(lead_sql, tuple(lead_params))
         if not matching_leads:
+            if is_salesman:
+                return {"thong_bao": f"Không tìm thấy khách hàng nào khớp với từ khóa '{keyword}' trong danh sách phụ trách của bạn (hoặc khách hàng thuộc phụ trách của nhân viên khác)."}
             return {"thong_bao": f"Không tìm thấy khách hàng nào khớp với từ khóa '{keyword}' trong cơ sở dữ liệu Zen CRM."}
 
         # Khách hàng phù hợp nhất

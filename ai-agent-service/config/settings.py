@@ -29,6 +29,10 @@ try:
         REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
         REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
         REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+
+        # JWT Config
+        JWT_SECRET: str = os.getenv("JWT_SECRET", "zen_crm_super_secret_jwt_key_2026_at_least_32_characters_long")
+        JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
 except ImportError:
     from pydantic import BaseModel
     class Settings(BaseModel):
@@ -50,6 +54,10 @@ except ImportError:
         REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
         REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
         REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+
+        # JWT Config
+        JWT_SECRET: str = os.getenv("JWT_SECRET", "zen_crm_super_secret_jwt_key_2026_at_least_32_characters_long")
+        JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
 
 settings = Settings()
 

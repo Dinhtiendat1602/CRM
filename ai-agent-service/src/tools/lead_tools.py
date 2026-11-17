@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 from src.database.connection import query_one, get_db_connection
 from src.utils.normalizer import format_vietnamese_name, clean_phone
+from src.utils.context import get_current_user_context
 
 def create_lead(
     first_name: str,
@@ -24,7 +25,12 @@ def create_lead(
     - campaign_id: ID chiến dịch tiếp thị mang lại khách này (tùy chọn)
     
     Hàm tự động kiểm tra trùng SĐT/Email, thêm vào CSDL và trả về thông tin xác nhận.
+    Đối với Salesman: Tự động gán khách hàng mới cho nhân viên đang đăng nhập.
     """
+    user = get_current_user_context()
+    if user.get("role") == "ADMIN":
+        return {"error": "Từ chối thao tác: Vai trò Quản trị viên (ADMIN) không được phép tạo hoặc chỉnh sửa dữ liệu khách hàng CRM."}
+
     clean_p = clean_phone(phone)
     if not clean_p:
         return {"error": "Số điện thoại là bắt buộc và không được để trống."}
@@ -57,9 +63,10 @@ def create_lead(
         }
 
     # 2. Thêm mới bản ghi vào bảng leads
+    assigned_to = user.get("id") if user.get("role") == "SALESMAN" else None
     insert_sql = """
-        INSERT INTO leads (first_name, last_name, phone, email, career, address, campaign_id, entered_date)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+        INSERT INTO leads (first_name, last_name, phone, email, career, address, campaign_id, assigned_to, entered_date)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
         RETURNING id, entered_date;
     """
     try:
@@ -67,7 +74,7 @@ def create_lead(
             with conn.cursor() as cur:
                 cur.execute(
                     insert_sql,
-                    (fn, ln, clean_p, (email.strip() if email else None), career, address, campaign_id)
+                    (fn, ln, clean_p, (email.strip() if email else None), career, address, campaign_id, assigned_to)
                 )
                 res = cur.fetchone()
                 conn.commit()
@@ -86,7 +93,8 @@ def create_lead(
                 "email": email or "Chưa cập nhật",
                 "nghe_nghiep": career or "Chưa cập nhật",
                 "dia_chi": address or "Chưa cập nhật",
-                "ngay_nhap": entered_at
+                "ngay_nhap": entered_at,
+                "nguoi_phu_trach": user.get("full_name") or user.get("username") if assigned_to else "Chưa gán"
             },
             "next_suggested_actions": [
                 f"Tạo cơ hội bán hàng mới cho {full_name}",

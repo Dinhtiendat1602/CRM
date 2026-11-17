@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-05 11:00
-- **Active Task:** Tích hợp Lịch sử Cuộc trò chuyện đa phiên (Multi-session History Drawer & Persistence) cho Trợ lý AI Zen CRM (`feat-027`).
-- **Current Status:** HOÀN THÀNH 100% (279/279 tests PASS: 146 backend + 117 frontend + 16 AI Agent Service tests; Vite build thành công 379ms, 0 lỗi runtime).
+- **Last Updated:** 2026-11-17 09:55
+- **Active Task:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (RBAC), Bảo mật Dữ liệu Cấp Bản Ghi (RLS) & Phân bổ Công cụ Động cho AI Agent Zen CRM trên LangGraph.
+- **Current Status:** HOÀN THÀNH 100% (284/284 tests PASS: 146 backend + 117 frontend + 21 AI Agent Service tests; Vite build thành công trong 667ms, 0 lỗi runtime).
 - **Next Feature:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard).
 
 

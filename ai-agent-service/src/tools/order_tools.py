@@ -1,5 +1,5 @@
 """Công cụ cho Agent thực hiện thao tác tự động trên Cơ hội bán hàng & Đơn hàng qua Express REST API."""
-from typing import Optional
+from typing import Optional, Dict, Any
 from datetime import datetime
 from src.utils.normalizer import format_vietnamese_name, format_currency
 from src.utils.context import get_current_user_context
@@ -68,7 +68,7 @@ def create_opportunity(
 
         # 3. Tạo cơ hội qua Express API POST /api/opportunities
         # Express Backend sẽ tự động kiểm tra bảng salesman_products đối với SALESMAN và trả về 403 nếu chưa được phân quyền
-        payload = {
+        payload: Dict[str, Any] = {
             "lead_id": lead_id,
             "product_id": product_id,
             "quantity": qty,

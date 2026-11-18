@@ -4,7 +4,7 @@ thực thi hoàn toàn thông qua việc gửi yêu cầu đến Express REST AP
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from src.utils.normalizer import format_vietnamese_name, format_currency
 from src.utils.context import get_current_user_context
 from src.services.backend_client import backend_client
@@ -22,7 +22,7 @@ def get_leads_summary(limit: int = 10, query: Optional[str] = "") -> dict:
     is_salesman = (user.get("role") == "SALESMAN")
     user_id = user.get("id")
 
-    params = {
+    params: Dict[str, Any] = {
         "limit": limit,
         "all_time": "true"
     }
@@ -137,7 +137,7 @@ def get_products_and_inventory(query: Optional[str] = "", low_stock_only: bool =
     - limit: Số lượng sản phẩm hiển thị (mặc định 25).
     Đối với Salesman: Express Backend tự động lọc chỉ hiển thị các sản phẩm được phân quyền bán (salesman_products).
     """
-    params = {
+    params: Dict[str, Any] = {
         "limit": 100
     }
     clean_q = (query or "").strip()
@@ -271,7 +271,7 @@ def get_campaigns_overview(query: Optional[str] = "") -> dict:
             "error": "Quyền truy cập bị từ chối: Báo cáo chiến dịch và ngân sách tiếp thị chỉ dành riêng cho Quản lý (Sale Manager)."
         }
 
-    params = {"limit": 50}
+    params: Dict[str, Any] = {"limit": 50}
     clean_q = (query or "").strip()
     if clean_q:
         params["search"] = clean_q
@@ -315,7 +315,7 @@ def get_orders_summary(limit: int = 10, query: Optional[str] = "", status: Optio
     is_salesman = (user.get("role") == "SALESMAN")
     user_id = user.get("id")
 
-    params = {
+    params: Dict[str, Any] = {
         "limit": limit,
         "all_time": "true"
     }
@@ -378,7 +378,7 @@ def search_customer(keyword: str) -> dict:
     user_id = user.get("id")
 
     clean_keyword = (keyword or "").strip()
-    params = {
+    params: Dict[str, Any] = {
         "search": clean_keyword,
         "all_time": "true",
         "limit": 5

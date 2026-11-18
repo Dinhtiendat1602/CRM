@@ -1,5 +1,5 @@
 """Công cụ cho Agent thực hiện thao tác tự động trên Khách hàng tiềm năng (Leads) qua Express REST API."""
-from typing import Optional
+from typing import Optional, Dict, Any
 from src.utils.normalizer import format_vietnamese_name, clean_phone
 from src.utils.context import get_current_user_context
 from src.services.backend_client import backend_client
@@ -42,7 +42,7 @@ def create_lead(
     # Đảm bảo trường email hợp lệ theo yêu cầu của Backend Express
     effective_email = email.strip() if (email and email.strip()) else f"lead_{clean_p}@zencrm.local"
 
-    payload = {
+    payload: Dict[str, Any] = {
         "first_name": fn,
         "last_name": ln,
         "phone": clean_p,

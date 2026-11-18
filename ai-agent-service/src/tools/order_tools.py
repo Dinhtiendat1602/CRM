@@ -42,7 +42,8 @@ def create_opportunity(
         lead_name = lead_data.get("full_name") or format_vietnamese_name(lead_data.get("first_name", ""), lead_data.get("last_name", ""))
 
         # 2. Khớp sản phẩm qua Express API GET /api/products
-        prod_res = backend_client.get("/products", params={"search": product_identifier.strip(), "limit": 10})
+        clean_prod_id = (product_identifier or "").strip()
+        prod_res = backend_client.get("/products", params={"search": clean_prod_id, "limit": 10})
         if "error" in prod_res:
             return prod_res
         
@@ -53,7 +54,7 @@ def create_opportunity(
         # Tìm sản phẩm khớp mã chính xác hoặc phần tử đầu tiên
         target_product = products[0]
         for p in products:
-            if p.get("product_code", "").upper() == product_identifier.strip().upper():
+            if p.get("product_code", "").upper() == clean_prod_id.upper():
                 target_product = p
                 break
 

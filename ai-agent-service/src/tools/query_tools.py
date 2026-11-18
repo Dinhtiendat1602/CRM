@@ -10,7 +10,7 @@ from src.utils.context import get_current_user_context
 from src.services.backend_client import backend_client
 
 
-def get_leads_summary(limit: int = 10, query: str = "") -> dict:
+def get_leads_summary(limit: int = 10, query: Optional[str] = "") -> dict:
     """
     Tra cứu tổng quan về Khách hàng tiềm năng (Leads) qua Express REST API /api/leads.
     - limit: Số lượng lead cần lấy (mặc định 10).
@@ -26,8 +26,9 @@ def get_leads_summary(limit: int = 10, query: str = "") -> dict:
         "limit": limit,
         "all_time": "true"
     }
-    if query.strip():
-        params["search"] = query.strip()
+    clean_q = (query or "").strip()
+    if clean_q:
+        params["search"] = clean_q
     if is_salesman and user_id:
         params["assigned_to"] = user_id
 
@@ -128,7 +129,7 @@ def get_revenue_and_forecast(year: Optional[int] = None, month: Optional[int] = 
     }
 
 
-def get_products_and_inventory(query: str = "", low_stock_only: bool = False, limit: int = 25) -> dict:
+def get_products_and_inventory(query: Optional[str] = "", low_stock_only: bool = False, limit: int = 25) -> dict:
     """
     Tra cứu danh mục sản phẩm, đơn giá và số lượng tồn kho qua Express REST API /api/products.
     - query: Tên sản phẩm, danh mục hoặc mã sản phẩm cần tìm.
@@ -139,8 +140,9 @@ def get_products_and_inventory(query: str = "", low_stock_only: bool = False, li
     params = {
         "limit": 100
     }
-    if query.strip():
-        params["search"] = query.strip()
+    clean_q = (query or "").strip()
+    if clean_q:
+        params["search"] = clean_q
 
     api_res = backend_client.get("/products", params=params)
     if "error" in api_res:
@@ -256,7 +258,7 @@ def get_opportunities_overview() -> dict:
     }
 
 
-def get_campaigns_overview(query: str = "") -> dict:
+def get_campaigns_overview(query: Optional[str] = "") -> dict:
     """
     Tra cứu danh sách các chiến dịch tiếp thị (Campaigns) đang diễn ra hoặc đã kết thúc,
     ngân sách và số lượng Lead thu thập được từ mỗi chiến dịch qua Express REST API /api/campaigns.
@@ -270,8 +272,9 @@ def get_campaigns_overview(query: str = "") -> dict:
         }
 
     params = {"limit": 50}
-    if query.strip():
-        params["search"] = query.strip()
+    clean_q = (query or "").strip()
+    if clean_q:
+        params["search"] = clean_q
 
     api_res = backend_client.get("/campaigns", params=params)
     if "error" in api_res:
@@ -299,7 +302,7 @@ def get_campaigns_overview(query: str = "") -> dict:
     }
 
 
-def get_orders_summary(limit: int = 10, query: str = "", status: str = "") -> dict:
+def get_orders_summary(limit: int = 10, query: Optional[str] = "", status: Optional[str] = "") -> dict:
     """
     Tra cứu danh sách các đơn hàng (Orders) trong hệ thống qua Express REST API /api/orders.
     - limit: Số lượng đơn hàng cần lấy (mặc định 10).
@@ -316,10 +319,12 @@ def get_orders_summary(limit: int = 10, query: str = "", status: str = "") -> di
         "limit": limit,
         "all_time": "true"
     }
-    if query.strip():
-        params["search"] = query.strip()
-    if status.strip():
-        params["status"] = status.strip().upper()
+    clean_q = (query or "").strip()
+    if clean_q:
+        params["search"] = clean_q
+    clean_st = (status or "").strip().upper()
+    if clean_st:
+        params["status"] = clean_st
     if is_salesman and user_id:
         params["created_by"] = user_id
 
@@ -372,7 +377,7 @@ def search_customer(keyword: str) -> dict:
     is_salesman = (user.get("role") == "SALESMAN")
     user_id = user.get("id")
 
-    clean_keyword = keyword.strip()
+    clean_keyword = (keyword or "").strip()
     params = {
         "search": clean_keyword,
         "all_time": "true",

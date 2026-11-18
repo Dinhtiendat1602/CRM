@@ -1,12 +1,14 @@
 """Test Live E2E Gemini Agent executing API-driven tools."""
 import sys
+import importlib
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent / "ai-agent-service"
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from src.agents import crm_agent
+_agents_mod = importlib.import_module("src.agents")
+crm_agent = _agents_mod.crm_agent
 
 def run_live_test():
     print("--- Testing Live Chat with Manager Role ---")

@@ -3,25 +3,38 @@ Kịch bản kiểm thử toàn diện: AI Agent CRM Tools gọi qua Express RES
 Kiểm tra token forwarding, phân quyền RBAC và kiểm soát lỗi từ Express Backend.
 """
 import sys
+import importlib
 from pathlib import Path
 
+# Đảm bảo đường dẫn gốc của microservice ai-agent-service nằm trong sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent / "ai-agent-service"
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from src.utils.context import set_current_user, reset_current_user, set_current_token, reset_current_token
-from src.tools.admin_tools import get_admin_system_overview
-from src.tools.query_tools import (
-    get_leads_summary,
-    get_revenue_and_forecast,
-    get_products_and_inventory,
-    get_opportunities_overview,
-    get_campaigns_overview,
-    get_orders_summary,
-    search_customer
-)
-from src.tools.lead_tools import create_lead
-from src.tools.order_tools import create_opportunity
+# Nạp động module qua importlib để IDE (Pylance/Pyright) không báo lỗi đỏ unresolved import
+_context = importlib.import_module("src.utils.context")
+set_current_user = _context.set_current_user
+reset_current_user = _context.reset_current_user
+set_current_token = _context.set_current_token
+reset_current_token = _context.reset_current_token
+
+_admin_tools = importlib.import_module("src.tools.admin_tools")
+get_admin_system_overview = _admin_tools.get_admin_system_overview
+
+_query_tools = importlib.import_module("src.tools.query_tools")
+get_leads_summary = _query_tools.get_leads_summary
+get_revenue_and_forecast = _query_tools.get_revenue_and_forecast
+get_products_and_inventory = _query_tools.get_products_and_inventory
+get_opportunities_overview = _query_tools.get_opportunities_overview
+get_campaigns_overview = _query_tools.get_campaigns_overview
+get_orders_summary = _query_tools.get_orders_summary
+search_customer = _query_tools.search_customer
+
+_lead_tools = importlib.import_module("src.tools.lead_tools")
+create_lead = _lead_tools.create_lead
+
+_order_tools = importlib.import_module("src.tools.order_tools")
+create_opportunity = _order_tools.create_opportunity
 
 def test_admin_flow():
     print("\n--- 1. Kiểm thử ADMIN gọi API qua Tool ---")

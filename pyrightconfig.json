@@ -1,0 +1,10 @@
+{
+  "include": [
+    "ai-agent-service",
+    "scratch"
+  ],
+  "extraPaths": [
+    "./ai-agent-service",
+    "./ai-agent-service/src"
+  ]
+}

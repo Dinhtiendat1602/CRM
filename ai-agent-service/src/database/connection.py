@@ -1,3 +1,4 @@
+from typing import Optional
 from contextlib import contextmanager
 from datetime import date, datetime
 from decimal import Decimal
@@ -7,7 +8,7 @@ from psycopg2.pool import ThreadedConnectionPool
 
 from config.settings import settings
 
-_pool = None
+_pool: Optional[ThreadedConnectionPool] = None
 
 def get_pool():
     global _pool
@@ -60,21 +61,21 @@ def _serialize_row(row: dict) -> dict:
             serialized[k] = v
     return serialized
 
-def query_all(query: str, params: tuple = None) -> list:
+def query_all(query: str, params: Optional[tuple] = None) -> list:
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params or ())
             rows = cur.fetchall()
             return [_serialize_row(dict(r)) for r in rows]
 
-def query_one(query: str, params: tuple = None) -> dict:
+def query_one(query: str, params: Optional[tuple] = None) -> Optional[dict]:
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params or ())
             row = cur.fetchone()
             return _serialize_row(dict(row)) if row else None
 
-def execute_commit(query: str, params: tuple = None) -> int:
+def execute_commit(query: str, params: Optional[tuple] = None) -> int:
     """Thực thi câu lệnh INSERT / UPDATE / DELETE và commit giao dịch."""
     with get_db_connection() as conn:
         with conn.cursor() as cur:

@@ -73,7 +73,7 @@ def get_leads_summary(limit: int = 10, query: str = "") -> dict:
     }
 
 
-def get_revenue_and_forecast(year: int = None, month: int = None) -> dict:
+def get_revenue_and_forecast(year: Optional[int] = None, month: Optional[int] = None) -> dict:
     """
     Tra cứu báo cáo doanh số thực tế và tiến độ hoàn thành chỉ tiêu kế hoạch (Sales Forecast) qua Express REST API.
     - year: Năm tài chính (mặc định là năm hiện tại 2026).

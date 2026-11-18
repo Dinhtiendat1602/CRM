@@ -1,4 +1,5 @@
 """Hệ thống System Instructions và Prompt Templates cho Zen CRM AI Assistant theo phân quyền vai trò (RBAC)."""
+from typing import Optional, Dict, Any
 
 MANAGER_SYSTEM_INSTRUCTION = """
 Bạn là "Zen AI Assistant" — Trợ lý Trí tuệ Nhân tạo thông minh của Giám đốc / Quản lý Kinh doanh (Sale Manager) trong hệ thống Zen CRM Enterprise.
@@ -69,7 +70,7 @@ QUY TẮC BẢO MẬT & PHẠM VI NGHIÊM NGẶT:
 # Mặc định tương thích ngược
 SYSTEM_INSTRUCTION = MANAGER_SYSTEM_INSTRUCTION
 
-def get_system_prompt_for_role(role: str = "SALE_MANAGER", user: dict = None) -> str:
+def get_system_prompt_for_role(role: str = "SALE_MANAGER", user: Optional[Dict[str, Any]] = None) -> str:
     """Trả về System Instruction phù hợp với vai trò người dùng (ADMIN, SALE_MANAGER, SALESMAN)."""
     clean_role = (role or "SALE_MANAGER").upper()
     if clean_role == "ADMIN":

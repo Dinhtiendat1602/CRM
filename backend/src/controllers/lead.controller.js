@@ -36,12 +36,12 @@ exports.getLeads = async (req, res, next) => {
     const conditions = [];
     const values = [];
 
-    // Tìm kiếm theo tên hoặc một phần tên (SRS 3.3)
+    // Tìm kiếm theo tên hoặc một phần tên (SRS 3.3) - Hỗ trợ không dấu & có dấu qua unaccent
     if (search && search.trim()) {
       values.push(`%${search.trim()}%`);
       const idx = values.length;
       conditions.push(
-        `(l.first_name ILIKE $${idx} OR l.last_name ILIKE $${idx} OR (l.first_name || ' ' || l.last_name) ILIKE $${idx} OR (l.last_name || ' ' || l.first_name) ILIKE $${idx} OR l.email ILIKE $${idx} OR l.phone ILIKE $${idx})`
+        `(unaccent(l.first_name) ILIKE unaccent($${idx}) OR unaccent(l.last_name) ILIKE unaccent($${idx}) OR unaccent(l.first_name || ' ' || l.last_name) ILIKE unaccent($${idx}) OR unaccent(l.last_name || ' ' || l.first_name) ILIKE unaccent($${idx}) OR l.email ILIKE $${idx} OR l.phone ILIKE $${idx})`
       );
     }
 

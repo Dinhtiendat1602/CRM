@@ -4,9 +4,9 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-17 10:45
-- **Active Task:** Hiện thực hóa Hệ thống Phân quyền Vai trò Toàn diện (RBAC), Bảo mật Dữ liệu Cấp Bản Ghi (RLS), Phân bổ Công cụ Động & Cách ly Lịch sử Trò chuyện theo Vai trò cho AI Agent Zen CRM trên LangGraph.
-- **Current Status:** HOÀN THÀNH 100% (285/285 tests PASS: 146 backend + 117 frontend + 22 AI Agent Service tests; Vite build thành công trong 381ms, 0 lỗi runtime).
+- **Last Updated:** 2026-11-18 09:00
+- **Active Task:** Chuyển đổi toàn diện AI Agent CRM Tools sang Kiến trúc Gọi API (Approach 2) với Token Forwarding qua Express Backend REST API.
+- **Current Status:** HOÀN THÀNH 100% (22/22 AI Agent Service tests PASS + 146/146 Express Backend tests PASS; Vite frontend build 364ms; Live E2E Gemini Chat Agent gọi REST API Express thành công 100%).
 - **Next Feature:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard).
 
 
@@ -461,3 +461,30 @@
   - Kiểm thử trực tiếp gọi Gemini API và truy vấn PostgreSQL thời gian thực với LangGraph: Agent phản hồi chính xác 22 Leads và nhớ ngữ cảnh chỉ ra Lead mới nhất ở lượt hỏi thứ hai.
   - Backend integration tests: **146/146 tests PASS** (6 suites, 31.6s).
   - Frontend Vite build: **Thành công trong 359ms** (0 lỗi runtime, bundle sạch).
+
+---
+
+### [2026-11-18] Chuyển Đổi Toàn Diện AI Agent CRM Tools Sang Kiến Trúc Gọi API (Approach 2)
+
+- **Mục tiêu:** Chuyển đổi toàn diện cơ chế thực thi của các công cụ CRM AI Agent từ truy vấn SQL trực tiếp trong Python sang kiến trúc Gọi API qua Express Backend RESTful API (`http://localhost:8888/api`). Express Backend đóng vai trò Single Source of Truth kiểm soát toàn bộ Business Rules, Phân quyền RBAC, RLS và Deduplication BR-02.
+- **Những việc đã hoàn thành:**
+  1. **Cấu hình Backend API Base:** Bổ sung `BACKEND_API_BASE` vào `config/settings.py` và `ai-agent-service/.env` (mặc định `http://localhost:8888/api`).
+  2. **Quản lý & Chuyển tiếp Token (Token Context & Forwarding):** 
+     - Mở rộng `src/utils/context.py` với `_raw_token_context`, hàm `set_current_token()` và `get_current_token()` (kèm fallback minting JWT token hợp lệ khi chạy unit tests nội bộ).
+     - Bổ sung `raw_token` vào `src/api/auth.py` và quản lý lifecycle trong `crm_agent.chat()` qua `try ... finally`.
+  3. **Xây dựng `BackendAPIClient`:**
+     - Tạo `src/services/backend_client.py` sử dụng thư viện `httpx.Client`.
+     - Tự động đính kèm `Authorization: Bearer <token>` vào mọi yêu cầu.
+     - Chuẩn hóa các mã lỗi HTTP từ Express: `401 Unauthorized`, `403 Forbidden` (quyền hạn), `409 Conflict` (trùng lặp BR-02), `400 Bad Request`, `404 Not Found`.
+  4. **Tái cấu trúc toàn bộ 10 CRM Tools:**
+     - `src/tools/admin_tools.py`: `get_admin_system_overview` gọi `GET /api/admin/users`, `GET /api/admin/roles` và `GET /api/health`.
+     - `src/tools/lead_tools.py`: `create_lead` gọi `POST /api/leads`, bắt mã `409 Conflict` trả về thông tin khách hàng trùng theo BR-02.
+     - `src/tools/order_tools.py`: `create_opportunity` kiểm tra lead qua `GET /api/leads/:id`, khớp sản phẩm qua `GET /api/products`, gọi `POST /api/opportunities`. Express backend tự động kiểm tra `salesman_products` và từ chối 403 nếu Salesman chưa được phân quyền bán.
+     - `src/tools/query_tools.py`: 7 tools (`get_leads_summary`, `get_revenue_and_forecast`, `get_products_and_inventory`, `get_opportunities_overview`, `get_campaigns_overview`, `get_orders_summary`, `search_customer`) chuyển đổi hoàn toàn sang gọi các REST endpoints tương ứng (`/leads`, `/forecasts/performance`, `/products`, `/opportunities`, `/campaigns`, `/orders`).
+  5. **Nâng cấp Express Backend Controller:**
+     - Bổ sung `unaccent` vào `lead.controller.js` hỗ trợ tìm kiếm không dấu & có dấu xuyên suốt qua REST API.
+  6. **Kiểm thử Toàn diện & Live E2E:**
+     - Bộ kiểm thử AI Agent Service: **22/22 tests PASS (100%)**.
+     - Bộ kiểm thử Express Backend: **146/146 tests PASS (100%)**.
+     - Frontend Production Build: **Vite build thành công trong 364ms**.
+     - Live E2E Gemini Chat Agent: Chạy thực tế thành công với cả Sale Manager (báo cáo doanh thu & đối soát chỉ tiêu 12 tháng) và Salesman (lọc tự động 3 sản phẩm được phân quyền trong kho).

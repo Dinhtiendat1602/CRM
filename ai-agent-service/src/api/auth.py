@@ -56,7 +56,8 @@ def get_current_user(authorization: Optional[str] = Header(None)) -> Dict[str, A
             "username": payload.get("username", f"user_{user_id}"),
             "role": role,
             "email": payload.get("email", ""),
-            "full_name": payload.get("full_name", "")
+            "full_name": payload.get("full_name", ""),
+            "raw_token": token
         }
 
     # Chế độ fallback cho unit-test / kiểm thử nội bộ không token

@@ -5,7 +5,12 @@ from src.tools import ALL_CRM_TOOLS
 from src.agents.router import router
 from src.memory.redis_memory import memory
 from src.utils.logger import log_user_message, log_ai_reply
-from src.utils.context import set_current_user, reset_current_user
+from src.utils.context import (
+    set_current_user,
+    reset_current_user,
+    set_current_token,
+    reset_current_token,
+)
 
 class CRMAgent(BaseAgent):
     def __init__(self):
@@ -14,8 +19,10 @@ class CRMAgent(BaseAgent):
     def chat(self, user_message: str, session_id: str = "default", user: Optional[Dict[str, Any]] = None) -> str:
         role = (user.get("role") if user else "SALE_MANAGER") or "SALE_MANAGER"
         clean_role = str(role).upper()
+        raw_jwt = user.get("raw_token") if user else None
 
-        token = set_current_user(user)
+        cv_user_token = set_current_user(user)
+        cv_jwt_token = set_current_token(raw_jwt)
         try:
             log_user_message(session_id, f"[{clean_role}] {user_message}")
             # Lưu tin nhắn người dùng vào lịch sử hội thoại
@@ -32,6 +39,7 @@ class CRMAgent(BaseAgent):
             log_ai_reply(session_id, len(reply))
             return reply
         finally:
-            reset_current_user(token)
+            reset_current_user(cv_user_token)
+            reset_current_token(cv_jwt_token)
 
 crm_agent = CRMAgent()

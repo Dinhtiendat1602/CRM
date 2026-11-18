@@ -1,17 +1,18 @@
 """
-Các công cụ tra cứu cơ sở dữ liệu Zen CRM dành cho Trợ lý AI Gemini (Function Calling).
-Mỗi hàm đều có docstring rõ ràng và type hints để Gemini hiểu chính xác ngữ cảnh sử dụng.
+Các công cụ tra cứu cơ sở dữ liệu Zen CRM dành cho Trợ lý AI Gemini (Function Calling)
+thực thi hoàn toàn thông qua việc gửi yêu cầu đến Express REST API Backend kèm JWT Bearer Token.
 """
 
 from datetime import datetime
-from src.database.connection import query_all, query_one
-from src.utils.normalizer import format_vietnamese_name
+from typing import Optional
+from src.utils.normalizer import format_vietnamese_name, format_currency
 from src.utils.context import get_current_user_context
+from src.services.backend_client import backend_client
 
 
 def get_leads_summary(limit: int = 10, query: str = "") -> dict:
     """
-    Tra cứu tổng quan về Khách hàng tiềm năng (Leads).
+    Tra cứu tổng quan về Khách hàng tiềm năng (Leads) qua Express REST API /api/leads.
     - limit: Số lượng lead cần lấy (mặc định 10).
     - query: Từ khóa tìm kiếm theo họ tên (có dấu hoặc không dấu), số điện thoại hoặc email.
     Trả về tổng số lead trong hệ thống, số lead mới hôm nay, số lead tháng này và danh sách chi tiết.
@@ -21,738 +22,448 @@ def get_leads_summary(limit: int = 10, query: str = "") -> dict:
     is_salesman = (user.get("role") == "SALESMAN")
     user_id = user.get("id")
 
-    try:
-        if is_salesman:
-            total_res = query_one("SELECT COUNT(*) AS total FROM leads WHERE assigned_to = %s", (user_id,))
-        else:
-            total_res = query_one("SELECT COUNT(*) AS total FROM leads")
-        total = total_res["total"] if total_res else 0
+    params = {
+        "limit": limit,
+        "all_time": "true"
+    }
+    if query.strip():
+        params["search"] = query.strip()
+    if is_salesman and user_id:
+        params["assigned_to"] = user_id
 
-        today_str = datetime.now().strftime("%Y-%m-%d")
-        if is_salesman:
-            today_res = query_one(
-                "SELECT COUNT(*) AS today_count FROM leads WHERE DATE(entered_date) = %s AND assigned_to = %s",
-                (today_str, user_id)
-            )
-        else:
-            today_res = query_one(
-                "SELECT COUNT(*) AS today_count FROM leads WHERE DATE(entered_date) = %s",
-                (today_str,)
-            )
-        today_count = today_res["today_count"] if today_res else 0
+    api_res = backend_client.get("/leads", params=params)
+    if "error" in api_res:
+        return api_res
 
-        current_month = datetime.now().month
-        current_year = datetime.now().year
-        if is_salesman:
-            month_res = query_one(
-                "SELECT COUNT(*) AS month_count FROM leads WHERE EXTRACT(MONTH FROM entered_date) = %s AND EXTRACT(YEAR FROM entered_date) = %s AND assigned_to = %s",
-                (current_month, current_year, user_id)
-            )
-        else:
-            month_res = query_one(
-                "SELECT COUNT(*) AS month_count FROM leads WHERE EXTRACT(MONTH FROM entered_date) = %s AND EXTRACT(YEAR FROM entered_date) = %s",
-                (current_month, current_year)
-            )
-        month_count = month_res["month_count"] if month_res else 0
+    leads_data = api_res.get("data", [])
+    pagination = api_res.get("pagination", {})
+    total = pagination.get("total", len(leads_data))
 
-        where_clauses = []
-        params = []
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    current_month_str = datetime.now().strftime("%Y-%m")
 
-        if query.strip():
-            like_val = f"%{query.strip()}%"
-            where_clauses.append("""(
-                phone ILIKE %s 
-                   OR email ILIKE %s 
-                   OR unaccent(first_name) ILIKE unaccent(%s)
-                   OR unaccent(last_name) ILIKE unaccent(%s)
-                   OR unaccent(first_name || ' ' || last_name) ILIKE unaccent(%s)
-                   OR unaccent(last_name || ' ' || first_name) ILIKE unaccent(%s)
-            )""")
-            params.extend([like_val, like_val, like_val, like_val, like_val, like_val])
+    today_count = 0
+    month_count = 0
+    formatted_leads = []
 
-        if is_salesman:
-            where_clauses.append("assigned_to = %s")
-            params.append(user_id)
+    for l in leads_data:
+        entered = str(l.get("entered_date", ""))
+        if entered.startswith(today_str):
+            today_count += 1
+        if entered.startswith(current_month_str):
+            month_count += 1
 
-        where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
-        leads_sql = f"""
-            SELECT id, first_name, last_name, email, phone, career, address, entered_date
-            FROM leads
-            {where_sql}
-            ORDER BY entered_date DESC
-            LIMIT %s
-        """
-        params.append(limit)
-        leads = query_all(leads_sql, tuple(params))
+        full_name = l.get("full_name") or format_vietnamese_name(l.get("first_name", ""), l.get("last_name", ""))
+        formatted_leads.append({
+            "id": l.get("id"),
+            "ho_va_ten": full_name,
+            "so_dien_thoai": l.get("phone"),
+            "email": l.get("email"),
+            "nghe_nghiep": l.get("career") or "Chưa cập nhật",
+            "dia_chi": l.get("address") or "Chưa cập nhật",
+            "ngay_nhap": entered
+        })
 
-        formatted_leads = []
-        for l in leads:
-            full_name = format_vietnamese_name(l.get("first_name", ""), l.get("last_name", ""))
-            formatted_leads.append({
-                "id": l["id"],
-                "ho_va_ten": full_name,
-                "so_dien_thoai": l["phone"],
-                "email": l["email"],
-                "nghe_nghiep": l["career"] or "Chưa cập nhật",
-                "dia_chi": l["address"] or "Chưa cập nhật",
-                "ngay_nhap": l["entered_date"]
-            })
-
-        return {
-            "tong_so_lead_toan_he_thong": total,
-            "so_lead_moi_hom_nay": today_count,
-            "so_lead_moi_thang_nay": month_count,
-            "so_lead_tra_ve": len(formatted_leads),
-            "danh_sach_lead": formatted_leads
-        }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu danh sách Lead: {str(e)}"}
+    return {
+        "tong_so_lead_toan_he_thong": total,
+        "so_lead_moi_hom_nay": today_count,
+        "so_lead_moi_thang_nay": month_count,
+        "so_lead_tra_ve": len(formatted_leads),
+        "danh_sach_lead": formatted_leads
+    }
 
 
 def get_revenue_and_forecast(year: int = None, month: int = None) -> dict:
     """
-    Tra cứu báo cáo doanh số thực tế và tiến độ hoàn thành chỉ tiêu kế hoạch (Sales Forecast).
+    Tra cứu báo cáo doanh số thực tế và tiến độ hoàn thành chỉ tiêu kế hoạch (Sales Forecast) qua Express REST API.
     - year: Năm tài chính (mặc định là năm hiện tại 2026).
     - month: Tháng (1-12, mặc định là tháng hiện tại).
     Trả về doanh thu thực tế, số đơn hàng thành công, chỉ tiêu kế hoạch, tỉ lệ đạt được và bảng tổng hợp 12 tháng.
+    Yêu cầu quyền hạn: Chỉ Sale Manager và Admin được phép truy cập (Salesman sẽ bị Backend từ chối 403 Forbidden).
     """
-    try:
-        user = get_current_user_context()
-        if user.get("role") == "SALESMAN":
-            return {
-                "error": "Quyền truy cập bị từ chối: Báo cáo tài chính, chỉ tiêu và doanh số toàn công ty chỉ dành riêng cho vai trò Quản lý (Sale Manager)."
-            }
-
-        now = datetime.now()
-        target_year = year or now.year
-        target_month = month or now.month
-
-        # Doanh số thực tế từ đơn hàng COMPLETED trong tháng/năm đó
-        orders_sql = """
-            SELECT 
-                COUNT(*) AS total_completed_orders,
-                COALESCE(SUM(total_amount), 0) AS total_revenue
-            FROM orders
-            WHERE status = 'COMPLETED'
-              AND EXTRACT(YEAR FROM order_date) = %s
-              AND EXTRACT(MONTH FROM order_date) = %s
-        """
-        rev_data = query_one(orders_sql, (target_year, target_month)) or {"total_completed_orders": 0, "total_revenue": 0}
-
-        # Doanh số cả năm
-        year_orders_sql = """
-            SELECT 
-                COUNT(*) AS year_orders,
-                COALESCE(SUM(total_amount), 0) AS year_revenue
-            FROM orders
-            WHERE status = 'COMPLETED'
-              AND EXTRACT(YEAR FROM order_date) = %s
-        """
-        year_rev_data = query_one(year_orders_sql, (target_year,)) or {"year_orders": 0, "year_revenue": 0}
-
-        # Chỉ tiêu từ bảng sale_forecasts
-        plan_sql = """
-            SELECT target_amount 
-            FROM sale_forecasts 
-            WHERE fiscal_year = %s AND month = %s
-        """
-        plan_data = query_one(plan_sql, (target_year, target_month))
-        target_amount = plan_data["target_amount"] if plan_data else 0
-
-        actual_month_rev = float(rev_data["total_revenue"])
-        percent_achieved = round((actual_month_rev / target_amount * 100), 2) if target_amount > 0 else 0
-
-        # Tổng hợp doanh số từng tháng trong năm để Gemini có bức tranh toàn cảnh
-        monthly_summary_sql = """
-            SELECT 
-                EXTRACT(MONTH FROM order_date)::int AS month,
-                COUNT(*) AS orders_count,
-                COALESCE(SUM(total_amount), 0) AS revenue
-            FROM orders
-            WHERE status = 'COMPLETED'
-              AND EXTRACT(YEAR FROM order_date) = %s
-            GROUP BY EXTRACT(MONTH FROM order_date)
-            ORDER BY month ASC
-        """
-        monthly_rows = query_all(monthly_summary_sql, (target_year,))
-        monthly_breakdown = [
-            {
-                "thang": int(r["month"]),
-                "so_don_thanh_cong": r["orders_count"],
-                "doanh_thu_vnd": float(r["revenue"])
-            }
-            for r in monthly_rows
-        ]
-
+    user = get_current_user_context()
+    if user.get("role") == "SALESMAN":
         return {
-            "nam_tai_chinh": target_year,
-            "thang": target_month,
-            "doanh_thu_thang_thuc_te_vnd": actual_month_rev,
-            "so_don_thanh_cong_thang": rev_data["total_completed_orders"],
-            "chi_tieu_ke_hoach_thang_vnd": float(target_amount),
-            "ti_le_hoan_thanh_ke_hoach_percent": percent_achieved,
-            "doanh_thu_luy_ke_ca_nam_vnd": float(year_rev_data["year_revenue"]),
-            "tong_so_don_ca_nam": year_rev_data["year_orders"],
-            "bang_tong_hop_doanh_thu_cac_thang_nam": monthly_breakdown
+            "error": "Quyền truy cập bị từ chối: Báo cáo tài chính, chỉ tiêu và doanh số toàn công ty chỉ dành riêng cho vai trò Quản lý (Sale Manager)."
         }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu doanh số: {str(e)}"}
+
+    now = datetime.now()
+    target_year = year or now.year
+    target_month = month or now.month
+
+    # Gọi API kiểm tra performance kế hoạch & thực tế từ Express Backend
+    fc_res = backend_client.get("/forecasts/performance", params={"year": target_year})
+    if "error" in fc_res:
+        return fc_res
+
+    fc_data = fc_res.get("data", {})
+    months = fc_data.get("months", [])
+    fc_summary = fc_data.get("summary", {})
+
+    target_month_data = next((m for m in months if m.get("month") == target_month), {})
+    actual_rev = float(target_month_data.get("actually_value", 0))
+    target_plan = float(target_month_data.get("plan", 0))
+    achieved_pct = float(target_month_data.get("percentage", 0))
+    orders_cnt = int(target_month_data.get("orders_count", 0))
+
+    monthly_breakdown = [
+        {
+            "thang": m.get("month"),
+            "so_don_thanh_cong": m.get("orders_count", 0),
+            "doanh_thu_vnd": float(m.get("actually_value", 0))
+        }
+        for m in months
+    ]
+
+    return {
+        "nam_tai_chinh": target_year,
+        "thang": target_month,
+        "doanh_thu_thang_thuc_te_vnd": actual_rev,
+        "so_don_thanh_cong_thang": orders_cnt,
+        "chi_tieu_ke_hoach_thang_vnd": target_plan,
+        "ti_le_hoan_thanh_ke_hoach_percent": achieved_pct,
+        "doanh_thu_luy_ke_ca_nam_vnd": float(fc_summary.get("total_actual", 0)),
+        "tong_so_don_ca_nam": int(fc_summary.get("total_orders", 0)),
+        "bang_tong_hop_doanh_thu_cac_thang_nam": monthly_breakdown
+    }
 
 
 def get_products_and_inventory(query: str = "", low_stock_only: bool = False, limit: int = 25) -> dict:
     """
-    Tra cứu danh mục sản phẩm, đơn giá và số lượng tồn kho.
-    - query: Tên sản phẩm, danh mục hoặc mã sản phẩm cần tìm (hỗ trợ tiếng Việt có dấu và không dấu).
+    Tra cứu danh mục sản phẩm, đơn giá và số lượng tồn kho qua Express REST API /api/products.
+    - query: Tên sản phẩm, danh mục hoặc mã sản phẩm cần tìm.
     - low_stock_only: Chỉ hiển thị các sản phẩm sắp hết hàng (tồn kho <= 5).
     - limit: Số lượng sản phẩm hiển thị (mặc định 25).
-    Đối với Salesman: Tự động chỉ hiển thị các sản phẩm được phân quyền bán (salesman_products).
+    Đối với Salesman: Express Backend tự động lọc chỉ hiển thị các sản phẩm được phân quyền bán (salesman_products).
+    """
+    params = {
+        "limit": 100
+    }
+    if query.strip():
+        params["search"] = query.strip()
+
+    api_res = backend_client.get("/products", params=params)
+    if "error" in api_res:
+        return api_res
+
+    products = api_res.get("products") or api_res.get("data") or []
+    total_products = api_res.get("pagination", {}).get("totalRecords", len(products))
+
+    # Đếm số lượng sản phẩm sắp hết hàng
+    low_count = sum(1 for p in products if int(p.get("stock_qty", 0)) <= 5)
+
+    if low_stock_only:
+        products = [p for p in products if int(p.get("stock_qty", 0)) <= 5]
+
+    # Sắp xếp theo tồn kho tăng dần và giới hạn kết quả
+    products.sort(key=lambda p: int(p.get("stock_qty", 0)))
+    display_products = products[:limit]
+
+    items = []
+    for r in display_products:
+        stock = int(r.get("stock_qty", 0))
+        items.append({
+            "id": r.get("id"),
+            "ma_san_pham": r.get("product_code"),
+            "ten_san_pham": r.get("name"),
+            "danh_muc": r.get("category_name") or "Khác",
+            "don_gia_vnd": float(r.get("unit_price", 0)),
+            "so_luong_ton_kho": stock,
+            "canh_bao": "Sắp hết hàng!" if stock <= 5 else "Bình thường"
+        })
+
+    return {
+        "tong_so_san_pham_toan_he_thong": total_products,
+        "so_san_pham_khop_tim_kiem": len(items),
+        "so_san_pham_canh_bao_het_hang": low_count,
+        "danh_sach_san_pham": items
+    }
+
+
+def get_opportunities_overview() -> dict:
+    """
+    Tra cứu tổng quan về Cơ hội bán hàng (Opportunities) qua Express REST API /api/opportunities.
+    Bao gồm phân bố theo từng giai đoạn (NEW, CONTACTED, QUALIFIED, PROPOSAL, ORDERED, LOST)
+    và danh sách các cơ hội bán hàng có giá trị lớn nhất hiện có.
+    Đối với Salesman: Tự động chỉ hiển thị các cơ hội do nhân viên phụ trách hoặc tạo lập.
     """
     user = get_current_user_context()
     is_salesman = (user.get("role") == "SALESMAN")
     user_id = user.get("id")
 
-    try:
-        where_clauses = []
-        params = []
+    params = {
+        "limit": 100,
+        "all_time": "true"
+    }
+    if is_salesman and user_id:
+        params["created_by"] = user_id
 
-        if is_salesman:
-            where_clauses.append("p.id IN (SELECT product_id FROM salesman_products WHERE user_id = %s)")
-            params.append(user_id)
-            total_products_res = query_one(
-                "SELECT COUNT(*) AS total FROM salesman_products WHERE user_id = %s",
-                (user_id,)
-            )
-            low_stock_count = query_one("""
-                SELECT COUNT(*) AS cnt FROM products p
-                JOIN salesman_products sp ON p.id = sp.product_id
-                WHERE sp.user_id = %s AND p.stock_qty <= 5
-            """, (user_id,))
+    api_res = backend_client.get("/opportunities", params=params)
+    if "error" in api_res:
+        return api_res
+
+    opps_list = api_res.get("data", [])
+
+    pipeline = {
+        "NEW": 0,
+        "CONTACTED": 0,
+        "QUALIFIED": 0,
+        "PROPOSAL": 0,
+        "ORDERED": 0,
+        "LOST": 0
+    }
+    for opp in opps_list:
+        st = str(opp.get("status", "NEW")).upper()
+        if st in pipeline:
+            pipeline[st] += 1
         else:
-            total_products_res = query_one("SELECT COUNT(*) AS total FROM products")
-            low_stock_count = query_one("SELECT COUNT(*) AS cnt FROM products WHERE stock_qty <= 5")
+            pipeline[st] = pipeline.get(st, 0) + 1
 
-        total_products = total_products_res["total"] if total_products_res else 0
-        low_count = low_stock_count["cnt"] if low_stock_count else 0
+    # Tính toán tổng giá trị pipeline đang mở (chưa ORDERED hoặc LOST)
+    open_opps = [o for o in opps_list if str(o.get("status", "")).upper() not in ["ORDERED", "LOST"]]
+    
+    def get_opp_value(o):
+        try:
+            return float(o.get("estimated_value") or (int(o.get("quantity", 1)) * float(o.get("unit_price", 0))))
+        except Exception:
+            return 0.0
 
-        if query.strip():
-            where_clauses.append("(unaccent(p.name) ILIKE unaccent(%s) OR p.product_code ILIKE %s OR unaccent(c.name) ILIKE unaccent(%s))")
-            like_val = f"%{query.strip()}%"
-            params.extend([like_val, like_val, like_val])
+    total_open_val = sum(get_opp_value(o) for o in open_opps)
 
-        if low_stock_only:
-            where_clauses.append("p.stock_qty <= 5")
+    # Sắp xếp top cơ hội tiềm năng có giá trị lớn nhất
+    open_opps.sort(key=get_opp_value, reverse=True)
+    top_rows = open_opps[:6]
 
-        where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+    top_opps = []
+    for r in top_rows:
+        lead_name = r.get("lead_name") or format_vietnamese_name(r.get("lead_first_name", ""), r.get("lead_last_name", ""))
+        top_opps.append({
+            "id": r.get("id"),
+            "khach_hang": lead_name,
+            "so_dien_thoai": r.get("lead_phone", "Chưa cập nhật"),
+            "san_pham": r.get("product_name"),
+            "so_luong": r.get("quantity", 1),
+            "gia_tri_du_kien_vnd": get_opp_value(r),
+            "trang_thai": r.get("status"),
+            "ngay_du_kien_chot": str(r.get("expected_close_date", "Chưa rõ"))
+        })
 
-        sql = f"""
-            SELECT 
-                p.id, 
-                p.product_code, 
-                p.name, 
-                c.name AS category_name,
-                p.unit_price, 
-                p.stock_qty
-            FROM products p
-            LEFT JOIN product_categories c ON p.category_id = c.id
-            {where_sql}
-            ORDER BY p.stock_qty ASC, p.name ASC
-            LIMIT %s
-        """
-        params.append(limit)
-        rows = query_all(sql, tuple(params))
-
-        items = []
-        for r in rows:
-            items.append({
-                "id": r["id"],
-                "ma_san_pham": r["product_code"],
-                "ten_san_pham": r["name"],
-                "danh_muc": r["category_name"] or "Khác",
-                "don_gia_vnd": float(r["unit_price"]),
-                "so_luong_ton_kho": r["stock_qty"],
-                "canh_bao": "Sắp hết hàng!" if r["stock_qty"] <= 5 else "Bình thường"
-            })
-
-        return {
-            "tong_so_san_pham_toan_he_thong": total_products,
-            "so_san_pham_khop_tim_kiem": len(items),
-            "so_san_pham_canh_bao_het_hang": low_count,
-            "danh_sach_san_pham": items
-        }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu sản phẩm: {str(e)}"}
-
-
-def get_opportunities_overview() -> dict:
-    """
-    Tra cứu tổng quan về Cơ hội bán hàng (Opportunities).
-    Bao gồm phân bố theo từng giai đoạn (NEW, CONTACTED, QUALIFIED, PROPOSAL, ORDERED, LOST)
-    và danh sách các cơ hội bán hàng có giá trị lớn nhất hiện có.
-    Đối với Salesman: Tự động chỉ hiển thị các cơ hội do nhân viên phụ trách hoặc tạo lập.
-    """
-    try:
-        user = get_current_user_context()
-        is_salesman = (user.get("role") == "SALESMAN")
-        user_id = user.get("id")
-
-        if is_salesman:
-            status_sql = """
-                SELECT o.status, COUNT(*) AS count 
-                FROM opportunities o
-                JOIN leads l ON o.lead_id = l.id
-                WHERE (o.created_by = %s OR l.assigned_to = %s)
-                GROUP BY o.status
-            """
-            status_rows = query_all(status_sql, (user_id, user_id))
-        else:
-            status_sql = """
-                SELECT status, COUNT(*) AS count 
-                FROM opportunities 
-                GROUP BY status
-            """
-            status_rows = query_all(status_sql)
-        pipeline = {r["status"]: r["count"] for r in status_rows}
-
-        if is_salesman:
-            top_opps_sql = """
-                SELECT 
-                    o.id,
-                    l.first_name, l.last_name, l.phone,
-                    p.name AS product_name,
-                    o.quantity,
-                    p.unit_price,
-                    (o.quantity * p.unit_price) AS estimated_value,
-                    o.status,
-                    o.expected_close_date
-                FROM opportunities o
-                JOIN leads l ON o.lead_id = l.id
-                JOIN products p ON o.product_id = p.id
-                WHERE o.status NOT IN ('ORDERED', 'LOST')
-                  AND (o.created_by = %s OR l.assigned_to = %s)
-                ORDER BY estimated_value DESC
-                LIMIT 6
-            """
-            top_rows = query_all(top_opps_sql, (user_id, user_id))
-        else:
-            top_opps_sql = """
-                SELECT 
-                    o.id,
-                    l.first_name, l.last_name, l.phone,
-                    p.name AS product_name,
-                    o.quantity,
-                    p.unit_price,
-                    (o.quantity * p.unit_price) AS estimated_value,
-                    o.status,
-                    o.expected_close_date
-                FROM opportunities o
-                JOIN leads l ON o.lead_id = l.id
-                JOIN products p ON o.product_id = p.id
-                WHERE o.status NOT IN ('ORDERED', 'LOST')
-                ORDER BY estimated_value DESC
-                LIMIT 6
-            """
-            top_rows = query_all(top_opps_sql)
-
-        top_opps = []
-        for r in top_rows:
-            full_name = format_vietnamese_name(r.get("first_name", ""), r.get("last_name", ""))
-            top_opps.append({
-                "id": r["id"],
-                "khach_hang": full_name,
-                "so_dien_thoai": r["phone"],
-                "san_pham": r["product_name"],
-                "so_luong": r["quantity"],
-                "gia_tri_du_kien_vnd": float(r["estimated_value"]),
-                "trang_thai": r["status"],
-                "ngay_du_kien_chot": str(r["expected_close_date"]) if r["expected_close_date"] else "Chưa rõ"
-            })
-
-        if is_salesman:
-            total_open_val_res = query_one("""
-                SELECT COALESCE(SUM(o.quantity * p.unit_price), 0) AS total_val
-                FROM opportunities o
-                JOIN leads l ON o.lead_id = l.id
-                JOIN products p ON o.product_id = p.id
-                WHERE o.status NOT IN ('ORDERED', 'LOST')
-                  AND (o.created_by = %s OR l.assigned_to = %s)
-            """, (user_id, user_id))
-        else:
-            total_open_val_res = query_one("""
-                SELECT COALESCE(SUM(o.quantity * p.unit_price), 0) AS total_val
-                FROM opportunities o
-                JOIN products p ON o.product_id = p.id
-                WHERE o.status NOT IN ('ORDERED', 'LOST')
-            """)
-        total_open_val = float(total_open_val_res["total_val"]) if total_open_val_res else 0.0
-
-        return {
-            "phan_bo_theo_giai_doan": pipeline,
-            "tong_so_co_hoi_dang_mo": sum(v for k, v in pipeline.items() if k not in ["ORDERED", "LOST"]),
-            "tong_gia_tri_pipeline_dang_mo_vnd": total_open_val,
-            "top_co_hoi_tiem_nang": top_opps
-        }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu cơ hội bán hàng: {str(e)}"}
+    return {
+        "phan_bo_theo_giai_doan": pipeline,
+        "tong_so_co_hoi_dang_mo": len(open_opps),
+        "tong_gia_tri_pipeline_dang_mo_vnd": total_open_val,
+        "top_co_hoi_tiem_nang": top_opps
+    }
 
 
 def get_campaigns_overview(query: str = "") -> dict:
     """
     Tra cứu danh sách các chiến dịch tiếp thị (Campaigns) đang diễn ra hoặc đã kết thúc,
-    ngân sách và số lượng Lead thu thập được từ mỗi chiến dịch.
+    ngân sách và số lượng Lead thu thập được từ mỗi chiến dịch qua Express REST API /api/campaigns.
     - query: Tìm kiếm chiến dịch theo tên (tùy chọn).
     Đối với Salesman: Bị từ chối vì báo cáo chiến dịch chỉ dành cho cấp Quản lý.
     """
-    try:
-        user = get_current_user_context()
-        if user.get("role") == "SALESMAN":
-            return {
-                "error": "Quyền truy cập bị từ chối: Báo cáo chiến dịch và ngân sách tiếp thị chỉ dành riêng cho Quản lý (Sale Manager)."
-            }
-
-        where_sql = ""
-        params = []
-        if query.strip():
-            where_sql = "WHERE unaccent(c.name) ILIKE unaccent(%s)"
-            params.append(f"%{query.strip()}%")
-
-        sql = f"""
-            SELECT 
-                c.id, 
-                c.name, 
-                c.budget, 
-                c.start_date, 
-                c.end_date,
-                COUNT(l.id) AS leads_count
-            FROM campaigns c
-            LEFT JOIN leads l ON l.campaign_id = c.id
-            {where_sql}
-            GROUP BY c.id
-            ORDER BY c.start_date DESC
-            LIMIT 25
-        """
-        rows = query_all(sql, tuple(params))
-
-        total_campaigns_res = query_one("SELECT COUNT(*) AS total FROM campaigns")
-        total_campaigns = total_campaigns_res["total"] if total_campaigns_res else 0
-
-        campaigns = []
-        for r in rows:
-            campaigns.append({
-                "id": r["id"],
-                "ten_chien_dich": r["name"],
-                "ngan_sach_vnd": float(r["budget"]),
-                "ngay_bat_dau": str(r["start_date"]),
-                "ngay_ket_thuc": str(r["end_date"]),
-                "so_lead_thu_thap_duoc": r["leads_count"]
-            })
+    user = get_current_user_context()
+    if user.get("role") == "SALESMAN":
         return {
-            "tong_so_chien_dich_he_thong": total_campaigns,
-            "so_chien_dich_khop": len(campaigns),
-            "danh_sach_chien_dich": campaigns
+            "error": "Quyền truy cập bị từ chối: Báo cáo chiến dịch và ngân sách tiếp thị chỉ dành riêng cho Quản lý (Sale Manager)."
         }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu chiến dịch: {str(e)}"}
+
+    params = {"limit": 50}
+    if query.strip():
+        params["search"] = query.strip()
+
+    api_res = backend_client.get("/campaigns", params=params)
+    if "error" in api_res:
+        return api_res
+
+    rows = api_res.get("data", [])
+    pagination = api_res.get("pagination", {})
+    total_campaigns = pagination.get("total", len(rows))
+
+    campaigns = []
+    for r in rows:
+        campaigns.append({
+            "id": r.get("id"),
+            "ten_chien_dich": r.get("name"),
+            "ngan_sach_vnd": float(r.get("budget", 0)),
+            "ngay_bat_dau": str(r.get("start_date", "")),
+            "ngay_ket_thuc": str(r.get("end_date", "")),
+            "so_lead_thu_thap_duoc": int(r.get("leads_count", 0))
+        })
+
+    return {
+        "tong_so_chien_dich_he_thong": total_campaigns,
+        "so_chien_dich_khop": len(campaigns),
+        "danh_sach_chien_dich": campaigns
+    }
 
 
 def get_orders_summary(limit: int = 10, query: str = "", status: str = "") -> dict:
     """
-    Tra cứu danh sách các đơn hàng (Orders) trong hệ thống.
+    Tra cứu danh sách các đơn hàng (Orders) trong hệ thống qua Express REST API /api/orders.
     - limit: Số lượng đơn hàng cần lấy (mặc định 10).
     - query: Tìm kiếm theo mã đơn (VD: 'ORD-20260115-0001'), tên khách hàng hoặc tên sản phẩm.
     - status: Lọc theo trạng thái đơn ('COMPLETED', 'PENDING', 'CANCELLED').
     Trả về tổng số đơn, tổng giá trị và chi tiết từng đơn hàng kèm tên sản phẩm, số lượng, ngày đặt.
     Đối với Salesman: Tự động chỉ hiển thị các đơn hàng của khách hàng do nhân viên phụ trách.
     """
-    try:
-        user = get_current_user_context()
-        is_salesman = (user.get("role") == "SALESMAN")
-        user_id = user.get("id")
+    user = get_current_user_context()
+    is_salesman = (user.get("role") == "SALESMAN")
+    user_id = user.get("id")
 
-        where_clauses = []
-        params = []
+    params = {
+        "limit": limit,
+        "all_time": "true"
+    }
+    if query.strip():
+        params["search"] = query.strip()
+    if status.strip():
+        params["status"] = status.strip().upper()
+    if is_salesman and user_id:
+        params["created_by"] = user_id
 
-        if is_salesman:
-            where_clauses.append("l.assigned_to = %s")
-            params.append(user_id)
+    api_res = backend_client.get("/orders", params=params)
+    if "error" in api_res:
+        return api_res
 
-        if query.strip():
-            where_clauses.append("""(
-                o.order_code ILIKE %s
-                OR unaccent(p.name) ILIKE unaccent(%s)
-                OR p.product_code ILIKE %s
-                OR unaccent(l.first_name || ' ' || l.last_name) ILIKE unaccent(%s)
-                OR unaccent(l.last_name || ' ' || l.first_name) ILIKE unaccent(%s)
-                OR l.phone ILIKE %s
-            )""")
-            like_val = f"%{query.strip()}%"
-            params.extend([like_val, like_val, like_val, like_val, like_val, like_val])
+    orders_data = api_res.get("data", [])
+    summary = api_res.get("summary", {})
+    total_orders = summary.get("totalOrders", len(orders_data))
+    total_amount = float(summary.get("totalRevenue", 0))
 
-        if status.strip():
-            where_clauses.append("o.status = %s")
-            params.append(status.strip().upper())
+    completed_orders = sum(1 for o in orders_data if str(o.get("status", "")).upper() == "COMPLETED")
 
-        where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+    orders_list = []
+    for r in orders_data:
+        lead_name = r.get("lead_name") or format_vietnamese_name(r.get("first_name", ""), r.get("last_name", ""))
+        orders_list.append({
+            "id": r.get("id"),
+            "ma_don": r.get("order_code"),
+            "khach_hang": lead_name,
+            "so_dien_thoai": r.get("lead_phone") or r.get("phone", "Chưa cập nhật"),
+            "san_pham": r.get("product_name"),
+            "ma_san_pham": r.get("product_code"),
+            "so_luong": r.get("quantity", 1),
+            "don_gia_vnd": float(r.get("unit_price", 0)),
+            "tong_tien_vnd": float(r.get("total_amount", 0)),
+            "ngay_dat": str(r.get("order_date", "")),
+            "phuong_thuc_thanh_toan": r.get("payment_info", "Chưa cập nhật"),
+            "dia_chi_giao_hang": r.get("shipping_address", "Chưa cập nhật"),
+            "trang_thai": r.get("status")
+        })
 
-        count_sql = f"""
-            SELECT 
-                COUNT(*) AS total_orders,
-                COALESCE(SUM(o.total_amount), 0) AS total_amount,
-                COUNT(CASE WHEN o.status = 'COMPLETED' THEN 1 END) AS completed_orders
-            FROM orders o
-            JOIN leads l ON o.lead_id = l.id
-            JOIN products p ON o.product_id = p.id
-            {where_sql}
-        """
-        stats = query_one(count_sql, tuple(params)) or {"total_orders": 0, "total_amount": 0, "completed_orders": 0}
-
-        orders_sql = f"""
-            SELECT 
-                o.id,
-                o.order_code,
-                l.first_name,
-                l.last_name,
-                l.phone,
-                p.name AS product_name,
-                p.product_code,
-                o.quantity,
-                o.unit_price,
-                o.total_amount,
-                o.order_date,
-                o.payment_info,
-                o.shipping_address,
-                o.status
-            FROM orders o
-            JOIN leads l ON o.lead_id = l.id
-            JOIN products p ON o.product_id = p.id
-            {where_sql}
-            ORDER BY o.order_date DESC
-            LIMIT %s
-        """
-        orders_params = list(params) + [limit]
-        rows = query_all(orders_sql, tuple(orders_params))
-
-        orders_list = []
-        for r in rows:
-            full_name = format_vietnamese_name(r.get("first_name", ""), r.get("last_name", ""))
-            orders_list.append({
-                "id": r["id"],
-                "ma_don": r["order_code"],
-                "khach_hang": full_name,
-                "so_dien_thoai": r["phone"],
-                "san_pham": r["product_name"],
-                "ma_san_pham": r["product_code"],
-                "so_luong": r["quantity"],
-                "don_gia_vnd": float(r["unit_price"]),
-                "tong_tien_vnd": float(r["total_amount"]),
-                "ngay_dat": str(r["order_date"]),
-                "phuong_thuc_thanh_toan": r["payment_info"],
-                "dia_chi_giao_hang": r["shipping_address"],
-                "trang_thai": r["status"]
-            })
-
-        return {
-            "tong_so_don_hang": stats["total_orders"],
-            "tong_so_don_thanh_cong": stats["completed_orders"],
-            "tong_gia_tri_vnd": float(stats["total_amount"]),
-            "danh_sach_don_hang": orders_list
-        }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu danh sách đơn hàng: {str(e)}"}
+    return {
+        "tong_so_don_hang": total_orders,
+        "tong_so_don_thanh_cong": completed_orders,
+        "tong_gia_tri_vnd": total_amount,
+        "danh_sach_don_hang": orders_list
+    }
 
 
 def search_customer(keyword: str) -> dict:
     """
-    Tìm kiếm thông tin chi tiết một khách hàng cụ thể theo số điện thoại, email hoặc họ tên.
+    Tìm kiếm thông tin chi tiết một khách hàng cụ thể theo số điện thoại, email hoặc họ tên qua Express REST API.
     Hỗ trợ tìm kiếm tiếng Việt có dấu hoặc không dấu, thứ tự họ tên tự nhiên.
     Trả về thông tin cá nhân cùng toàn bộ lịch sử các sản phẩm đã mua, đơn hàng và cơ hội bán hàng.
     Đối với Salesman: Tự động chỉ tìm kiếm trong tệp khách hàng do nhân viên phụ trách.
     """
-    try:
-        user = get_current_user_context()
-        is_salesman = (user.get("role") == "SALESMAN")
-        user_id = user.get("id")
+    user = get_current_user_context()
+    is_salesman = (user.get("role") == "SALESMAN")
+    user_id = user.get("id")
 
-        clean_keyword = keyword.strip()
-        like_val = f"%{clean_keyword}%"
+    clean_keyword = keyword.strip()
+    params = {
+        "search": clean_keyword,
+        "all_time": "true",
+        "limit": 5
+    }
+    if is_salesman and user_id:
+        params["assigned_to"] = user_id
 
-        salesman_clause = "AND assigned_to = %s" if is_salesman else ""
-        lead_sql = f"""
-            SELECT id, first_name, last_name, email, phone, career, address, entered_date
-            FROM leads
-            WHERE (phone ILIKE %s 
-               OR email ILIKE %s 
-               OR unaccent(first_name) ILIKE unaccent(%s)
-               OR unaccent(last_name) ILIKE unaccent(%s)
-               OR unaccent(first_name || ' ' || last_name) ILIKE unaccent(%s)
-               OR unaccent(last_name || ' ' || first_name) ILIKE unaccent(%s))
-               {salesman_clause}
-            ORDER BY entered_date DESC
-            LIMIT 5
-        """
-        lead_params = [like_val, like_val, like_val, like_val, like_val, like_val]
+    lead_res = backend_client.get("/leads", params=params)
+    if "error" in lead_res:
+        return lead_res
+
+    matching_leads = lead_res.get("data", [])
+    if not matching_leads:
         if is_salesman:
-            lead_params.append(user_id)
+            return {"thong_bao": f"Không tìm thấy khách hàng nào khớp với từ khóa '{keyword}' trong danh sách phụ trách của bạn (hoặc khách hàng thuộc phụ trách của nhân viên khác)."}
+        return {"thong_bao": f"Không tìm thấy khách hàng nào khớp với từ khóa '{keyword}' trong cơ sở dữ liệu Zen CRM."}
 
-        matching_leads = query_all(lead_sql, tuple(lead_params))
-        if not matching_leads:
-            if is_salesman:
-                return {"thong_bao": f"Không tìm thấy khách hàng nào khớp với từ khóa '{keyword}' trong danh sách phụ trách của bạn (hoặc khách hàng thuộc phụ trách của nhân viên khác)."}
-            return {"thong_bao": f"Không tìm thấy khách hàng nào khớp với từ khóa '{keyword}' trong cơ sở dữ liệu Zen CRM."}
+    # Chọn khách hàng phù hợp nhất đầu tiên
+    primary_lead = matching_leads[0]
+    lead_id = primary_lead["id"]
 
-        # Khách hàng phù hợp nhất
-        primary_lead = matching_leads[0]
-        lead_id = primary_lead["id"]
-        full_name = format_vietnamese_name(primary_lead.get("first_name", ""), primary_lead.get("last_name", ""))
+    # Lấy thông tin chi tiết kèm các cơ hội liên quan qua GET /api/leads/:id
+    detail_res = backend_client.get(f"/leads/{lead_id}")
+    lead_detail = detail_res.get("data", primary_lead) if not "error" in detail_res else primary_lead
 
-        # Lấy cơ hội bán hàng
-        opps_sql = """
-            SELECT 
-                o.id, 
-                p.name AS product_name, 
-                p.product_code,
-                o.quantity, 
-                p.unit_price,
-                (o.quantity * p.unit_price) AS estimated_val,
-                o.status,
-                o.expected_close_date
-            FROM opportunities o
-            JOIN products p ON o.product_id = p.id
-            WHERE o.lead_id = %s
-            ORDER BY o.created_at DESC
-        """
-        opps = query_all(opps_sql, (lead_id,))
+    full_name = lead_detail.get("full_name") or format_vietnamese_name(lead_detail.get("first_name", ""), lead_detail.get("last_name", ""))
+    raw_opps = lead_detail.get("opportunities", [])
+    opps = []
+    for o in raw_opps:
+        qty = int(o.get("quantity", 1))
+        unit_p = float(o.get("unit_price", 0))
+        opps.append({
+            "id": o.get("id"),
+            "product_name": o.get("product_name"),
+            "product_code": o.get("product_code"),
+            "quantity": qty,
+            "unit_price": unit_p,
+            "estimated_val": qty * unit_p,
+            "status": o.get("status"),
+            "expected_close_date": o.get("expected_close_date")
+        })
 
-        # Lấy đơn hàng và chi tiết sản phẩm đã mua
-        orders_sql = """
-            SELECT 
-                o.id,
-                o.order_code, 
-                p.name AS product_name,
-                p.product_code,
-                o.quantity,
-                o.unit_price,
-                o.total_amount, 
-                o.order_date, 
-                o.status,
-                o.payment_info,
-                o.shipping_address
-            FROM orders o
-            JOIN products p ON o.product_id = p.id
-            WHERE o.lead_id = %s
-            ORDER BY o.order_date DESC
-        """
-        orders = query_all(orders_sql, (lead_id,))
+    # Lấy lịch sử đơn hàng của khách hàng này qua GET /api/orders?lead_id=...
+    orders_res = backend_client.get("/orders", params={"lead_id": lead_id, "all_time": "true", "limit": 20})
+    raw_orders = orders_res.get("data", []) if not "error" in orders_res else []
+    orders = []
+    for ord_item in raw_orders:
+        orders.append({
+            "id": ord_item.get("id"),
+            "order_code": ord_item.get("order_code"),
+            "product_name": ord_item.get("product_name"),
+            "product_code": ord_item.get("product_code"),
+            "quantity": ord_item.get("quantity"),
+            "unit_price": float(ord_item.get("unit_price", 0)),
+            "total_amount": float(ord_item.get("total_amount", 0)),
+            "order_date": ord_item.get("order_date"),
+            "status": ord_item.get("status"),
+            "payment_info": ord_item.get("payment_info"),
+            "shipping_address": ord_item.get("shipping_address")
+        })
 
-        # Lấy nhật ký chăm sóc (follow-ups) gần nhất qua opportunities
-        follow_ups_sql = """
-            SELECT 
-                f.follow_date,
-                f.contact_method,
-                f.content,
-                f.customer_response,
-                f.next_plan
-            FROM follow_ups f
-            JOIN opportunities o ON f.opportunity_id = o.id
-            WHERE o.lead_id = %s
-            ORDER BY f.follow_date DESC
-            LIMIT 5
-        """
-        follow_ups = query_all(follow_ups_sql, (lead_id,))
+    # Tính tổng giá trị đơn hàng đã mua
+    total_spent = sum(o["total_amount"] for o in orders if str(o.get("status", "")).upper() == "COMPLETED")
 
-        # Danh sách các khách hàng khác khớp từ khóa nếu có nhiều hơn 1
-        other_matches = []
-        if len(matching_leads) > 1:
-            for other in matching_leads[1:]:
-                other_matches.append({
-                    "id": other["id"],
-                    "ho_va_ten": format_vietnamese_name(other.get("first_name", ""), other.get("last_name", "")),
-                    "so_dien_thoai": other["phone"],
-                    "email": other["email"]
-                })
+    return {
+        "khach_hang": {
+            "id": lead_id,
+            "ho_va_ten": full_name,
+            "so_dien_thoai": lead_detail.get("phone"),
+            "email": lead_detail.get("email"),
+            "nghe_nghiep": lead_detail.get("career") or "Chưa cập nhật",
+            "dia_chi": lead_detail.get("address") or "Chưa cập nhật",
+            "ngay_nhap_crm": str(lead_detail.get("entered_date", "")),
+            "nguoi_phu_trach": lead_detail.get("assigned_to_name") or "Chưa gán"
+        },
+        "tong_quan_chi_tieu": {
+            "so_don_da_mua": len([o for o in orders if str(o.get("status", "")).upper() == "COMPLETED"]),
+            "tong_tien_da_thanh_toan_vnd": total_spent,
+            "tong_so_co_hoi_dang_theo_duoi": len([o for o in opps if str(o.get("status", "")).upper() not in ["ORDERED", "LOST"]])
+        },
+        "danh_sach_co_hoi_ban_hang": opps,
+        "danh_sach_don_hang_da_dat": orders
+    }
 
-        return {
-            "khach_hang": {
-                "id": primary_lead["id"],
-                "ho_va_ten": full_name,
-                "email": primary_lead["email"],
-                "so_dien_thoai": primary_lead["phone"],
-                "dia_chi": primary_lead["address"] or "Chưa cập nhật",
-                "nghe_nghiep": primary_lead["career"] or "Chưa cập nhật",
-                "ngay_nhap_crm": str(primary_lead["entered_date"])
-            },
-            "tong_so_don_da_mua": len(orders),
-            "tong_chi_tieu_vnd": sum(float(od["total_amount"]) for od in orders if od["status"] == "COMPLETED"),
-            "chi_tiet_don_hang_va_san_pham_da_mua": [
-                {
-                    "ma_don_hang": od["order_code"],
-                    "san_pham": od["product_name"],
-                    "ma_san_pham": od["product_code"],
-                    "so_luong": od["quantity"],
-                    "don_gia_vnd": float(od["unit_price"]),
-                    "tong_tien_vnd": float(od["total_amount"]),
-                    "ngay_dat_hang": str(od["order_date"]),
-                    "trang_thai": od["status"],
-                    "phuong_thuc_thanh_toan": od["payment_info"],
-                    "dia_chi_nhan": od["shipping_address"]
-                }
-                for od in orders
-            ],
-            "cac_co_hoi_ban_hang": [
-                {
-                    "id": op["id"],
-                    "san_pham": op["product_name"],
-                    "ma_san_pham": op["product_code"],
-                    "so_luong": op["quantity"],
-                    "gia_tri_du_kien_vnd": float(op["estimated_val"]),
-                    "trang_thai": op["status"],
-                    "ngay_du_kien_chot": str(op["expected_close_date"]) if op["expected_close_date"] else "Chưa rõ"
-                }
-                for op in opps
-            ],
-            "nhat_ky_cham_soc_gan_nhat": [
-                {
-                    "ngay_lien_he": str(fu["follow_date"]),
-                    "hinh_thuc": fu["contact_method"],
-                    "noi_dung": fu["content"],
-                    "phan_hoi_khach": fu["customer_response"],
-                    "ke_hoach_tiep_theo": fu["next_plan"]
-                }
-                for fu in follow_ups
-            ],
-            "cac_ket_qua_khop_khac": other_matches
-        }
-    except Exception as e:
-        return {"error": f"Lỗi khi tra cứu khách hàng: {str(e)}"}
-
-
-# =============================================================================
-# DANH SÁCH BỘ CÔNG CỤ FUNCTION CALLING CUNG CẤP CHO GEMINI AI
-# =============================================================================
-# Gemini Engine sử dụng danh sách này để đăng ký các tool thời gian thực.
-# Mỗi khi người dùng trò chuyện, Gemini sẽ tự động nhận diện ý định (Intent)
-# và kích hoạt hàm tương ứng để truy vấn dữ liệu trực tiếp từ PostgreSQL.
-ALL_CRM_TOOLS = [
-    # 1. Tra cứu khách hàng tiềm năng: Tổng số lead, số lead mới hôm nay/tháng này và lọc tìm kiếm theo tên, SĐT, email
+QUERY_TOOLS = [
     get_leads_summary,
-
-    # 2. Thống kê tài chính & KPI: Doanh thu thực tế, tiến độ hoàn thành chỉ tiêu kế hoạch và bảng phân rã doanh thu 12 tháng năm tài chính
     get_revenue_and_forecast,
-
-    # 3. Quản lý kho & danh mục: Tra cứu toàn bộ danh mục sản phẩm, đơn giá, số lượng tồn kho thực tế và cảnh báo sắp hết hàng (<= 5)
     get_products_and_inventory,
-
-    # 4. Quản lý phễu bán hàng (Pipeline): Phân bố cơ hội qua 6 giai đoạn (NEW, CONTACTED,...) và top deal giá trị lớn nhất
     get_opportunities_overview,
-
-    # 5. Đánh giá chiến dịch tiếp thị: Danh sách chiến dịch marketing, ngân sách chi tiêu và hiệu quả số lượng lead thu được
     get_campaigns_overview,
-
-    # 6. Quản trị đơn hàng: Tra cứu các đơn hàng gần nhất, tìm kiếm theo mã đơn (ORD-...), tên khách hàng hoặc sản phẩm
     get_orders_summary,
-
-    # 7. Hồ sơ khách hàng 360 độ: Tra cứu chi tiết một khách hàng theo tên (hỗ trợ có dấu/không dấu), SĐT, email; bao gồm lịch sử mua hàng, sản phẩm đã mua, cơ hội và nhật ký chăm sóc
     search_customer,
 ]
-
-QUERY_TOOLS = ALL_CRM_TOOLS
-

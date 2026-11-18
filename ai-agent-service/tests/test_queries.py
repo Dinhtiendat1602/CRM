@@ -74,9 +74,9 @@ def test_get_orders_summary():
     assert "tong_so_don_hang" in res
 
 def test_search_customer_accent_insensitivity():
-    # Tìm kiếm khách hàng không dấu và có dấu đều phải tìm ra
-    res_accent = search_customer("Nguyễn Văn An")
-    res_no_accent = search_customer("Nguyen Van An")
+    # Tìm kiếm khách hàng không dấu và có dấu đều phải tìm ra qua Express API
+    res_accent = search_customer("Phan Cảnh Đức")
+    res_no_accent = search_customer("Phan Canh Duc")
     assert "error" not in res_accent
     assert "error" not in res_no_accent
     assert "khach_hang" in res_accent

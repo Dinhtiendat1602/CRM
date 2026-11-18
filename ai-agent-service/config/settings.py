@@ -33,6 +33,9 @@ try:
         # JWT Config
         JWT_SECRET: str = os.getenv("JWT_SECRET", "zen_crm_super_secret_jwt_key_2026_at_least_32_characters_long")
         JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+
+        # Express Backend REST API Config
+        BACKEND_API_BASE: str = os.getenv("BACKEND_API_BASE", "http://localhost:8888/api")
 except ImportError:
     from pydantic import BaseModel
     class Settings(BaseModel):
@@ -58,6 +61,9 @@ except ImportError:
         # JWT Config
         JWT_SECRET: str = os.getenv("JWT_SECRET", "zen_crm_super_secret_jwt_key_2026_at_least_32_characters_long")
         JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+
+        # Express Backend REST API Config
+        BACKEND_API_BASE: str = os.getenv("BACKEND_API_BASE", "http://localhost:8888/api")
 
 settings = Settings()
 

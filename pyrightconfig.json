@@ -3,8 +3,11 @@
     "ai-agent-service",
     "scratch"
   ],
+  "venvPath": "ai-agent-service",
+  "venv": "venv",
   "extraPaths": [
     "./ai-agent-service",
-    "./ai-agent-service/src"
+    "./ai-agent-service/src",
+    "./ai-agent-service/venv/lib/python3.9/site-packages"
   ]
 }

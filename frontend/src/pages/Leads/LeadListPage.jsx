@@ -98,6 +98,33 @@ export default function LeadListPage() {
     fetchLeads();
   }, [fetchLeads]);
 
+  // Lắng nghe sự kiện tạo Lead từ AI Assistant để đồng bộ thời gian thực (feat-028 & feat-033)
+  useEffect(() => {
+    const handleLeadCreated = (e) => {
+      fetchLeads();
+      const lead = e.detail;
+      const leadName = lead?.ho_va_ten || `${lead?.last_name || ''} ${lead?.first_name || ''}`.trim() || 'mới';
+      setSuccessMsg({
+        text: `Trợ lý AI vừa tự động thêm khách hàng tiềm năng: "${leadName}" vào hệ thống.`,
+        hasOpp: false,
+      });
+      setTimeout(() => {
+        setSuccessMsg(null);
+      }, 6000);
+    };
+
+    const handleRefresh = () => {
+      fetchLeads();
+    };
+
+    window.addEventListener('crm:lead-created', handleLeadCreated);
+    window.addEventListener('crm:refresh-leads', handleRefresh);
+    return () => {
+      window.removeEventListener('crm:lead-created', handleLeadCreated);
+      window.removeEventListener('crm:refresh-leads', handleRefresh);
+    };
+  }, [fetchLeads]);
+
   // Đổi trang
   const handlePageChange = (newPage) => {
     setPagination((prev) => ({ ...prev, page: newPage }));

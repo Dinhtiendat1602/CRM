@@ -50,15 +50,22 @@ def handle_chat(payload: ChatRequest, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=400, detail="Nội dung tin nhắn không được để trống.")
     
     session_id = payload.session_id or "default"
-    reply = crm_agent.chat(
+    chat_result = crm_agent.chat(
         user_message=payload.message.strip(),
         session_id=session_id,
-        user=user
+        user=user,
+        return_actions=True
     )
+
+    if isinstance(chat_result, tuple):
+        reply, actions = chat_result
+    else:
+        reply, actions = chat_result, None
 
     return ChatResponse(
         reply=reply,
-        session_id=session_id
+        session_id=session_id,
+        actions=actions
     )
 
 @router.get("/api/chat/history")

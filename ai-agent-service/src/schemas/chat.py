@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
 class ChatRequest(BaseModel):
@@ -8,10 +8,10 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str = Field(..., description="Câu trả lời phản hồi từ Zen AI Assistant")
     session_id: str = Field(..., description="ID phiên hội thoại tương ứng")
+    actions: Optional[List[Dict[str, Any]]] = Field(default=None, description="Danh sách các tác vụ nghiệp vụ tự động đã thực thi")
 
 class ResetRequest(BaseModel):
     session_id: Optional[str] = Field("default", description="ID phiên hội thoại muốn làm mới")
 
 class QuickPromptsResponse(BaseModel):
     prompts: List[str] = Field(..., description="Danh sách các câu lệnh mẫu nhanh")
-

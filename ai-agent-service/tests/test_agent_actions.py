@@ -301,4 +301,45 @@ def test_chat_history_role_isolation():
     memory.clear_session(sess_sales)
 
 
+def test_action_extraction_helper():
+    """Kiểm tra hàm trích xuất tác vụ nghiệp vụ _extract_actions_from_messages."""
+    from src.agents import crm_agent
+    from langchain_core.messages import ToolMessage, HumanMessage, AIMessage
+
+    messages = [
+        HumanMessage(content="Thêm khách hàng mới"),
+        AIMessage(content="Đang gọi tool create_lead"),
+        ToolMessage(
+            name="create_lead",
+            content='{"success": true, "status": "created", "lead": {"id": 99, "ho_va_ten": "Nguyễn Văn Nam", "so_dien_thoai": "0987112233"}, "message": "Đã thêm thành công"}',
+            tool_call_id="call_123"
+        ),
+        AIMessage(content="Đã thêm thành công khách hàng mới")
+    ]
+
+    actions = crm_agent._extract_actions_from_messages(messages)
+    assert len(actions) == 1
+    assert actions[0]["type"] == "lead_created"
+    assert actions[0]["status"] == "success"
+    assert actions[0]["lead"]["id"] == 99
+    assert actions[0]["lead"]["ho_va_ten"] == "Nguyễn Văn Nam"
+
+    # Trường hợp trùng lặp BR-02
+    messages_dup = [
+        HumanMessage(content="Thêm khách hàng trùng"),
+        ToolMessage(
+            name="create_lead",
+            content='{"success": false, "status": "duplicate_rejected", "existing_lead": {"id": 1, "name": "Khách cũ"}, "message": "BR-02 từ chối"}',
+            tool_call_id="call_456"
+        ),
+        AIMessage(content="Khách hàng đã tồn tại")
+    ]
+    actions_dup = crm_agent._extract_actions_from_messages(messages_dup)
+    assert len(actions_dup) == 1
+    assert actions_dup[0]["type"] == "lead_duplicate_rejected"
+    assert actions_dup[0]["status"] == "rejected"
+    assert actions_dup[0]["existing_lead"]["id"] == 1
+
+
+
 

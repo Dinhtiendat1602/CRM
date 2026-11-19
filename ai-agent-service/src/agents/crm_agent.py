@@ -1,5 +1,5 @@
 """Agent nghiệp vụ chuyên sâu Zen CRM Enterprise trên nền tảng LangGraph với bảo mật RBAC."""
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union, Tuple, List
 from src.agents.base_agent import BaseAgent
 from src.tools import ALL_CRM_TOOLS
 from src.agents.router import router
@@ -16,7 +16,13 @@ class CRMAgent(BaseAgent):
     def __init__(self):
         super().__init__(tools=ALL_CRM_TOOLS)
 
-    def chat(self, user_message: str, session_id: str = "default", user: Optional[Dict[str, Any]] = None) -> str:
+    def chat(
+        self,
+        user_message: str,
+        session_id: str = "default",
+        user: Optional[Dict[str, Any]] = None,
+        return_actions: bool = False
+    ) -> Union[str, Tuple[str, List[Dict[str, Any]]]]:
         role = (user.get("role") if user else "SALE_MANAGER") or "SALE_MANAGER"
         clean_role = str(role).upper()
         raw_jwt = user.get("raw_token") if user else None
@@ -32,12 +38,31 @@ class CRMAgent(BaseAgent):
             intent = router.classify(user_message)
             
             # Thực thi hội thoại qua đồ thị LangGraph theo Role (hỗ trợ Function Calling & ReAct loops)
-            reply = self.execute_chat(user_message, session_id=session_id, role=clean_role)
-            
-            # Lưu câu trả lời của AI vào lịch sử hội thoại
-            memory.save_message(session_id=session_id, role="assistant", content=reply)
-            log_ai_reply(session_id, len(reply))
-            return reply
+            if return_actions:
+                chat_res = self.execute_chat(
+                    user_message,
+                    session_id=session_id,
+                    role=clean_role,
+                    return_actions=True
+                )
+                if isinstance(chat_res, tuple):
+                    reply, actions = chat_res
+                else:
+                    reply, actions = chat_res, []
+                memory.save_message(session_id=session_id, role="assistant", content=reply)
+                log_ai_reply(session_id, len(reply))
+                return reply, actions
+            else:
+                chat_res = self.execute_chat(
+                    user_message,
+                    session_id=session_id,
+                    role=clean_role,
+                    return_actions=False
+                )
+                reply = chat_res if isinstance(chat_res, str) else chat_res[0]
+                memory.save_message(session_id=session_id, role="assistant", content=reply)
+                log_ai_reply(session_id, len(reply))
+                return reply
         finally:
             reset_current_user(cv_user_token)
             reset_current_token(cv_jwt_token)

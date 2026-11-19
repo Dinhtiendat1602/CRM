@@ -3,11 +3,11 @@
 # Session Handoff - Biên Bản Bàn Giao Phiên Làm Việc
 
 ## 1. Hiện Trạng & Mục Tiêu Phiên (Current State & Objective)
-- **Thời gian bàn giao:** 2026-11-18 09:00
-- **Nội dung trọng tâm:** Chuyển đổi toàn diện cơ chế hoạt động của các công cụ AI Agent CRM sang **Kiến Trúc Gọi API (Approach 2 - API-Driven Tools with JWT Bearer Token Forwarding)**. Thay vì viết truy vấn SQL trực tiếp trong Python, toàn bộ 10 công cụ của AI Agent giờ đây ủy quyền trực tiếp cho các RESTful API endpoints của Express Backend (`http://localhost:8888/api`). Express Backend đóng vai trò Single Source of Truth kiểm soát xác thực, phân quyền RBAC, RLS và các quy tắc nghiệp vụ (BR-01, BR-02, BR-03).
-- **Trạng thái hệ thống:** HOÀN THÀNH 100% (22/22 AI Agent tests PASS + 146/146 backend Express tests PASS; Vite frontend build thành công trong 364ms; Live E2E Gemini Chat Agent gọi REST API Express thành công xuất sắc 100%).
+- **Thời gian bàn giao:** 2026-11-19 10:50
+- **Nội dung trọng tâm:** Hoàn thành `feat-028`: **Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard)** kết hợp cơ chế Đồng Bộ Giao Diện CRM Thời Gian Thực (Real-time Cross-Module UI Sync) và Thẻ Tác Vụ Tương Tác (Interactive Action Confirmation Card).
+- **Trạng thái hệ thống:** HOÀN THÀNH 100% (23/23 AI Agent tests PASS + 146/146 Express Backend tests PASS + 117/117 Frontend tests PASS; Vite frontend production build thành công trong 455ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100%).
 - **Cổng dịch vụ đang cấu hình:**
-  - Express Backend: `http://localhost:8888` (hoặc `http://localhost:5001`)
+  - Express Backend: `http://localhost:8888`
   - React Frontend: `http://localhost:8080`
   - Python AI Agent Service: `http://localhost:8000` (`ai-agent-service/main.py`)
   - PostgreSQL Database: `localhost:5432` (`CRM`)
@@ -16,40 +16,33 @@
 
 ## 2. Công Việc Vừa Mới Thực Thi Trong Phiên Này (Just Completed)
 
-1. **Cấu hình & Quản lý Chuyển tiếp Token (JWT Token Context & Forwarding):**
-   - [`config/settings.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/config/settings.py) & [`.env`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/.env): Bổ sung `BACKEND_API_BASE` (mặc định `http://localhost:8888/api`).
-   - [`src/utils/context.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/utils/context.py): Bổ sung `_raw_token_context`, các hàm `set_current_token()`, `reset_current_token()` và `get_current_token()` (kèm cơ chế tự động mint JWT token hợp lệ khi chạy unit test độc lập).
-   - [`src/api/auth.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/api/auth.py): Lưu trữ `raw_token` vào context của user khi nhận Bearer Token từ client.
-   - [`src/agents/crm_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/crm_agent.py): Thiết lập và dọn dẹp ngữ cảnh token trong hàm `chat()` qua khối `try ... finally`.
+1. **Nâng cấp System Instructions & Prompt Engineering (`config/prompts.py`):**
+   - Bổ sung quy tắc bóc tách thực thể người Việt chuẩn xác cho cả vai trò Quản lý (`SALE_MANAGER`) và Nhân viên (`SALESMAN`): `first_name` (tên chính), `last_name` (họ và tên đệm), `phone` (bắt buộc), `email`, `career` (nghề nghiệp), `address` (địa chỉ), `campaign_id`.
+   - Hướng dẫn định dạng câu trả lời rõ ràng: Thẻ xác nhận icon ✅ kèm bảng tóm tắt chi tiết và gợi ý 2 bước tiếp theo (Tạo cơ hội bán hàng hoặc Lên lịch liên hệ).
+   - Hướng dẫn giải thích lịch sự và hiển thị thông tin khách hàng cũ khi vi phạm quy chuẩn chống trùng lặp dữ liệu BR-02 (HTTP 409 Conflict).
 
-2. **Xây dựng HTTP Client Trung Gian (`BackendAPIClient`):**
-   - [`src/services/backend_client.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/services/backend_client.py):
-     - Khởi tạo `httpx.Client` với timeout 10.0s, tự động đính kèm header `Authorization: Bearer <token>`.
-     - Chuẩn hóa các mã lỗi HTTP từ Express:
-       - `401 Unauthorized`: Trả về thông báo lỗi phiên làm việc hết hạn.
-       - `403 Forbidden`: Trích xuất thông báo từ chối từ `role.middleware.js` hoặc controller và định dạng thành lỗi quyền hạn rõ ràng cho Gemini.
-       - `409 Conflict`: Định dạng lỗi vi phạm quy chuẩn chống trùng lặp BR-02, trích xuất `existingLead` để Gemini trả lời khách hàng cũ.
-       - `400 Bad Request` / `404 Not Found`: Chuẩn hóa thông điệp lỗi tham số / tài nguyên không tồn tại.
+2. **Cơ Chế Bắt & Truyền Tải Metadata Tác Vụ Nghiệp Vụ (`BaseAgent` & `CRMAgent`):**
+   - [`src/agents/base_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py):
+     - Hiện thực hóa hàm `_extract_actions_from_messages()` trích xuất các tác vụ nghiệp vụ (`lead_created`, `lead_duplicate_rejected`).
+     - Bổ sung tham số `return_actions: bool = False` trong `execute_chat()`, bảo toàn 100% tương thích ngược với các caller dạng chuỗi văn bản.
+   - [`src/agents/crm_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/crm_agent.py): Hỗ trợ `return_actions=True` chuyển tiếp `(reply, actions)`.
+   - [`src/schemas/chat.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/schemas/chat.py): Bổ sung `actions: Optional[List[Dict[str, Any]]] = None` vào `ChatResponse`.
+   - [`src/api/routes.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/api/routes.py): Endpoint `POST /api/chat` gọi `crm_agent.chat(..., return_actions=True)` và trả về đầy đủ metadata actions cho frontend.
 
-3. **Tái Cấu Trúc Toàn Bộ 10 CRM Tools Sang Gọi REST API:**
-   - [`src/tools/admin_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/admin_tools.py): `get_admin_system_overview` gọi `GET /api/admin/users`, `GET /api/admin/roles` và `GET /api/health` của Express Backend.
-   - [`src/tools/lead_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/lead_tools.py): `create_lead` gọi `POST /api/leads`. Express Backend tự động kiểm tra trùng lặp BR-02 (trả mã 409 Conflict) và tự động gán `assigned_to` khi Salesman tạo khách mới.
-   - [`src/tools/order_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/order_tools.py): `create_opportunity` kiểm tra lead qua `GET /api/leads/:id`, tìm sản phẩm qua `GET /api/products`, gửi `POST /api/opportunities`. Express Backend tự động kiểm tra phân quyền `salesman_products` và từ chối 403 nếu Salesman chưa được cấp quyền bán.
-   - [`src/tools/query_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/query_tools.py):
-     - `get_leads_summary`: Gọi `GET /api/leads`.
-     - `get_revenue_and_forecast`: Gọi `GET /api/forecasts/performance`. Bị Express chặn 403 Forbidden đối với Salesman.
-     - `get_products_and_inventory`: Gọi `GET /api/products`. Express Backend tự động lọc chỉ trả về các sản phẩm Salesman được quyền phân phối.
-     - `get_opportunities_overview`: Gọi `GET /api/opportunities`.
-     - `get_campaigns_overview`: Gọi `GET /api/campaigns`. Bị chặn 403 Forbidden đối với Salesman.
-     - `get_orders_summary`: Gọi `GET /api/orders`.
-     - `search_customer`: Gọi `GET /api/leads?search=...`, `GET /api/leads/:id` và `GET /api/orders?lead_id=...` để tạo hồ sơ khách hàng 360 độ.
+3. **Đồng Bộ Giao Diện Thời Gian Thực & Thẻ Tác Vụ Tương Tác:**
+   - [`frontend/src/components/Chat/AIChatWidget.jsx`](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Chat/AIChatWidget.jsx):
+     - Phát tín hiệu browser event `window.dispatchEvent(new CustomEvent('crm:lead-created', { detail: act.lead }))` và fallback `crm:refresh-leads`.
+     - Hiển thị Thẻ Tác Vụ Xác Nhận (Interactive Action Card) ngay dưới tin nhắn của AI với badge xanh "Đã lưu CSDL", thông tin khách hàng, nút "Xem chi tiết" (dẫn đến `/leads/:id`) và nút "Tạo cơ hội (feat-029)".
+   - [`frontend/src/pages/Leads/LeadListPage.jsx`](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx):
+     - Lắng nghe sự kiện `crm:lead-created` và `crm:refresh-leads`.
+     - Tự động gọi `fetchLeads()` để nạp lại dữ liệu mà không cần F5/reload trang.
+     - Hiển thị banner thông báo xanh: `Trợ lý AI vừa tự động thêm khách hàng tiềm năng: "[Tên]" vào hệ thống.`.
 
-4. **Nâng Cấp Backend Express Controller (`lead.controller.js`):**
-   - Bổ sung hàm `unaccent()` của PostgreSQL vào câu truy vấn tìm kiếm `search` của [lead.controller.js](file:///Users/zen/CNTT/Fullstack/internship/backend/src/controllers/lead.controller.js) giúp tìm kiếm tiếng Việt không dấu & có dấu (VD: "Phan Canh Duc" <-> "Phan Cảnh Đức") hoạt động nhất quán và mượt mà qua API.
-
-5. **Kiểm Thử & Xác Thực Toàn Diện:**
-   - Kịch bản kiểm tra công cụ API [`scratch/verify_api_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/scratch/verify_api_tools.py): Đạt 100% trên cả 3 vai trò (ADMIN, SALE_MANAGER, SALESMAN).
-   - Kịch bản Live E2E Gemini Chat [`scratch/test_live_chat_api_tools.py`](file:///Users/zen/CNTT/Fullstack/internship/scratch/test_live_chat_api_tools.py): Mô hình Gemini gọi trực tiếp công cụ API, trích xuất đúng báo cáo đối soát 12 tháng của Sale Manager và lọc đúng 3 sản phẩm phân quyền của Salesman.
+4. **Kiểm Thử Toàn Diện & Live E2E:**
+   - Kịch bản Live E2E [`scratch/test_feat_028_lead_creation.py`](file:///Users/zen/CNTT/Fullstack/internship/scratch/test_feat_028_lead_creation.py):
+     - Bước 1: Gửi prompt tự nhiên "Thêm khách hàng mới Nguyễn Văn Nam, SĐT 0987112233, Email nam.nguyen@gmail.com, Địa chỉ 456 Trần Phú Đà Nẵng, Nghề Kỹ sư". Gemini gọi `create_lead`, bóc tách đúng họ tên, SĐT, email, nghề, địa chỉ, gán `assigned_to=3`, lưu bản ghi ID #75 vào CSDL PostgreSQL.
+     - Bước 2: Gửi prompt trùng SĐT "Tạo khách hàng mới Nguyễn Văn Nam SĐT 0987112233". Express Backend trả về 409 Conflict; Gemini giải thích lịch sự theo BR-02 và chỉ ra mã khách hàng cũ #75.
+   - Thêm unit test `test_action_extraction_helper` vào [`ai-agent-service/tests/test_agent_actions.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/tests/test_agent_actions.py).
 
 ---
 
@@ -57,22 +50,22 @@
 
 | Bộ kiểm thử | Kết quả | Ghi chú |
 |---|---|---|
-| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (22/22)** | 12 query tests + 10 agent action tests (kết nối trực tiếp Express API) |
-| Tool API Flow Verification (`scratch/verify_api_tools.py`) | **PASS (100%)** | Xác nhận Admin Overview qua Admin API, Manager qua Báo cáo, Salesman bị chặn 403 & BR-02 bắt trùng 409 |
-| Live E2E Gemini Chat Agent | **PASS (100%)** | Gemini gọi Express REST API trích xuất doanh thu 12 tháng & tồn kho sản phẩm phân quyền |
-| Backend Integration Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures, 32.1s |
-| Frontend Production Build (`npm run build`) | **PASS (364ms)** | Vite client build `dist/` thành công, 0 lỗi cú pháp/runtime |
+| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (23/23)** | 12 query tests + 11 agent action tests (kết nối trực tiếp Express API & CSDL) |
+| Live E2E Autonomous Lead Creation | **PASS (100%)** | Gemini bóc tách tiếng Việt, lưu CSDL thành công và từ chối trùng lặp BR-02 |
+| Backend Integration Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures, 31.4s |
+| Frontend Unit Tests (`frontend/`) | **PASS (117/117)** | 117 tests, 0 failures, 398ms |
+| Frontend Production Build (`npm run build`) | **PASS (455ms)** | Vite client build `dist/` thành công, 0 lỗi cú pháp/runtime |
 
 ---
 
 ## 4. Rủi Ro & Vướng Mắc Tồn Đọng (Blockers & Risks)
-- **Không có blocker nào.** Hệ thống gọi công cụ qua API vận hành bảo mật, ổn định và tuân thủ chặt chẽ kiến trúc phân tầng.
+- **Không có blocker nào.** Toàn bộ luồng tự động thêm Lead, kiểm tra chống trùng lặp BR-02, phân quyền phụ trách và đồng bộ thời gian thực giao diện vận hành hoàn hảo 100%.
 
 ---
 
 ## 5. Danh Sách Tính Năng Tiếp Theo Đã Cập Nhật Vào `feature_list.json`
-1. **`feat-028` (BƯỚC TIẾP THEO TRỌNG TÂM):** Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard) — Tận dụng LangGraph ReAct Agent để bóc tách thực thể ngôn ngữ tự nhiên, tự động gọi `create_lead` qua REST API, chống trùng SĐT/Email BR-02 và lưu vào CSDL.
-2. **`feat-029`:** Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching).
-3. **`feat-030`:** Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition).
-4. **`feat-031`:** Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync).
-5. **`feat-032`:** Hộp Thoại Xác Nhận Hành Động Nguy Hiểm & Thẻ Tác Vụ Tương Tác (Human-In-The-Loop Confirmation UI).
+1. **`feat-029` (BƯỚC TIẾP THEO TRỌNG TÂM):** Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching) — Tự động nhận diện lead qua tên/SĐT, truy vấn kho sản phẩm khớp mã và giá niêm yết, tính tổng giá trị dự kiến, tạo bản ghi opportunities trạng thái NEW.
+2. **`feat-030`:** Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition).
+3. **`feat-031`:** Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync).
+4. **`feat-032`:** Hộp Thoại Xác Nhận Hành Động Nguy Hiểm & Thẻ Tác Vụ Tương Tác (Human-In-The-Loop Confirmation UI).
+5. **`feat-033`:** Đồng Bộ Thời Gian Thực Dữ Liệu Giữa Chatbot và Giao Diện Bảng CRM (Real-time Cross-Module UI Sync).

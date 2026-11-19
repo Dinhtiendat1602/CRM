@@ -4,10 +4,10 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-18 09:00
-- **Active Task:** Chuyển đổi toàn diện AI Agent CRM Tools sang Kiến trúc Gọi API (Approach 2) với Token Forwarding qua Express Backend REST API.
-- **Current Status:** HOÀN THÀNH 100% (22/22 AI Agent Service tests PASS + 146/146 Express Backend tests PASS; Vite frontend build 364ms; Live E2E Gemini Chat Agent gọi REST API Express thành công 100%).
-- **Next Feature:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard).
+- **Last Updated:** 2026-11-19 10:50
+- **Active Task:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard) kèm Đồng bộ Giao diện Thời gian thực.
+- **Current Status:** HOÀN THÀNH 100% (23/23 AI Agent tests PASS + 146/146 Express Backend tests PASS + 117/117 Frontend tests PASS; Vite frontend build 455ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100%).
+- **Next Feature:** `feat-029` - Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching).
 
 
 ---
@@ -488,3 +488,28 @@
      - Bộ kiểm thử Express Backend: **146/146 tests PASS (100%)**.
      - Frontend Production Build: **Vite build thành công trong 364ms**.
      - Live E2E Gemini Chat Agent: Chạy thực tế thành công với cả Sale Manager (báo cáo doanh thu & đối soát chỉ tiêu 12 tháng) và Salesman (lọc tự động 3 sản phẩm được phân quyền trong kho).
+
+
+---
+
+### [2026-11-19] feat-028: Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard)
+
+- **Mục tiêu:** Cho phép người dùng ra lệnh bằng ngôn ngữ tự nhiên trong chat widget (VD: "Thêm khách hàng mới Nguyễn Văn Nam, SĐT 0987112233, Email nam.nguyen@gmail.com, Địa chỉ 456 Trần Phú Đà Nẵng, Nghề Kỹ sư"). Agent tự động bóc tách các thực thể tiếng Việt, kiểm tra chống trùng SĐT/Email theo BR-02 qua Express REST API, tự động gán nhân viên phụ trách cho Salesman, lưu bản ghi vào PostgreSQL, hiển thị thẻ tác vụ tương tác (Confirmation Card) trong chat widget và phát tín hiệu đồng bộ thời gian thực cho trang `LeadListPage` mà không cần F5/reload trang.
+- **Những việc đã hoàn thành:**
+  1. **Nâng cấp System Instructions (`config/prompts.py`):**
+     - Bổ sung quy tắc bóc tách thực thể người Việt chuẩn xác (`first_name`, `last_name`, `phone`, `email`, `career`, `address`, `campaign_id`).
+     - Hướng dẫn chi tiết cách xử lý khi thành công (thẻ tóm tắt thông tin + 2 bước gợi ý tiếp theo) và khi bị từ chối do trùng lặp dữ liệu BR-02 (giải thích lịch sự, cung cấp thông tin khách hàng cũ đã có).
+  2. **Bắt & Truyền Tải Metadata Tác Vụ Nghiệp Vụ (`BaseAgent` & `CRMAgent`):**
+     - Hiện thực hóa hàm `_extract_actions_from_messages()` trong `base_agent.py` trích xuất các hành động nghiệp vụ (`lead_created`, `lead_duplicate_rejected`).
+     - Hỗ trợ tham số `return_actions=True` trong `crm_agent.chat()` và `base_agent.execute_chat()`, bảo toàn 100% tương thích ngược với các cuộc gọi thông thường.
+     - Mở rộng `ChatResponse` trong `src/schemas/chat.py` với trường `actions: Optional[List[Dict[str, Any]]] = None`.
+     - Cập nhật endpoint `POST /api/chat` tại `src/api/routes.py` trả về `actions` cùng nội dung phản hồi văn bản `reply`.
+  3. **Đồng Bộ Thời Gian Thực & Thẻ Tác Vụ Tương Tác Frontend:**
+     - `frontend/src/components/Chat/AIChatWidget.jsx`: Nhận `actions` từ response; phát sự kiện `window.dispatchEvent(new CustomEvent('crm:lead-created', { detail: act.lead }))` và fallback `crm:refresh-leads`; hiển thị Interactive Action Card với thông tin Lead mới, nút "Xem chi tiết" và nút "Tạo cơ hội (feat-029)".
+     - `frontend/src/pages/Leads/LeadListPage.jsx`: Lắng nghe sự kiện `crm:lead-created`, tự động gọi `fetchLeads()` để nạp lại danh sách mà không cần reload trang, hiển thị toast thông báo xanh: `Trợ lý AI vừa tự động thêm khách hàng tiềm năng: "[Tên]" vào hệ thống.`.
+  4. **Kiểm thử Toàn Diện & Live E2E:**
+     - Kịch bản Live E2E `scratch/test_feat_028_lead_creation.py`: Gọi Gemini với prompt tự nhiên, bóc tách thực thể chính xác, lưu vào CSDL PostgreSQL và từ chối 409 Conflict khi tạo lại với cùng SĐT theo BR-02.
+     - AI Agent Service Tests: **23/23 tests PASS (100%)** bao gồm test mới `test_action_extraction_helper`.
+     - Backend Integration Tests: **146/146 tests PASS (100%)**.
+     - Frontend Unit Tests: **117/117 tests PASS (100%)**.
+     - Frontend Production Build: **Vite build thành công trong 455ms (0 lỗi)**.

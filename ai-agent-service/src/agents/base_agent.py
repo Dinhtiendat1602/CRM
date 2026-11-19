@@ -1,5 +1,7 @@
 """Base Agent đóng gói kết nối và vòng lặp đồ thị LangGraph (StateGraph & ReAct) theo RBAC."""
-from typing import List, Any, Optional, Dict
+import json
+import ast
+from typing import List, Any, Optional, Dict, Union, Tuple
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
@@ -61,7 +63,63 @@ class BaseAgent:
                 if messages_to_hydrate:
                     target_graph.update_state(config, {"messages": messages_to_hydrate})
 
-    def execute_chat(self, user_message: str, session_id: str = "default", role: str = "SALE_MANAGER") -> str:
+    def _extract_actions_from_messages(self, messages: List[Any]) -> List[Dict[str, Any]]:
+        """Trích xuất danh sách các tác vụ nghiệp vụ (actions) đã thực thi trong lượt hiện tại."""
+        actions: List[Dict[str, Any]] = []
+        for msg in reversed(messages):
+            # Dừng lại khi gặp tin nhắn user của lượt này
+            if getattr(msg, "type", None) == "human":
+                break
+
+            content = getattr(msg, "content", None)
+            data: Optional[Dict[str, Any]] = None
+
+            if isinstance(content, dict):
+                data = content
+            elif isinstance(content, str) and content.strip():
+                try:
+                    data = json.loads(content)
+                except Exception:
+                    try:
+                        data = ast.literal_eval(content)
+                    except Exception:
+                        data = None
+
+            if isinstance(data, dict):
+                status = data.get("status")
+                if status == "created" and "lead" in data:
+                    actions.append({
+                        "type": "lead_created",
+                        "status": "success",
+                        "lead": data.get("lead"),
+                        "message": data.get("message")
+                    })
+                elif status == "duplicate_rejected":
+                    actions.append({
+                        "type": "lead_duplicate_rejected",
+                        "status": "rejected",
+                        "existing_lead": data.get("existing_lead"),
+                        "message": data.get("message")
+                    })
+                elif status == "created" and "opportunity" in data:
+                    actions.append({
+                        "type": "opportunity_created",
+                        "status": "success",
+                        "opportunity": data.get("opportunity"),
+                        "message": data.get("message")
+                    })
+
+        # Đảo lại theo thứ tự thực thi
+        actions.reverse()
+        return actions
+
+    def execute_chat(
+        self,
+        user_message: str,
+        session_id: str = "default",
+        role: str = "SALE_MANAGER",
+        return_actions: bool = False
+    ) -> Union[str, Tuple[str, List[Dict[str, Any]]]]:
         """Thực thi một lượt hội thoại qua đồ thị LangGraph theo vai trò được phân quyền."""
         try:
             clean_role = (role or "SALE_MANAGER").upper()
@@ -75,8 +133,11 @@ class BaseAgent:
             )           
 
             messages = result.get("messages", [])
+            actions = self._extract_actions_from_messages(messages) if return_actions else []
+
             if not messages:
-                return "Tôi đã ghi nhận thông tin nhưng không có nội dung phản hồi văn bản."
+                reply = "Tôi đã ghi nhận thông tin nhưng không có nội dung phản hồi văn bản."
+                return (reply, actions) if return_actions else reply
 
             last_msg = messages[-1]
             if isinstance(last_msg.content, str):
@@ -89,13 +150,16 @@ class BaseAgent:
             else:
                 reply = str(last_msg.content)
 
-            return reply or "Tôi đã ghi nhận thông tin nhưng không có nội dung phản hồi văn bản."
+            reply = reply or "Tôi đã ghi nhận thông tin nhưng không có nội dung phản hồi văn bản."
+            return (reply, actions) if return_actions else reply
         except Exception as e:
             err_str = str(e)
             print(f"[LangGraph BaseAgent Error] Session {session_id} (Role: {role}): {err_str}")
             if "ResourceExhausted" in err_str or "429" in err_str:
-                return "⚠️ Hệ thống AI hiện đang vượt hạn mức lưu lượng trong giây lát. Vui lòng thử lại sau 30 giây."
-            return f"⚠️ Đã có lỗi xảy ra khi xử lý phản hồi từ AI Assistant: {err_str}"
+                reply = "⚠️ Hệ thống AI hiện đang vượt hạn mức lưu lượng trong giây lát. Vui lòng thử lại sau 30 giây."
+            else:
+                reply = f"⚠️ Đã có lỗi xảy ra khi xử lý phản hồi từ AI Assistant: {err_str}"
+            return (reply, []) if return_actions else reply
 
     def reset_session(self, session_id: str = "default") -> bool:
         """Làm mới phiên hội thoại trong LangGraph Checkpointer và kho lưu trữ."""

@@ -314,8 +314,8 @@
         "feat-008",
         "feat-027"
       ],
-      "status": "planned",
-      "evidence": "Kế hoạch kiểm thử: Gọi API chat với prompt tự nhiên yêu cầu thêm khách hàng; kiểm tra agent tự động gọi tool create_lead; kiểm tra bản ghi được lưu thực tế vào bảng leads; kiểm tra cơ chế bắt trùng lặp BR-02 khi nhập SĐT/Email đã có."
+      "status": "completed",
+      "evidence": "1. Bóc tách thực thể ngôn ngữ tự nhiên: AI Agent tự động bóc tách chính xác các trường Họ và tên đệm (last_name), Tên (first_name), SĐT (phone), Email, Nghề nghiệp (career), Địa chỉ (address) và Chiến dịch từ prompt tự nhiên của người dùng. 2. Tích hợp Tool qua REST API & Lưu CSDL: Gọi create_lead chuyển tiếp JWT Bearer Token sang Express Backend POST /api/leads, tự động gán assigned_to cho Salesman và lưu bản ghi vào CSDL PostgreSQL. 3. Cơ chế chống trùng lặp BR-02: Backend Express kiểm tra chống trùng SĐT/Email và trả về 409 Conflict; Agent giải thích lịch sự kèm thông tin khách hàng cũ đã có và đề xuất chăm sóc. 4. Đồng bộ thời gian thực giao diện CRM: AIChatWidget phát Custom Event 'crm:lead-created', LeadListPage tự động nạp lại danh sách mà không cần F5/reload và hiển thị banner thông báo xanh; khung chat hiển thị Interactive Action Card kèm nút 'Xem chi tiết' và 'Tạo cơ hội'. 5. Bằng chứng kiểm thử: 23/23 AI Agent tests PASS; 146/146 Backend tests PASS; 117/117 Frontend tests PASS; Vite build 455ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100% (scratch/test_feat_028_lead_creation.py)."
     },
     {
       "id": "feat-029",

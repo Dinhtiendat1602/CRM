@@ -18,7 +18,9 @@ import {
   Clock,
   Plus,
   Trash2,
-  MessageSquare
+  MessageSquare,
+  CheckCircle2,
+  Eye
 } from 'lucide-react';
 
 const AI_API_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
@@ -306,15 +308,29 @@ export default function AIChatWidget() {
 
       const data = await res.json();
       setIsOnline(true);
-      setMessages(prev => [
-        ...prev,
-        {
-          id: 'ai_' + Date.now(),
-          role: 'assistant',
-          content: data.reply || 'Dạ tôi đã xử lý xong.',
-          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
+      const newAiMsg = {
+        id: 'ai_' + Date.now(),
+        role: 'assistant',
+        content: data.reply || 'Dạ tôi đã xử lý xong.',
+        actions: data.actions || [],
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages(prev => [...prev, newAiMsg]);
+
+      // Đồng bộ thời gian thực cho giao diện bảng CRM (feat-028 & feat-033)
+      if (Array.isArray(data.actions) && data.actions.length > 0) {
+        data.actions.forEach((act) => {
+          if (act.type === 'lead_created' && act.lead) {
+            window.dispatchEvent(new CustomEvent('crm:lead-created', { detail: act.lead }));
+          }
+        });
+      } else if (
+        typeof data.reply === 'string' &&
+        (data.reply.includes('Đã thêm thành công khách hàng') ||
+         data.reply.includes('đã được thêm thành công'))
+      ) {
+        window.dispatchEvent(new CustomEvent('crm:refresh-leads'));
+      }
     } catch (err) {
       console.error('Lỗi kết nối AI Service:', err);
       setIsOnline(false);
@@ -692,6 +708,56 @@ export default function AIChatWidget() {
                             <p className="whitespace-pre-wrap">{msg.content}</p>
                           )}
                         </div>
+                        {isAssistant && Array.isArray(msg.actions) && msg.actions.map((act, actIdx) => {
+                          if (act.type === 'lead_created' && act.lead) {
+                            const l = act.lead;
+                            return (
+                              <div
+                                key={actIdx}
+                                className="mt-2.5 p-3.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/70 border border-emerald-200 text-xs text-gray-800 space-y-2 shadow-2xs w-full text-left"
+                              >
+                                <div className="flex items-center justify-between pb-1.5 border-b border-emerald-200/60 font-semibold text-emerald-950">
+                                  <span className="flex items-center gap-1.5">
+                                    <Users className="w-4 h-4 text-emerald-600" />
+                                    Khách hàng #{l.id}: {l.ho_va_ten}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-600 text-white font-medium shadow-2xs">
+                                    <CheckCircle2 className="w-3 h-3" /> Đã lưu CSDL
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 text-[11px] text-gray-700">
+                                  <div><span className="text-gray-500">SĐT:</span> <strong className="text-gray-900">{l.so_dien_thoai}</strong></div>
+                                  <div className="truncate"><span className="text-gray-500">Email:</span> <strong className="text-gray-900">{l.email}</strong></div>
+                                  {l.nghe_nghiep && l.nghe_nghiep !== 'Chưa cập nhật' && (
+                                    <div><span className="text-gray-500">Nghề:</span> {l.nghe_nghiep}</div>
+                                  )}
+                                  {l.nguoi_phu_trach && (
+                                    <div><span className="text-gray-500">Phụ trách:</span> {l.nguoi_phu_trach}</div>
+                                  )}
+                                  {l.dia_chi && l.dia_chi !== 'Chưa cập nhật' && (
+                                    <div className="col-span-2 truncate"><span className="text-gray-500">Địa chỉ:</span> {l.dia_chi}</div>
+                                  )}
+                                </div>
+                                <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-emerald-200/60">
+                                  <a
+                                    href={`/leads/${l.id}`}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-[11px] transition shadow-2xs"
+                                  >
+                                    <Eye className="w-3 h-3" /> Xem chi tiết
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSendMessage(`Tạo cơ hội bán hàng mới cho khách hàng ${l.ho_va_ten}`)}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-800 font-medium text-[11px] transition shadow-2xs cursor-pointer"
+                                  >
+                                    <Sparkles className="w-3 h-3 text-emerald-600" /> Tạo cơ hội (feat-029)
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
                         <span className="text-[10px] text-gray-400 mt-1 px-1">{msg.time}</span>
                       </div>
                     </div>

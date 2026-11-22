@@ -337,8 +337,8 @@
         "feat-014",
         "feat-029"
       ],
-      "status": "planned",
-      "evidence": "Kế hoạch kiểm thử: Gửi ghi chép cuộc gọi qua chat; kiểm tra bản ghi mới trong bảng follow_ups và trạng thái cơ hội chuyển đổi thành công sang CONTACTED."
+      "status": "completed",
+      "evidence": "1. Trích xuất thông tin tương tác & Khớp cơ hội: Agent bóc tách chính xác từ ngôn ngữ tự nhiên ('Vừa gọi điện cho khách Nam, khách hào hứng xin báo giá...') để nhận diện khách hàng, tự động tra cứu cơ hội bán hàng đang mở của khách hàng, trích xuất hình thức liên hệ (PHONE/MEETING/EMAIL/ZALO), nội dung tương tác, phản hồi của khách và kế hoạch tiếp theo. 2. Ghi nhận nhật ký CSDL & Chuyển đổi Pipeline: Gọi Express POST /api/opportunities/:id/follow-ups, lưu bản ghi vào bảng follow_ups với created_by tương ứng, tự động chuyển đổi trạng thái cơ hội từ NEW sang CONTACTED (SRS 3.11) hoặc chuyển sang giai đoạn kế tiếp (QUALIFIED, PROPOSAL) khi được yêu cầu. 3. Thẻ tác vụ tương tác & Đồng bộ thời gian thực: AIChatWidget phát Custom Event 'crm:followup-logged' và 'crm:refresh-followups', hiển thị Interactive Action Card màu hổ phách với badge Pipeline, thông tin chi tiết và nút [Chốt đơn hàng (feat-031)]; OpportunityDetailPage và OpportunityListPage tự động lắng nghe và cập nhật dữ liệu, hiển thị toast thông báo mà không cần reload trang. 4. Bằng chứng kiểm thử: 23/23 AI Agent tests PASS; 146/146 Express Backend tests PASS; 117/117 Frontend tests PASS; Vite build thành công trong 458ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100% (scratch/test_feat_030_follow_up_logging.py)."
     },
     {
       "id": "feat-031",

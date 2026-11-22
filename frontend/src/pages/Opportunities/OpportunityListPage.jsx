@@ -166,14 +166,24 @@ export default function OpportunityListPage() {
       setTimeout(() => setSuccessMsg(''), 6000);
     };
 
+    const handleFollowUpLogged = (e) => {
+      fetchOpportunities();
+      const fu = e.detail;
+      const cust = fu?.khach_hang || 'khách hàng';
+      setSuccessMsg(`Trợ lý AI vừa ghi nhận nhật ký chăm sóc cho "${cust}" (Pipeline: ${fu?.trang_thai_moi || 'CONTACTED'})`);
+      setTimeout(() => setSuccessMsg(''), 6000);
+    };
+
     const handleRefresh = () => {
       fetchOpportunities();
     };
 
     window.addEventListener('crm:opportunity-created', handleOppCreated);
+    window.addEventListener('crm:followup-logged', handleFollowUpLogged);
     window.addEventListener('crm:refresh-opportunities', handleRefresh);
     return () => {
       window.removeEventListener('crm:opportunity-created', handleOppCreated);
+      window.removeEventListener('crm:followup-logged', handleFollowUpLogged);
       window.removeEventListener('crm:refresh-opportunities', handleRefresh);
     };
   }, [fetchOpportunities]);

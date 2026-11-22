@@ -13,7 +13,7 @@ from .query_tools import (
     search_customer,
 )
 from .lead_tools import LEAD_ACTION_TOOLS, create_lead
-from .order_tools import ORDER_ACTION_TOOLS, create_opportunity
+from .order_tools import ORDER_ACTION_TOOLS, create_opportunity, log_follow_up
 
 # Danh sách hàm nguyên bản theo từng vai trò (thuận tiện cho unit tests)
 RAW_ADMIN_TOOLS = ADMIN_TOOLS
@@ -24,7 +24,8 @@ RAW_SALESMAN_TOOLS = [
     get_orders_summary,
     search_customer,
     create_lead,
-    create_opportunity
+    create_opportunity,
+    log_follow_up
 ]
 RAW_CRM_TOOLS = QUERY_TOOLS + LEAD_ACTION_TOOLS + ORDER_ACTION_TOOLS
 
@@ -69,4 +70,5 @@ __all__ = [
     "search_customer",
     "create_lead",
     "create_opportunity",
+    "log_follow_up",
 ]

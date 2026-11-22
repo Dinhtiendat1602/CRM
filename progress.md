@@ -542,3 +542,33 @@
      - Backend Integration Tests: **146/146 tests PASS (100%)**.
      - Frontend Unit Tests: **117/117 tests PASS (100%)**.
      - Frontend Production Build: **Vite build thành công trong 415ms (0 lỗi)**.
+
+---
+
+### [2026-11-22] feat-030: Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition)
+
+- **Mục tiêu:** Agent tự động tiếp nhận báo cáo kết quả cuộc gọi, buổi gặp, trao đổi chăm sóc của nhân viên bán hàng qua chat (VD: "Vừa gọi điện cho khách Nam, khách hào hứng xin báo giá máy ảnh Sony, kế hoạch ngày mai gửi báo giá qua Zalo"). Agent tự động nhận diện khách hàng, tìm cơ hội bán hàng đang mở, trích xuất hình thức liên hệ (PHONE/MEETING/EMAIL/ZALO), nội dung trao đổi, phản hồi của khách, kế hoạch tiếp theo, lưu vào bảng `follow_ups` qua Express REST API `POST /api/opportunities/:id/follow-ups`, đồng thời tự động cập nhật trạng thái cơ hội bán hàng liên quan từ `NEW` sang `CONTACTED` theo SRS 3.11 hoặc chuyển tiếp giai đoạn khi có yêu cầu, phát tín hiệu đồng bộ thời gian thực cho `OpportunityDetailPage` và `OpportunityListPage`, và hiển thị Interactive Action Card trong chat widget.
+- **Những việc đã hoàn thành:**
+  1. **Hiện thực hóa Công Cụ `log_follow_up` ([order_tools.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/order_tools.py)):**
+     - Hỗ trợ linh hoạt: tiếp nhận `opportunity_id` trực tiếp hoặc tìm kiếm cơ hội đang mở qua tên/SĐT khách hàng (`customer_name_or_phone`).
+     - Tự động bóc tách tiền tố xưng hô tiếng Việt ("anh", "chị", "khách", "khách hàng"), ưu tiên các cơ hội do Salesman đang gọi phụ trách và cơ hội đang ở giai đoạn mở (`NEW`, `CONTACTED`, `QUALIFIED`, `PROPOSAL`).
+     - Chuẩn hóa hình thức liên hệ: tự động nhận diện gọi điện/alo/điện thoại -> `PHONE`, gặp trực tiếp/văn phòng/cafe -> `MEETING`, email/thư -> `EMAIL`, zalo/chat/tin nhắn -> `ZALO`.
+     - Đảm bảo trường nội dung `content` luôn có dữ liệu hợp lệ theo ràng buộc SRS 3.11.3 REQ-1.
+     - Kiểm tra và chuyển đổi trạng thái Pipeline: gọi Express API `POST /api/opportunities/:id/follow-ups`, Express tự động chuyển trạng thái cơ hội từ `NEW` sang `CONTACTED` (SRS 3.11) hoặc cập nhật theo `new_status` chỉ định.
+     - Tích hợp vào `ORDER_ACTION_TOOLS`, `RAW_SALESMAN_TOOLS` và phân quyền RBAC đồ thị LangGraph trong [__init__.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/__init__.py).
+  2. **Metadata Actions Extraction ([base_agent.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py)):**
+     - Mở rộng hàm `_extract_actions_from_messages()` hỗ trợ trích xuất action `follow_up_logged` kèm đầy đủ thông tin: mã nhật ký, mã cơ hội, khách hàng, sản phẩm, hình thức liên hệ, nội dung, phản hồi, kế hoạch tiếp theo, trạng thái Pipeline mới và người thực hiện.
+     - Cập nhật unit test `test_action_extraction_helper` trong [test_agent_actions.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/tests/test_agent_actions.py).
+  3. **Nâng cấp System Instructions ([prompts.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/config/prompts.py)):**
+     - Bổ sung quy tắc bóc tách và gọi `log_follow_up` cho cả `SALE_MANAGER` và `SALESMAN`.
+     - Hướng dẫn định dạng câu trả lời: Thẻ xác nhận icon 📝 kèm bảng tóm tắt chi tiết (Mã cơ hội, Khách hàng, Sản phẩm quan tâm, Hình thức liên hệ, Nội dung trao đổi, Phản hồi khách hàng, Kế hoạch tiếp theo, Trạng thái Pipeline chuyển đổi, Người thực hiện) và gợi ý 2 bước tiếp theo (Gửi báo giá hoặc Chốt đơn hàng feat-031).
+  4. **Đồng Bộ Thời Gian Thực & Thẻ Tác Vụ Tương Tác Frontend:**
+     - `frontend/src/components/Chat/AIChatWidget.jsx`: Nhận action `follow_up_logged`, phát browser event `crm:followup-logged`, `crm:refresh-opportunities` và `crm:refresh-followups`; hiển thị Interactive Action Card màu hổ phách với badge Pipeline, thông tin tương tác chi tiết và 2 nút tương tác nhanh: [Xem chi tiết cơ hội] và [Chốt đơn hàng (feat-031)].
+     - `frontend/src/pages/Opportunities/OpportunityDetailPage.jsx`: Lắng nghe sự kiện `crm:followup-logged` và `crm:refresh-followups`, tự động nạp lại chi tiết cơ hội và danh sách follow-up mà không cần reload trang, hiển thị toast banner thông báo thành công màu xanh.
+     - `frontend/src/pages/Opportunities/OpportunityListPage.jsx`: Lắng nghe sự kiện `crm:followup-logged`, tự động làm mới danh sách cơ hội và số lượng tương tác, cập nhật badge trạng thái (NEW -> CONTACTED), hiển thị toast banner thông báo.
+  5. **Kiểm thử Toàn Diện & Live E2E:**
+     - Kịch bản Live E2E [scratch/test_feat_030_follow_up_logging.py](file:///Users/zen/CNTT/Fullstack/internship/scratch/test_feat_030_follow_up_logging.py): Gọi Gemini với prompt tự nhiên của Salesman ("Vừa gọi điện cho khách Nam, khách hào hứng xin báo giá máy ảnh Sony, kế hoạch ngày mai gửi báo giá qua Zalo"), Gemini nhận diện đúng khách hàng, khớp cơ hội, gọi `log_follow_up`, lưu bản ghi mới vào CSDL PostgreSQL bảng `follow_ups` (ID #113), chuyển đổi trạng thái cơ hội từ `NEW` sang `CONTACTED` thành công 100%, đồng thời test chuyển trạng thái chủ động sang `QUALIFIED`.
+     - AI Agent Service Tests: **23/23 tests PASS (100%)**.
+     - Backend Integration Tests: **146/146 tests PASS (100%)**.
+     - Frontend Unit Tests: **117/117 tests PASS (100%)**.
+     - Frontend Production Build: **Vite build thành công trong 458ms (0 lỗi)**.

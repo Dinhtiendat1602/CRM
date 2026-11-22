@@ -51,6 +51,7 @@ export default function OpportunityDetailPage() {
   const [opportunity, setOpportunity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [aiNotifyMsg, setAiNotifyMsg] = useState('');
 
   // Modals state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -119,6 +120,35 @@ export default function OpportunityDetailPage() {
     fetchDetail();
   }, [fetchDetail]);
 
+  // Đồng bộ thời gian thực khi AI ghi nhận Follow-up hoặc cập nhật cơ hội (feat-030 & feat-033)
+  useEffect(() => {
+    const handleFollowUp = (e) => {
+      const fu = e.detail;
+      if (!fu || !fu.opportunity_id || String(fu.opportunity_id) === String(id)) {
+        fetchDetail();
+        setAiNotifyMsg(
+          isEn
+            ? `Zen AI Assistant just recorded a new follow-up (${fu?.hinh_thuc || 'PHONE'})!`
+            : `Trợ lý AI vừa tự động ghi nhận nhật ký chăm sóc mới (${fu?.hinh_thuc || 'PHONE'})!`
+        );
+        setTimeout(() => setAiNotifyMsg(''), 6000);
+      }
+    };
+
+    const handleRefresh = () => {
+      fetchDetail();
+    };
+
+    window.addEventListener('crm:followup-logged', handleFollowUp);
+    window.addEventListener('crm:refresh-followups', handleFollowUp);
+    window.addEventListener('crm:refresh-opportunities', handleRefresh);
+    return () => {
+      window.removeEventListener('crm:followup-logged', handleFollowUp);
+      window.removeEventListener('crm:refresh-followups', handleFollowUp);
+      window.removeEventListener('crm:refresh-opportunities', handleRefresh);
+    };
+  }, [id, fetchDetail, isEn]);
+
   const handleDelete = async () => {
     setDeleteConfirm((prev) => ({ ...prev, loading: true }));
     try {
@@ -174,6 +204,21 @@ export default function OpportunityDetailPage() {
 
   return (
     <div className="space-y-6">
+      {aiNotifyMsg && (
+        <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-800 text-sm flex items-center justify-between shadow-2xs transition-all animate-fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span className="font-medium">{aiNotifyMsg}</span>
+          </div>
+          <button
+            onClick={() => setAiNotifyMsg('')}
+            className="text-emerald-700 hover:text-emerald-900 font-bold ml-2 cursor-pointer text-xs"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Navigation & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">

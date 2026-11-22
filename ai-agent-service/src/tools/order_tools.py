@@ -211,4 +211,176 @@ def create_opportunity(
     except Exception as e:
         return {"error": f"Lỗi ngoại lệ khi tạo cơ hội bán hàng qua API: {str(e)}"}
 
-ORDER_ACTION_TOOLS = [create_opportunity]
+def log_follow_up(
+    opportunity_id: Optional[Union[int, str]] = None,
+    customer_name_or_phone: Optional[str] = None,
+    contact_method: Optional[str] = "PHONE",
+    content: Optional[str] = None,
+    customer_response: Optional[str] = None,
+    next_plan: Optional[str] = None,
+    new_status: Optional[str] = None
+) -> dict:
+    """
+    Tự động ghi nhật ký chăm sóc khách hàng (Follow-up) và cập nhật trạng thái Pipeline cơ hội bán hàng qua Express REST API.
+    - opportunity_id: ID (số) của cơ hội bán hàng (VD: 194, '#194').
+    - customer_name_or_phone: Họ tên hoặc SĐT khách hàng nếu không nhớ ID cơ hội (VD: 'anh Nam', '0987112233').
+    - contact_method: Hình thức liên hệ: 'PHONE' (gọi điện), 'EMAIL' (gửi thư), 'MEETING' (gặp trực tiếp), 'ZALO' (nhắn tin Zalo/chat).
+    - content: Nội dung cuộc trao đổi / tương tác (bắt buộc).
+    - customer_response: Phản hồi, thái độ hoặc yêu cầu của khách hàng (VD: 'Khách hào hứng xin báo giá').
+    - next_plan: Kế hoạch hành động tiếp theo (VD: 'Ngày mai gửi báo giá qua Zalo').
+    - new_status: Trạng thái cơ hội mới nếu muốn chuyển đổi ('CONTACTED', 'QUALIFIED', 'PROPOSAL', v.v.). Mặc định nếu cơ hội đang là NEW thì hệ thống tự động chuyển sang CONTACTED theo SRS 3.11.
+    """
+    user = get_current_user_context()
+    if user.get("role") == "ADMIN":
+        return {"error": "Từ chối thao tác: Vai trò Quản trị viên (ADMIN) không được phép ghi nhật ký chăm sóc cơ hội CRM."}
+
+    is_salesman = (user.get("role") == "SALESMAN")
+    user_id = user.get("id")
+
+    try:
+        # 1. Xác định target opportunity ID
+        target_opp_id = None
+        opp_info: Optional[Dict[str, Any]] = None
+
+        # Kiểm tra nếu opportunity_id là số nguyên hoặc chuỗi số
+        if opportunity_id is not None:
+            clean_opp_str = str(opportunity_id).strip().lstrip("#")
+            if clean_opp_str.isdigit():
+                target_opp_id = int(clean_opp_str)
+
+        if not target_opp_id:
+            # Tra cứu cơ hội theo tên hoặc SĐT khách hàng
+            query_cust = str(customer_name_or_phone or (opportunity_id if opportunity_id is not None else "") or "").strip()
+            # Bỏ tiền tố xưng hô tiếng Việt thông dụng
+            for prefix in ["anh ", "chị ", "bác ", "ông ", "bà ", "khách ", "khách hàng "]:
+                if query_cust.lower().startswith(prefix):
+                    query_cust = query_cust[len(prefix):].strip()
+
+            if not query_cust:
+                return {"error": "Vui lòng cung cấp Mã cơ hội (opportunity_id) hoặc Tên / SĐT của khách hàng để ghi nhật ký chăm sóc."}
+
+            opps_res = backend_client.get("/opportunities", params={"search": query_cust, "limit": 10})
+            opps_list = opps_res.get("data") or opps_res.get("opportunities") or []
+
+            # Nếu không tìm thấy bằng search cơ hội, thử tìm lead rồi lấy cơ hội
+            if not opps_list:
+                leads_res = backend_client.get("/leads", params={"search": query_cust, "limit": 5})
+                leads = leads_res.get("data") or leads_res.get("leads") or []
+                if leads:
+                    lead_id = leads[0].get("id")
+                    opps_by_lead = backend_client.get("/opportunities", params={"lead_id": lead_id, "limit": 10})
+                    opps_list = opps_by_lead.get("data") or opps_by_lead.get("opportunities") or []
+
+            if not opps_list:
+                return {"error": f"Không tìm thấy cơ hội bán hàng nào của khách hàng '{query_cust}'. Vui lòng tạo cơ hội bán hàng mới trước."}
+
+            # Lọc theo nhân viên nếu là Salesman
+            if is_salesman and user_id:
+                my_opps = [o for o in opps_list if o.get("created_by") == user_id]
+                filtered_opps = my_opps if my_opps else opps_list
+            else:
+                filtered_opps = opps_list
+
+            # Ưu tiên các cơ hội đang mở (NEW, CONTACTED, QUALIFIED, PROPOSAL)
+            active_opps = [o for o in filtered_opps if o.get("status") in ["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL"]]
+            chosen_opp = active_opps[0] if active_opps else filtered_opps[0]
+
+            target_opp_id = chosen_opp["id"]
+            opp_info = chosen_opp
+
+        # 2. Lấy thông tin chi tiết cơ hội qua GET /api/opportunities/:id
+        detail_res = backend_client.get(f"/opportunities/{target_opp_id}")
+        if "error" in detail_res or not detail_res.get("success"):
+            return {"error": f"Không tìm thấy cơ hội bán hàng #{target_opp_id} trong hệ thống."}
+
+        current_opp = detail_res.get("data", {})
+        if is_salesman and user_id and current_opp.get("created_by") != user_id:
+            # Cho phép nếu lead_id thuộc quyền phụ trách của salesman
+            lead_check = current_opp.get("lead_id")
+            if lead_check:
+                lead_data = backend_client.get(f"/leads/{lead_check}").get("data", {})
+                if lead_data.get("assigned_to") != user_id:
+                    return {"error": f"Quyền truy cập bị từ chối: Cơ hội bán hàng #{target_opp_id} không thuộc quyền phụ trách của bạn."}
+
+        cust_name = current_opp.get("lead_name") or (opp_info.get("lead_name") if opp_info else f"Khách hàng #{current_opp.get('lead_id')}")
+        prod_name = current_opp.get("product_name") or (opp_info.get("product_name") if opp_info else "Sản phẩm")
+        current_status = current_opp.get("status", "NEW")
+
+        # 3. Chuẩn hóa hình thức liên hệ (contact_method)
+        raw_method = str(contact_method or "PHONE").upper().strip()
+        if any(w in raw_method for w in ["GẶP", "TRỰC TIẾP", "MEET", "FACE", "CAFE", "VĂN PHÒNG"]):
+            clean_method = "MEETING"
+        elif any(w in raw_method for w in ["MAIL", "THƯ", "GMAIL"]):
+            clean_method = "EMAIL"
+        elif any(w in raw_method for w in ["ZALO", "CHAT", "TIN NHẮN", "SMS"]):
+            clean_method = "ZALO"
+        else:
+            clean_method = "PHONE"
+
+        # 4. Chuẩn hóa nội dung chăm sóc (content là bắt buộc theo SRS 3.11.3 REQ-1)
+        clean_content = str(content or "").strip()
+        if not clean_content:
+            parts = []
+            if customer_response and str(customer_response).strip():
+                parts.append(f"Phản hồi khách: {str(customer_response).strip()}")
+            if next_plan and str(next_plan).strip():
+                parts.append(f"Kế hoạch: {str(next_plan).strip()}")
+            if parts:
+                clean_content = f"Liên hệ chăm sóc khách hàng qua {clean_method}. " + ". ".join(parts)
+            else:
+                clean_content = f"Trao đổi chăm sóc khách hàng qua {clean_method} về sản phẩm {prod_name}."
+
+        # 5. Chuẩn hóa trạng thái mới (new_status)
+        valid_statuses = ["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "ORDERED", "LOST"]
+        clean_new_status = None
+        if new_status and str(new_status).strip().upper() in valid_statuses:
+            clean_new_status = str(new_status).strip().upper()
+
+        payload: Dict[str, Any] = {
+            "contact_method": clean_method,
+            "content": clean_content,
+            "customer_response": str(customer_response).strip() if customer_response else None,
+            "next_plan": str(next_plan).strip() if next_plan else None,
+        }
+        if clean_new_status:
+            payload["new_status"] = clean_new_status
+
+        # 6. Gửi POST sang Express Backend /api/opportunities/:id/follow-ups
+        fu_res = backend_client.post(f"/opportunities/{target_opp_id}/follow-ups", json=payload)
+        if "error" in fu_res:
+            return fu_res
+
+        if not fu_res.get("success"):
+            return {"error": fu_res.get("message", "Không thể ghi nhận nhật ký chăm sóc qua Express API.")}
+
+        created_fu = fu_res.get("data", {})
+        final_status = fu_res.get("opportunity_status") or (clean_new_status or ("CONTACTED" if current_status == "NEW" else current_status))
+
+        return {
+            "success": True,
+            "status": "follow_up_logged",
+            "message": f"Đã ghi nhận nhật ký chăm sóc thành công cho cơ hội #{target_opp_id} ({cust_name} - {prod_name}). Trạng thái cơ hội hiện tại: {final_status}.",
+            "follow_up": {
+                "id": created_fu.get("id"),
+                "opportunity_id": target_opp_id,
+                "khach_hang": cust_name,
+                "san_pham": prod_name,
+                "hinh_thuc": clean_method,
+                "noi_dung": clean_content,
+                "phan_hoi_khach": customer_response or "Quan tâm tích cực",
+                "ke_hoach_tiep_theo": next_plan or "Tiếp tục tư vấn và chăm sóc",
+                "thoi_gian": created_fu.get("follow_date") or datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "trang_thai_truoc": current_status,
+                "trang_thai_moi": final_status,
+                "nguoi_thuc_hien": user.get("full_name") or user.get("username")
+            },
+            "next_suggested_actions": [
+                f"Gửi báo giá sản phẩm {prod_name} cho {cust_name}",
+                f"Thực hiện kế hoạch tiếp theo: {next_plan or 'Liên hệ lại'}",
+                f"Chốt đơn hàng (feat-031) khi khách hàng đồng ý thanh toán"
+            ]
+        }
+    except Exception as e:
+        return {"error": f"Lỗi ngoại lệ khi ghi nhật ký chăm sóc qua API: {str(e)}"}
+
+ORDER_ACTION_TOOLS = [create_opportunity, log_follow_up]

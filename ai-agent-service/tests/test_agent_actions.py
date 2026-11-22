@@ -96,7 +96,7 @@ def test_langgraph_crm_agent_structure():
     node_names = list(crm_agent.graph.nodes.keys())
     assert "agent" in node_names
     assert "tools" in node_names
-    assert len(crm_agent.tools) == 9
+    assert len(crm_agent.tools) == 10
     
     # Kiểm tra hydrate session khi có lịch sử sẵn
     from src.memory.redis_memory import memory
@@ -240,8 +240,8 @@ def test_role_graphs_tool_allocation():
     assert len(admin_tools) == 1
     assert admin_tools[0].name == "get_admin_system_overview"
 
-    assert len(manager_tools) == 9
-    assert len(salesman_tools) == 7
+    assert len(manager_tools) == 10
+    assert len(salesman_tools) == 8
 
     salesman_tool_names = [t.name for t in salesman_tools]
     assert "get_revenue_and_forecast" not in salesman_tool_names
@@ -249,6 +249,7 @@ def test_role_graphs_tool_allocation():
     assert "get_leads_summary" in salesman_tool_names
     assert "create_lead" in salesman_tool_names
     assert "create_opportunity" in salesman_tool_names
+    assert "log_follow_up" in salesman_tool_names
 
 
 def test_chat_history_role_isolation():
@@ -371,6 +372,23 @@ def test_action_extraction_helper():
     assert actions_opp_dup[0]["type"] == "opportunity_duplicate_rejected"
     assert actions_opp_dup[0]["status"] == "rejected"
     assert actions_opp_dup[0]["existing_opportunity_id"] == 194
+
+    # Trường hợp ghi nhận Follow-up thành công (feat-030)
+    messages_fu = [
+        HumanMessage(content="Vừa gọi điện cho khách Nam xin báo giá"),
+        ToolMessage(
+            name="log_follow_up",
+            content='{"success": true, "status": "follow_up_logged", "follow_up": {"id": 88, "opportunity_id": 194, "khach_hang": "Nguyễn Văn Nam", "hinh_thuc": "PHONE", "trang_thai_moi": "CONTACTED"}, "message": "Ghi nhận thành công"}',
+            tool_call_id="call_follow_up_123"
+        ),
+        AIMessage(content="Đã ghi nhận nhật ký chăm sóc thành công")
+    ]
+    actions_fu = crm_agent._extract_actions_from_messages(messages_fu)
+    assert len(actions_fu) == 1
+    assert actions_fu[0]["type"] == "follow_up_logged"
+    assert actions_fu[0]["status"] == "success"
+    assert actions_fu[0]["opportunity_id"] == 194
+    assert actions_fu[0]["opportunity_status"] == "CONTACTED"
 
 
 

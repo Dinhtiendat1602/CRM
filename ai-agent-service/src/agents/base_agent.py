@@ -118,6 +118,15 @@ class BaseAgent:
                         "opportunity": data.get("opportunity"),
                         "message": data.get("message")
                     })
+                elif status == "follow_up_logged" or (data.get("success") and "follow_up" in data):
+                    actions.append({
+                        "type": "follow_up_logged",
+                        "status": "success",
+                        "follow_up": data.get("follow_up"),
+                        "opportunity_id": data.get("follow_up", {}).get("opportunity_id"),
+                        "opportunity_status": data.get("follow_up", {}).get("trang_thai_moi"),
+                        "message": data.get("message")
+                    })
 
         # Đảo lại theo thứ tự thực thi
         actions.reverse()

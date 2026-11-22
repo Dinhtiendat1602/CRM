@@ -95,12 +95,22 @@ class BaseAgent:
                         "message": data.get("message")
                     })
                 elif status == "duplicate_rejected":
-                    actions.append({
-                        "type": "lead_duplicate_rejected",
-                        "status": "rejected",
-                        "existing_lead": data.get("existing_lead"),
-                        "message": data.get("message")
-                    })
+                    if "existing_opportunity_id" in data:
+                        actions.append({
+                            "type": "opportunity_duplicate_rejected",
+                            "status": "rejected",
+                            "existing_opportunity_id": data.get("existing_opportunity_id"),
+                            "lead_name": data.get("lead_name"),
+                            "product_name": data.get("product_name"),
+                            "message": data.get("message")
+                        })
+                    else:
+                        actions.append({
+                            "type": "lead_duplicate_rejected",
+                            "status": "rejected",
+                            "existing_lead": data.get("existing_lead"),
+                            "message": data.get("message")
+                        })
                 elif status == "created" and "opportunity" in data:
                     actions.append({
                         "type": "opportunity_created",

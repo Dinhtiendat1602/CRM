@@ -20,7 +20,8 @@ import {
   Trash2,
   MessageSquare,
   CheckCircle2,
-  Eye
+  Eye,
+  Target
 } from 'lucide-react';
 
 const AI_API_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000';
@@ -317,19 +318,28 @@ export default function AIChatWidget() {
       };
       setMessages(prev => [...prev, newAiMsg]);
 
-      // Đồng bộ thời gian thực cho giao diện bảng CRM (feat-028 & feat-033)
+      // Đồng bộ thời gian thực cho giao diện bảng CRM (feat-028, feat-029 & feat-033)
       if (Array.isArray(data.actions) && data.actions.length > 0) {
         data.actions.forEach((act) => {
           if (act.type === 'lead_created' && act.lead) {
             window.dispatchEvent(new CustomEvent('crm:lead-created', { detail: act.lead }));
+          } else if (act.type === 'opportunity_created' && act.opportunity) {
+            window.dispatchEvent(new CustomEvent('crm:opportunity-created', { detail: act.opportunity }));
           }
         });
-      } else if (
-        typeof data.reply === 'string' &&
-        (data.reply.includes('Đã thêm thành công khách hàng') ||
-         data.reply.includes('đã được thêm thành công'))
-      ) {
-        window.dispatchEvent(new CustomEvent('crm:refresh-leads'));
+      } else if (typeof data.reply === 'string') {
+        if (
+          data.reply.includes('Đã thêm thành công khách hàng') ||
+          data.reply.includes('đã được thêm thành công')
+        ) {
+          window.dispatchEvent(new CustomEvent('crm:refresh-leads'));
+        }
+        if (
+          data.reply.includes('Đã tạo thành công cơ hội') ||
+          data.reply.includes('tạo cơ hội bán hàng mới')
+        ) {
+          window.dispatchEvent(new CustomEvent('crm:refresh-opportunities'));
+        }
       }
     } catch (err) {
       console.error('Lỗi kết nối AI Service:', err);
@@ -751,6 +761,48 @@ export default function AIChatWidget() {
                                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-800 font-medium text-[11px] transition shadow-2xs cursor-pointer"
                                   >
                                     <Sparkles className="w-3 h-3 text-emerald-600" /> Tạo cơ hội (feat-029)
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (act.type === 'opportunity_created' && act.opportunity) {
+                            const o = act.opportunity;
+                            return (
+                              <div
+                                key={actIdx}
+                                className="mt-2.5 p-3.5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50/70 border border-blue-200 text-xs text-gray-800 space-y-2 shadow-2xs w-full text-left"
+                              >
+                                <div className="flex items-center justify-between pb-1.5 border-b border-blue-200/60 font-semibold text-blue-950">
+                                  <span className="flex items-center gap-1.5">
+                                    <Target className="w-4 h-4 text-blue-600" />
+                                    Cơ hội #{o.id}: {o.khach_hang}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-blue-600 text-white font-medium shadow-2xs">
+                                    <CheckCircle2 className="w-3 h-3" /> Trạng thái: NEW
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 text-[11px] text-gray-700">
+                                  <div className="col-span-2 truncate"><span className="text-gray-500">Sản phẩm:</span> <strong className="text-gray-900">{o.san_pham}</strong></div>
+                                  <div><span className="text-gray-500">Số lượng:</span> <strong className="text-gray-900">{o.so_luong_du_kien}</strong></div>
+                                  <div><span className="text-gray-500">Đơn giá:</span> {o.don_gia_niem_yet}</div>
+                                  <div><span className="text-gray-500">Dự kiến chốt:</span> {o.ngay_du_kien_chot}</div>
+                                  <div className="col-span-2"><span className="text-gray-500">Doanh thu dự kiến:</span> <strong className="text-blue-700 font-bold ml-1">{o.doanh_thu_du_kien}</strong></div>
+                                </div>
+                                <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-blue-200/60">
+                                  <a
+                                    href={`/opportunities/${o.id}`}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-[11px] transition shadow-2xs"
+                                  >
+                                    <Eye className="w-3 h-3" /> Xem chi tiết
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSendMessage(`Ghi nhật ký chăm sóc cho cơ hội của ${o.khach_hang}`)}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-blue-300 hover:bg-blue-50 text-blue-800 font-medium text-[11px] transition shadow-2xs cursor-pointer"
+                                  >
+                                    <Sparkles className="w-3 h-3 text-blue-600" /> Ghi chăm sóc (feat-030)
                                   </button>
                                 </div>
                               </div>

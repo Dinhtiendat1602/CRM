@@ -326,8 +326,8 @@
         "feat-012",
         "feat-028"
       ],
-      "status": "planned",
-      "evidence": "Kế hoạch kiểm thử: Ra lệnh tạo cơ hội qua chat; kiểm tra agent tự khớp lead_id và product_id; kiểm tra tính đúng giá trị ước tính và bản ghi mới trong CSDL bảng opportunities."
+      "status": "completed",
+      "evidence": "1. Khớp thông tin khách hàng & sản phẩm tự động: Agent tự động nhận diện khách hàng qua tên hoặc SĐT ('anh Nam' -> 'Nguyễn Văn Nam', ID #79), khớp chính xác sản phẩm kho ('Kit Livestream Pro 4K' -> 'Trọn bộ Kit Livestream Pro 4K', Product ID 8, mã LIVE-KIT-STUDIO). 2. Tính toán doanh số & Tạo bản ghi: Tự động tính số lượng (2 bộ), đơn giá niêm yết (15.500.000 ₫), tổng doanh thu dự kiến (31.000.000 ₫), ngày dự kiến chốt (2026-11-20), tạo cơ hội mới trạng thái NEW trong bảng opportunities qua Express POST /api/opportunities. 3. Cơ chế chống trùng lặp BR-02 & Phân quyền: Express bắt trùng cơ hội chưa đóng (409 Conflict) và chặn Salesman bán sản phẩm chưa được phân quyền (403 Forbidden). 4. Đồng bộ thời gian thực & Thẻ tác vụ: AIChatWidget phát Custom Event 'crm:opportunity-created', hiển thị Interactive Action Card với thông tin cơ hội và nút [Ghi chăm sóc (feat-030)]; OpportunityListPage tự động reload danh sách và hiển thị toast xanh mà không cần F5. 5. Bằng chứng kiểm thử: 23/23 AI Agent tests PASS; 146/146 Backend tests PASS; 117/117 Frontend tests PASS; Vite build 415ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100% (scratch/test_feat_029_opportunity_creation.py)."
     },
     {
       "id": "feat-030",

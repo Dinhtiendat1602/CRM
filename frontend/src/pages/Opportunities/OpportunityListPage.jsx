@@ -70,6 +70,7 @@ export default function OpportunityListPage() {
   // UI state
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isOppModalOpen, setIsOppModalOpen] = useState(false);
   const [selectedOpp, setSelectedOpp] = useState(null);
 
@@ -154,6 +155,29 @@ export default function OpportunityListPage() {
     fetchOpportunities();
   }, [fetchOpportunities]);
 
+  // Lắng nghe sự kiện tạo Cơ hội bán hàng từ AI Assistant để đồng bộ thời gian thực (feat-029 & feat-033)
+  useEffect(() => {
+    const handleOppCreated = (e) => {
+      fetchOpportunities();
+      const opp = e.detail;
+      const cust = opp?.khach_hang || 'khách hàng';
+      const prod = opp?.san_pham || 'sản phẩm';
+      setSuccessMsg(`Trợ lý AI vừa tự động tạo cơ hội bán hàng: "${cust} - ${prod}"`);
+      setTimeout(() => setSuccessMsg(''), 6000);
+    };
+
+    const handleRefresh = () => {
+      fetchOpportunities();
+    };
+
+    window.addEventListener('crm:opportunity-created', handleOppCreated);
+    window.addEventListener('crm:refresh-opportunities', handleRefresh);
+    return () => {
+      window.removeEventListener('crm:opportunity-created', handleOppCreated);
+      window.removeEventListener('crm:refresh-opportunities', handleRefresh);
+    };
+  }, [fetchOpportunities]);
+
   // Xử lý mở modal thêm mới
   const handleOpenCreateModal = () => {
     setSelectedOpp(null);
@@ -225,6 +249,23 @@ export default function OpportunityListPage() {
           <span>{t('oppAddNew')}</span>
         </button>
       </div>
+
+      {/* Thông báo thành công từ Trợ lý AI */}
+      {successMsg && (
+        <div className="flex items-center justify-between p-3 sm:p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl sm:rounded-2xl text-xs sm:text-sm shadow-2xs">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
+            <span className="font-semibold">{successMsg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessMsg('')}
+            className="text-emerald-500 hover:text-emerald-700 p-1 rounded-lg cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Cards thống kê nhanh - 2 hàng trên mobile */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">

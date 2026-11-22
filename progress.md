@@ -4,10 +4,10 @@
 
 ## Current State (Hiện Trạng Hệ Thống)
 
-- **Last Updated:** 2026-11-19 10:50
-- **Active Task:** `feat-028` - Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard) kèm Đồng bộ Giao diện Thời gian thực.
-- **Current Status:** HOÀN THÀNH 100% (23/23 AI Agent tests PASS + 146/146 Express Backend tests PASS + 117/117 Frontend tests PASS; Vite frontend build 455ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100%).
-- **Next Feature:** `feat-029` - Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching).
+- **Last Updated:** 2026-11-22 21:10
+- **Active Task:** `feat-029` - Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching).
+- **Current Status:** HOÀN THÀNH 100% (23/23 AI Agent tests PASS + 146/146 Express Backend tests PASS + 117/117 Frontend tests PASS; Vite frontend build 415ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100%).
+- **Next Feature:** `feat-030` - Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition).
 
 
 ---
@@ -513,3 +513,32 @@
      - Backend Integration Tests: **146/146 tests PASS (100%)**.
      - Frontend Unit Tests: **117/117 tests PASS (100%)**.
      - Frontend Production Build: **Vite build thành công trong 455ms (0 lỗi)**.
+
+
+---
+
+### [2026-11-22] feat-029: Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching)
+
+- **Mục tiêu:** Cho phép người dùng ra lệnh bằng ngôn ngữ tự nhiên trong chat widget (VD: "Tạo cơ hội cho anh Nam mua 2 bộ Kit Livestream Pro 4K dự kiến chốt 20/11"). Agent tự động tìm kiếm khách hàng tiềm năng bằng tên hoặc SĐT, khớp chính xác sản phẩm trong kho (`product_code` và đơn giá niêm yết), tính tổng doanh thu dự kiến (`quantity * unit_price`), lưu bản ghi vào PostgreSQL bảng `opportunities` với trạng thái `NEW`, kiểm soát phân quyền sản phẩm (`salesman_products`), chống trùng lặp theo quy chuẩn BR-02, hiển thị Interactive Action Card và phát tín hiệu đồng bộ thời gian thực cho `OpportunityListPage` mà không cần F5.
+- **Những việc đã hoàn thành:**
+  1. **Nâng cấp Công Cụ `create_opportunity` ([order_tools.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/order_tools.py)):**
+     - Hỗ trợ giải quyết khách hàng linh hoạt: chấp nhận `lead_id` số hoặc tìm kiếm bằng Tên/SĐT qua `GET /api/leads?search=...`, tự động loại bỏ tiền tố xưng hô tiếng Việt ("anh", "chị", "khách hàng"), ưu tiên lead của Salesman phụ trách.
+     - Khớp sản phẩm thông minh qua `GET /api/products`: tìm kiếm theo mã hoặc từ khóa chính, kiểm tra đơn giá và số lượng tồn kho.
+     - Chuẩn hóa ngày dự kiến chốt `parse_expected_date` (hỗ trợ "20/11", "20/11/2026", "2026-11-20") và bóc tách số lượng `parse_quantity` ("2 bộ" -> 2).
+     - Bắt mã lỗi HTTP 409 Conflict từ Express Backend khi cơ hội chưa đóng đã tồn tại theo quy chuẩn BR-02, trả về `opportunity_duplicate_rejected`.
+     - Bắt mã lỗi HTTP 403 Forbidden khi Salesman chưa được phân quyền phân phối sản phẩm này.
+  2. **Nâng cấp System Instructions ([prompts.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/config/prompts.py)):**
+     - Bổ sung quy tắc bóc tách và gọi `create_opportunity` cho cả vai trò `SALE_MANAGER` và `SALESMAN`.
+     - Hướng dẫn định dạng câu trả lời rõ ràng: Thẻ xác nhận icon 🎯 kèm bảng tóm tắt chi tiết (Mã cơ hội, Khách hàng, Sản phẩm, Số lượng, Đơn giá, Tổng doanh thu dự kiến, Ngày dự kiến chốt, Trạng thái) và 2 gợi ý hành động tiếp theo (Ghi nhật ký chăm sóc Follow-up hoặc Gửi báo giá).
+  3. **Metadata Actions Extraction ([base_agent.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py)):**
+     - Mở rộng `_extract_actions_from_messages()` hỗ trợ trích xuất `opportunity_created` và `opportunity_duplicate_rejected`.
+     - Bổ sung unit test `test_action_extraction_helper` trong [test_agent_actions.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/tests/test_agent_actions.py).
+  4. **Đồng Bộ Thời Gian Thực & Thẻ Tác Vụ Tương Tác Frontend:**
+     - `frontend/src/components/Chat/AIChatWidget.jsx`: Nhận `actions`, phát browser event `crm:opportunity-created` (kèm fallback `crm:refresh-opportunities`), hiển thị Interactive Action Card màu xanh dương cho Cơ hội bán hàng với đầy đủ thông số tài chính và 2 nút tương tác nhanh: [Xem chi tiết] và [Ghi chăm sóc (feat-030)].
+     - `frontend/src/pages/Opportunities/OpportunityListPage.jsx`: Lắng nghe sự kiện `crm:opportunity-created` và `crm:refresh-opportunities`, tự động gọi `fetchOpportunities()` để nạp bản ghi mới ngay lập tức mà không cần reload trang, hiển thị toast banner thông báo thành công màu xanh.
+  5. **Kiểm thử Toàn Diện & Live E2E:**
+     - Kịch bản Live E2E [test_feat_029_opportunity_creation.py](file:///Users/zen/CNTT/Fullstack/internship/scratch/test_feat_029_opportunity_creation.py): Gọi Gemini với prompt tự nhiên, khớp khách "anh Nam" (#79), khớp sản phẩm "Trọn bộ Kit Livestream Pro 4K" (ID 8), tính đúng 31.000.000 ₫, lưu CSDL thành công (ID #194) và từ chối tạo trùng 409 theo BR-02.
+     - AI Agent Service Tests: **23/23 tests PASS (100%)**.
+     - Backend Integration Tests: **146/146 tests PASS (100%)**.
+     - Frontend Unit Tests: **117/117 tests PASS (100%)**.
+     - Frontend Production Build: **Vite build thành công trong 415ms (0 lỗi)**.

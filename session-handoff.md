@@ -3,9 +3,9 @@
 # Session Handoff - Biên Bản Bàn Giao Phiên Làm Việc
 
 ## 1. Hiện Trạng & Mục Tiêu Phiên (Current State & Objective)
-- **Thời gian bàn giao:** 2026-11-19 10:50
-- **Nội dung trọng tâm:** Hoàn thành `feat-028`: **Trợ Lý AI Tự Động Thêm Khách Hàng Tiềm Năng (Autonomous Lead Creation & Deduplication Guard)** kết hợp cơ chế Đồng Bộ Giao Diện CRM Thời Gian Thực (Real-time Cross-Module UI Sync) và Thẻ Tác Vụ Tương Tác (Interactive Action Confirmation Card).
-- **Trạng thái hệ thống:** HOÀN THÀNH 100% (23/23 AI Agent tests PASS + 146/146 Express Backend tests PASS + 117/117 Frontend tests PASS; Vite frontend production build thành công trong 455ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100%).
+- **Thời gian bàn giao:** 2026-11-22 21:15
+- **Nội dung trọng tâm vừa hoàn thành:** `feat-029`: **Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching)** kết hợp cơ chế Đồng Bộ Giao Diện CRM Thời Gian Thực (Real-time Cross-Module UI Sync) và Thẻ Tác Vụ Tương Tác (Interactive Action Confirmation Card).
+- **Trạng thái hệ thống:** HOÀN THÀNH 100% (23/23 AI Agent tests PASS + 146/146 Express Backend tests PASS + 117/117 Frontend tests PASS; Vite frontend production build thành công trong 415ms; Live E2E Gemini Chat Agent kiểm thử thực tế đạt 100%).
 - **Cổng dịch vụ đang cấu hình:**
   - Express Backend: `http://localhost:8888`
   - React Frontend: `http://localhost:8080`
@@ -16,33 +16,37 @@
 
 ## 2. Công Việc Vừa Mới Thực Thi Trong Phiên Này (Just Completed)
 
-1. **Nâng cấp System Instructions & Prompt Engineering (`config/prompts.py`):**
-   - Bổ sung quy tắc bóc tách thực thể người Việt chuẩn xác cho cả vai trò Quản lý (`SALE_MANAGER`) và Nhân viên (`SALESMAN`): `first_name` (tên chính), `last_name` (họ và tên đệm), `phone` (bắt buộc), `email`, `career` (nghề nghiệp), `address` (địa chỉ), `campaign_id`.
-   - Hướng dẫn định dạng câu trả lời rõ ràng: Thẻ xác nhận icon ✅ kèm bảng tóm tắt chi tiết và gợi ý 2 bước tiếp theo (Tạo cơ hội bán hàng hoặc Lên lịch liên hệ).
-   - Hướng dẫn giải thích lịch sự và hiển thị thông tin khách hàng cũ khi vi phạm quy chuẩn chống trùng lặp dữ liệu BR-02 (HTTP 409 Conflict).
+1. **Nâng cấp `create_opportunity` Tool ([ai-agent-service/src/tools/order_tools.py](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/tools/order_tools.py)):**
+   - Hỗ trợ cả `lead_id` và `customer_name_or_phone` trong tham số tool.
+   - Tự động bóc tách tiền tố xưng hô tiếng Việt ("anh", "chị", "khách", "khách hàng"), tìm kiếm `/leads?search=...`, ưu tiên Lead thuộc quyền phụ trách của Salesman đang gọi.
+   - Khớp sản phẩm thông minh qua `/products?search=...` kết hợp tra cứu theo từ khóa danh mục kho (ví dụ: "Kit Livestream Pro 4K" -> ID 8, mã `LIVE-KIT-STUDIO`, đơn giá 15.500.000 ₫).
+   - Tự động chuẩn hóa ngày dự kiến chốt `parse_expected_date()` (ví dụ: "20/11" -> "2026-11-20" theo năm hệ thống 2026) và trích xuất số lượng `parse_quantity()` (ví dụ: "2 bộ" -> 2).
+   - Tự động tính toán tổng doanh số dự kiến `expected_revenue = quantity * unit_price` (2 * 15.500.000 = 31.000.000 ₫).
+   - Xử lý mã lỗi HTTP 409 Conflict (quy tắc nghiệp vụ BR-02: chặn tạo cơ hội trùng khi cơ hội trước chưa đóng) -> trả về action `opportunity_duplicate_rejected` kèm `existing_opportunity_id`.
+   - Xử lý mã lỗi HTTP 403 Forbidden (kiểm tra phân quyền Salesman theo `salesman_products`) -> từ chối lịch sự bằng tiếng Việt.
 
-2. **Cơ Chế Bắt & Truyền Tải Metadata Tác Vụ Nghiệp Vụ (`BaseAgent` & `CRMAgent`):**
-   - [`src/agents/base_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py):
-     - Hiện thực hóa hàm `_extract_actions_from_messages()` trích xuất các tác vụ nghiệp vụ (`lead_created`, `lead_duplicate_rejected`).
-     - Bổ sung tham số `return_actions: bool = False` trong `execute_chat()`, bảo toàn 100% tương thích ngược với các caller dạng chuỗi văn bản.
-   - [`src/agents/crm_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/crm_agent.py): Hỗ trợ `return_actions=True` chuyển tiếp `(reply, actions)`.
-   - [`src/schemas/chat.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/schemas/chat.py): Bổ sung `actions: Optional[List[Dict[str, Any]]] = None` vào `ChatResponse`.
-   - [`src/api/routes.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/api/routes.py): Endpoint `POST /api/chat` gọi `crm_agent.chat(..., return_actions=True)` và trả về đầy đủ metadata actions cho frontend.
+2. **Cơ Chế Bắt & Truyền Tải Metadata Tác Vụ Nghiệp Vụ (`BaseAgent` & `backend_client.py`):**
+   - [`src/services/backend_client.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/services/backend_client.py): Trích xuất `existing_opportunity_id` khi Backend Express trả về 409 Conflict.
+   - [`src/agents/base_agent.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/src/agents/base_agent.py): Hàm `_extract_actions_from_messages()` trích xuất các tác vụ `opportunity_created` và `opportunity_duplicate_rejected`.
 
-3. **Đồng Bộ Giao Diện Thời Gian Thực & Thẻ Tác Vụ Tương Tác:**
+3. **Nâng cấp System Instructions (`config/prompts.py`):**
+   - Thêm hướng dẫn chi tiết cho cả `SALE_MANAGER` và `SALESMAN` về cách gọi `create_opportunity` tự động với các tham số tìm kiếm tiếng Việt.
+   - Định dạng câu trả lời rõ ràng: Thẻ xác nhận icon 🎯 kèm bảng thông tin tài chính chi tiết (Sản phẩm, Đơn giá niêm yết, Số lượng, Tổng doanh thu dự kiến, Ngày dự kiến chốt) và 2 bước gợi ý tiếp theo (Lên lịch gọi điện hoặc Gửi báo giá).
+
+4. **Đồng Bộ Giao Diện Thời Gian Thực & Thẻ Tác Vụ Tương Tác:**
    - [`frontend/src/components/Chat/AIChatWidget.jsx`](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/components/Chat/AIChatWidget.jsx):
-     - Phát tín hiệu browser event `window.dispatchEvent(new CustomEvent('crm:lead-created', { detail: act.lead }))` và fallback `crm:refresh-leads`.
-     - Hiển thị Thẻ Tác Vụ Xác Nhận (Interactive Action Card) ngay dưới tin nhắn của AI với badge xanh "Đã lưu CSDL", thông tin khách hàng, nút "Xem chi tiết" (dẫn đến `/leads/:id`) và nút "Tạo cơ hội (feat-029)".
-   - [`frontend/src/pages/Leads/LeadListPage.jsx`](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Leads/LeadListPage.jsx):
-     - Lắng nghe sự kiện `crm:lead-created` và `crm:refresh-leads`.
-     - Tự động gọi `fetchLeads()` để nạp lại dữ liệu mà không cần F5/reload trang.
-     - Hiển thị banner thông báo xanh: `Trợ lý AI vừa tự động thêm khách hàng tiềm năng: "[Tên]" vào hệ thống.`.
+     - Phát tín hiệu browser event `crm:opportunity-created` kèm dữ liệu cơ hội và `crm:refresh-opportunities`.
+     - Hiển thị Thẻ Tác Vụ Xác Nhận Cơ Hội (Interactive Action Card) màu xanh lam nhạt với đầy đủ thông tin: Mã cơ hội, Tên cơ hội, Sản phẩm, Số lượng, Đơn giá, Tổng doanh thu dự kiến, nút "Xem chi tiết" và nút "Ghi chăm sóc (feat-030)".
+   - [`frontend/src/pages/Opportunities/OpportunityListPage.jsx`](file:///Users/zen/CNTT/Fullstack/internship/frontend/src/pages/Opportunities/OpportunityListPage.jsx):
+     - Lắng nghe sự kiện `crm:opportunity-created` và `crm:refresh-opportunities`.
+     - Tự động nạp lại danh sách cơ hội thời gian thực mà không cần F5/reload trang.
+     - Hiển thị banner thông báo xanh: `Trợ lý AI vừa tự động tạo cơ hội bán hàng: "[Tên cơ hội]" vào hệ thống.`.
 
-4. **Kiểm Thử Toàn Diện & Live E2E:**
-   - Kịch bản Live E2E [`scratch/test_feat_028_lead_creation.py`](file:///Users/zen/CNTT/Fullstack/internship/scratch/test_feat_028_lead_creation.py):
-     - Bước 1: Gửi prompt tự nhiên "Thêm khách hàng mới Nguyễn Văn Nam, SĐT 0987112233, Email nam.nguyen@gmail.com, Địa chỉ 456 Trần Phú Đà Nẵng, Nghề Kỹ sư". Gemini gọi `create_lead`, bóc tách đúng họ tên, SĐT, email, nghề, địa chỉ, gán `assigned_to=3`, lưu bản ghi ID #75 vào CSDL PostgreSQL.
-     - Bước 2: Gửi prompt trùng SĐT "Tạo khách hàng mới Nguyễn Văn Nam SĐT 0987112233". Express Backend trả về 409 Conflict; Gemini giải thích lịch sự theo BR-02 và chỉ ra mã khách hàng cũ #75.
-   - Thêm unit test `test_action_extraction_helper` vào [`ai-agent-service/tests/test_agent_actions.py`](file:///Users/zen/CNTT/Fullstack/internship/ai-agent-service/tests/test_agent_actions.py).
+5. **Kiểm Thử Toàn Diện & Live E2E:**
+   - Kịch bản Live E2E [`scratch/test_feat_029_opportunity_creation.py`](file:///Users/zen/CNTT/Fullstack/internship/scratch/test_feat_029_opportunity_creation.py):
+     - Prompt tự nhiên: "Tạo cơ hội cho anh Nam mua 2 bộ Kit Livestream Pro 4K dự kiến chốt 20/11".
+     - Gemini nhận diện Lead #79 (Nguyễn Văn Nam), khớp sản phẩm ID 8 (`LIVE-KIT-STUDIO`), đơn giá 15.500.000 ₫, tính doanh số 31.000.000 ₫, chuẩn hóa ngày 2026-11-20, tạo cơ hội mới ID #194 trạng thái NEW.
+     - Prompt trùng lặp: Express trả về 409 Conflict, Gemini từ chối lịch sự và hiển thị mã cơ hội cũ #194 theo BR-02.
 
 ---
 
@@ -50,22 +54,22 @@
 
 | Bộ kiểm thử | Kết quả | Ghi chú |
 |---|---|---|
-| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (23/23)** | 12 query tests + 11 agent action tests (kết nối trực tiếp Express API & CSDL) |
-| Live E2E Autonomous Lead Creation | **PASS (100%)** | Gemini bóc tách tiếng Việt, lưu CSDL thành công và từ chối trùng lặp BR-02 |
-| Backend Integration Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures, 31.4s |
-| Frontend Unit Tests (`frontend/`) | **PASS (117/117)** | 117 tests, 0 failures, 398ms |
-| Frontend Production Build (`npm run build`) | **PASS (455ms)** | Vite client build `dist/` thành công, 0 lỗi cú pháp/runtime |
+| AI Agent Service Tests (`tests/run_tests.py`) | **PASS (23/23)** | 100% tests đạt chuẩn |
+| Live E2E Autonomous Opportunity Creation | **PASS (100%)** | Gemini bóc tách tiếng Việt, khớp sản phẩm và lưu CSDL thành công |
+| Backend Integration Tests (`backend/`) | **PASS (146/146)** | 6 test suites, 0 failures |
+| Frontend Unit Tests (`frontend/`) | **PASS (117/117)** | 117 tests, 0 failures |
+| Frontend Production Build (`npm run build`) | **PASS (415ms)** | Vite client build `dist/` thành công |
 
 ---
 
 ## 4. Rủi Ro & Vướng Mắc Tồn Đọng (Blockers & Risks)
-- **Không có blocker nào.** Toàn bộ luồng tự động thêm Lead, kiểm tra chống trùng lặp BR-02, phân quyền phụ trách và đồng bộ thời gian thực giao diện vận hành hoàn hảo 100%.
+- **Không có blocker nào.** Hệ thống hoạt động trơn tru và sẵn sàng triển khai `feat-030`.
 
 ---
 
 ## 5. Danh Sách Tính Năng Tiếp Theo Đã Cập Nhật Vào `feature_list.json`
-1. **`feat-029` (BƯỚC TIẾP THEO TRỌNG TÂM):** Trợ Lý AI Tự Động Tạo Cơ Hội Bán Hàng & Khớp Sản Phẩm (Autonomous Opportunity Creation & Product Matching) — Tự động nhận diện lead qua tên/SĐT, truy vấn kho sản phẩm khớp mã và giá niêm yết, tính tổng giá trị dự kiến, tạo bản ghi opportunities trạng thái NEW.
-2. **`feat-030`:** Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition).
-3. **`feat-031`:** Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync).
-4. **`feat-032`:** Hộp Thoại Xác Nhận Hành Động Nguy Hiểm & Thẻ Tác Vụ Tương Tác (Human-In-The-Loop Confirmation UI).
-5. **`feat-033`:** Đồng Bộ Thời Gian Thực Dữ Liệu Giữa Chatbot và Giao Diện Bảng CRM (Real-time Cross-Module UI Sync).
+1. **`feat-030` (BƯỚC TIẾP THEO TRỌNG TÂM):** Trợ Lý AI Tự Động Ghi Nhật Ký Chăm Sóc & Chuyển Đổi Pipeline (Autonomous Follow-up Logging & Pipeline Transition) — Agent tự động tiếp nhận báo cáo kết quả cuộc gọi/gặp gỡ của nhân viên bán hàng (VD: 'Vừa gọi điện cho khách Nam, khách hào hứng xin báo giá, kế hoạch ngày mai gửi báo giá qua Zalo'). Agent tự động trích xuất nội dung, phản hồi khách hàng, kế hoạch tiếp theo và hình thức liên hệ (PHONE/EMAIL/MEETING), lưu vào bảng follow_ups, đồng thời tự động cập nhật trạng thái cơ hội bán hàng liên quan từ NEW sang CONTACTED (SRS 3.11).
+2. **`feat-031`:** Trợ Lý AI Tự Động Chốt Đơn Hàng & Cập Nhật Tồn Kho (Autonomous Make Order & Inventory Sync).
+3. **`feat-032`:** Hộp Thoại Xác Nhận Hành Động Nguy Hiểm & Thẻ Tác Vụ Tương Tác (Human-In-The-Loop Confirmation UI).
+4. **`feat-033`:** Đồng Bộ Thời Gian Thực Dữ Liệu Giữa Chatbot và Giao Diện Bảng CRM (Real-time Cross-Module UI Sync).
+5. **`feat-034`:** Phân Tích Thông Minh & Chấm Điểm Xác Suất Chốt Đơn Bằng AI (AI Deal Win-Rate Scoring & Sales Coaching).

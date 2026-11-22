@@ -44,11 +44,16 @@ class BackendAPIClient:
             }
         elif status_code == 409:
             # Xung đột / Trùng lặp dữ liệu theo BR-02
+            exist_opp_id = data.get("existing_opportunity_id") if isinstance(data, dict) else None
+            existing_val = None
+            if isinstance(data, dict):
+                existing_val = data.get("existingLead") or data.get("existingOpportunity") or exist_opp_id
             return {
                 "success": False,
                 "status": "duplicate_rejected",
                 "message": message or "Phát hiện trùng lặp dữ liệu (BR-02 Conflict).",
-                "existing_data": (data.get("existingLead") or data.get("existingOpportunity")) if isinstance(data, dict) else None
+                "existing_data": existing_val,
+                "existing_opportunity_id": exist_opp_id
             }
         elif status_code == 404:
             return {

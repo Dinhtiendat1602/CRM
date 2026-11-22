@@ -324,7 +324,7 @@ def test_action_extraction_helper():
     assert actions[0]["lead"]["id"] == 99
     assert actions[0]["lead"]["ho_va_ten"] == "Nguyễn Văn Nam"
 
-    # Trường hợp trùng lặp BR-02
+    # Trường hợp trùng lặp Lead BR-02
     messages_dup = [
         HumanMessage(content="Thêm khách hàng trùng"),
         ToolMessage(
@@ -339,6 +339,38 @@ def test_action_extraction_helper():
     assert actions_dup[0]["type"] == "lead_duplicate_rejected"
     assert actions_dup[0]["status"] == "rejected"
     assert actions_dup[0]["existing_lead"]["id"] == 1
+
+    # Trường hợp tạo cơ hội thành công (feat-029)
+    messages_opp = [
+        HumanMessage(content="Tạo cơ hội cho khách Nam mua Kit Livestream"),
+        ToolMessage(
+            name="create_opportunity",
+            content='{"success": true, "status": "created", "opportunity": {"id": 194, "khach_hang": "Nguyễn Văn Nam", "san_pham": "Kit Livestream", "doanh_thu_du_kien": "31.000.000 ₫"}, "message": "Đã tạo cơ hội"}',
+            tool_call_id="call_789"
+        ),
+        AIMessage(content="Đã tạo thành công cơ hội bán hàng")
+    ]
+    actions_opp = crm_agent._extract_actions_from_messages(messages_opp)
+    assert len(actions_opp) == 1
+    assert actions_opp[0]["type"] == "opportunity_created"
+    assert actions_opp[0]["status"] == "success"
+    assert actions_opp[0]["opportunity"]["id"] == 194
+
+    # Trường hợp trùng lặp Cơ hội BR-02 (feat-029)
+    messages_opp_dup = [
+        HumanMessage(content="Tạo cơ hội trùng cho khách Nam"),
+        ToolMessage(
+            name="create_opportunity",
+            content='{"success": false, "status": "duplicate_rejected", "existing_opportunity_id": 194, "message": "BR-02 từ chối"}',
+            tool_call_id="call_999"
+        ),
+        AIMessage(content="Cơ hội đã tồn tại")
+    ]
+    actions_opp_dup = crm_agent._extract_actions_from_messages(messages_opp_dup)
+    assert len(actions_opp_dup) == 1
+    assert actions_opp_dup[0]["type"] == "opportunity_duplicate_rejected"
+    assert actions_opp_dup[0]["status"] == "rejected"
+    assert actions_opp_dup[0]["existing_opportunity_id"] == 194
 
 
 

@@ -39,6 +39,11 @@
 - **Giao Diện & Trải Nghiệm Người Dùng:**
   - Thiết kế theo bảng màu thương hiệu chuẩn: Mint Pastel & Brand Green (`#3CB371`).
   - Hỗ trợ đa ngôn ngữ song ngữ Tiếng Việt 🇻🇳 và Tiếng Anh 🇬🇧 toàn diện (i18n).
+- **Trợ Lý AI Thông Minh (Zen AI Assistant — LangGraph & Gemini):**
+  - Trợ lý cá nhân hóa theo vai trò người dùng (Admin, Manager, Salesman).
+  - Tự động hóa tác vụ: Thêm khách hàng tiềm năng (`create_lead`), tạo cơ hội và khớp sản phẩm (`create_opportunity`), ghi nhật ký chăm sóc và chuyển đổi Pipeline (`log_follow_up`).
+  - Thẻ tác vụ tương tác (Interactive Action Card) và cơ chế đồng bộ thời gian thực giao diện không cần reload trang (F5).
+  - Bảo mật đa tầng (Defense-in-Depth): Phân tách 3 đồ thị LangGraph độc lập, chặn xem doanh thu với Salesman, bảo mật cấp dòng (RLS), cách ly bộ nhớ chat. Chi tiết xem tại [docs/SECURITY.md](docs/SECURITY.md).
 
 ---
 
@@ -51,6 +56,14 @@
 - **Authentication:** JSON Web Token (JWT), bcrypt.js (hash mật khẩu)
 - **Email:** Nodemailer (Gmail SMTP)
 - **Testing:** Node.js native test runner & integration test suite (146 tests)
+
+### AI Agent Service
+- **Runtime:** Python 3.9+
+- **Framework:** FastAPI, LangGraph, LangChain Core
+- **LLM Engine:** Google Gemini SDK (`google-genai` v1, Gemini 2.5 Flash-Lite)
+- **Architecture:** CQRS (Command Query Responsibility Segregation), Function Calling
+- **Memory & Storage:** Redis / File-based checkpointer, Connection Pool `psycopg2`
+- **Testing:** Unit & live E2E test suite (23 tests)
 
 ### Frontend
 - **Framework:** React 18 + Vite
@@ -102,9 +115,9 @@ Truy cập hệ thống tại: `http://localhost:8080`
 
 ### 4. Tài Khoản Đăng Nhập Mẫu
 Tất cả các tài khoản mặc định đều có mật khẩu khởi tạo: `11111111`
-- **Quản trị viên (Admin):** `admin` hoặc `admin@crm.com`
-- **Quản lý bán hàng (Sale Manager):** `manager` hoặc `manager@crm.com`
-- **Nhân viên bán hàng (Salesman):** `sale` hoặc `salesman@crm.com`
+- **Quản trị viên (Admin):** `admin` 
+- **Quản lý bán hàng (Sale Manager):** `manager`
+- **Nhân viên bán hàng (Salesman):** `sale`
 
 ---
 

@@ -101,3 +101,42 @@ SMTP_PASS=xxx
 ```
 
 Chỉ commit file `.env.example` với giá trị placeholder.
+
+---
+
+## 7. BẢO MẬT & PHÂN QUYỀN TRỢ LÝ AI AGENT (Chatbot Security & RBAC/RLS)
+
+Hệ thống Trợ lý AI (Zen AI Assistant — Python FastAPI, LangGraph và Google Gemini) được thiết kế theo nguyên tắc **Bảo mật đa tầng (Defense-in-Depth)** và **Phân tách Trách nhiệm Đọc - Ghi (CQRS)**:
+
+### 7.1. Bốn Lớp Khóa Bảo Mật Cho Chatbot:
+
+1. **Lớp 1: Xác thực Danh tính & Chuyển tiếp Token (JWT Context Forwarding):**
+   - Khi Client gửi tin nhắn tới AI Agent qua `POST /api/chat`, Bearer Token được đính kèm và giải mã thông qua ContextVar (`get_current_user_context()`).
+   - Mọi Tool đều biết chính xác User ID, Username và Role của người đang trò chuyện.
+
+2. **Lớp 2: Phân tách Đồ thị LangGraph Độc lập (Graph & Tool Allocation Isolation):**
+   - Tại `ai-agent-service/src/tools/__init__.py`, hệ thống biên dịch 3 đồ thị trạng thái LangGraph độc lập cho 3 vai trò:
+     - **`ADMIN`:** Chỉ được cấp duy nhất 1 tool giám sát kỹ thuật (`get_admin_system_overview`). Hoàn toàn không có công cụ đọc hay ghi dữ liệu kinh doanh.
+     - **`SALE_MANAGER`:** Được cấp toàn bộ 10 công cụ CRM (Query, Lead, Opportunity, Follow-up).
+     - **`SALESMAN`:** Chỉ được cấp 8 công cụ phục vụ bán hàng cá nhân. **Bị loại bỏ hoàn toàn** tool xem doanh thu toàn công ty (`get_revenue_and_forecast`) và tool xem ngân sách tiếp thị (`get_campaigns_overview`).
+   - Mô hình Gemini của Salesman thậm chí **không hề biết sự tồn tại của các công cụ cấp Quản lý**, triệt tiêu nguy cơ rò rỉ dữ liệu qua tấn công Prompt Injection / Jailbreak.
+
+3. **Lớp 3: Kiểm soát Cấp Công cụ & Bảo mật Dòng dữ liệu (Tool-level RBAC & RLS):**
+   - **Chặn vai trò cấp hàm:** Trong `query_tools.py`, nếu Salesman cố tình gọi hàm doanh số hoặc ngân sách, mã nguồn Python kiểm tra `if user["role"] == "SALESMAN"` và từ chối ngay lập tức: *"Quyền truy cập bị từ chối"*.
+   - **Bảo mật dòng dữ liệu (Row-Level Security):**
+     - Khi Salesman tra cứu khách hàng (`get_leads_summary`): Tự động ép điều kiện `assigned_to = user_id`.
+     - Khi Salesman tra cứu cơ hội (`get_opportunities_overview`): Tự động ép điều kiện `created_by = user_id`.
+     - Khi tra cứu danh mục sản phẩm (`get_products_and_inventory`): Backend Express tự động lọc theo danh mục sản phẩm được phân quyền bán trong bảng `salesman_products`.
+     - Khi Salesman ghi chăm sóc (`log_follow_up`) hoặc tạo cơ hội (`create_opportunity`): Tool kiểm tra quyền sở hữu đối với Lead/Cơ hội, từ chối nếu khách hàng thuộc quyền phụ trách của nhân viên khác.
+
+4. **Lớp 4: Cách ly Bộ nhớ Hội thoại (Session & Chat History Isolation):**
+   - Bộ nhớ hội thoại (Redis Memory / File Checkpointer) lưu trữ với khóa `role_userId_sessionId`.
+   - Nhân viên này tuyệt đối không thể đọc hay can thiệp vào lịch sử chat của nhân viên khác.
+
+### 7.2. Kiến Trúc CQRS Trong Các Tool (Tại sao Tra cứu dùng SQL, Tạo mới gọi API?):
+
+| Nhóm Tool | File nguồn | Thao tác thực tế | Lý do kiến trúc |
+|:---|:---|:---|:---|
+| **Query Tools (Tra cứu - Đọc)** | `query_tools.py`, `admin_tools.py` | Truy vấn SQL có kẹp điều kiện RLS (`WHERE assigned_to = %s`) | **Tối ưu độ trễ (Latency < 2ms):** AI không tốn thời gian gọi qua nhiều chặng mạng (network hop). **Tối ưu Token:** Viết SQL tổng hợp (`GROUP BY`, `SUM`, `COUNT`) trả về dữ liệu tinh gọn, tránh tràn Context Window. |
+| **Action Tools (Tác vụ - Ghi)** | `lead_tools.py`, `order_tools.py` | Gọi Express REST API (`POST /api/...`) kèm JWT Bearer Token | **Đảm bảo tính toàn vẹn nghiệp vụ:** Tận dụng 100% luật nghiệp vụ của Backend Express (chống trùng SĐT/Email BR-02 trả 409 Conflict, kiểm tra phân quyền sản phẩm 403 Forbidden, giao dịch trừ kho ACID có khóa dòng). |
+
